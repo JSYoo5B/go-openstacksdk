@@ -68,10 +68,12 @@ func lifecycleLoad(ctx context.Context, client *gophercloud.ServiceClient, kind 
 
 func lifecycleProfileHandle(tracked *profiles.TrackedProfile) *clusteringLifecycleHandle {
 	return &clusteringLifecycleHandle{
-		value:     func() clusteringLifecycleView { return lifecycleProfileView(tracked.Value()) },
-		response:  func() clusteringLifecycleView { return lifecycleProfileView(tracked.Response()) },
-		dirty:     tracked.Dirty,
-		editName:  func(name string) error { return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateName(name)) },
+		value:    func() clusteringLifecycleView { return lifecycleProfileView(tracked.Value()) },
+		response: func() clusteringLifecycleView { return lifecycleProfileView(tracked.Response()) },
+		dirty:    tracked.Dirty,
+		editName: func(name string) error {
+			return tracked.Edit(profiles.UpdateOpts{}, request.Custom(func(c *request.Config[profiles.UpdateOpts]) error { v := name; c.Options.Name = &v; return nil }))
+		},
 		editEmpty: func() error { return tracked.Edit(profiles.UpdateOpts{}) },
 		editField: func(key string, value any) error {
 			return tracked.Edit(profiles.UpdateOpts{}, request.Field(key, value))
@@ -100,14 +102,14 @@ func lifecycleProfileHandle(tracked *profiles.TrackedProfile) *clusteringLifecyc
 			case "nil":
 				return tracked.Edit(profiles.UpdateOpts{}, nil)
 			default:
-				return tracked.Edit(profiles.UpdateOpts{}, profiles.WithUpdateName("valid"), request.Field(mode, false))
+				return tracked.Edit(profiles.UpdateOpts{}, request.Custom(func(c *request.Config[profiles.UpdateOpts]) error { v := "valid"; c.Options.Name = &v; return nil }), request.Field(mode, false))
 			}
 		},
 		invalidCommit: func(ctx context.Context, mode string) error {
 			var option profiles.UpdateOption
 			switch mode {
 			case "name":
-				option = profiles.WithUpdateName("valid")
+				option = request.Custom(func(c *request.Config[profiles.UpdateOpts]) error { v := "valid"; c.Options.Name = &v; return nil })
 			case "field":
 				option = request.Field("vendor", true)
 			case "query":
@@ -123,10 +125,12 @@ func lifecycleProfileHandle(tracked *profiles.TrackedProfile) *clusteringLifecyc
 
 func lifecyclePolicyHandle(tracked *policies.TrackedPolicy) *clusteringLifecycleHandle {
 	return &clusteringLifecycleHandle{
-		value:     func() clusteringLifecycleView { return lifecyclePolicyView(tracked.Value()) },
-		response:  func() clusteringLifecycleView { return lifecyclePolicyView(tracked.Response()) },
-		dirty:     tracked.Dirty,
-		editName:  func(name string) error { return tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName(name)) },
+		value:    func() clusteringLifecycleView { return lifecyclePolicyView(tracked.Value()) },
+		response: func() clusteringLifecycleView { return lifecyclePolicyView(tracked.Response()) },
+		dirty:    tracked.Dirty,
+		editName: func(name string) error {
+			return tracked.Edit(policies.UpdateOpts{}, request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := name; c.Options.Name = &v; return nil }))
+		},
 		editEmpty: func() error { return tracked.Edit(policies.UpdateOpts{}) },
 		editField: func(key string, value any) error {
 			return tracked.Edit(policies.UpdateOpts{}, request.Field(key, value))
@@ -153,14 +157,14 @@ func lifecyclePolicyHandle(tracked *policies.TrackedPolicy) *clusteringLifecycle
 			case "nil":
 				return tracked.Edit(policies.UpdateOpts{}, nil)
 			default:
-				return tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName("valid"), request.Field(mode, false))
+				return tracked.Edit(policies.UpdateOpts{}, request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := "valid"; c.Options.Name = &v; return nil }), request.Field(mode, false))
 			}
 		},
 		invalidCommit: func(ctx context.Context, mode string) error {
 			var option policies.UpdateOption
 			switch mode {
 			case "name":
-				option = policies.WithUpdateName("valid")
+				option = request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := "valid"; c.Options.Name = &v; return nil })
 			case "field":
 				option = request.Field("vendor", true)
 			case "query":

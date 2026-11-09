@@ -128,7 +128,10 @@ func TestClusteringClusterProfileOnlyNullStatelessWireSnapshotsAndLastWins(t *te
 				expected["metadata"] = `{"big":9007199254740993,"off":false}`
 				callsExpected = 2
 			case "bulk-empty-clears-null":
-				options = append(options, clusters.WithUpdateProfileOnlyNull(), clusters.WithUpdateOptions(clusters.UpdateOpts{}), clusters.WithUpdateName("Bulk"))
+				options = append(options, clusters.WithUpdateProfileOnlyNull(), clusters.WithUpdateOptions(clusters.UpdateOpts{}), request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+					c.Options.Name = request.Present("Bulk")
+					return nil
+				}))
 				expected = map[string]string{"name": `"Bulk"`}
 			case "unmarshal-empty-clears-null":
 				opts = clusterProfileOnlyNullDecoded(t, `{"profile_only":null}`)

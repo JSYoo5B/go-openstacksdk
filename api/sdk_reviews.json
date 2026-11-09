@@ -7038,7 +7038,8 @@
         "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Value",
         "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Response",
         "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Dirty",
-        "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithUpdateName"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
+        "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithUpdateOptions"
       ],
       "contracts": [
         {
@@ -7409,7 +7410,8 @@
         "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Value",
         "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Response",
         "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Dirty",
-        "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithUpdateName"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
+        "github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithUpdateOptions"
       ],
       "contracts": [
         {

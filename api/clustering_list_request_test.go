@@ -401,7 +401,7 @@ func TestClusteringListRequestEffectiveVersionGates(t *testing.T) {
 				if kind == "services" {
 					_, err = services.New(client).All(context.Background(), request.Microversion(tc.selected))
 				} else {
-					_, err = receivers.New(client).All(context.Background(), receivers.WithListUserID("owner"), request.Microversion(tc.selected))
+					_, err = receivers.New(client).All(context.Background(), request.Custom(func(c *request.Config[receivers.ListOpts]) error { c.Options.UserID = "owner"; return nil }), request.Microversion(tc.selected))
 				}
 				if tc.allowed {
 					if err != nil || calls.Load() != 1 {

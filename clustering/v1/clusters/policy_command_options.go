@@ -48,17 +48,3 @@ func WithDetachPolicyOptions(value DetachPolicyOpts) DetachPolicyOption {
 func WithUpdatePolicyOptions(value UpdatePolicyOpts) UpdatePolicyOption {
 	return request.Custom(senlin.Snapshot(value))
 }
-
-func WithAttachPolicyEnabled(value bool) AttachPolicyOption {
-	return request.Custom(func(config *request.Config[AttachPolicyOpts]) error {
-		config.Options.Enabled = request.Present(value)
-		return nil
-	})
-}
-
-func WithUpdatePolicyEnabled(value bool) UpdatePolicyOption {
-	return request.Custom(func(config *request.Config[UpdatePolicyOpts]) error {
-		config.Options.Enabled = request.Present(value)
-		return nil
-	})
-}

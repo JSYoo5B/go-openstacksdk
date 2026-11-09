@@ -276,7 +276,11 @@ func TestClusteringBindingListControlsStayLocalAndOwnSnapshots(t *testing.T) {
 			row := func(id string) string {
 				return fmt.Sprintf(`{"id":%q,"policy_id":"policy-%s","cluster_id":"canonical","enabled":false}`, id, id)
 			}
-			options := []clusterpolicies.ListOption{clusterpolicies.WithListEnabled(false), request.Query("vendor", "retained")}
+			options := []clusterpolicies.ListOption{request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error {
+				v := false
+				c.Options.Enabled = &v
+				return nil
+			}), request.Query("vendor", "retained")}
 			wantRows, wantCalls := 2, int32(1)
 			var captured *request.Config[clusterpolicies.ListOpts]
 			switch mode {

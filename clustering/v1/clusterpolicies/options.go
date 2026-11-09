@@ -19,37 +19,16 @@ type ListOpts struct {
 	Paginated  *bool
 }
 
-// ListOption is one option of List and All: WithListOptions, WithListEnabled,
-// WithListPolicyName, WithListPolicyType, WithListSort, WithListFilter,
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
 // request.Header, request.Microversion, request.Query (a string or []string
 // value), request.MaxItems, request.Paginated or request.Custom over
-// *request.Config[ListOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// *request.Config[ListOpts] (for example to set Enabled, PolicyName, PolicyType
+// or Sort). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
 
 func WithListOptions(value ListOpts) ListOption { return request.Custom(senlin.Snapshot(value)) }
-
-func WithListEnabled(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.Enabled = &copy
-		return nil
-	})
-}
-
-func WithListPolicyName(value string) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.PolicyName = value; return nil })
-}
-
-func WithListPolicyType(value string) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.PolicyType = value; return nil })
-}
-
-func WithListSort(value string) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.Sort = value; return nil })
-}
 
 func validateQuery(query url.Values) error {
 	if query.Has("max_items") || query.Has("paginated") {

@@ -92,7 +92,10 @@ func TestClusteringReceiverTrackedCleanStickyDirtyShallowMergeAndActualResponse(
 		t.Fatal(err, calls.Load())
 	}
 	for _, name := range []string{"B", "A", "A"} {
-		if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName(name)); err != nil {
+		if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+			c.Options.Name = request.Present(name)
+			return nil
+		})); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -107,7 +110,7 @@ func TestClusteringReceiverTrackedCleanStickyDirtyShallowMergeAndActualResponse(
 	if response.ID != "" || len(response.Body) != 2 || response.StatusCode != 200 || response.Header.Get("X-Request-ID") != "last-patch" {
 		t.Fatal("actual response invented cached fields", response)
 	}
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("B"), receivers.WithUpdateParams(map[string]any{"big": json.Number("9007199254740993"), "off": false}), request.Field("vendor", false)); err != nil {
+	if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error { c.Options.Name = request.Present("B"); return nil }), receivers.WithUpdateParams(map[string]any{"big": json.Number("9007199254740993"), "off": false}), request.Field("vendor", false)); err != nil {
 		t.Fatal(err)
 	}
 	value, err = tracked.Commit(context.Background(), request.Header("X-Vendor", "kept"))
@@ -154,7 +157,10 @@ func TestClusteringReceiverTrackedEmptyNullAndRemovalPresence(t *testing.T) {
 				}
 			}
 			if mode == "empty" {
-				err = tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName(""), receivers.WithUpdateAction(""), receivers.WithUpdateParams(map[string]any{}))
+				err = tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error { c.Options.Name = request.Present(""); return nil }), request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+					c.Options.Action = request.Present("")
+					return nil
+				}), receivers.WithUpdateParams(map[string]any{}))
 			} else if mode != "removal" {
 				err = tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
 					c.Options.Name = request.Null[string]()
@@ -196,23 +202,35 @@ func TestClusteringReceiverTrackedAtomicEditAndHeaderOnlyCommitProtection(t *tes
 		invalid = append(invalid, request.Field(key, false))
 	}
 	for index, option := range invalid {
-		if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("WouldApply"), option); !errors.Is(err, resource.ErrInvalidOption) || tracked.Dirty() || tracked.Value().Name != "A" {
+		if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+			c.Options.Name = request.Present("WouldApply")
+			return nil
+		}), option); !errors.Is(err, resource.ErrInvalidOption) || tracked.Dirty() || tracked.Value().Name != "A" {
 			t.Fatalf("option %d partly applied: %v, %#v", index, err, tracked.Value())
 		}
 	}
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("WouldApply"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error {
+	if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Present("WouldApply")
+		return nil
+	}), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error {
 		config.Fields["vendor"] = json.RawMessage(`{`)
 		return nil
 	})); err == nil || tracked.Dirty() || tracked.Value().Name != "A" {
 		t.Fatal("invalid raw JSON partly applied", err, tracked.Value())
 	}
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Pending")); err != nil {
+	if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Present("Pending")
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	invalidCommit := []receivers.UpdateOption{nil, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
 		c.Options.Name = request.Null[string]()
 		return nil
-	}), receivers.WithUpdateAction(""), receivers.WithUpdateParams(nil), request.Field("vendor", false), request.Custom(request.WithQuery[receivers.UpdateOpts]("vendor", "value")), request.Custom(request.WithArgument[receivers.UpdateOpts]("foreign", true)), request.Header("X-Auth-Token", "override"), request.Header("OpenStack-API-Version", "clustering 1.4")}
+	}), request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Action = request.Present("")
+		return nil
+	}), receivers.WithUpdateParams(nil), request.Field("vendor", false), request.Custom(request.WithQuery[receivers.UpdateOpts]("vendor", "value")), request.Custom(request.WithArgument[receivers.UpdateOpts]("foreign", true)), request.Header("X-Auth-Token", "override"), request.Header("OpenStack-API-Version", "clustering 1.4")}
 	for index, option := range invalidCommit {
 		if _, err := tracked.Commit(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) || !tracked.Dirty() || tracked.Value().Name != "Pending" || calls.Load() != 0 {
 			t.Fatalf("commit option %d: %v, %#v, calls=%d", index, err, tracked.Value(), calls.Load())
@@ -336,7 +354,10 @@ func TestClusteringReceiverTrackedCanonicalNameAllPagesAndExplicitFixedID(t *tes
 				t.Fatal(err)
 			}
 			tracked.Value().Body["id"] = json.RawMessage(`"caller-retarget"`)
-			if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Requested")); err != nil {
+			if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Name = request.Present("Requested")
+				return nil
+			})); err != nil {
 				t.Fatal(err)
 			}
 			if _, err := tracked.Commit(context.Background()); err != nil {
@@ -383,7 +404,10 @@ func TestClusteringReceiverTrackedNativeAndMalformedResponseEvidenceNoResend(t *
 				testcloud.JSON(w, status, body)
 			})
 			tracked := receiverTrackedHandle(t, cloud.Client("clustering", "/v1"))
-			if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Pending")); err != nil {
+			if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Name = request.Present("Pending")
+				return nil
+			})); err != nil {
 				t.Fatal(err)
 			}
 			_, err := tracked.Commit(context.Background())
@@ -422,7 +446,10 @@ func TestClusteringReceiverTrackedRefreshResetsOlderDirtyAndPreservesFailures(t 
 	})
 	cloud.Mux.HandleFunc("PATCH /v1/receivers/fixed", func(w http.ResponseWriter, r *http.Request) { patches.Add(1); w.WriteHeader(500) })
 	tracked := receiverTrackedHandle(t, cloud.Client("clustering", "/v1"))
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Discarded"), receivers.WithUpdateParams(map[string]any{"pending": true})); err != nil {
+	if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Present("Discarded")
+		return nil
+	}), receivers.WithUpdateParams(map[string]any{"pending": true})); err != nil {
 		t.Fatal(err)
 	}
 	value, err := tracked.Refresh(context.Background())
@@ -432,7 +459,10 @@ func TestClusteringReceiverTrackedRefreshResetsOlderDirtyAndPreservesFailures(t 
 	if _, err := tracked.Commit(context.Background()); err != nil || patches.Load() != 0 {
 		t.Fatal(err, patches.Load())
 	}
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Keep")); err != nil {
+	if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Present("Keep")
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	mode.Store(1)
@@ -478,7 +508,10 @@ func TestClusteringReceiverTrackedNewEditsSurviveCommitAndRefreshInFlight(t *tes
 				testcloud.JSON(w, 200, `{"receiver":{}}`)
 			})
 			tracked := receiverTrackedHandle(t, cloud.Client("clustering", "/v1"))
-			if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Submitted"), receivers.WithUpdateParams(map[string]any{"submitted": true})); err != nil {
+			if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Name = request.Present("Submitted")
+				return nil
+			}), receivers.WithUpdateParams(map[string]any{"submitted": true})); err != nil {
 				t.Fatal(err)
 			}
 			done := make(chan error, 1)
@@ -496,7 +529,13 @@ func TestClusteringReceiverTrackedNewEditsSurviveCommitAndRefreshInFlight(t *tes
 			case <-time.After(5 * time.Second):
 				t.Fatal("HTTP did not start")
 			}
-			if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Newer"), receivers.WithUpdateAction("")); err != nil {
+			if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Name = request.Present("Newer")
+				return nil
+			}), request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Action = request.Present("")
+				return nil
+			})); err != nil {
 				t.Fatal(err)
 			}
 			once.Do(func() { close(release) })
@@ -625,7 +664,10 @@ func TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := loaded.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Loaded")); err != nil {
+	if err := loaded.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Present("Loaded")
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := loaded.Commit(context.Background()); err != nil {
@@ -634,7 +676,10 @@ func TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation(t *t
 	_, err = right.Update(context.Background(), resource.Name("A"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
 		c.Options.Name = request.Null[string]()
 		return nil
-	}), receivers.WithUpdateAction(""), receivers.WithUpdateParams(map[string]json.Number{"large": "9007199254740993"}), request.Header("X-Snapshot", "captured"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { captured = config; return nil }))
+	}), request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Action = request.Present("")
+		return nil
+	}), receivers.WithUpdateParams(map[string]json.Number{"large": "9007199254740993"}), request.Header("X-Snapshot", "captured"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { captured = config; return nil }))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -643,13 +688,19 @@ func TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation(t *t
 	if err != nil {
 		t.Fatal(err)
 	}
-	if err := byName.Edit(receivers.UpdateOpts{}, receivers.WithUpdateAction("")); err != nil {
+	if err := byName.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Action = request.Present("")
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := byName.Commit(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(context.Background(), resource.ID("base-id"), receivers.UpdateOpts{}, receivers.WithUpdateName("Default")); err != nil {
+	if _, err := api.Update(context.Background(), resource.ID("base-id"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Present("Default")
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	var wait sync.WaitGroup
@@ -657,7 +708,10 @@ func TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation(t *t
 		wait.Add(1)
 		go func(scope *receivers.UpdateScope) {
 			defer wait.Done()
-			if _, err := scope.Update(context.Background(), resource.ID("concurrent"), receivers.UpdateOpts{}, receivers.WithUpdateAction("CLUSTER_SCALE_OUT")); err != nil {
+			if _, err := scope.Update(context.Background(), resource.ID("concurrent"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Action = request.Present("CLUSTER_SCALE_OUT")
+				return nil
+			})); err != nil {
 				t.Error(err)
 			}
 		}(scope)
@@ -702,7 +756,10 @@ func TestClusteringReceiverTrackedAndUpdateScopeOfflineSourceAndCleanValidation(
 		t.Fatal("cached user invented a 1.4 query gate", err, calls.Load())
 	}
 	client.Type = "compute"
-	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Offline")); err != nil {
+	if err := tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Present("Offline")
+		return nil
+	})); err != nil {
 		t.Fatal("offline edit validated source", err)
 	}
 	if _, err := tracked.Commit(context.Background()); !errors.Is(err, resource.ErrInvalidOption) || !tracked.Dirty() {
@@ -772,12 +829,18 @@ func TestClusteringReceiverTrackedAndUpdateScopeOfflineSourceAndCleanValidation(
 			testcloud.JSON(w, 200, `{"receivers":[{"id":"canonical","name":"A"}]}`)
 		})
 		lookupCloud.Mux.HandleFunc("PATCH /v1/alternate/receivers/canonical", func(w http.ResponseWriter, r *http.Request) { patches.Add(1); w.WriteHeader(500) })
-		_, err = scope.Update(context.Background(), resource.ID("canonical"), receivers.UpdateOpts{}, receivers.WithUpdateName("Updated"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { lookupClient.Type = "compute"; return nil }))
+		_, err = scope.Update(context.Background(), resource.ID("canonical"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+			c.Options.Name = request.Present("Updated")
+			return nil
+		}), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { lookupClient.Type = "compute"; return nil }))
 		if !errors.Is(err, resource.ErrInvalidOption) || reads.Load() != 0 || patches.Load() != 0 {
 			t.Fatal(err, reads.Load(), patches.Load())
 		}
 		lookupClient.Type = "clustering"
-		_, err = scope.Update(context.Background(), resource.Name("A"), receivers.UpdateOpts{}, receivers.WithUpdateName("Updated"))
+		_, err = scope.Update(context.Background(), resource.Name("A"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+			c.Options.Name = request.Present("Updated")
+			return nil
+		}))
 		if !errors.Is(err, resource.ErrInvalidOption) || reads.Load() != 1 || patches.Load() != 0 {
 			t.Fatal(err, reads.Load(), patches.Load())
 		}

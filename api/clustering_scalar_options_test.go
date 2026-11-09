@@ -45,22 +45,31 @@ func TestClusteringScalarOptionsPreserveExplicitValuesAndReuse(t *testing.T) {
 	}
 	clusterAPI, nodeAPI := clusters.New(client), nodes.New(client)
 	var captured *request.Config[clusters.CreateOpts]
-	createCluster := []clusters.CreateOption{clusters.WithCreateMinSize(0), clusters.WithCreateMaxSize(-1), clusters.WithCreateDesiredCapacity(0), request.Custom(func(c *request.Config[clusters.CreateOpts]) error {
+	createCluster := []clusters.CreateOption{request.Custom(func(c *request.Config[clusters.CreateOpts]) error { v := 0; c.Options.MinSize = &v; return nil }), request.Custom(func(c *request.Config[clusters.CreateOpts]) error { v := -1; c.Options.MaxSize = &v; return nil }), request.Custom(func(c *request.Config[clusters.CreateOpts]) error { v := 0; c.Options.DesiredCapacity = &v; return nil }), request.Custom(func(c *request.Config[clusters.CreateOpts]) error {
 		c.Options.Timeout = request.Null[int]()
 		return nil
 	}), request.Custom(func(config *request.Config[clusters.CreateOpts]) error { captured = config; return nil })}
 	updateCluster := []clusters.UpdateOption{request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
 		c.Options.Name = request.Null[string]()
 		return nil
-	}), clusters.WithUpdateProfileID("changed"), clusters.WithUpdateTimeout(0)}
+	}), request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+		c.Options.ProfileID = request.Present("changed")
+		return nil
+	}), clusters.WithUpdateTimeout(0)}
 	createNode := []nodes.CreateOption{request.Custom(func(c *request.Config[nodes.CreateOpts]) error {
 		c.Options.ClusterID = request.Null[string]()
 		return nil
-	}), nodes.WithCreateRole("")}
-	updateNode := []nodes.UpdateOption{nodes.WithUpdateName("renamed"), request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+	}), request.Custom(func(c *request.Config[nodes.CreateOpts]) error { c.Options.Role = request.Present(""); return nil })}
+	updateNode := []nodes.UpdateOption{request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+		c.Options.Name = request.Present("renamed")
+		return nil
+	}), request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
 		c.Options.ProfileID = request.Null[string]()
 		return nil
-	}), request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Role = request.Null[string](); return nil }), nodes.WithUpdateTainted(false)}
+	}), request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Role = request.Null[string](); return nil }), request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+		c.Options.Tainted = request.Present(false)
+		return nil
+	})}
 	for range 2 {
 		if _, err := clusterAPI.Create(context.Background(), clusters.CreateOpts{Name: "workers", ProfileID: "profile"}, createCluster...); err != nil {
 			t.Fatal(err)

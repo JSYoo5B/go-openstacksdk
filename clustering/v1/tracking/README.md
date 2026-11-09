@@ -23,7 +23,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Value`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Response`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Dirty`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithUpdateName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithUpdateOptions`
 
 - PATCH200 sends a resource object rather than JSON Patch operations; optional mutable fields and headers are prepared before exact-name resolution, explicit IDs skip lookup, and empty updates fail before HTTP.
   Tests: `api/clustering_profiles_test.go:TestClusteringProfilesCRUDExactPathsBodiesAndResponseEvidence`, `api/clustering_profiles_test.go:TestClusteringProfilesNameUpdateFindDefaultsAndAmbiguity`, `api/clustering_profiles_test.go:TestClusteringProfilesMetadataPresenceAndOptionsReuse`, `api/clustering_profiles_test.go:TestClusteringProfilesDefaultsInvalidOptionsAndEmptyUpdatePreflight`.
@@ -64,7 +65,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Value`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Response`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Dirty`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithUpdateName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithUpdateOptions`
 
 - PATCH200 sends a resource object rather than JSON Patch operations; optional mutable fields and headers are prepared before exact-name resolution, explicit IDs skip lookup, and empty updates fail before HTTP.
   Tests: `api/clustering_policies_test.go:TestClusteringPolicyUpdateNameResolvedOnceAndInputsFrozen`, `api/clustering_policies_test.go:TestClusteringPolicyUpdateIDSkipsLookupAndSnapshotCanBeReused`, `api/clustering_policies_test.go:TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions`.
@@ -175,7 +177,7 @@ if err != nil { return err }
 tracked, err := service.Profiles.Load(ctx, resource.ID("PROFILE_ID"))
 if err != nil { return err }
 if err := tracked.Edit(profiles.UpdateOpts{},
-    profiles.WithUpdateName("renamed-profile"),
+    request.Custom(func(c *request.Config[profiles.UpdateOpts]) error { v := "renamed-profile"; c.Options.Name = &v; return nil }),
     profiles.WithUpdateMetadata(map[string]any{"team": "platform"})); err != nil {
     return err
 }
@@ -190,7 +192,7 @@ if err != nil { return err }
 tracked, err := service.Policies.Load(ctx, resource.Name("existing-policy"))
 if err != nil { return err }
 current := tracked.Value().Name
-if err := tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName(current)); err != nil {
+if err := tracked.Edit(policies.UpdateOpts{}, request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := current; c.Options.Name = &v; return nil })); err != nil {
     return err
 }
 _, err = tracked.Commit(ctx)

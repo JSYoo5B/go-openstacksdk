@@ -127,7 +127,7 @@ func TestClusteringReadActionListMarkersDefaultsAndOptionsSnapshot(t *testing.T)
 	api := actions.New(cloud.Client("clustering", "/senlin/v1"))
 	options := []actions.ListOption{option, request.Custom(capture), request.Query("vendor", "retained")}
 	iterator := api.List(context.Background(), options...)
-	options[0] = actions.WithListGlobalProject(false)
+	options[0] = request.Custom(func(c *request.Config[actions.ListOpts]) error { v := false; c.Options.GlobalProject = &v; return nil })
 	if calls.Load() != 0 {
 		t.Fatal("eager iterator")
 	}

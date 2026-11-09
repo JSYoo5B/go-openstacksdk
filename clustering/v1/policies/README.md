@@ -98,7 +98,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Value`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Response`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.TrackedPolicy.Dirty`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithUpdateName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies.WithUpdateOptions`
 
 - PATCH200 sends a resource object rather than JSON Patch operations; optional mutable fields and headers are prepared before exact-name resolution, explicit IDs skip lookup, and empty updates fail before HTTP.
   Tests: `api/clustering_policies_test.go:TestClusteringPolicyUpdateNameResolvedOnceAndInputsFrozen`, `api/clustering_policies_test.go:TestClusteringPolicyUpdateIDSkipsLookupAndSnapshotCanBeReused`, `api/clustering_policies_test.go:TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions`.
@@ -232,7 +233,7 @@ fmt.Println(checked.Spec, checked.Body["id"])
 service, err := conn.Clustering(ctx)
 if err != nil { return err }
 renamed, err := service.Policies.Update(ctx, resource.Name("scale_workers"), policies.UpdateOpts{},
-    policies.WithUpdateName("scale_out_workers"),
+    request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := "scale_out_workers"; c.Options.Name = &v; return nil }),
     request.Header("X-Vendor-Mode", "explicit"))
 if err != nil { return err }
 fmt.Println(renamed.ID, renamed.Name)
@@ -249,7 +250,7 @@ service, err := conn.Clustering(ctx)
 if err != nil { return err }
 tracked, err := service.Policies.Load(ctx, resource.ID("POLICY_ID"))
 if err != nil { return err }
-if err := tracked.Edit(policies.UpdateOpts{}, policies.WithUpdateName("scale_out_workers")); err != nil {
+if err := tracked.Edit(policies.UpdateOpts{}, request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := "scale_out_workers"; c.Options.Name = &v; return nil })); err != nil {
     return err
 }
 policy, err := tracked.Commit(ctx)
@@ -262,7 +263,7 @@ service, err := conn.Clustering(ctx)
 if err != nil { return err }
 for policy, err := range service.Policies.List(ctx,
     policies.WithListOptions(policies.ListOpts{Limit: 20, Sort: "created_at:desc"}),
-    policies.WithListGlobalProject(false),
+    request.Custom(func(c *request.Config[policies.ListOpts]) error { v := false; c.Options.GlobalProject = &v; return nil }),
     policies.WithListFilter("data", map[string]any{"vendor": map[string]any{"enabled": false}})) {
     if err != nil { return err }
     fmt.Println(policy.ID, policy.Name)

@@ -91,7 +91,10 @@ func TestClusteringNodeCommandsRecoverNullableSnapshotAndReuse(t *testing.T) {
 	vendor["off"] = true
 	api := nodes.New(client)
 	for range 2 {
-		value, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, options, nodes.WithRecoverOperation("reboot"), extension, request.Header("X-Vendor", "retained"))
+		value, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, options, request.Custom(func(c *request.Config[nodes.RecoverOpts]) error {
+			c.Options.Operation = request.Present("reboot")
+			return nil
+		}), extension, request.Header("X-Vendor", "retained"))
 		if err != nil || value.ActionID != "recover-action" {
 			t.Fatal(value, err)
 		}
@@ -147,7 +150,10 @@ func TestClusteringNodeCommandsRecoverOperationOmittedEmptyAndNull(t *testing.T)
 	api := nodes.New(cloud.Client("clustering", "/senlin/v1"))
 	for _, options := range [][]nodes.RecoverOption{
 		nil,
-		{nodes.WithRecoverOperation("")},
+		{request.Custom(func(c *request.Config[nodes.RecoverOpts]) error {
+			c.Options.Operation = request.Present("")
+			return nil
+		})},
 		{request.Custom(func(c *request.Config[nodes.RecoverOpts]) error {
 			c.Options.Operation = request.Null[string]()
 			return nil
@@ -228,7 +234,10 @@ func TestClusteringNodeCommandsNameLookupFreezesBodyHeadersAndGate(t *testing.T)
 		testcloud.JSON(w, 202, `{"action":"frozen-action"}`)
 	})
 	capture := func(config *request.Config[nodes.RecoverOpts]) error { captured = config; return nil }
-	value, err := nodes.New(client).Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{OperationParams: json.RawMessage(`{"type":"soft"}`), Check: request.Present(false)}, nodes.WithRecoverOperation("reboot"), request.Field("id", "plugin-id"), request.Header("X-Vendor", "original"), request.Custom(capture))
+	value, err := nodes.New(client).Recover(context.Background(), resource.Name("selected"), nodes.RecoverOpts{OperationParams: json.RawMessage(`{"type":"soft"}`), Check: request.Present(false)}, request.Custom(func(c *request.Config[nodes.RecoverOpts]) error {
+		c.Options.Operation = request.Present("reboot")
+		return nil
+	}), request.Field("id", "plugin-id"), request.Header("X-Vendor", "original"), request.Custom(capture))
 	if err != nil || value.ActionID != "frozen-action" || reads.Load() != 1 || posts.Load() != 1 {
 		t.Fatal(value, err, reads.Load(), posts.Load())
 	}

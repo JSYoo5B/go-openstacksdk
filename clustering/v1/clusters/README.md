@@ -445,8 +445,8 @@ service, err := conn.ClusteringV1(ctx)
 if err != nil { return err }
 cluster, err := service.Clusters.Create(ctx, clusters.CreateOpts{
     Name: "workers", ProfileID: "PROFILE_ID", Timeout: request.Null[int](),
-}, clusters.WithCreateMinSize(0), clusters.WithCreateMaxSize(-1),
-   clusters.WithCreateDesiredCapacity(1),
+}, request.Custom(func(c *request.Config[clusters.CreateOpts]) error { v := 0; c.Options.MinSize = &v; return nil }), request.Custom(func(c *request.Config[clusters.CreateOpts]) error { v := -1; c.Options.MaxSize = &v; return nil }),
+   request.Custom(func(c *request.Config[clusters.CreateOpts]) error { v := 1; c.Options.DesiredCapacity = &v; return nil }),
    clusters.WithCreateMetadata(map[string]any{"team": "infra"}))
 if err != nil { return err }
 cluster, err = service.Clusters.Get(ctx, cluster.ID)
@@ -463,7 +463,7 @@ cluster = conn.clustering.update_cluster(
 ```go
 api := clusters.New(client)
 cluster, err := api.Update(ctx, resource.Name("workers"), clusters.UpdateOpts{Timeout: request.Null[int]()},
-    clusters.WithUpdateName("workers_v2"),
+    request.Custom(func(c *request.Config[clusters.UpdateOpts]) error { c.Options.Name = request.Present("workers_v2"); return nil }),
     clusters.WithUpdateMetadata(map[string]any{}), clusters.WithUpdateProfileOnly(false))
 if err != nil { return err }
 fmt.Println(cluster.ID, cluster.Operation.ActionID)
@@ -478,7 +478,7 @@ cluster = conn.clustering.find_cluster("workers", ignore_missing=True)
 api := clusters.New(client)
 for cluster, err := range api.List(ctx,
     clusters.WithListOptions(clusters.ListOpts{Status: "ACTIVE", Limit: 20}),
-    clusters.WithListGlobalProject(false),
+    request.Custom(func(c *request.Config[clusters.ListOpts]) error { v := false; c.Options.GlobalProject = &v; return nil }),
     clusters.WithListFilter("metadata", map[string]any{"team": "infra"}),
 ) {
     if err != nil { return err }
@@ -496,7 +496,7 @@ action = conn.clustering.get_action(action.id)
 
 ```go
 api := clusters.New(client)
-submission, err := api.Delete(ctx, resource.ID("CLUSTER_ID"), clusters.WithDeleteForce(true))
+submission, err := api.Delete(ctx, resource.ID("CLUSTER_ID"), request.Custom(func(c *request.Config[clusters.DeleteOpts]) error { c.Options.Force = true; return nil }))
 if err != nil { return err }
 if submission == nil { return nil }
 action, err := actions.New(client).Get(ctx, submission.ActionID)
@@ -514,12 +514,12 @@ action = conn.clustering.resize_cluster(
 ```go
 api := clusters.New(client)
 scaled, err := api.ScaleOut(ctx, resource.ID("CLUSTER_ID"), clusters.ScaleOutOpts{},
-    clusters.WithScaleOutCount(1))
+    request.Custom(func(c *request.Config[clusters.ScaleOutOpts]) error { c.Options.Count = request.Present(1); return nil }))
 if err != nil { return err }
 resized, err := api.Resize(ctx, resource.ID("CLUSTER_ID"), clusters.ResizeOpts{},
-    clusters.WithResizeAdjustmentType(clusters.ExactCapacity),
-    clusters.WithResizeNumber(json.Number("3")), clusters.WithResizeMinSize(0),
-    clusters.WithResizeStrict(false))
+    request.Custom(func(c *request.Config[clusters.ResizeOpts]) error { c.Options.AdjustmentType = request.Present(clusters.ExactCapacity); return nil }),
+    request.Custom(func(c *request.Config[clusters.ResizeOpts]) error { c.Options.Number = request.Present(json.Number("3")); return nil }), request.Custom(func(c *request.Config[clusters.ResizeOpts]) error { c.Options.MinSize = request.Present(0); return nil }),
+    request.Custom(func(c *request.Config[clusters.ResizeOpts]) error { c.Options.Strict = request.Present(false); return nil }))
 if err != nil { return err }
 fmt.Println(scaled.ActionID, resized.ActionID)
 ```
@@ -540,7 +540,7 @@ added, err := api.AddNodes(ctx, resource.ID("CLUSTER_ID"), clusters.AddNodesOpts
 if err != nil { return err }
 removed, err := api.RemoveNodes(ctx, resource.ID("CLUSTER_ID"), clusters.RemoveNodesOpts{
     Nodes: []string{"NODE_ID"},
-}, clusters.WithRemoveNodesDestroyAfterDeletion(false))
+}, request.Custom(func(c *request.Config[clusters.RemoveNodesOpts]) error { c.Options.DestroyAfterDeletion = request.Present(false); return nil }))
 if err != nil { return err }
 replaced, err := api.ReplaceNodes(ctx, resource.ID("CLUSTER_ID"), clusters.ReplaceNodesOpts{
     Nodes: map[string]string{"OLD_NODE": "NEW_NODE"},
@@ -562,7 +562,7 @@ api := clusters.New(client)
 checked, err := api.Check(ctx, resource.ID("CLUSTER_ID"))
 if err != nil { return err }
 recovered, err := api.Recover(ctx, resource.ID("CLUSTER_ID"), clusters.RecoverOpts{},
-    clusters.WithRecoverCheck(false), clusters.WithRecoverCheckCapacity(false))
+    request.Custom(func(c *request.Config[clusters.RecoverOpts]) error { c.Options.Check = request.Present(false); return nil }), request.Custom(func(c *request.Config[clusters.RecoverOpts]) error { c.Options.CheckCapacity = request.Present(false); return nil }))
 if err != nil { return err }
 operated, err := api.PerformOperation(ctx, resource.ID("CLUSTER_ID"), "reboot",
     clusters.PerformOperationOpts{},
@@ -584,7 +584,7 @@ attached, err := api.AttachPolicy(ctx, resource.ID("CLUSTER_ID"),
     clusters.AttachPolicyOpts{PolicyID: "POLICY_ID"})
 if err != nil { return err }
 updated, err := api.UpdatePolicy(ctx, resource.ID("CLUSTER_ID"),
-    clusters.UpdatePolicyOpts{PolicyID: "POLICY_ID"}, clusters.WithUpdatePolicyEnabled(false))
+    clusters.UpdatePolicyOpts{PolicyID: "POLICY_ID"}, request.Custom(func(c *request.Config[clusters.UpdatePolicyOpts]) error { c.Options.Enabled = request.Present(false); return nil }))
 if err != nil { return err }
 detached, err := api.DetachPolicy(ctx, resource.ID("CLUSTER_ID"),
     clusters.DetachPolicyOpts{PolicyID: "POLICY_ID"})
@@ -630,6 +630,7 @@ package example
 import (
     "context"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
     "github.com/JSYoo5B/go-openstacksdk/resource"
@@ -641,7 +642,7 @@ func RenameTrackedCluster(ctx context.Context, conn *sdk.Connection) (*clusters.
     tracked, err := service.Clusters.Load(ctx, resource.ID("CLUSTER_ID"))
     if err != nil { return nil, err }
     if err := tracked.Edit(clusters.UpdateOpts{},
-        clusters.WithUpdateName("renamed")); err != nil {
+        request.Custom(func(c *request.Config[clusters.UpdateOpts]) error { c.Options.Name = request.Present("renamed"); return nil })); err != nil {
         return nil, err
     }
     return tracked.Commit(ctx)

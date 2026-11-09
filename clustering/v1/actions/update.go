@@ -30,10 +30,10 @@ type UpdateOpts struct {
 }
 
 // UpdateOption is one option of Update and Cancel: WithUpdateOptions,
-// WithUpdateForce, WithUpdateQuery, request.Header, request.Field or
-// request.Custom over *request.Config[UpdateOpts]. Other shared calls fail
-// with resource.ErrInvalidOption before HTTP. WithUpdateQuery stays because
-// the write category admits no query call.
+// WithUpdateQuery, request.Header, request.Field or request.Custom over
+// *request.Config[UpdateOpts] (for example to set Force). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP. WithUpdateQuery stays
+// because the write category admits no query call.
 type UpdateOption = request.WriteCall
 
 var updateCalls = senlin.WriteCalls[UpdateOpts]()
@@ -42,13 +42,6 @@ func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	value.Force = senlin.Bool(value.Force)
 	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options = UpdateOpts{Status: value.Status, Force: senlin.Bool(value.Force)}
-		return nil
-	})
-}
-func WithUpdateForce(value bool) UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		copy := value
-		config.Options.Force = &copy
 		return nil
 	})
 }

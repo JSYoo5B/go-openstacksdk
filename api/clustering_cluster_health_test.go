@@ -32,7 +32,10 @@ func TestClusteringClusterHealthWirePresenceAndRoutes(t *testing.T) {
 			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{})
 		}},
 		{"recover-check-only-false", "1.6", "actions", `{"recover":{"check":false}}`, func(a *clusters.API) (*actions.Submission, error) {
-			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, clusters.WithRecoverCheck(false))
+			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.Check = request.Present(false)
+				return nil
+			}))
 		}},
 		{"recover-check-only-null", "1.6", "actions", `{"recover":{"check":null}}`, func(a *clusters.API) (*actions.Submission, error) {
 			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
@@ -41,7 +44,16 @@ func TestClusteringClusterHealthWirePresenceAndRoutes(t *testing.T) {
 			}))
 		}},
 		{"recover-false", "1.7", "actions", `{"recover":{"check":false,"check_capacity":false,"operation":"","operation_params":{}}}`, func(a *clusters.API) (*actions.Submission, error) {
-			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, clusters.WithRecoverOperation(""), clusters.WithRecoverOperationParams(map[string]any{}), clusters.WithRecoverCheck(false), clusters.WithRecoverCheckCapacity(false))
+			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.Operation = request.Present("")
+				return nil
+			}), clusters.WithRecoverOperationParams(map[string]any{}), request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.Check = request.Present(false)
+				return nil
+			}), request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.CheckCapacity = request.Present(false)
+				return nil
+			}))
 		}},
 		{"recover-null", "1.7", "actions", `{"recover":{"check":null,"check_capacity":null,"operation":null,"operation_params":null}}`, func(a *clusters.API) (*actions.Submission, error) {
 			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
@@ -201,9 +213,15 @@ func TestClusteringClusterHealthVersionPreflightAndRecheck(t *testing.T) {
 			capture := func(c *request.Config[clusters.RecoverOpts]) error { config = c; return nil }
 			switch mode {
 			case "capacity":
-				_, err = a.Recover(context.Background(), resource.Name("selected"), clusters.RecoverOpts{}, clusters.WithRecoverCheckCapacity(false), request.Custom(capture))
+				_, err = a.Recover(context.Background(), resource.Name("selected"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+					c.Options.CheckCapacity = request.Present(false)
+					return nil
+				}), request.Custom(capture))
 			case "check":
-				_, err = a.Recover(context.Background(), resource.Name("selected"), clusters.RecoverOpts{}, clusters.WithRecoverCheck(false), request.Custom(capture))
+				_, err = a.Recover(context.Background(), resource.Name("selected"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+					c.Options.Check = request.Present(false)
+					return nil
+				}), request.Custom(capture))
 			case "operation":
 				_, err = a.PerformOperation(context.Background(), resource.Name("selected"), "reboot", clusters.PerformOperationOpts{})
 			case "source":

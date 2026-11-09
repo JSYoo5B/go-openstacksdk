@@ -319,7 +319,7 @@ func TestClusteringProfilesListShortPagesLocalFiltersAndSnapshot(t *testing.T) {
 	options := []profiles.ListOption{option, filterOption, profiles.WithListFilter("project_id", "p"), request.Query("vendor", "retained"), request.Custom(capture)}
 	api := profiles.New(cloud.Client("clustering", "/v1"))
 	iterator := api.List(context.Background(), options...)
-	options[0] = profiles.WithListGlobalProject(true)
+	options[0] = request.Custom(func(c *request.Config[profiles.ListOpts]) error { v := true; c.Options.GlobalProject = &v; return nil })
 	if calls.Load() != 0 {
 		t.Fatal("eager list")
 	}

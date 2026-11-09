@@ -76,7 +76,10 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 							return nil
 						}))
 					} else {
-						options = append(options, clusters.WithUpdateName(value.(string)))
+						options = append(options, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+							c.Options.Name = request.Present(value.(string))
+							return nil
+						}))
 					}
 				case "profile_id":
 					if value == nil {
@@ -85,7 +88,10 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 							return nil
 						}))
 					} else {
-						options = append(options, clusters.WithUpdateProfileID(value.(string)))
+						options = append(options, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+							c.Options.ProfileID = request.Present(value.(string))
+							return nil
+						}))
 					}
 				case "timeout":
 					if value == nil {
@@ -149,16 +155,25 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 			case "nil":
 				return tracked.Edit(clusters.UpdateOpts{}, nil)
 			case "empty-name":
-				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName(""))
+				return tracked.Edit(clusters.UpdateOpts{}, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error { c.Options.Name = request.Present(""); return nil }))
 			case "bad-metadata":
-				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), clusters.WithUpdateMetadata([]any{}))
+				return tracked.Edit(clusters.UpdateOpts{}, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+					c.Options.Name = request.Present("Valid")
+					return nil
+				}), clusters.WithUpdateMetadata([]any{}))
 			case "bad-json":
-				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), request.Custom(func(config *request.Config[clusters.UpdateOpts]) error {
+				return tracked.Edit(clusters.UpdateOpts{}, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+					c.Options.Name = request.Present("Valid")
+					return nil
+				}), request.Custom(func(config *request.Config[clusters.UpdateOpts]) error {
 					config.Fields["vendor"] = json.RawMessage(`{`)
 					return nil
 				}))
 			default:
-				return tracked.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Valid"), request.Field(mode, false))
+				return tracked.Edit(clusters.UpdateOpts{}, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+					c.Options.Name = request.Present("Valid")
+					return nil
+				}), request.Field(mode, false))
 			}
 		},
 		badCommit: func(ctx context.Context, mode string) error {
@@ -211,7 +226,10 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 					if value == nil {
 						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Null[string](); return nil }))
 					} else {
-						options = append(options, nodes.WithUpdateName(value.(string)))
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+							c.Options.Name = request.Present(value.(string))
+							return nil
+						}))
 					}
 				case "profile_id":
 					if value == nil {
@@ -220,19 +238,28 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 							return nil
 						}))
 					} else {
-						options = append(options, nodes.WithUpdateProfileID(value.(string)))
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+							c.Options.ProfileID = request.Present(value.(string))
+							return nil
+						}))
 					}
 				case "role":
 					if value == nil {
 						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Role = request.Null[string](); return nil }))
 					} else {
-						options = append(options, nodes.WithUpdateRole(value.(string)))
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+							c.Options.Role = request.Present(value.(string))
+							return nil
+						}))
 					}
 				case "tainted":
 					if value == nil {
 						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Tainted = request.Null[bool](); return nil }))
 					} else {
-						options = append(options, nodes.WithUpdateTainted(value.(bool)))
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+							c.Options.Tainted = request.Present(value.(bool))
+							return nil
+						}))
 					}
 				case "metadata":
 					options = append(options, nodes.WithUpdateMetadata(value))
@@ -281,16 +308,16 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 			case "nil":
 				return tracked.Edit(nodes.UpdateOpts{}, nil)
 			case "empty-name":
-				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName(""))
+				return tracked.Edit(nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present(""); return nil }))
 			case "bad-metadata":
-				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), nodes.WithUpdateMetadata([]any{}))
+				return tracked.Edit(nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present("Valid"); return nil }), nodes.WithUpdateMetadata([]any{}))
 			case "bad-json":
-				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), request.Custom(func(config *request.Config[nodes.UpdateOpts]) error {
+				return tracked.Edit(nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present("Valid"); return nil }), request.Custom(func(config *request.Config[nodes.UpdateOpts]) error {
 					config.Fields["vendor"] = json.RawMessage(`{`)
 					return nil
 				}))
 			default:
-				return tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Valid"), request.Field(mode, false))
+				return tracked.Edit(nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present("Valid"); return nil }), request.Field(mode, false))
 			}
 		},
 		badCommit: func(ctx context.Context, mode string) error {
@@ -299,9 +326,12 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 			case "name":
 				option = request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Null[string](); return nil })
 			case "zero":
-				option = nodes.WithUpdateRole("")
+				option = request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Role = request.Present(""); return nil })
 			case "false":
-				option = nodes.WithUpdateTainted(false)
+				option = request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+					c.Options.Tainted = request.Present(false)
+					return nil
+				})
 			case "metadata":
 				option = nodes.WithUpdateMetadata(nil)
 			case "field":
@@ -1263,7 +1293,10 @@ func TestClusteringAsyncTrackedNameLoadAbsenceDuplicatesAndNilHandles(t *testing
 				if manual.Value().StatusCode != 0 || manual.Response().StatusCode != 0 || manual.Response().Operation != nil {
 					t.Fatal("manual seed fabricated HTTP evidence", manual.Response())
 				}
-				if err := manual.Edit(clusters.UpdateOpts{}, clusters.WithUpdateName("Offline")); err != nil {
+				if err := manual.Edit(clusters.UpdateOpts{}, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+					c.Options.Name = request.Present("Offline")
+					return nil
+				})); err != nil {
 					t.Fatal(err)
 				}
 				if _, err := manual.Commit(context.Background()); !errors.Is(err, resource.ErrInvalidOption) || !manual.Dirty() {
@@ -1277,7 +1310,10 @@ func TestClusteringAsyncTrackedNameLoadAbsenceDuplicatesAndNilHandles(t *testing
 				if manual.Value().StatusCode != 0 || manual.Response().StatusCode != 0 || manual.Response().Operation != nil {
 					t.Fatal("manual seed fabricated HTTP evidence", manual.Response())
 				}
-				if err := manual.Edit(nodes.UpdateOpts{}, nodes.WithUpdateName("Offline")); err != nil {
+				if err := manual.Edit(nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+					c.Options.Name = request.Present("Offline")
+					return nil
+				})); err != nil {
 					t.Fatal(err)
 				}
 				if _, err := manual.Commit(context.Background()); !errors.Is(err, resource.ErrInvalidOption) || !manual.Dirty() {

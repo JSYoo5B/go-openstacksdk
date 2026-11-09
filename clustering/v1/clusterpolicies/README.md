@@ -180,7 +180,7 @@ binding, err := scope.Get(ctx, "POLICY_NAME_OR_ID")
 if err != nil { return err }
 fmt.Println(binding.ID, binding.PolicyID, binding.ClusterID, binding.URIClusterID)
 
-for binding, err := range scope.List(ctx, clusterpolicies.WithListEnabled(false)) {
+for binding, err := range scope.List(ctx, request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { v := false; c.Options.Enabled = &v; return nil })) {
     if err != nil { return err }
     fmt.Println(binding.PolicyName, binding.IsEnabled)
 }
@@ -188,9 +188,9 @@ for binding, err := range scope.List(ctx, clusterpolicies.WithListEnabled(false)
 
 ```go
 bindings, err := scope.All(ctx,
-    clusterpolicies.WithListEnabled(false),
-    clusterpolicies.WithListPolicyName("POLICY_NAME"),
-    clusterpolicies.WithListPolicyType("senlin.policy.scaling-1.0"))
+    request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { v := false; c.Options.Enabled = &v; return nil }),
+    request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { c.Options.PolicyName = "POLICY_NAME"; return nil }),
+    request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { c.Options.PolicyType = "senlin.policy.scaling-1.0"; return nil }))
 if err != nil { return err }
 fmt.Println(len(bindings))
 ```

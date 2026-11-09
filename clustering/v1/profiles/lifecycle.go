@@ -75,16 +75,6 @@ func (a *API) Load(ctx context.Context, ref resource.Ref) (*TrackedProfile, erro
 
 func profileMetadata(value *Profile) *resource.Metadata { return &value.Metadata }
 
-// WithUpdateName supplies the optional name without allocating a caller-owned
-// pointer. It can be reused by stateless Update and tracked Edit.
-func WithUpdateName(value string) UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		copy := value
-		config.Options.Name = &copy
-		return nil
-	})
-}
-
 func (tracked *TrackedProfile) Value() *Profile {
 	if tracked == nil || tracked.state == nil {
 		return nil

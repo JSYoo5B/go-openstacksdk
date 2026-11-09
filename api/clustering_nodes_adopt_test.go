@@ -76,14 +76,17 @@ func TestClusteringNodeAdoptPresenceSnapshotsAndIndependentReuse(t *testing.T) {
 	extension := request.Field("vendor", vendor)
 	vendor["zero"] = 1
 	for range 2 {
-		value, err := api.Adopt(context.Background(), nodes.AdoptOpts{}, snapshot, nodes.WithAdoptName(""), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Role = request.Null[string](); return nil }), nodes.WithAdoptSnapshot(false), nodes.WithAdoptOverrides(map[string]any{}), extension, request.Header("X-Vendor", "retained"))
+		value, err := api.Adopt(context.Background(), nodes.AdoptOpts{}, snapshot, request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Name = request.Present(""); return nil }), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Role = request.Null[string](); return nil }), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error {
+			c.Options.Snapshot = request.Present(false)
+			return nil
+		}), nodes.WithAdoptOverrides(map[string]any{}), extension, request.Header("X-Vendor", "retained"))
 		if err != nil || value.ID != "adopted" || value.Operation != nil || string(value.UserMetadata["big"]) != "9007199254740993" || value.Header.Get("X-Request-ID") != "owned-response" {
 			t.Fatal(value, err)
 		}
 		value.UserMetadata["big"][0] = 'X'
 		value.Header.Set("X-Request-ID", "consumer-change")
 	}
-	if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Name = request.Null[string](); return nil }), nodes.WithAdoptRole(""), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Snapshot = request.Null[bool](); return nil }), nodes.WithAdoptMetadata(nil), nodes.WithAdoptOverrides(nil), request.Header("X-Vendor", "retained")); err != nil {
+	if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Name = request.Null[string](); return nil }), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Role = request.Present(""); return nil }), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Snapshot = request.Null[bool](); return nil }), nodes.WithAdoptMetadata(nil), nodes.WithAdoptOverrides(nil), request.Header("X-Vendor", "retained")); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 {
@@ -157,7 +160,10 @@ func TestClusteringNodeAdoptPreviewSnapshotsFalseNullAndEmptyObject(t *testing.T
 		}
 	}
 	for _, options := range [][]nodes.AdoptPreviewOption{
-		{nodes.WithAdoptPreviewOverrides(map[string]any{}), nodes.WithAdoptPreviewSnapshot(true)},
+		{nodes.WithAdoptPreviewOverrides(map[string]any{}), request.Custom(func(c *request.Config[nodes.AdoptPreviewOpts]) error {
+			c.Options.Snapshot = request.Present(true)
+			return nil
+		})},
 		{nodes.WithAdoptPreviewOverrides(nil), request.Custom(func(c *request.Config[nodes.AdoptPreviewOpts]) error {
 			c.Options.Snapshot = request.Null[bool]()
 			return nil

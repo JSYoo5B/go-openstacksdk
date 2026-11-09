@@ -51,7 +51,13 @@ func TestClusteringReceiversSynchronousCRUDAndResponseEvidence(t *testing.T) {
 		w.WriteHeader(204)
 	})
 	api := receivers.New(cloud.Client("clustering", "/reverse/senlin/v1"))
-	created, err := api.Create(context.Background(), receivers.CreateOpts{Name: "webhook", Type: "webhook"}, receivers.WithCreateClusterID("cluster-name"), receivers.WithCreateAction("CLUSTER_SCALE_OUT"))
+	created, err := api.Create(context.Background(), receivers.CreateOpts{Name: "webhook", Type: "webhook"}, request.Custom(func(c *request.Config[receivers.CreateOpts]) error {
+		c.Options.ClusterID = request.Present("cluster-name")
+		return nil
+	}), request.Custom(func(c *request.Config[receivers.CreateOpts]) error {
+		c.Options.Action = request.Present("CLUSTER_SCALE_OUT")
+		return nil
+	}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +65,10 @@ func TestClusteringReceiversSynchronousCRUDAndResponseEvidence(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	updated, err := api.Update(context.Background(), resource.ID("controller-name"), receivers.UpdateOpts{}, receivers.WithUpdateAction("CLUSTER_SCALE_IN"), receivers.WithUpdateParams(map[string]any{}))
+	updated, err := api.Update(context.Background(), resource.ID("controller-name"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Action = request.Present("CLUSTER_SCALE_IN")
+		return nil
+	}), receivers.WithUpdateParams(map[string]any{}))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -128,7 +137,13 @@ func TestClusteringReceiversMessagePresenceSnapshotsAndReuse(t *testing.T) {
 			t.Fatal(value, err)
 		}
 	}
-	if _, err := api.Create(context.Background(), receivers.CreateOpts{Name: "message", Type: "message"}, receivers.WithCreateClusterID(""), receivers.WithCreateAction(""), receivers.WithCreateActor(map[string]any{}), receivers.WithCreateParams(map[string]any{})); err != nil {
+	if _, err := api.Create(context.Background(), receivers.CreateOpts{Name: "message", Type: "message"}, request.Custom(func(c *request.Config[receivers.CreateOpts]) error {
+		c.Options.ClusterID = request.Present("")
+		return nil
+	}), request.Custom(func(c *request.Config[receivers.CreateOpts]) error {
+		c.Options.Action = request.Present("")
+		return nil
+	}), receivers.WithCreateActor(map[string]any{}), receivers.WithCreateParams(map[string]any{})); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := api.Create(context.Background(), receivers.CreateOpts{Name: "vendor", Type: "vendor.receiver"}); err != nil {
@@ -175,7 +190,10 @@ func TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource(t *te
 			value, err := receivers.New(client).Update(context.Background(), resource.Name("selected"), receivers.UpdateOpts{}, option, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
 				c.Options.Name = request.Null[string]()
 				return nil
-			}), receivers.WithUpdateAction(""), request.Field("vendor", false), request.Header("X-Vendor", "original"), request.Custom(capture))
+			}), request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Action = request.Present("")
+				return nil
+			}), request.Field("vendor", false), request.Header("X-Vendor", "original"), request.Custom(capture))
 			if changed {
 				if value != nil || !errors.Is(err, resource.ErrInvalidOption) || patches.Load() != 0 {
 					t.Fatal(value, err, patches.Load())
@@ -204,7 +222,7 @@ func TestClusteringReceiversUserGateResourcesBypassAndPageRecheck(t *testing.T) 
 	api := receivers.New(client)
 	for _, version := range []string{"", "1.3", "latest"} {
 		client.Microversion = version
-		if _, err := api.All(context.Background(), receivers.WithListUserID("owner")); !errors.Is(err, resource.ErrUnsupported) {
+		if _, err := api.All(context.Background(), request.Custom(func(c *request.Config[receivers.ListOpts]) error { c.Options.UserID = "owner"; return nil })); !errors.Is(err, resource.ErrUnsupported) {
 			t.Fatal(version, err)
 		}
 		for _, user := range []string{"owner", ""} {
@@ -229,7 +247,7 @@ func TestClusteringReceiversUserGateResourcesBypassAndPageRecheck(t *testing.T) 
 		client.Microversion = "1.4"
 		seen := 0
 		var final error
-		iterator := api.List(context.Background(), receivers.WithListUserID("owner"))
+		iterator := api.List(context.Background(), request.Custom(func(c *request.Config[receivers.ListOpts]) error { c.Options.UserID = "owner"; return nil }))
 		if generic {
 			iterator = api.Resources.List(context.Background(), resource.WithQuery("user", "owner"))
 		}
@@ -427,7 +445,10 @@ func TestClusteringReceiversAcceptedMalformedAndWrongCodesKeepEvidence(t *testin
 				case "Get":
 					_, err = api.Get(context.Background(), "wire-id")
 				case "Update":
-					_, err = api.Update(context.Background(), resource.ID("wire-id"), receivers.UpdateOpts{}, receivers.WithUpdateName("changed"))
+					_, err = api.Update(context.Background(), resource.ID("wire-id"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+						c.Options.Name = request.Present("changed")
+						return nil
+					}))
 				case "List":
 					_, err = api.All(context.Background())
 				}

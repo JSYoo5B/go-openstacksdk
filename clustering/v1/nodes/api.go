@@ -126,7 +126,7 @@ func (a *API) Create(ctx context.Context, value CreateOpts, options ...CreateOpt
 	return result, request.Wrap("Create", "clustering.nodes", err)
 }
 
-// Get sends the controller identity directly. WithGetDetails(true) requests
+// Get sends the controller identity directly. GetOpts.Details = true requests
 // physical-resource details, while an omitted option leaves server defaults.
 func (a *API) Get(ctx context.Context, identity string, options ...GetOption) (*Node, error) {
 	client := a.RawClient()

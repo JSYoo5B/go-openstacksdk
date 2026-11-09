@@ -77,11 +77,18 @@ func TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource(t *testin
 	if err != nil || receiver == nil || receiver.ID != "receiver-id" || receiver.ClusterID != nil || receiver.Action != nil || string(receiver.Channel["queue_name"]) != `"notifications"` || receiver.Header.Get("Location") != "https://incidental.invalid/unrelated" {
 		t.Fatal(receiver, err)
 	}
-	listed, err := service.Receivers.All(ctx, receivers.WithListUserID("owner-id"), receivers.WithListGlobalProject(false))
+	listed, err := service.Receivers.All(ctx, request.Custom(func(c *request.Config[receivers.ListOpts]) error { c.Options.UserID = "owner-id"; return nil }), request.Custom(func(c *request.Config[receivers.ListOpts]) error {
+		v := false
+		c.Options.GlobalProject = &v
+		return nil
+	}))
 	if err != nil || len(listed) != 1 || listed[0].UserID != "owner-id" {
 		t.Fatal(listed, err)
 	}
-	attached, err := service.Clusters.AttachPolicy(ctx, resource.ID("cluster-id"), clusters.AttachPolicyOpts{PolicyID: "policy-name"}, clusters.WithAttachPolicyEnabled(false))
+	attached, err := service.Clusters.AttachPolicy(ctx, resource.ID("cluster-id"), clusters.AttachPolicyOpts{PolicyID: "policy-name"}, request.Custom(func(c *request.Config[clusters.AttachPolicyOpts]) error {
+		c.Options.Enabled = request.Present(false)
+		return nil
+	}))
 	if err != nil || attached == nil || attached.ActionID != "policy-action" || attached.StatusCode != 202 {
 		t.Fatal(attached, err)
 	}

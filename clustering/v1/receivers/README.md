@@ -188,7 +188,7 @@ receiver = conn.clustering.get_receiver(receiver.id)
 ```go
 api := receivers.New(client)
 receiver, err := api.Create(ctx, receivers.CreateOpts{Name: "scale_out", Type: "webhook"},
-    receivers.WithCreateClusterID("CLUSTER_ID"), receivers.WithCreateAction("CLUSTER_SCALE_OUT"),
+    request.Custom(func(c *request.Config[receivers.CreateOpts]) error { c.Options.ClusterID = request.Present("CLUSTER_ID"); return nil }), request.Custom(func(c *request.Config[receivers.CreateOpts]) error { c.Options.Action = request.Present("CLUSTER_SCALE_OUT"); return nil }),
     receivers.WithCreateParams(map[string]any{}))
 if err != nil { return err }
 message, err := api.Create(ctx, receivers.CreateOpts{Name: "events", Type: "message"})
@@ -207,7 +207,7 @@ receiver = conn.clustering.update_receiver(
 ```go
 api := receivers.New(client)
 receiver, err := api.Update(ctx, resource.Name("scale_out"), receivers.UpdateOpts{},
-    receivers.WithUpdateName("scale_in"), receivers.WithUpdateAction("CLUSTER_SCALE_IN"),
+    request.Custom(func(c *request.Config[receivers.UpdateOpts]) error { c.Options.Name = request.Present("scale_in"); return nil }), request.Custom(func(c *request.Config[receivers.UpdateOpts]) error { c.Options.Action = request.Present("CLUSTER_SCALE_IN"); return nil }),
     receivers.WithUpdateParams(map[string]any{}))
 if err != nil { return err }
 fmt.Println(receiver.ID, receiver.Action)
@@ -221,7 +221,7 @@ receivers = conn.clustering.receivers(type="message", user_id="USER_ID", limit=2
 api := receivers.New(client)
 for receiver, err := range api.List(ctx,
     receivers.WithListOptions(receivers.ListOpts{Type: "message", Limit: 20}),
-    receivers.WithListUserID("USER_ID"), receivers.WithListGlobalProject(false),
+    request.Custom(func(c *request.Config[receivers.ListOpts]) error { c.Options.UserID = "USER_ID"; return nil }), request.Custom(func(c *request.Config[receivers.ListOpts]) error { v := false; c.Options.GlobalProject = &v; return nil }),
     receivers.WithListFilter("params", map[string]any{"team": "infra"}),
 ) {
     if err != nil { return err }

@@ -90,7 +90,7 @@ func TestClusteringActionUpdateFreezesBodyQueryAndHeadersBeforeNameLookup(t *tes
 	extension := request.Field("vendor", vendor)
 	vendor["off"] = true
 	capture := func(config *request.Config[actions.UpdateOpts]) error { captured = config; return nil }
-	value, err := actions.New(client).Cancel(context.Background(), resource.Name("selected"), actions.WithUpdateForce(false), actions.WithUpdateQuery("vendor", "original"), request.Header("X-Vendor", "original"), extension, request.Custom(capture))
+	value, err := actions.New(client).Cancel(context.Background(), resource.Name("selected"), request.Custom(func(c *request.Config[actions.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }), actions.WithUpdateQuery("vendor", "original"), request.Header("X-Vendor", "original"), extension, request.Custom(capture))
 	if err != nil || value == nil || value.StatusCode != 202 || reads.Load() != 1 || writes.Load() != 1 {
 		t.Fatal(value, err, reads.Load(), writes.Load())
 	}

@@ -226,7 +226,7 @@ func TestClusteringClustersDeleteNormalForceBodiesAndSubmission(t *testing.T) {
 				testcloud.JSON(w, 202, `{"message":"accepted","future":9007199254740993}`)
 			})
 			api := clusters.New(cloud.Client("clustering", "/v1"))
-			value, err := api.Delete(context.Background(), resource.ID("direct-name"), clusters.WithDeleteForce(force), request.Header("X-Custom", "original"))
+			value, err := api.Delete(context.Background(), resource.ID("direct-name"), request.Custom(func(c *request.Config[clusters.DeleteOpts]) error { c.Options.Force = force; return nil }), request.Header("X-Custom", "original"))
 			if err != nil || value == nil || value.ActionID != "deleted-action" || value.StatusCode != 202 || value.Header.Get("X-Request-Id") != "delete-cluster" || string(value.Body) != `{"message":"accepted","future":9007199254740993}` || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -256,15 +256,15 @@ func TestClusteringClustersDeleteDefaultsIgnoreOnlyMissingAndForceIsStrict(t *te
 	if _, err := api.Delete(context.Background(), resource.ID("missing"), request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if _, err := api.Delete(context.Background(), resource.ID("missing"), clusters.WithDeleteForce(true)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(context.Background(), resource.ID("missing"), request.Custom(func(c *request.Config[clusters.DeleteOpts]) error { c.Options.Force = true; return nil })); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if value, err := api.Delete(context.Background(), resource.ID("missing"), clusters.WithDeleteForce(true), request.IgnoreMissing(true)); err != nil || value != nil {
+	if value, err := api.Delete(context.Background(), resource.ID("missing"), request.Custom(func(c *request.Config[clusters.DeleteOpts]) error { c.Options.Force = true; return nil }), request.IgnoreMissing(true)); err != nil || value != nil {
 		t.Fatal(value, err)
 	}
 	for identity, code := range map[string]int{"denied": 403, "used": 409} {
 		for _, force := range []bool{false, true} {
-			if _, err := api.Delete(context.Background(), resource.ID(identity), clusters.WithDeleteForce(force), request.IgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, code) {
+			if _, err := api.Delete(context.Background(), resource.ID(identity), request.Custom(func(c *request.Config[clusters.DeleteOpts]) error { c.Options.Force = force; return nil }), request.IgnoreMissing(true)); !gophercloud.ResponseCodeIs(err, code) {
 				t.Fatal(identity, force, err)
 			}
 		}
@@ -309,7 +309,7 @@ func TestClusteringClustersFindAndNamedDeleteResolveOnce(t *testing.T) {
 	if submission, err := api.Delete(context.Background(), resource.Name("missing")); submission != nil || err != nil {
 		t.Fatal(submission, err)
 	}
-	if _, err := api.Delete(context.Background(), resource.Name("missing"), clusters.WithDeleteForce(true)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(context.Background(), resource.Name("missing"), request.Custom(func(c *request.Config[clusters.DeleteOpts]) error { c.Options.Force = true; return nil })); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	if _, err := api.Delete(context.Background(), resource.Name("duplicate")); !errors.Is(err, resource.ErrAmbiguous) {
@@ -358,7 +358,7 @@ func TestClusteringClustersListShortPageFiltersAndSnapshots(t *testing.T) {
 	global, metadata["nested"] = true, nil
 	options := []clusters.ListOption{option, filter, clusters.WithListFilter("project_id", "p"), clusters.WithListFilter("desired_capacity", json.Number("9007199254740993")), request.Query("vendor", "retained")}
 	iterator := clusters.New(cloud.Client("clustering", "/v1")).List(context.Background(), options...)
-	options[0] = clusters.WithListGlobalProject(true)
+	options[0] = request.Custom(func(c *request.Config[clusters.ListOpts]) error { v := true; c.Options.GlobalProject = &v; return nil })
 	if calls.Load() != 0 {
 		t.Fatal("eager iterator")
 	}

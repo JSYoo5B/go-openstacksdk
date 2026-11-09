@@ -109,7 +109,7 @@ func UpdateScopedCluster(ctx context.Context, conn *sdk.Connection, collectionPa
     scope, err := service.Clusters.AtBasePath(collectionPath)
     if err != nil { return nil, err }
     return scope.Update(ctx, resource.Name("workers"), clusters.UpdateOpts{},
-        clusters.WithUpdateName("workers_renamed"),
+        request.Custom(func(c *request.Config[clusters.UpdateOpts]) error { c.Options.Name = request.Present("workers_renamed"); return nil }),
         request.Header("X-Audit-Tag", "rename"))
 }
 ```
@@ -120,6 +120,7 @@ package example
 import (
     "context"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
@@ -132,7 +133,7 @@ func UpdateScopedNode(ctx context.Context, conn *sdk.Connection, collectionPath,
     if err != nil { return nil, err }
     tracked, err := scope.Load(ctx, resource.ID(nodeID))
     if err != nil { return nil, err }
-    if err := tracked.Edit(nodes.UpdateOpts{}, nodes.WithUpdateRole("worker")); err != nil {
+    if err := tracked.Edit(nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Role = request.Present("worker"); return nil })); err != nil {
         return nil, err
     }
     accepted, err := tracked.Commit(ctx)

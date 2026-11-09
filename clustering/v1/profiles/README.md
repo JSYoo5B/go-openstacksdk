@@ -97,7 +97,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Value`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Response`
 - `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.TrackedProfile.Dirty`
-- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithUpdateName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles.WithUpdateOptions`
 
 - PATCH200 sends a resource object rather than JSON Patch operations; optional mutable fields and headers are prepared before exact-name resolution, explicit IDs skip lookup, and empty updates fail before HTTP.
   Tests: `api/clustering_profiles_test.go:TestClusteringProfilesCRUDExactPathsBodiesAndResponseEvidence`, `api/clustering_profiles_test.go:TestClusteringProfilesNameUpdateFindDefaultsAndAmbiguity`, `api/clustering_profiles_test.go:TestClusteringProfilesMetadataPresenceAndOptionsReuse`, `api/clustering_profiles_test.go:TestClusteringProfilesDefaultsInvalidOptionsAndEmptyUpdatePreflight`.
@@ -249,7 +250,7 @@ if err != nil { return err }
 tracked, err := service.Profiles.Load(ctx, resource.ID("PROFILE_ID"))
 if err != nil { return err }
 if err := tracked.Edit(profiles.UpdateOpts{},
-    profiles.WithUpdateName("renamed_template"),
+    request.Custom(func(c *request.Config[profiles.UpdateOpts]) error { v := "renamed_template"; c.Options.Name = &v; return nil }),
     profiles.WithUpdateMetadata(map[string]any{"role": "worker"})); err != nil {
     return err
 }
@@ -263,7 +264,7 @@ service, err := conn.Clustering(ctx)
 if err != nil { return err }
 for profile, err := range service.Profiles.List(ctx,
     profiles.WithListOptions(profiles.ListOpts{Limit: 20, Sort: "created_at:desc"}),
-    profiles.WithListGlobalProject(false),
+    request.Custom(func(c *request.Config[profiles.ListOpts]) error { v := false; c.Options.GlobalProject = &v; return nil }),
     profiles.WithListFilter("metadata", map[string]any{"role": "worker"})) {
     if err != nil { return err }
     fmt.Println(profile.ID, profile.Name)

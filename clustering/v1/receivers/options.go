@@ -61,12 +61,11 @@ type UpdateOption = request.WriteCall
 
 var updateCalls = senlin.WriteCalls[UpdateOpts]()
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListGlobalProject, WithListUserID, WithListFilter, request.Header,
-// request.Microversion, request.Query (a string or []string value),
-// request.MaxItems, request.Paginated or request.Custom over
-// *request.Config[ListOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts] (for example to set GlobalProject or UserID). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
@@ -74,33 +73,6 @@ var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, 
 func WithCreateOptions(value CreateOpts) CreateOption { return request.Custom(senlin.Snapshot(value)) }
 func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.Custom(senlin.Snapshot(value)) }
 func WithListOptions(value ListOpts) ListOption       { return request.Custom(senlin.Snapshot(value)) }
-func WithCreateClusterID(value string) CreateOption {
-	return request.Custom(func(config *request.Config[CreateOpts]) error {
-		config.Options.ClusterID = request.Present(value)
-		return nil
-	})
-}
-
-func WithCreateAction(value string) CreateOption {
-	return request.Custom(func(config *request.Config[CreateOpts]) error {
-		config.Options.Action = request.Present(value)
-		return nil
-	})
-}
-
-func WithUpdateName(value string) UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		config.Options.Name = request.Present(value)
-		return nil
-	})
-}
-
-func WithUpdateAction(value string) UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		config.Options.Action = request.Present(value)
-		return nil
-	})
-}
 
 func withJSON[T any](value any, set func(*T, json.RawMessage)) request.Option[T] {
 	encoded, err := json.Marshal(value)
@@ -120,17 +92,6 @@ func WithCreateParams(value any) CreateOption {
 }
 func WithUpdateParams(value any) UpdateOption {
 	return request.Custom(withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Params = raw }))
-}
-
-func WithListGlobalProject(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.GlobalProject = &copy
-		return nil
-	})
-}
-func WithListUserID(value string) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error { config.Options.UserID = value; return nil })
 }
 
 func validateQuery(ctx context.Context, client *gophercloud.ServiceClient, query url.Values) error {

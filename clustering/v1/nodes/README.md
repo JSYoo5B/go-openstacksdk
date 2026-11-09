@@ -269,10 +269,10 @@ service, err := conn.ClusteringV1(ctx)
 if err != nil { return err }
 node, err := service.Nodes.Create(ctx, nodes.CreateOpts{
     Name: "worker_1", ProfileID: "PROFILE_ID",
-}, nodes.WithCreateClusterID("CLUSTER_ID"), nodes.WithCreateRole("worker"),
+}, request.Custom(func(c *request.Config[nodes.CreateOpts]) error { c.Options.ClusterID = request.Present("CLUSTER_ID"); return nil }), request.Custom(func(c *request.Config[nodes.CreateOpts]) error { c.Options.Role = request.Present("worker"); return nil }),
    nodes.WithCreateMetadata(map[string]any{"team": "infra"}))
 if err != nil { return err }
-node, err = service.Nodes.Get(ctx, node.ID, nodes.WithGetDetails(true))
+node, err = service.Nodes.Get(ctx, node.ID, request.Custom(func(c *request.Config[nodes.GetOpts]) error { v := true; c.Options.Details = &v; return nil }))
 if err != nil { return err }
 fmt.Println(node.ID, node.PhysicalID, node.Details)
 ```
@@ -286,8 +286,8 @@ node = conn.clustering.update_node(
 ```go
 api := nodes.New(client)
 node, err := api.Update(ctx, resource.Name("worker_1"), nodes.UpdateOpts{Role: request.Null[string]()},
-    nodes.WithUpdateName("worker_2"),
-    nodes.WithUpdateTainted(false), nodes.WithUpdateMetadata(map[string]any{}))
+    request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present("worker_2"); return nil }),
+    request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Tainted = request.Present(false); return nil }), nodes.WithUpdateMetadata(map[string]any{}))
 if err != nil { return err }
 fmt.Println(node.ID, node.Operation.ActionID)
 ```
@@ -301,7 +301,7 @@ node = conn.clustering.find_node("worker_1", ignore_missing=True)
 api := nodes.New(client)
 for node, err := range api.List(ctx,
     nodes.WithListOptions(nodes.ListOpts{ClusterID: "CLUSTER_ID", Status: "ACTIVE", Limit: 20}),
-    nodes.WithListShowDetails(false), nodes.WithListGlobalProject(false),
+    request.Custom(func(c *request.Config[nodes.ListOpts]) error { v := false; c.Options.ShowDetails = &v; return nil }), request.Custom(func(c *request.Config[nodes.ListOpts]) error { v := false; c.Options.GlobalProject = &v; return nil }),
     nodes.WithListFilter("metadata", map[string]any{"team": "infra"}),
 ) {
     if err != nil { return err }
@@ -319,7 +319,7 @@ action = conn.clustering.get_action(action.id)
 
 ```go
 api := nodes.New(client)
-submission, err := api.Delete(ctx, resource.ID("NODE_ID"), nodes.WithDeleteForce(true))
+submission, err := api.Delete(ctx, resource.ID("NODE_ID"), request.Custom(func(c *request.Config[nodes.DeleteOpts]) error { c.Options.Force = true; return nil }))
 if err != nil { return err }
 if submission == nil { return nil }
 action, err := actions.New(client).Get(ctx, submission.ActionID)
@@ -340,8 +340,8 @@ api := nodes.New(client)
 checked, err := api.Check(ctx, resource.ID("NODE_ID"))
 if err != nil { return err }
 recovered, err := api.Recover(ctx, resource.ID("NODE_ID"), nodes.RecoverOpts{},
-    nodes.WithRecoverOperation("REBOOT"), nodes.WithRecoverOperationParams(map[string]any{}),
-    nodes.WithRecoverCheck(false))
+    request.Custom(func(c *request.Config[nodes.RecoverOpts]) error { c.Options.Operation = request.Present("REBOOT"); return nil }), nodes.WithRecoverOperationParams(map[string]any{}),
+    request.Custom(func(c *request.Config[nodes.RecoverOpts]) error { c.Options.Check = request.Present(false); return nil }))
 if err != nil { return err }
 performed, err := api.PerformOperation(ctx, resource.ID("NODE_ID"), "reboot",
     request.Field("type", "SOFT"))
@@ -363,7 +363,7 @@ preview = conn.clustering.adopt_node(
 api := nodes.New(client)
 node, err := api.Adopt(ctx, nodes.AdoptOpts{
     Identity: "PHYSICAL_RESOURCE_ID", Type: "os.nova.server-1.0",
-}, nodes.WithAdoptName("adopted_worker"), nodes.WithAdoptSnapshot(false),
+}, request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Name = request.Present("adopted_worker"); return nil }), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Snapshot = request.Present(false); return nil }),
    nodes.WithAdoptMetadata(map[string]any{}))
 if err != nil { return err }
 preview, err := api.AdoptPreview(ctx, nodes.AdoptPreviewOpts{
@@ -411,6 +411,7 @@ package example
 import (
     "context"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
@@ -422,7 +423,7 @@ func RenameTrackedNode(ctx context.Context, conn *sdk.Connection) (*nodes.Node, 
     tracked, err := service.Nodes.Load(ctx, resource.ID("NODE_ID"))
     if err != nil { return nil, err }
     if err := tracked.Edit(nodes.UpdateOpts{},
-        nodes.WithUpdateName("renamed")); err != nil {
+        request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present("renamed"); return nil })); err != nil {
         return nil, err
     }
     return tracked.Commit(ctx)

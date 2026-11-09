@@ -52,28 +52,9 @@ func WithRecoverOptions(value RecoverOpts) RecoverOption {
 func WithPerformOperationOptions(value PerformOperationOpts) PerformOperationOption {
 	return request.Custom(senlin.Snapshot(value))
 }
-func WithRecoverOperation(value string) RecoverOption {
-	return request.Custom(func(config *request.Config[RecoverOpts]) error {
-		config.Options.Operation = request.Present(value)
-		return nil
-	})
-}
 
 func WithRecoverOperationParams(value any) RecoverOption {
 	return request.Custom(withJSON(value, func(options *RecoverOpts, raw json.RawMessage) { options.OperationParams = raw }))
-}
-func WithRecoverCheck(value bool) RecoverOption {
-	return request.Custom(func(config *request.Config[RecoverOpts]) error {
-		config.Options.Check = request.Present(value)
-		return nil
-	})
-}
-
-func WithRecoverCheckCapacity(value bool) RecoverOption {
-	return request.Custom(func(config *request.Config[RecoverOpts]) error {
-		config.Options.CheckCapacity = request.Present(value)
-		return nil
-	})
 }
 
 func WithPerformOperationFilters(value any) PerformOperationOption {

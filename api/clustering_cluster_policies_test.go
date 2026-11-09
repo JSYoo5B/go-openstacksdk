@@ -374,7 +374,7 @@ func TestClusteringClusterPoliciesPreflightAndScopedWaits(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, option := range []clusterpolicies.ListOption{nil, request.Query("enabled", "true"), request.Query("cluster_id", "foreign"), request.Custom(request.WithField[clusterpolicies.ListOpts]("vendor", true)), request.Custom(request.WithHeader[clusterpolicies.ListOpts]("X-Auth-Token", "foreign")), request.Custom(request.WithArgument[clusterpolicies.ListOpts]("vendor", true)), clusterpolicies.WithListSort("name:sideways")} {
+	for _, option := range []clusterpolicies.ListOption{nil, request.Query("enabled", "true"), request.Query("cluster_id", "foreign"), request.Custom(request.WithField[clusterpolicies.ListOpts]("vendor", true)), request.Custom(request.WithHeader[clusterpolicies.ListOpts]("X-Auth-Token", "foreign")), request.Custom(request.WithArgument[clusterpolicies.ListOpts]("vendor", true)), request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { c.Options.Sort = "name:sideways"; return nil })} {
 		if _, err := scope.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

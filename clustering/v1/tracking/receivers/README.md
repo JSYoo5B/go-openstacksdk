@@ -70,8 +70,8 @@ func RenameTrackedReceiver(ctx context.Context, conn *sdk.Connection) (*receiver
     tracked, err := service.Receivers.Load(ctx, resource.Name("scale_out"))
     if err != nil { return nil, err }
     if err := tracked.Edit(receivers.UpdateOpts{},
-        receivers.WithUpdateName("scale_in"),
-        receivers.WithUpdateAction("CLUSTER_SCALE_IN"),
+        request.Custom(func(c *request.Config[receivers.UpdateOpts]) error { c.Options.Name = request.Present("scale_in"); return nil }),
+        request.Custom(func(c *request.Config[receivers.UpdateOpts]) error { c.Options.Action = request.Present("CLUSTER_SCALE_IN"); return nil }),
         receivers.WithUpdateParams(map[string]any{"team": "platform"})); err != nil {
         return nil, err
     }
@@ -85,6 +85,7 @@ package example
 import (
     "context"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/receivers"
     "github.com/JSYoo5B/go-openstacksdk/resource"

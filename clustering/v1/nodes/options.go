@@ -68,28 +68,27 @@ type UpdateOption = request.WriteCall
 
 var updateCalls = senlin.WriteCalls[UpdateOpts]()
 
-// GetOption is one option of Get: WithGetOptions, WithGetDetails,
-// request.Header, request.Query (a string or []string value) or request.Custom
-// over *request.Config[GetOpts]. Other shared calls fail with
+// GetOption is one option of Get: WithGetOptions, request.Header, request.Query
+// (a string or []string value) or request.Custom over *request.Config[GetOpts]
+// (for example to set Details). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type GetOption = request.GetQueryCall
 
 var getCalls = senlin.GetQueryCalls[GetOpts]()
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListGlobalProject, WithListShowDetails, WithListFilter, request.Header,
-// request.Microversion, request.Query (a string or []string value),
-// request.MaxItems, request.Paginated or request.Custom over
-// *request.Config[ListOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts] (for example to set GlobalProject or ShowDetails).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
 
-// DeleteOption is one option of Delete: WithDeleteOptions, WithDeleteForce,
+// DeleteOption is one option of Delete: WithDeleteOptions,
 // request.IgnoreMissing, request.Header or request.Custom over
-// *request.Config[DeleteOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// *request.Config[DeleteOpts] (for example to set Force). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type DeleteOption = request.DeleteCall
 
 var deleteCalls = senlin.DeleteCalls(func(o *DeleteOpts) **bool { return &o.IgnoreMissing })
@@ -122,30 +121,6 @@ func WithCreateMetadata(value any) CreateOption {
 }
 func WithUpdateMetadata(value any) UpdateOption {
 	return request.Custom(withJSON(value, func(opts *UpdateOpts, raw json.RawMessage) { opts.Metadata = raw }))
-}
-
-func WithGetDetails(value bool) GetOption {
-	return request.Custom(func(config *request.Config[GetOpts]) error { copy := value; config.Options.Details = &copy; return nil })
-}
-func WithListGlobalProject(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.GlobalProject = &copy
-		return nil
-	})
-}
-func WithListShowDetails(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.ShowDetails = &copy
-		return nil
-	})
-}
-func WithDeleteForce(value bool) DeleteOption {
-	return request.Custom(func(config *request.Config[DeleteOpts]) error {
-		config.Options.Force = value
-		return nil
-	})
 }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {

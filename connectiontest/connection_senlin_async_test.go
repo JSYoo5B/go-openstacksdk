@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -105,7 +106,7 @@ func TestConnectionSenlinAsyncResourcesShareVersionTokenAndActionRoutes(t *testi
 	if err != nil || checked == nil || checked.ActionID != "check-action" {
 		t.Fatal(checked, err)
 	}
-	accepted, err := service.Actions.Cancel(ctx, resource.ID(deleted.ActionID), actions.WithUpdateForce(false))
+	accepted, err := service.Actions.Cancel(ctx, resource.ID(deleted.ActionID), request.Custom(func(c *request.Config[actions.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }))
 	if err != nil || accepted == nil || accepted.StatusCode != 202 || len(accepted.Body) != 0 {
 		t.Fatal(accepted, err)
 	}
@@ -171,7 +172,10 @@ func TestConnectionSenlinAdoptionAndClusterRecoveryShareSelectedSource(t *testin
 	if err != nil || preview == nil || string(preview.Spec.Version) != "1.0" {
 		t.Fatal(preview, err)
 	}
-	recovered, err := service.Clusters.Recover(ctx, resource.ID("cluster-id"), clusters.RecoverOpts{}, clusters.WithRecoverCheckCapacity(false))
+	recovered, err := service.Clusters.Recover(ctx, resource.ID("cluster-id"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+		c.Options.CheckCapacity = request.Present(false)
+		return nil
+	}))
 	if err != nil || recovered == nil || recovered.ActionID != "recovery-action" {
 		t.Fatal(recovered, err)
 	}

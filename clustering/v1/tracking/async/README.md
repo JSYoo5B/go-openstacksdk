@@ -112,7 +112,7 @@ func UpdateTrackedCluster(ctx context.Context, conn *sdk.Connection) (*clusters.
     tracked, err := service.Clusters.Load(ctx, resource.Name("workers"))
     if err != nil { return nil, err }
     if err := tracked.Edit(clusters.UpdateOpts{},
-        clusters.WithUpdateName("workers_renamed"),
+        request.Custom(func(c *request.Config[clusters.UpdateOpts]) error { c.Options.Name = request.Present("workers_renamed"); return nil }),
         clusters.WithUpdateTimeout(0),
         clusters.WithUpdateMetadata(map[string]any{"team": "platform"}),
         clusters.WithUpdateProfileOnlyNull()); err != nil {
@@ -134,6 +134,7 @@ package example
 import (
     "context"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/clustering/v1/nodes"
     "github.com/JSYoo5B/go-openstacksdk/resource"
@@ -145,9 +146,9 @@ func UpdateTrackedNode(ctx context.Context, conn *sdk.Connection) (*nodes.Node, 
     tracked, err := service.Nodes.Load(ctx, resource.ID("NODE_ID"))
     if err != nil { return nil, err }
     if err := tracked.Edit(nodes.UpdateOpts{},
-        nodes.WithUpdateRole(""),
+        request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Role = request.Present(""); return nil }),
         nodes.WithUpdateMetadata(map[string]any{}),
-        nodes.WithUpdateTainted(false)); err != nil {
+        request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Tainted = request.Present(false); return nil })); err != nil {
         return nil, err
     }
     return tracked.Commit(ctx)

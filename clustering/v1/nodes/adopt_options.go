@@ -47,26 +47,6 @@ type AdoptPreviewOption = request.WriteCall
 var adoptPreviewCalls = senlin.HeaderCalls[AdoptPreviewOpts]()
 
 func WithAdoptOptions(value AdoptOpts) AdoptOption { return request.Custom(senlin.Snapshot(value)) }
-func WithAdoptName(value string) AdoptOption {
-	return request.Custom(func(config *request.Config[AdoptOpts]) error {
-		config.Options.Name = request.Present(value)
-		return nil
-	})
-}
-
-func WithAdoptRole(value string) AdoptOption {
-	return request.Custom(func(config *request.Config[AdoptOpts]) error {
-		config.Options.Role = request.Present(value)
-		return nil
-	})
-}
-
-func WithAdoptSnapshot(value bool) AdoptOption {
-	return request.Custom(func(config *request.Config[AdoptOpts]) error {
-		config.Options.Snapshot = request.Present(value)
-		return nil
-	})
-}
 
 func WithAdoptMetadata(value any) AdoptOption {
 	return request.Custom(withJSON(value, func(opts *AdoptOpts, raw json.RawMessage) { opts.Metadata = raw }))
@@ -80,10 +60,4 @@ func WithAdoptPreviewOptions(value AdoptPreviewOpts) AdoptPreviewOption {
 }
 func WithAdoptPreviewOverrides(value any) AdoptPreviewOption {
 	return request.Custom(withJSON(value, func(opts *AdoptPreviewOpts, raw json.RawMessage) { opts.Overrides = raw }))
-}
-func WithAdoptPreviewSnapshot(value bool) AdoptPreviewOption {
-	return request.Custom(func(config *request.Config[AdoptPreviewOpts]) error {
-		config.Options.Snapshot = request.Present(value)
-		return nil
-	})
 }

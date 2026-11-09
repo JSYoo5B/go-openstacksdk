@@ -102,7 +102,7 @@ func TestClusteringNodeGetDirectIdentityAndPhysicalDetails(t *testing.T) {
 		testcloud.JSON(w, 200, `{"node":{"id":"response-node","physical_id":"physical","cluster_id":"cluster","role":"worker","index":0,"details":{"capacity":9007199254740993},"metadata":{},"tainted":false}}`)
 	})
 	api := nodes.New(cloud.Client("clustering", "/senlin/v1"))
-	for _, options := range [][]nodes.GetOption{nil, {nodes.WithGetDetails(true), request.Query("vendor", "retained"), request.Header("X-Vendor", "custom")}, {nodes.WithGetDetails(false)}} {
+	for _, options := range [][]nodes.GetOption{nil, {request.Custom(func(c *request.Config[nodes.GetOpts]) error { v := true; c.Options.Details = &v; return nil }), request.Query("vendor", "retained"), request.Header("X-Vendor", "custom")}, {request.Custom(func(c *request.Config[nodes.GetOpts]) error { v := false; c.Options.Details = &v; return nil })}} {
 		value, err := api.Get(context.Background(), "short-name", options...)
 		if err != nil || value.ID != "response-node" || value.ClusterID == nil || *value.ClusterID != "cluster" || value.Index == nil || value.Index.String() != "0" || string(value.Details["capacity"]) != "9007199254740993" || value.Header.Get("X-Request-ID") != "read-node" || value.Operation != nil {
 			t.Fatal(value, err)
@@ -251,7 +251,7 @@ func TestClusteringNodeDeleteActionDefaultForceAndResponseOwnership(t *testing.T
 	force := true
 	option := nodes.WithDeleteOptions(nodes.DeleteOpts{Force: force})
 	force = false
-	for _, options := range [][]nodes.DeleteOption{nil, {option}, {nodes.WithDeleteForce(false)}} {
+	for _, options := range [][]nodes.DeleteOption{nil, {option}, {request.Custom(func(c *request.Config[nodes.DeleteOpts]) error { c.Options.Force = false; return nil })}} {
 		value, err := api.Delete(context.Background(), resource.ID("node-id"), options...)
 		if err != nil || value == nil || value.ActionID != "delete-action" || value.Location != "actions/delete-action" || value.StatusCode != 202 || len(value.Body) != 0 || value.Header.Get("X-Request-ID") != "delete-node" {
 			t.Fatal(value, err)
@@ -301,13 +301,13 @@ func TestClusteringNodeDeleteNameLookupDefaultsMissingAndConflict(t *testing.T) 
 	if _, err := api.Delete(context.Background(), resource.Name("selected")); !gophercloud.ResponseCodeIs(err, 409) || !strings.Contains(err.Error(), "node busy") {
 		t.Fatal(err)
 	}
-	if _, err := api.Delete(context.Background(), resource.ID("missing"), nodes.WithDeleteForce(true)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(context.Background(), resource.ID("missing"), request.Custom(func(c *request.Config[nodes.DeleteOpts]) error { c.Options.Force = true; return nil })); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
-	if value, err := api.Delete(context.Background(), resource.ID("missing"), nodes.WithDeleteForce(true), request.IgnoreMissing(true)); value != nil || err != nil {
+	if value, err := api.Delete(context.Background(), resource.ID("missing"), request.Custom(func(c *request.Config[nodes.DeleteOpts]) error { c.Options.Force = true; return nil }), request.IgnoreMissing(true)); value != nil || err != nil {
 		t.Fatal(value, err)
 	}
-	if _, err := api.Delete(context.Background(), resource.Name("missing"), nodes.WithDeleteForce(true)); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := api.Delete(context.Background(), resource.Name("missing"), request.Custom(func(c *request.Config[nodes.DeleteOpts]) error { c.Options.Force = true; return nil })); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatal(err)
 	}
 	if _, err := api.Delete(context.Background(), resource.ID("missing"), request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {

@@ -237,7 +237,7 @@ func TestClusteringPolicyMutationPreflightRejectsInvalidCoreAndExtensions(t *tes
 			return e
 		}},
 		{"empty-name", func() error {
-			_, e := api.Update(context.Background(), resource.Name("name"), policies.UpdateOpts{}, policies.WithUpdateName(""))
+			_, e := api.Update(context.Background(), resource.Name("name"), policies.UpdateOpts{}, request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := ""; c.Options.Name = &v; return nil }))
 			return e
 		}},
 		{"validate-null", func() error {
@@ -320,7 +320,7 @@ func TestClusteringPolicyListShortPagesRetainFiltersAndSnapshot(t *testing.T) {
 	global = true
 	options := []policies.ListOption{option, request.Query("vendor", "retain")}
 	iterator := policies.New(cloud.Client("clustering", "/senlin/v1")).List(context.Background(), options...)
-	options[0] = policies.WithListGlobalProject(true)
+	options[0] = request.Custom(func(c *request.Config[policies.ListOpts]) error { v := true; c.Options.GlobalProject = &v; return nil })
 	if calls.Load() != 0 {
 		t.Fatal("eager list")
 	}
@@ -503,7 +503,7 @@ func TestClusteringPolicyDeleteSuccessAndMissingResponseIDCannotBeUsed(t *testin
 	if err := api.Delete(context.Background(), resource.Name("null-id")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := api.Update(context.Background(), resource.Name("null-id"), policies.UpdateOpts{}, policies.WithUpdateName("new-name")); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.Update(context.Background(), resource.Name("null-id"), policies.UpdateOpts{}, request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := "new-name"; c.Options.Name = &v; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if lists.Load() != 2 || deletes.Load() != 1 {

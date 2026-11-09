@@ -50,10 +50,10 @@ type CreateOption = request.WriteCall
 var createCalls = senlin.WriteCalls[CreateOpts]()
 
 // UpdateOption is one option of Update, TrackedProfile.Edit and
-// TrackedProfile.Commit: WithUpdateOptions, WithUpdateName,
-// WithUpdateMetadata, request.Header, request.Field or request.Custom over
-// *request.Config[UpdateOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// TrackedProfile.Commit: WithUpdateOptions, WithUpdateMetadata, request.Header,
+// request.Field or request.Custom over *request.Config[UpdateOpts] (for example
+// to set Name). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type UpdateOption = request.WriteCall
 
 var updateCalls = senlin.WriteCalls[UpdateOpts]()
@@ -66,11 +66,11 @@ type ValidateOption = request.WriteCall
 
 var validateCalls = senlin.WriteCalls[ValidateOpts]()
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListGlobalProject, WithListFilter, request.Header, request.Microversion,
-// request.Query (a string or []string value), request.MaxItems,
-// request.Paginated or request.Custom over *request.Config[ListOpts]. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts] (for example to set GlobalProject). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
@@ -104,14 +104,6 @@ func WithUpdateMetadata(value any) UpdateOption {
 }
 func WithValidateSpec(value any) ValidateOption {
 	return request.Custom(withJSON(value, func(opts *ValidateOpts, raw json.RawMessage) { opts.Spec = raw }))
-}
-
-func WithListGlobalProject(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.GlobalProject = &copy
-		return nil
-	})
 }
 
 func listQuery(config request.Config[ListOpts]) (url.Values, error) {

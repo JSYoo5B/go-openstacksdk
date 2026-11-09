@@ -116,11 +116,11 @@ type ListOpts struct {
 	ClusterID string
 }
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListGlobalProject, WithListFilter, request.Header, request.Microversion,
-// request.Query (a string or []string value), request.MaxItems,
-// request.Paginated or request.Custom over *request.Config[ListOpts]. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts] (for example to set GlobalProject). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
@@ -135,14 +135,6 @@ func WithListOptions(value ListOpts) ListOption {
 	value = cloneOptions(value)
 	return request.Custom(func(config *request.Config[ListOpts]) error {
 		config.Options = cloneOptions(value)
-		return nil
-	})
-}
-
-func WithListGlobalProject(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.GlobalProject = &copy
 		return nil
 	})
 }

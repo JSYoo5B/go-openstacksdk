@@ -131,7 +131,7 @@ action = conn.clustering.update_action("ACTION_ID", status="CANCELLED")
 service, err := conn.ClusteringV1(ctx)
 if err != nil { return err }
 accepted, err := service.Actions.Cancel(ctx, resource.ID("ACTION_ID"),
-    actions.WithUpdateForce(false))
+    request.Custom(func(c *request.Config[actions.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }))
 if err != nil { return err }
 fmt.Println(accepted.StatusCode, string(accepted.Body))
 action, err := service.Actions.Get(ctx, "ACTION_ID")

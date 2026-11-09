@@ -53,17 +53,14 @@ type UpdateOpts struct {
 }
 
 // UpdateOption is one option of Update, TrackedPolicy.Edit and
-// TrackedPolicy.Commit: WithUpdateOptions, WithUpdateName, request.Header,
-// request.Field or request.Custom over *request.Config[UpdateOpts]. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// TrackedPolicy.Commit: WithUpdateOptions, request.Header, request.Field or
+// request.Custom over *request.Config[UpdateOpts] (for example to set Name).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type UpdateOption = request.WriteCall
 
 var updateCalls = senlin.WriteCalls[UpdateOpts]()
 
 func WithUpdateOptions(value UpdateOpts) UpdateOption { return request.Custom(senlin.Snapshot(value)) }
-func WithUpdateName(value string) UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error { copy := value; config.Options.Name = &copy; return nil })
-}
 
 type ValidateOpts struct {
 	Spec json.RawMessage `json:"spec"`

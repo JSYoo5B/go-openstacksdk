@@ -114,19 +114,19 @@ type UpdateOption = request.WriteCall
 
 var updateCalls = senlin.WriteCalls[UpdateOpts]()
 
-// DeleteOption is one option of Delete: WithDeleteOptions, WithDeleteForce,
+// DeleteOption is one option of Delete: WithDeleteOptions,
 // request.IgnoreMissing, request.Header or request.Custom over
-// *request.Config[DeleteOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// *request.Config[DeleteOpts] (for example to set Force). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type DeleteOption = request.DeleteCall
 
 var deleteCalls = senlin.DeleteCalls(func(o *DeleteOpts) **bool { return &o.IgnoreMissing })
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListGlobalProject, WithListFilter, request.Header, request.Microversion,
-// request.Query (a string or []string value), request.MaxItems,
-// request.Paginated or request.Custom over *request.Config[ListOpts]. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// request.Header, request.Microversion, request.Query (a string or []string
+// value), request.MaxItems, request.Paginated or request.Custom over
+// *request.Config[ListOpts] (for example to set GlobalProject). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = senlin.ListCalls(func(o *ListOpts) *int { return &o.MaxItems }, func(o *ListOpts) **bool { return &o.Paginated })
@@ -174,16 +174,6 @@ func WithUpdateProfileOnlyNull() UpdateOption {
 	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.ProfileOnly = nil
 		config.Options.profileOnlyNull = true
-		return nil
-	})
-}
-func WithDeleteForce(value bool) DeleteOption {
-	return request.Custom(func(config *request.Config[DeleteOpts]) error { config.Options.Force = value; return nil })
-}
-func WithListGlobalProject(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.GlobalProject = &copy
 		return nil
 	})
 }

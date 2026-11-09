@@ -62,7 +62,7 @@ var clusteringUpdateScopeCases = []clusteringUpdateScopeCase{
 		}
 		return &clusteringUpdateScopeAPI{
 			update: func(ctx context.Context, ref resource.Ref, name string, gated bool, captured *func()) (clusteringAsyncTrackedView, error) {
-				options := []clusters.UpdateOption{clusters.WithUpdateName(name), clusters.WithUpdateMetadata(map[string]json.Number{"big": "9007199254740993"}), request.Field("vendor", false), request.Header("X-Snapshot", "captured")}
+				options := []clusters.UpdateOption{request.Custom(func(c *request.Config[clusters.UpdateOpts]) error { c.Options.Name = request.Present(name); return nil }), clusters.WithUpdateMetadata(map[string]json.Number{"big": "9007199254740993"}), request.Field("vendor", false), request.Header("X-Snapshot", "captured")}
 				if gated {
 					options = append(options, clusters.WithUpdateProfileOnlyNull())
 				}
@@ -81,7 +81,10 @@ var clusteringUpdateScopeCases = []clusteringUpdateScopeCase{
 				return clusteringAsyncClusterView(value), err
 			},
 			baseUpdate: func(ctx context.Context) (clusteringAsyncTrackedView, error) {
-				value, err := base.Update(ctx, resource.ID("base-id"), clusters.UpdateOpts{}, clusters.WithUpdateName("Base"))
+				value, err := base.Update(ctx, resource.ID("base-id"), clusters.UpdateOpts{}, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+					c.Options.Name = request.Present("Base")
+					return nil
+				}))
 				return clusteringAsyncClusterView(value), err
 			},
 			load: func(ctx context.Context, ref resource.Ref) (*clusteringUpdateScopeHandle, error) {
@@ -108,7 +111,7 @@ var clusteringUpdateScopeCases = []clusteringUpdateScopeCase{
 		}
 		return &clusteringUpdateScopeAPI{
 			update: func(ctx context.Context, ref resource.Ref, name string, gated bool, captured *func()) (clusteringAsyncTrackedView, error) {
-				options := []nodes.UpdateOption{nodes.WithUpdateName(name), nodes.WithUpdateMetadata(map[string]json.Number{"big": "9007199254740993"}), request.Field("vendor", false), request.Header("X-Snapshot", "captured")}
+				options := []nodes.UpdateOption{request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present(name); return nil }), nodes.WithUpdateMetadata(map[string]json.Number{"big": "9007199254740993"}), request.Field("vendor", false), request.Header("X-Snapshot", "captured")}
 				if gated {
 					options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Tainted = request.Null[bool](); return nil }))
 				}
@@ -127,7 +130,7 @@ var clusteringUpdateScopeCases = []clusteringUpdateScopeCase{
 				return clusteringAsyncNodeView(value), err
 			},
 			baseUpdate: func(ctx context.Context) (clusteringAsyncTrackedView, error) {
-				value, err := base.Update(ctx, resource.ID("base-id"), nodes.UpdateOpts{}, nodes.WithUpdateName("Base"))
+				value, err := base.Update(ctx, resource.ID("base-id"), nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Present("Base"); return nil }))
 				return clusteringAsyncNodeView(value), err
 			},
 			load: func(ctx context.Context, ref resource.Ref) (*clusteringUpdateScopeHandle, error) {

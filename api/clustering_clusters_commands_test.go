@@ -39,10 +39,10 @@ func TestClusteringClusterCommandsWireDefaultsAndPresence(t *testing.T) {
 			return api.ScaleOut(ctx, resource.ID("controller-name"), clusters.ScaleOutOpts{})
 		}},
 		{"scale-in-zero", `{"scale_in":{"count":0,"vendor":false}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.ScaleIn(ctx, resource.ID("controller-name"), clusters.ScaleInOpts{}, clusters.WithScaleInCount(0), request.Field("vendor", false))
+			return api.ScaleIn(ctx, resource.ID("controller-name"), clusters.ScaleInOpts{}, request.Custom(func(c *request.Config[clusters.ScaleInOpts]) error { c.Options.Count = request.Present(0); return nil }), request.Field("vendor", false))
 		}},
 		{"scale-out-count", `{"scale_out":{"action":"plugin-action","count":2,"id":"plugin-id","location":"plugin-location","status":"plugin-status"}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.ScaleOut(ctx, resource.ID("controller-name"), clusters.ScaleOutOpts{}, clusters.WithScaleOutCount(2), request.Field("action", "plugin-action"), request.Field("id", "plugin-id"), request.Field("location", "plugin-location"), request.Field("status", "plugin-status"))
+			return api.ScaleOut(ctx, resource.ID("controller-name"), clusters.ScaleOutOpts{}, request.Custom(func(c *request.Config[clusters.ScaleOutOpts]) error { c.Options.Count = request.Present(2); return nil }), request.Field("action", "plugin-action"), request.Field("id", "plugin-id"), request.Field("location", "plugin-location"), request.Field("status", "plugin-status"))
 		}},
 		{"scale-in-explicit-null", `{"scale_in":{"count":null}}`, func(api *clusters.API) (*actions.Submission, error) {
 			return api.ScaleIn(ctx, resource.ID("controller-name"), clusters.ScaleInOpts{Count: request.Present(2)}, request.Custom(func(c *request.Config[clusters.ScaleInOpts]) error { c.Options.Count = request.Null[int](); return nil }))
@@ -57,7 +57,19 @@ func TestClusteringClusterCommandsWireDefaultsAndPresence(t *testing.T) {
 			return api.Resize(ctx, resource.ID("controller-name"), clusters.ResizeOpts{})
 		}},
 		{"resize-exact-fields", `{"resize":{"adjustment_type":"CHANGE_IN_PERCENTAGE","max_size":-1,"min_size":0,"min_step":0,"number":9007199254740993.125,"plugin":{"precision":9007199254740993},"strict":false}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.Resize(ctx, resource.ID("controller-name"), clusters.ResizeOpts{}, clusters.WithResizeAdjustmentType(clusters.ChangeInPercentage), clusters.WithResizeNumber("9007199254740993.125"), clusters.WithResizeMinSize(0), clusters.WithResizeMaxSize(-1), clusters.WithResizeMinStep(0), clusters.WithResizeStrict(false), resizePlugin)
+			return api.Resize(ctx, resource.ID("controller-name"), clusters.ResizeOpts{}, request.Custom(func(c *request.Config[clusters.ResizeOpts]) error {
+				c.Options.AdjustmentType = request.Present(clusters.ChangeInPercentage)
+				return nil
+			}), request.Custom(func(c *request.Config[clusters.ResizeOpts]) error {
+				c.Options.Number = request.Present(json.Number("9007199254740993.125"))
+				return nil
+			}), request.Custom(func(c *request.Config[clusters.ResizeOpts]) error { c.Options.MinSize = request.Present(0); return nil }), request.Custom(func(c *request.Config[clusters.ResizeOpts]) error {
+				c.Options.MaxSize = request.Present(-1)
+				return nil
+			}), request.Custom(func(c *request.Config[clusters.ResizeOpts]) error { c.Options.MinStep = request.Present(0); return nil }), request.Custom(func(c *request.Config[clusters.ResizeOpts]) error {
+				c.Options.Strict = request.Present(false)
+				return nil
+			}), resizePlugin)
 		}},
 		{"resize-null", `{"resize":{"number":null,"strict":null}}`, func(api *clusters.API) (*actions.Submission, error) {
 			return api.Resize(ctx, resource.ID("controller-name"), clusters.ResizeOpts{}, clusters.WithResizeOptions(clusters.ResizeOpts{Number: request.Null[json.Number](), Strict: request.Null[bool]()}))
@@ -165,7 +177,10 @@ func TestClusteringClusterCommandsNameLookupFreezesInputsAndVersions(t *testing.
 				value, err = api.ReplaceNodes(context.Background(), resource.Name("selected"), clusters.ReplaceNodesOpts{Nodes: map[string]string{"old-node": "new-node"}}, request.Custom(capture))
 			case "remove-gate":
 				capture := func(config *request.Config[clusters.RemoveNodesOpts]) error { removeConfig = config; return nil }
-				value, err = api.RemoveNodes(context.Background(), resource.Name("selected"), clusters.RemoveNodesOpts{Nodes: []string{"old-node"}}, clusters.WithRemoveNodesDestroyAfterDeletion(false), request.Custom(capture))
+				value, err = api.RemoveNodes(context.Background(), resource.Name("selected"), clusters.RemoveNodesOpts{Nodes: []string{"old-node"}}, request.Custom(func(c *request.Config[clusters.RemoveNodesOpts]) error {
+					c.Options.DestroyAfterDeletion = request.Present(false)
+					return nil
+				}), request.Custom(capture))
 			default:
 				capture := func(config *request.Config[clusters.AddNodesOpts]) error { addConfig = config; return nil }
 				value, err = api.AddNodes(context.Background(), resource.Name("selected"), clusters.AddNodesOpts{Nodes: []string{"old-node"}}, request.Field("vendor", map[string]bool{"flag": false}), request.Header("X-Vendor", "original"), request.Custom(capture))
@@ -305,7 +320,10 @@ func TestClusteringClusterCommandsPreflightErrorsAndCancellation(t *testing.T) {
 				return e
 			}},
 			{"invalid-number", func() error {
-				_, e := api.Resize(ctx, ref, clusters.ResizeOpts{}, clusters.WithResizeNumber("NaN"))
+				_, e := api.Resize(ctx, ref, clusters.ResizeOpts{}, request.Custom(func(c *request.Config[clusters.ResizeOpts]) error {
+					c.Options.Number = request.Present(json.Number("NaN"))
+					return nil
+				}))
 				return e
 			}},
 			{"auth-header", func() error {
@@ -372,7 +390,7 @@ func TestClusteringClusterCommandsCustomTransportSubmissionOwnership(t *testing.
 		}
 		return &http.Response{StatusCode: 202, Header: header, Body: io.NopCloser(strings.NewReader(responseBody)), Request: r}, nil
 	}))
-	value, err := clusters.New(client).ScaleOut(context.Background(), resource.ID("id"), clusters.ScaleOutOpts{}, clusters.WithScaleOutCount(1))
+	value, err := clusters.New(client).ScaleOut(context.Background(), resource.ID("id"), clusters.ScaleOutOpts{}, request.Custom(func(c *request.Config[clusters.ScaleOutOpts]) error { c.Options.Count = request.Present(1); return nil }))
 	if err != nil || value == nil {
 		t.Fatal(value, err)
 	}
