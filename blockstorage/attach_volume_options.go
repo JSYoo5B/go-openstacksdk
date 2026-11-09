@@ -25,6 +25,7 @@ import (
 // wait blocks on each send until it is received or the context ends, never
 // closes it and sends nothing after it returns.
 type AttachVolumeOpts struct {
+	// Device selects a literal device name; empty omits the field.
 	Device      string
 	Wait        *bool
 	WaitOptions []resource.WaitOption
@@ -56,11 +57,6 @@ func copyAttachOptions(value AttachVolumeOpts) AttachVolumeOpts {
 func WithAttachVolumeOptions(value AttachVolumeOpts) AttachVolumeOption {
 	snapshot := copyAttachOptions(value)
 	return func(config *AttachVolumeOpts) error { *config = copyAttachOptions(snapshot); return nil }
-}
-
-// WithAttachVolumeDevice selects a literal device name; empty omits the field.
-func WithAttachVolumeDevice(value string) AttachVolumeOption {
-	return func(config *AttachVolumeOpts) error { config.Device = value; return nil }
 }
 
 // WithAttachVolumeWait controls the default post-creation wait.

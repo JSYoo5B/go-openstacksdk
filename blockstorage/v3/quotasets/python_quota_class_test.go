@@ -167,7 +167,7 @@ func TestPythonCinderQuotaClassOwnedOptionsAndNoVersionDiscovery(t *testing.T) {
 func TestPythonCinderQuotaClassPreflightIDsAndBoundConstructorControls(t *testing.T) {
 	api, _, calls := quotaClassFixture(t, func(*http.Request) *http.Response { t.Fatal("preflight sent HTTP"); return nil })
 	for _, id := range []string{"", " ", ".", "..", "bad\n", "\xff"} {
-		if row, err := api.GetQuotaClassRecord(context.Background(), quotasets.WithQuotaClassName(id)); row != nil || !errors.Is(err, resource.ErrInvalidOption) {
+		if row, err := api.GetQuotaClassRecord(context.Background(), request.Custom(func(c *quotasets.QuotaClassGetOpts) error { v := id; c.Name = &v; return nil })); row != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(id, row, err)
 		}
 		if row, err := api.UpdateQuotaClassRecord(context.Background(), id); row != nil || !errors.Is(err, resource.ErrInvalidOption) {

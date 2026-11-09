@@ -97,11 +97,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SummaryRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryQuery`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummarySingleFetch`
 
 - Source Proxy summary preserves the initial queryless requires_id=False GET followed by all_tenants=False/True aggregate fetch; stock /volumes/summary is separate from /volumes ListSummary. First fetch only declared untyped seed survives omission; explicit null overwrites. Explicit single fetch improves redundant Source request sequence.
   Tests: `blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryDefaultTwoFetchesAndAllProjects`, `blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummaryRetainsFirstFetchDeclaredSeedOnly`, `blockstorage/v3/volumes/python_summary_contracts_test.go:TestPythonVolumeSummarySingleFetchAndFetchSpecificVersion`.
@@ -116,7 +115,7 @@ Go API:
 
 Python/Go differences:
 
-- Go library defaults all_projects tofalse through functional options, while pinned Proxy.summary requires an explicit bool. Default retains Source two fetches; WithSummarySingleFetch(true) explicitly improves redundant first request and drops its seed contribution.
+- Go library defaults all_projects tofalse through functional options, while pinned Proxy.summary requires an explicit bool. Default retains Source two fetches; SummaryOpts.SingleFetch = true explicitly improves redundant first request and drops its seed contribution.
 - Standalone leaf projection uses computed locationnull with unknown/location retained only inWire, a documented SDK-R1 boundary; Python Connection-derived dynamic Resource dirty/cache/session/warning behavior remains project-level parity work.
 - Go Headers is a copied typed extension. Raw Source controls, unsafe route/session rewriting and duplicate all_tenants/requires_id bindings are rejected before marshaler/HTTP rather than allowing Python kwargs collisions after its firstGET. Exact envelope/header/status/fault proof and native original causes remain.
 - Source accepted non-JSON bodies retain seed/default. Go additionally requires UTF8 and nonnull object representations for parsed JSON; receipt-bearing error is exposed for invalidshape rather than Python attribute-method exceptions.
@@ -129,7 +128,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.GetQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 

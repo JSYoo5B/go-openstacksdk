@@ -115,7 +115,7 @@ func TestConnectionDeleteVolumeOptionsPrecedeDiscoveryAndReuseSelectedForceProto
 		t.Fatal(result, err, discoveries.Load())
 	}
 	for _, force := range []bool{false, true} {
-		result, err := conn.DeleteVolume(context.Background(), input, blockstorage.WithDeleteVolumeWait(false), blockstorage.WithDeleteVolumeForce(force), func(*blockstorage.DeleteVolumeOpts) error { callbacks.Add(1); return nil })
+		result, err := conn.DeleteVolume(context.Background(), input, blockstorage.WithDeleteVolumeWait(false), func(c *blockstorage.DeleteVolumeOpts) error { c.Force = force; return nil }, func(*blockstorage.DeleteVolumeOpts) error { callbacks.Add(1); return nil })
 		if err != nil || result == nil || !result.Found || !result.Deleted || result.Located == nil || result.Deletion == nil || result.Deletion.StatusCode != 204 || result.LastAccepted != nil {
 			t.Fatal(result, err)
 		}

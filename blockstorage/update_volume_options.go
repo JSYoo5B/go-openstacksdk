@@ -52,16 +52,6 @@ func WithUpdateVolumeAttributes(value UpdateVolumeAttributes) UpdateVolumeOption
 		return nil
 	}
 }
-func WithUpdateVolumeName(value string) UpdateVolumeOption {
-	return func(target *UpdateVolumeOpts) error { owned := value; target.Attributes.Name = &owned; return nil }
-}
-func WithUpdateVolumeDescription(value string) UpdateVolumeOption {
-	return func(target *UpdateVolumeOpts) error {
-		owned := value
-		target.Attributes.Description = &owned
-		return nil
-	}
-}
 func WithUpdateVolumeMetadata(value map[string]string) UpdateVolumeOption {
 	owned := maps.Clone(value)
 	return func(target *UpdateVolumeOpts) error { target.Attributes.Metadata = maps.Clone(owned); return nil }

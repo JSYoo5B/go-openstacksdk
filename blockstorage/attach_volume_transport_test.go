@@ -400,7 +400,7 @@ func TestAttachVolumeContractsNativeReauthenticationBackoffAndOwnedRetry(t *test
 			testcloud.JSON(w, 200, attachVolumeContractCreated())
 		}
 	})
-	result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeDevice("/dev/vdb"))
+	result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), func(c *blockstorage.AttachVolumeOpts) error { c.Device = "/dev/vdb"; return nil })
 	attachVolumeContractCreatedProof(t, result)
 	if err != nil || result.Ready == nil || calls.Load() != 6 || posts.Load() != 4 || reauths.Load() != 1 || backoffs.Load() != 1 || retries.Load() != 1 || cloud.Provider.Token() != "refreshed-token" {
 		t.Fatalf("result=%+v error=%v calls=%d posts=%d reauths=%d backoffs=%d retries=%d", result, err, calls.Load(), posts.Load(), reauths.Load(), backoffs.Load(), retries.Load())

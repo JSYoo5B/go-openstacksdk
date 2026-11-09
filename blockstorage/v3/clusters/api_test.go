@@ -126,7 +126,7 @@ func TestClusterListDetailsQueryAndLocalFilters(t *testing.T) {
 	clCheck(t, values[0])
 
 	api, calls = clAPI(t, "3.26", func(*http.Request) (int, string) { return 200, `{"clusters":[{"name":"c2"}]}` })
-	values, err = api.All(context.Background(), clusters.WithListDetails(false))
+	values, err = api.All(context.Background(), request.Custom(func(c *clusters.ListOpts) error { v := false; c.Details = &v; return nil }))
 	if err != nil || len(values) != 1 || clCalls(calls)[0].path != clBase || values[0].Name != "c2" {
 		t.Fatal(err, clCalls(calls))
 	}
@@ -180,7 +180,7 @@ func TestClusterEnableDisableUseConfiguredMicroversion(t *testing.T) {
 	api, calls = clAPI(t, "3.7", func(*http.Request) (int, string) {
 		return 200, `{"cluster":{"name":"c1","status":"disabled","disabled_reason":"maint"}}`
 	})
-	v, err = api.Disable(context.Background(), clusters.NewTarget("c1", ""), clusters.WithDisableReason("maint"))
+	v, err = api.Disable(context.Background(), clusters.NewTarget("c1", ""), request.Custom(func(c *clusters.ActionOpts) error { c.Reason = "maint"; return nil }))
 	if err != nil || clCalls(calls)[0].path != clBase+"/disable" || clCalls(calls)[0].body != `{"disabled_reason":"maint","name":"c1"}` {
 		t.Fatal(err, clCalls(calls))
 	}
@@ -191,7 +191,7 @@ func TestClusterEnableDisableUseConfiguredMicroversion(t *testing.T) {
 
 	// A plain Python string becomes the id, so the name is sent as null.
 	api, calls = clAPI(t, "3.7", func(*http.Request) (int, string) { return 400, `{"badRequest":{}}` })
-	_, err = api.Disable(context.Background(), clusters.Target{}, clusters.WithDisableReason(""))
+	_, err = api.Disable(context.Background(), clusters.Target{}, request.Custom(func(c *clusters.ActionOpts) error { c.Reason = ""; return nil }))
 	if clCalls(calls)[0].body != `{"name":null}` {
 		t.Fatal(clCalls(calls))
 	}

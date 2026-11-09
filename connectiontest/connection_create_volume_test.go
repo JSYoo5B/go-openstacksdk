@@ -111,7 +111,7 @@ func TestConnectionCreateVolumeOptionsPrecedeDiscoveryAndReuseMicroversion(t *te
 		t.Fatal(result, err, discoveries.Load(), posts.Load(), callbacks.Load())
 	}
 	for range 2 {
-		result, err := conn.CreateVolume(context.Background(), blockstorage.CreateVolumeRequest{Size: 1}, blockstorage.WithCreateVolumeWait(false), blockstorage.WithCreateVolumeBootable(false))
+		result, err := conn.CreateVolume(context.Background(), blockstorage.CreateVolumeRequest{Size: 1}, blockstorage.WithCreateVolumeWait(false), func(c *blockstorage.CreateVolumeOpts) error { v := false; c.Bootable = &v; return nil })
 		if err != nil || result == nil || result.Ready == nil || result.BootableSet != nil {
 			t.Fatal(result, err)
 		}

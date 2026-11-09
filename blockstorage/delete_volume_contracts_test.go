@@ -350,7 +350,7 @@ func TestDeleteVolumeContractsFiniteMicroversionsChooseExactNormalOrForceWireCon
 					_, _ = w.Write([]byte{0, 0xff})
 				}
 			})
-			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWait(false), blockstorage.WithDeleteVolumeForce(tc.force))
+			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWait(false), func(c *blockstorage.DeleteVolumeOpts) error { c.Force = tc.force; return nil })
 			deleteVolumeContractLocated(t, result, located)
 			if err != nil || !result.Deleted || result.Deletion == nil || result.Deletion.StatusCode != tc.code || result.Absent != nil || calls.Load() != 2 || client.Type != tc.kind {
 				t.Fatalf("result=%+v error=%v calls=%d sourceType=%q", result, err, calls.Load(), client.Type)
@@ -503,7 +503,7 @@ func TestDeleteVolumeContractsRejectedMutationsReturnCurrentNativeProofAndNoFall
 				w.Header().Set("X-Proof", "rejected-current")
 				testcloud.JSON(w, code, `{"error":"current mutation rejected"}`)
 			})
-			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeForce(force))
+			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, func(c *blockstorage.DeleteVolumeOpts) error { c.Force = force; return nil })
 			deleteVolumeContractLocated(t, result, located)
 			var native gophercloud.ErrUnexpectedResponseCode
 			var accepted *resource.ResponseError

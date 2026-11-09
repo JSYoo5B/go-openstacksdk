@@ -73,7 +73,7 @@ func (a *API) Get(ctx context.Context, name string, options ...GetOption) (*Clus
 }
 
 // List implements clusters(details=True, **query) as a lazy iterator over GET
-// clusters/detail, or clusters with WithListDetails(false).
+// clusters/detail, or clusters with ListOpts.Details = false.
 func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Cluster, error] {
 	return func(yield func(*Cluster, error) bool) {
 		const op = "List"

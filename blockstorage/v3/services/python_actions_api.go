@@ -52,7 +52,7 @@ func (a *API) Enable(ctx context.Context, service ServiceTarget, options ...Acti
 
 // Disable implements disable_service: PUT os-services/disable with binary and
 // host, or os-services/disable-log-reason with disabled_reason added when
-// WithDisableReason gives a nonempty reason.
+// ActionOpts.Reason gives a nonempty reason.
 func (a *API) Disable(ctx context.Context, service ServiceTarget, options ...DisableOption) (*ServiceRecord, error) {
 	return serviceAction(ctx, a, "Disable", "disable", service, nil, false, options)
 }

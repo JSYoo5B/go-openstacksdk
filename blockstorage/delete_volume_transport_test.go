@@ -595,7 +595,7 @@ func TestDeleteVolumeTransportNativeAuthBackoffRetryPreservesNormalAndForceReque
 					_, _ = w.Write([]byte{0, 0xff})
 				}
 			})
-			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeForce(force))
+			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, func(c *blockstorage.DeleteVolumeOpts) error { c.Force = force; return nil })
 			if err != nil || result == nil || !result.Found || !result.Deleted || result.Deletion == nil || result.Absent == nil || calls.Load() != 6 || mutations.Load() != 4 || reauths.Load() != 1 || backoffs.Load() != 1 || retries.Load() != 1 {
 				t.Fatalf("result=%+v error=%v calls=%d mutations=%d auth=%d backoff=%d retry=%d", result, err, calls.Load(), mutations.Load(), reauths.Load(), backoffs.Load(), retries.Load())
 			}
@@ -642,7 +642,7 @@ func TestDeleteVolumeTransportNativeRetryCannotChangeOwnedBodyResponseOrSuccessC
 						testcloud.JSON(w, 200, `{"accepted":true}`)
 					}
 				})
-				result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeForce(force), blockstorage.WithDeleteVolumeWait(false))
+				result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, func(c *blockstorage.DeleteVolumeOpts) error { c.Force = force; return nil }, blockstorage.WithDeleteVolumeWait(false))
 				if result == nil || !result.Found || result.Deleted || result.Deletion != nil || result.LastAccepted != nil || result.Absent != nil || result.Ready != nil || err == nil {
 					t.Fatal(result, err)
 				}
@@ -685,7 +685,7 @@ func TestDeleteVolumeTransportRedirectCannotChangeOwnedFiniteQueryOrActionRoute(
 				w.Header().Set("Location", deleteVolumeContractPath+"?cascade=false")
 				w.WriteHeader(307)
 			})
-			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWait(false), blockstorage.WithDeleteVolumeForce(force))
+			result, err := blockstorage.DeleteVolume(context.Background(), client, blockstorage.DeleteVolumeRequest{Volume: resource.ID("volume-1")}, blockstorage.WithDeleteVolumeWait(false), func(c *blockstorage.DeleteVolumeOpts) error { c.Force = force; return nil })
 			if result == nil || !result.Found || result.Deleted || result.Deletion != nil || result.LastAccepted != nil || result.Absent != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 2 || redirects.Load() != 1 {
 				t.Fatalf("result=%+v error=%v calls=%d redirects=%d", result, err, calls.Load(), redirects.Load())
 			}

@@ -34,11 +34,11 @@ type ListOpts struct {
 	Details *bool
 }
 
-// ListOption is one option of List and All: WithListOpts, WithListDetails,
-// request.Query (a Python **query name; the value is sent as JSON),
-// request.Limit, request.Marker, request.MaxItems, request.Paginated,
-// request.Headers (replaces the headers) or request.Custom over *ListOpts.
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List and All: WithListOpts, request.Query (a
+// Python **query name; the value is sent as JSON), request.Limit,
+// request.Marker, request.MaxItems, request.Paginated, request.Headers
+// (replaces the headers) or request.Custom over *ListOpts (for example to set
+// Details). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 func copyList(v ListOpts) ListOpts {
@@ -56,9 +56,6 @@ func WithListOpts(opts ListOpts) ListOption {
 	owned := copyList(opts)
 	return request.Custom(func(v *ListOpts) error { *v = copyList(owned); return nil })
 }
-func WithListDetails(value bool) ListOption {
-	return request.Custom(func(v *ListOpts) error { x := value; v.Details = &x; return nil })
-}
 
 // ActionOpts carries the disable reason and per-request headers.
 type ActionOpts struct {
@@ -73,15 +70,11 @@ func copyAction(v ActionOpts) ActionOpts { v.Headers = maps.Clone(v.Headers); re
 // resource.ErrInvalidOption before HTTP.
 type EnableOption = request.WriteCall
 
-// DisableOption is one option of Disable: WithDisableReason, request.Headers
-// (replaces the headers) or request.Custom over *ActionOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP. An empty reason is
-// not sent, as in Python.
+// DisableOption is one option of Disable: request.Headers (replaces the
+// headers) or request.Custom over *ActionOpts (for example to set Reason).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP. An empty
+// reason is not sent, as in Python.
 type DisableOption = request.WriteCall
-
-func WithDisableReason(reason string) DisableOption {
-	return request.Custom(func(v *ActionOpts) error { v.Reason = reason; return nil })
-}
 
 var (
 	getCalls    = calls.Spec[GetOpts]{Headers: cinderowned.ReadHeadersCall}

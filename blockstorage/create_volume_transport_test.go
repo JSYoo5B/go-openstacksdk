@@ -108,7 +108,7 @@ func TestCreateVolumeTransportAcceptedPhaseReadCloseContextAndSourceFailuresKeep
 				}))
 				options := []blockstorage.CreateVolumeOption{}
 				if phase == "bootable" {
-					options = append(options, blockstorage.WithCreateVolumeBootable(true))
+					options = append(options, func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil })
 				}
 				result, err := blockstorage.CreateVolume(ctx, cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, options...)
 				var accepted *resource.ResponseError
@@ -285,7 +285,7 @@ func TestCreateVolumeTransportWaitBudgetExcludesCreateAndBootableUsesParentConte
 		}
 	}))
 	timeout := 50 * time.Millisecond
-	result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeWaitOptions(resource.WithTimeout(timeout)))
+	result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil }, blockstorage.WithCreateVolumeWaitOptions(resource.WithTimeout(timeout)))
 	createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
 	if err != nil || result.Ready == nil || result.BootableSet == nil || string(result.BootableSet.Body) != "opaque" || calls.Load() != 3 {
 		t.Fatalf("result=%+v error=%v calls=%d", result, err, calls.Load())
@@ -374,7 +374,7 @@ func TestCreateVolumeTransportWaitCancellationAndLaterFailuresRetainAcceptedCrea
 			if mode == "later native denial" || mode == "later transport cause" || mode == "invalid poll identity" {
 				unlimited = true
 			}
-			result, err := blockstorage.CreateVolume(ctx, cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeWaitOptions(volumeWaitPolicy(interval, timeout, unlimited, callback)...))
+			result, err := blockstorage.CreateVolume(ctx, cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil }, blockstorage.WithCreateVolumeWaitOptions(volumeWaitPolicy(interval, timeout, unlimited, callback)...))
 			createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
 			var accepted *resource.ResponseError
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -496,7 +496,7 @@ func TestCreateVolumeTransportNativeAuthBackoffRetryOwnsCreateAndBootableJSON(t 
 			_, _ = w.Write([]byte{0, 0xff, 'x'})
 		}
 	})
-	result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeName("worker"), blockstorage.WithCreateVolumeBootable(true))
+	result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, func(c *blockstorage.CreateVolumeOpts) error { v := "worker"; c.Attributes.Name = &v; return nil }, func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil })
 	createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
 	if err != nil || result.Ready == nil || result.BootableSet == nil || calls.Load() != 7 || creates.Load() != 4 || actions.Load() != 2 || reauths.Load() != 1 || backoffs.Load() != 1 || retries.Load() != 2 {
 		t.Fatalf("result=%+v error=%v calls=%d creates=%d actions=%d reauths=%d backoffs=%d retries=%d", result, err, calls.Load(), creates.Load(), actions.Load(), reauths.Load(), backoffs.Load(), retries.Load())
@@ -564,7 +564,7 @@ func TestCreateVolumeTransportNativeRetryCannotRewritePhaseBodyOrPromoteStatus(t
 				})
 				options := []blockstorage.CreateVolumeOption{blockstorage.WithCreateVolumeWait(false)}
 				if phase == "bootable" {
-					options = append(options, blockstorage.WithCreateVolumeBootable(true))
+					options = append(options, func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil })
 				}
 				result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, options...)
 				if err == nil || result == nil || result.BootableSet != nil || phase == "create" && (result.Created != nil || result.Ready != nil) || phase == "bootable" && (result.Created == nil || result.Ready == nil) {

@@ -101,9 +101,10 @@ type QuotaClassGetOpts struct {
 }
 
 // QuotaClassGetOption is one option of GetQuotaClassRecord:
-// WithQuotaClassGetOpts, WithQuotaClassName, request.Headers (replaces the
-// headers), request.Microversion or request.Custom over *QuotaClassGetOpts.
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithQuotaClassGetOpts, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *QuotaClassGetOpts (for example
+// to set Name). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type QuotaClassGetOption = request.GetCall
 
 var quotaClassGetCalls = calls.Spec[QuotaClassGetOpts]{
@@ -126,9 +127,6 @@ func copyQuotaClassGetOpts(value QuotaClassGetOpts) QuotaClassGetOpts {
 func WithQuotaClassGetOpts(value QuotaClassGetOpts) QuotaClassGetOption {
 	owned := copyQuotaClassGetOpts(value)
 	return request.Custom(func(target *QuotaClassGetOpts) error { *target = copyQuotaClassGetOpts(owned); return nil })
-}
-func WithQuotaClassName(value string) QuotaClassGetOption {
-	return request.Custom(func(target *QuotaClassGetOpts) error { name := value; target.Name = &name; return nil })
 }
 
 // GetQuotaClassRecord fetches the default class unless a name was supplied.

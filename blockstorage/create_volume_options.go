@@ -90,9 +90,6 @@ func WithCreateVolumeAttributes(value CreateVolumeAttributes) CreateVolumeOption
 func WithCreateVolumeWait(value bool) CreateVolumeOption {
 	return func(config *CreateVolumeOpts) error { owned := value; config.Wait = &owned; return nil }
 }
-func WithCreateVolumeBootable(value bool) CreateVolumeOption {
-	return func(config *CreateVolumeOpts) error { owned := value; config.Bootable = &owned; return nil }
-}
 
 // WithCreateVolumeWaitOptions appends shared wait options to WaitOptions;
 // repeated calls accumulate and the later option wins per control.
@@ -100,30 +97,6 @@ func WithCreateVolumeWaitOptions(options ...resource.WaitOption) CreateVolumeOpt
 	owned := copyWaitOptions(options)
 	return func(config *CreateVolumeOpts) error {
 		config.WaitOptions = append(copyWaitOptions(config.WaitOptions), owned...)
-		return nil
-	}
-}
-func WithCreateVolumeName(value string) CreateVolumeOption {
-	return func(config *CreateVolumeOpts) error { owned := value; config.Attributes.Name = &owned; return nil }
-}
-func WithCreateVolumeDescription(value string) CreateVolumeOption {
-	return func(config *CreateVolumeOpts) error {
-		owned := value
-		config.Attributes.Description = &owned
-		return nil
-	}
-}
-func WithCreateVolumeSnapshot(value string) CreateVolumeOption {
-	return func(config *CreateVolumeOpts) error {
-		owned := value
-		config.Attributes.SnapshotID = &owned
-		return nil
-	}
-}
-func WithCreateVolumeType(value string) CreateVolumeOption {
-	return func(config *CreateVolumeOpts) error {
-		owned := value
-		config.Attributes.VolumeType = &owned
 		return nil
 	}
 }

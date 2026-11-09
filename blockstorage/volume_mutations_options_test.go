@@ -49,7 +49,7 @@ func TestVolumeMutationPrepareDefaultsAndFactoriesOwnCompleteReusablePolicies(t 
 		*b.Bootable = true
 		*b.Location.Cloud = "returned mutated"
 	}
-	replacement, err := blockstorage.PrepareSetVolumeBootableOptions(context.Background(), blockstorage.WithSetVolumeBootable(false), blockstorage.WithSetVolumeBootableOptions(blockstorage.SetVolumeBootableOpts{}))
+	replacement, err := blockstorage.PrepareSetVolumeBootableOptions(context.Background(), func(c *blockstorage.SetVolumeBootableOpts) error { v := false; c.Bootable = &v; return nil }, blockstorage.WithSetVolumeBootableOptions(blockstorage.SetVolumeBootableOpts{}))
 	if err != nil || replacement.Bootable == nil || !*replacement.Bootable {
 		t.Fatal("replacement/default order", replacement, err)
 	}
@@ -73,7 +73,11 @@ func TestVolumeMutationOriginalOptionsOwnSlicesPointersFieldsAndHeadersAcrossBot
 				loc := ownedLocation.Clone()
 				c.Location = &loc
 				return nil
-			}, blockstorage.WithUpdateVolumeDescription("requested"), func(next *blockstorage.UpdateVolumeOpts) error {
+			}, func(c *blockstorage.UpdateVolumeOpts) error {
+				v := "requested"
+				c.Attributes.Description = &v
+				return nil
+			}, func(next *blockstorage.UpdateVolumeOpts) error {
 				uRetained = next
 				order = append(order, 1)
 				updates[3] = func(*blockstorage.UpdateVolumeOpts) error { return errors.New("replaced callback") }
@@ -95,7 +99,7 @@ func TestVolumeMutationOriginalOptionsOwnSlicesPointersFieldsAndHeadersAcrossBot
 				loc := ownedLocation2.Clone()
 				c.Location = &loc
 				return nil
-			}, blockstorage.WithSetVolumeBootable(false), func(next *blockstorage.SetVolumeBootableOpts) error {
+			}, func(c *blockstorage.SetVolumeBootableOpts) error { v := false; c.Bootable = &v; return nil }, func(next *blockstorage.SetVolumeBootableOpts) error {
 				bRetained = next
 				order = append(order, 1)
 				boots[3] = func(*blockstorage.SetVolumeBootableOpts) error { return errors.New("replaced callback") }

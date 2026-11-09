@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.AttachVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.AttachVolume`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeOptions`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeDevice`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWait`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWaitOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
@@ -95,7 +95,7 @@ func attachDefault(ctx context.Context, conn *sdk.Connection, serverID, volumeID
 func attachWithoutWaiting(ctx context.Context, conn *sdk.Connection, serverID, volumeID string) (*blockstorage.AttachVolumeResult, error) {
     return conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{
         Server: resource.ID(serverID), Volume: resource.ID(volumeID),
-    }, blockstorage.WithAttachVolumeDevice("/dev/vdb"),
+    }, func(c *blockstorage.AttachVolumeOpts) error { c.Device = "/dev/vdb"; return nil },
         blockstorage.WithAttachVolumeWait(false))
 }
 

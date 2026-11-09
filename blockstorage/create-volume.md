@@ -18,7 +18,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWait`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBootable`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWaitOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
@@ -27,10 +27,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithProgress`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeName`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeDescription`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshot`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeType`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSchedulerHints`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeFields`
@@ -107,7 +103,7 @@ import (
 
 func createDefault(ctx context.Context, conn *sdk.Connection) (*blockstorage.CreateVolumeResult, error) {
     return conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: 10},
-        blockstorage.WithCreateVolumeName("data"),
+        func(c *blockstorage.CreateVolumeOpts) error { v := "data"; c.Attributes.Name = &v; return nil },
         blockstorage.WithCreateVolumeMetadata(map[string]string{"owner": "worker"}))
 }
 
@@ -121,12 +117,12 @@ func createBootableFromImage(ctx context.Context, conn *sdk.Connection) (*blocks
     image := resource.Name("ubuntu")
     return conn.CreateVolume(ctx,
         blockstorage.CreateVolumeRequest{Size: 20, Image: &image},
-        blockstorage.WithCreateVolumeBootable(true))
+        func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil })
 }
 
 func createWithPolicy(ctx context.Context, conn *sdk.Connection, progress func(int) error) (*blockstorage.CreateVolumeResult, error) {
     return conn.CreateVolume(ctx, blockstorage.CreateVolumeRequest{Size: 30},
-        blockstorage.WithCreateVolumeSnapshot("snapshot-id"),
+        func(c *blockstorage.CreateVolumeOpts) error { v := "snapshot-id"; c.Attributes.SnapshotID = &v; return nil },
         blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{
             "volume_type_id": json.RawMessage(`"type-id"`),
             "is_multiattach": json.RawMessage(`false`),

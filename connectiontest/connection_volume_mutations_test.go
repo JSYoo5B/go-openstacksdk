@@ -129,7 +129,7 @@ func TestConnectionVolumeMutationsOriginalsPrecedeCachedCinderAndBindActualRespo
 					return nil
 				})
 				if index == 1 {
-					boot = append(boot, blockstorage.WithSetVolumeBootable(false))
+					boot = append(boot, func(c *blockstorage.SetVolumeBootableOpts) error { v := false; c.Bootable = &v; return nil })
 				}
 				result, err := connectionMutationContractCall(context.Background(), conn, operation, identity, update, boot)
 				if err != nil {
@@ -190,7 +190,7 @@ func TestConnectionUpdateVolumeNoOpKeepsLookupAndSkipsMutation(t *testing.T) {
 			options := []blockstorage.UpdateVolumeOption{func(*blockstorage.UpdateVolumeOpts) error { callbacks++; return nil }}
 			switch kind {
 			case "equal name":
-				options = append(options, blockstorage.WithUpdateVolumeName("old"))
+				options = append(options, func(c *blockstorage.UpdateVolumeOpts) error { v := "old"; c.Attributes.Name = &v; return nil })
 			case "equal bool number":
 				options = append(options, blockstorage.WithUpdateVolumeFields(map[string]json.RawMessage{"is_multiattach": json.RawMessage("1")}))
 			case "ignored unknown":
@@ -249,7 +249,8 @@ func TestConnectionVolumeMutationsOwnFactoryAndRetainedCallbackState(t *testing.
 						return nil
 					}}
 					ownedLocation2 := location.Clone()
-					boot = []blockstorage.SetVolumeBootableOption{blockstorage.WithSetVolumeBootable(enabled), func(c *blockstorage.SetVolumeBootableOpts) error {
+					bootable := enabled
+					boot = []blockstorage.SetVolumeBootableOption{func(c *blockstorage.SetVolumeBootableOpts) error { v := bootable; c.Bootable = &v; return nil }, func(c *blockstorage.SetVolumeBootableOpts) error {
 						loc := ownedLocation2.Clone()
 						c.Location = &loc
 						return nil

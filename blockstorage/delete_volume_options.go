@@ -22,7 +22,9 @@ import (
 // so failure states and a status attribute fail with
 // resource.ErrInvalidOption before any request.
 type DeleteVolumeOpts struct {
-	Wait        *bool
+	Wait *bool
+	// Force selects the force protocol for the selected Cinder microversion. It
+	// does not introduce cascade deletion or a fallback attempt.
 	Force       bool
 	WaitOptions []resource.WaitOption
 }
@@ -45,12 +47,6 @@ func WithDeleteVolumeOptions(value DeleteVolumeOpts) DeleteVolumeOption {
 // WithDeleteVolumeWait controls completion polling; initial lookup still runs.
 func WithDeleteVolumeWait(value bool) DeleteVolumeOption {
 	return func(config *DeleteVolumeOpts) error { owned := value; config.Wait = &owned; return nil }
-}
-
-// WithDeleteVolumeForce selects the force protocol for the selected Cinder
-// microversion. It does not introduce cascade deletion or a fallback attempt.
-func WithDeleteVolumeForce(value bool) DeleteVolumeOption {
-	return func(config *DeleteVolumeOpts) error { config.Force = value; return nil }
 }
 
 // WithDeleteVolumeWaitOptions appends shared wait options to WaitOptions;

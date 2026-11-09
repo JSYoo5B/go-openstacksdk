@@ -20,7 +20,7 @@ func TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplaceme
 	}
 	for _, bootable := range []bool{false, true} {
 		for _, reverse := range []bool{false, true} {
-			options := []blockstorage.CreateVolumeOption{blockstorage.WithCreateVolumeBootable(bootable), blockstorage.WithCreateVolumeWait(false)}
+			options := []blockstorage.CreateVolumeOption{func(c *blockstorage.CreateVolumeOpts) error { v := bootable; c.Bootable = &v; return nil }, blockstorage.WithCreateVolumeWait(false)}
 			if reverse {
 				options[0], options[1] = options[1], options[0]
 			}
@@ -30,7 +30,7 @@ func TestCreateVolumeOptionsEffectiveDefaultsAndBootableForcesWaitAfterReplaceme
 			}
 		}
 	}
-	value, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), blockstorage.WithCreateVolumeBootable(true), blockstorage.WithCreateVolumeOptions(blockstorage.CreateVolumeOpts{}), blockstorage.WithCreateVolumeWait(false), blockstorage.WithCreateVolumeWaitOptions(resource.WithFailureStates()))
+	value, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil }, blockstorage.WithCreateVolumeOptions(blockstorage.CreateVolumeOpts{}), blockstorage.WithCreateVolumeWait(false), blockstorage.WithCreateVolumeWaitOptions(resource.WithFailureStates()))
 	if err != nil || *value.Wait || value.Bootable != nil || !preparedWait(t, value.WaitOptions).FailureStatesSet || len(preparedWait(t, value.WaitOptions).FailureStates) != 0 {
 		t.Fatalf("complete replacement=%+v error=%v", value, err)
 	}
@@ -66,7 +66,19 @@ func TestCreateVolumeOptionsFactoriesOwnPointersMapsRawValuesAndReusableSnapshot
 		}()
 	}
 	wait.Wait()
-	value, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), option, blockstorage.WithCreateVolumeAttributes(blockstorage.CreateVolumeAttributes{}), blockstorage.WithCreateVolumeName("later"), blockstorage.WithCreateVolumeDescription("later description"), blockstorage.WithCreateVolumeSnapshot("later snapshot"), blockstorage.WithCreateVolumeType("later type"), blockstorage.WithCreateVolumeMetadata(map[string]string{}), blockstorage.WithCreateVolumeSchedulerHints(map[string]json.RawMessage{}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{}))
+	value, err := blockstorage.PrepareCreateVolumeOptions(context.Background(), option, blockstorage.WithCreateVolumeAttributes(blockstorage.CreateVolumeAttributes{}), func(c *blockstorage.CreateVolumeOpts) error { v := "later"; c.Attributes.Name = &v; return nil }, func(c *blockstorage.CreateVolumeOpts) error {
+		v := "later description"
+		c.Attributes.Description = &v
+		return nil
+	}, func(c *blockstorage.CreateVolumeOpts) error {
+		v := "later snapshot"
+		c.Attributes.SnapshotID = &v
+		return nil
+	}, func(c *blockstorage.CreateVolumeOpts) error {
+		v := "later type"
+		c.Attributes.VolumeType = &v
+		return nil
+	}, blockstorage.WithCreateVolumeMetadata(map[string]string{}), blockstorage.WithCreateVolumeSchedulerHints(map[string]json.RawMessage{}), blockstorage.WithCreateVolumeFields(map[string]json.RawMessage{}))
 	if err != nil || *value.Attributes.Name != "later" || *value.Attributes.Description != "later description" || *value.Attributes.SnapshotID != "later snapshot" || *value.Attributes.VolumeType != "later type" || value.Attributes.Metadata == nil || len(value.Attributes.Metadata) != 0 || value.Attributes.Fields == nil || len(value.Attributes.Fields) != 0 || value.Attributes.SchedulerHints == nil || len(value.Attributes.SchedulerHints) != 0 {
 		t.Fatalf("attribute replacement=%+v error=%v", value, err)
 	}

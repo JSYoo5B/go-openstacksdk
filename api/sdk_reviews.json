@@ -35314,7 +35314,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.AttachVolume",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.AttachVolume",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeDevice",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWait",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithAttachVolumeWaitOptions",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
@@ -35660,7 +35660,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeAttributes",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBootable",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeWaitOptions",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
@@ -35669,10 +35669,6 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.WithFailureStates",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeName",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeDescription",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshot",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeType",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeMetadata",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSchedulerHints",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeFields"
@@ -35878,7 +35874,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareDeleteVolumeOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeForce",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWaitOptions",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
@@ -91530,7 +91526,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Disable",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithDisableReason"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -91606,8 +91602,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Failover",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithFailoverCluster",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithFailoverBackendID"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -91634,9 +91629,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.SetLogLevels",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogBinary",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogServer",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogPrefix"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -91662,9 +91655,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.GetLogLevels",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogBinary",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogServer",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogPrefix"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -91914,11 +91905,10 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.SummaryRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryOptions",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryAllProjects",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummaryQuery",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
-        "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithSummarySingleFetch"
+        "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],
       "contracts": [
         {
@@ -91966,7 +91956,7 @@
         "blockstorage/v3/python-summary.md"
       ],
       "differences": [
-        "Go library defaults all_projects tofalse through functional options, while pinned Proxy.summary requires an explicit bool. Default retains Source two fetches; WithSummarySingleFetch(true) explicitly improves redundant first request and drops its seed contribution.",
+        "Go library defaults all_projects tofalse through functional options, while pinned Proxy.summary requires an explicit bool. Default retains Source two fetches; SummaryOpts.SingleFetch = true explicitly improves redundant first request and drops its seed contribution.",
         "Standalone leaf projection uses computed locationnull with unknown/location retained only inWire, a documented SDK-R1 boundary; Python Connection-derived dynamic Resource dirty/cache/session/warning behavior remains project-level parity work.",
         "Go Headers is a copied typed extension. Raw Source controls, unsafe route/session rewriting and duplicate all_tenants/requires_id bindings are rejected before marshaler/HTTP rather than allowing Python kwargs collisions after its firstGET. Exact envelope/header/status/fault proof and native original causes remain.",
         "Source accepted non-JSON bodies retain seed/default. Go additionally requires UTF8 and nonnull object representations for parsed JSON; receipt-bearing error is exposed for invalidshape rather than Python attribute-method exceptions."
@@ -92033,12 +92023,13 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.List",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.All",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListDetails",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Query"
       ],
       "contracts": [
         {
-          "behavior": "List sends GET clusters/detail by default or clusters with WithListDetails(false), maps the Cluster QueryParameters to Requests-encoded query and filters undeclared-query Body attributes such as state locally.",
+          "behavior": "List sends GET clusters/detail by default or clusters with ListOpts.Details = false, maps the Cluster QueryParameters to Requests-encoded query and filters undeclared-query Body attributes such as state locally.",
           "tests": [
             "blockstorage/v3/clusters/api_test.go:TestClusterListDetailsQueryAndLocalFilters"
           ]
@@ -92087,7 +92078,7 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Disable",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithDisableReason",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.NewTarget",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.Cluster.Target"
       ],
@@ -92521,7 +92512,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.GetQuotaClassRecord",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassName",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Headers",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion"
       ],

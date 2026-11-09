@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareDeleteVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeOptions`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWait`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeForce`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeWaitOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`

@@ -17,13 +17,15 @@ type SummaryOpts struct {
 	Query        map[string]any
 	Headers      map[string]string
 	Microversion *string
-	SingleFetch  bool
+	// SingleFetch improves the redundant fixed Python request sequence
+	// explicitly. It sends only the aggregate request carrying all_tenants.
+	SingleFetch bool
 }
 
 // SummaryOption is one option of the volume summary reads: WithSummaryOptions,
-// WithSummaryAllProjects, WithSummaryQuery, WithSummarySingleFetch,
-// request.Headers (replaces the headers), request.Microversion or
-// request.Custom over *SummaryOpts. Other shared calls fail with
+// WithSummaryQuery, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *SummaryOpts (for example to set
+// AllProjects or SingleFetch). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type SummaryOption = request.GetCall
 
@@ -66,9 +68,6 @@ func WithSummaryOptions(value SummaryOpts) SummaryOption {
 		return nil
 	})
 }
-func WithSummaryAllProjects(value bool) SummaryOption {
-	return request.Custom(func(c *SummaryOpts) error { c.AllProjects = value; return nil })
-}
 func WithSummaryQuery(value map[string]any) SummaryOption {
 	cfg := cloneSummary(SummaryOpts{Query: value})
 	err := freezeSummaryQuery(&cfg)
@@ -79,10 +78,4 @@ func WithSummaryQuery(value map[string]any) SummaryOption {
 		c.Query = cloneSummary(cfg).Query
 		return nil
 	})
-}
-
-// WithSummarySingleFetch improves the redundant fixed Python request sequence
-// explicitly. It sends only the aggregate request carrying all_tenants.
-func WithSummarySingleFetch(value bool) SummaryOption {
-	return request.Custom(func(c *SummaryOpts) error { c.SingleFetch = value; return nil })
 }

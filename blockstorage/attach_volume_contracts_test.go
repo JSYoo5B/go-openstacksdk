@@ -151,7 +151,7 @@ func TestAttachVolumeContractsExplicitNoWaitAndLiteralDevice(t *testing.T) {
 					testcloud.JSON(w, 200, attachVolumeContractCreated())
 				}
 			})
-			result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), blockstorage.WithAttachVolumeDevice(device), blockstorage.WithAttachVolumeWait(false))
+			result, err := blockstorage.AttachVolume(context.Background(), nova, cinder, attachVolumeContractInput(), func(c *blockstorage.AttachVolumeOpts) error { c.Device = device; return nil }, blockstorage.WithAttachVolumeWait(false))
 			attachVolumeContractCreatedProof(t, result)
 			if err != nil || calls.Load() != 2 || result.LastAccepted != nil || result.Ready != nil {
 				t.Fatalf("result=%+v error=%v calls=%d", result, err, calls.Load())
@@ -245,7 +245,7 @@ func TestAttachVolumeContractsPreflightBeforeCallbacksOrHTTP(t *testing.T) {
 		{name: "version override", change: func(_, c *gophercloud.ServiceClient, _ *blockstorage.AttachVolumeRequest) {
 			c.MoreHeaders["OpenStack-API-Version"] = "volume 3.99"
 		}},
-		{name: "invalid device", option: blockstorage.WithAttachVolumeDevice("device\n"), callbacks: 1},
+		{name: "invalid device", option: func(c *blockstorage.AttachVolumeOpts) error { c.Device = "device\n"; return nil }, callbacks: 1},
 		{name: "inactive negative timeout", option: blockstorage.WithAttachVolumeWaitOptions(resource.WithTimeout(negative)), callbacks: 1},
 		{name: "inactive zero interval", option: blockstorage.WithAttachVolumeWaitOptions(resource.WithPollInterval(zero)), callbacks: 1},
 	} {

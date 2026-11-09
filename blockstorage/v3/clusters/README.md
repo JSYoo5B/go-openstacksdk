@@ -51,10 +51,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- List sends GET clusters/detail by default or clusters with WithListDetails(false), maps the Cluster QueryParameters to Requests-encoded query and filters undeclared-query Body attributes such as state locally.
+- List sends GET clusters/detail by default or clusters with ListOpts.Details = false, maps the Cluster QueryParameters to Requests-encoded query and filters undeclared-query Body attributes such as state locally.
   Tests: `blockstorage/v3/clusters/api_test.go:TestClusterListDetailsQueryAndLocalFilters`.
 
 Python/Go differences:
@@ -89,7 +90,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.API.Disable`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.WithDisableReason`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.NewTarget`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/clusters.Cluster.Target`
 
@@ -115,7 +116,7 @@ conn.block_storage.disable_cluster(cluster, reason="maintenance")
 api := clusters.New(volumeClient)
 cluster, err := api.Get(ctx, "cluster1@lvm")
 if err != nil { return err }
-_, err = api.Disable(ctx, cluster.Target(), clusters.WithDisableReason("maintenance"))
+_, err = api.Disable(ctx, cluster.Target(), request.Custom(func(c *clusters.ActionOpts) error { c.Reason = "maintenance"; return nil }))
 ```
 
 ## References

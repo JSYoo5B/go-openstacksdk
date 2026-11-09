@@ -59,10 +59,10 @@ func TestAttachVolumeOptionsConcreteDefaultsAndReplacementOrder(t *testing.T) {
 	}
 	interval, timeout := time.Millisecond, time.Minute
 	policy, err := applyAttachOptions([]AttachVolumeOption{
-		WithAttachVolumeDevice("discarded"), WithAttachVolumeWait(false),
+		func(c *AttachVolumeOpts) error { c.Device = "discarded"; return nil }, WithAttachVolumeWait(false),
 		WithAttachVolumeWaitOptions(resource.WithTimeout(timeout), resource.WithPollInterval(interval), resource.WithFailureStates("custom")),
 		WithAttachVolumeOptions(AttachVolumeOpts{}),
-		WithAttachVolumeDevice("/dev/vdc"), WithAttachVolumeWait(false),
+		func(c *AttachVolumeOpts) error { c.Device = "/dev/vdc"; return nil }, WithAttachVolumeWait(false),
 		WithAttachVolumeWaitOptions(resource.WithFailureStates()),
 	}, guard)
 	if err != nil || policy.wait || policy.policy.Device != "/dev/vdc" || policy.timeout != 0 || policy.strategy.Delay(1) != 2*time.Second || policy.failures == nil || len(policy.failures) != 0 {
@@ -117,8 +117,8 @@ func TestAttachVolumeOptionsValidateInactiveWaitPolicyAndStopOnGuardFailure(t *t
 	negative, zero := -time.Second, time.Duration(0)
 	for _, option := range []AttachVolumeOption{
 		nil,
-		WithAttachVolumeDevice("device\nheader"),
-		WithAttachVolumeDevice(string([]byte{0xff})),
+		func(c *AttachVolumeOpts) error { c.Device = "device\nheader"; return nil },
+		func(c *AttachVolumeOpts) error { c.Device = string([]byte{0xff}); return nil },
 		WithAttachVolumeWaitOptions(resource.WithTimeout(negative)),
 		WithAttachVolumeWaitOptions(resource.WithPollInterval(zero)),
 		WithAttachVolumeWaitOptions(resource.WithFailureStates(" ")),

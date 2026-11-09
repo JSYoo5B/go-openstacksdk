@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -81,10 +82,10 @@ func TestPythonServiceActionsSendServiceBodies(t *testing.T) {
 			return a.Enable(context.Background(), target)
 		}},
 		{"Disable", "/disable", `{"binary":"cinder-volume","host":"host@lvm"}`, func(a *services.API) (*services.ServiceRecord, error) {
-			return a.Disable(context.Background(), target, services.WithDisableReason(""))
+			return a.Disable(context.Background(), target, request.Custom(func(c *services.ActionOpts) error { c.Reason = ""; return nil }))
 		}},
 		{"Disable", "/disable-log-reason", `{"binary":"cinder-volume","disabled_reason":"maint","host":"host@lvm"}`, func(a *services.API) (*services.ServiceRecord, error) {
-			return a.Disable(context.Background(), target, services.WithDisableReason("maint"))
+			return a.Disable(context.Background(), target, request.Custom(func(c *services.ActionOpts) error { c.Reason = "maint"; return nil }))
 		}},
 		{"Thaw", "/thaw", `{"host":"host@lvm"}`, func(a *services.API) (*services.ServiceRecord, error) {
 			return a.Thaw(context.Background(), target)
@@ -131,9 +132,9 @@ func TestPythonServiceFailoverChoosesActionBySupportedMicroversion(t *testing.T)
 		version, maximum, path, body string
 		options                      []services.FailoverOption
 	}{
-		{"", "3.70", "/failover", `{"backend_id":"b2","cluster":"c1","host":"host@lvm"}`, []services.FailoverOption{services.WithFailoverCluster("c1"), services.WithFailoverBackendID("b2")}},
+		{"", "3.70", "/failover", `{"backend_id":"b2","cluster":"c1","host":"host@lvm"}`, []services.FailoverOption{request.Custom(func(c *services.ActionOpts) error { c.Cluster = "c1"; return nil }), request.Custom(func(c *services.ActionOpts) error { c.BackendID = "b2"; return nil })}},
 		{"", "3.20", "/failover_host", `{"host":"host@lvm"}`, nil},
-		{"3.0", "3.70", "/failover_host", `{"host":"host@lvm"}`, []services.FailoverOption{services.WithFailoverCluster("")}},
+		{"3.0", "3.70", "/failover_host", `{"host":"host@lvm"}`, []services.FailoverOption{request.Custom(func(c *services.ActionOpts) error { c.Cluster = ""; return nil })}},
 		{"3.26", "3.70", "/failover", `{"host":"host@lvm"}`, nil},
 	} {
 		api, calls := svcActionAPI(t, item.version, item.maximum, func(*http.Request) (int, string) { return 202, `` })
@@ -165,7 +166,7 @@ func TestPythonServiceLogLevelsRequireMicroversion332(t *testing.T) {
 	api, calls = svcActionAPI(t, "3.40", "3.70", func(*http.Request) (int, string) {
 		return 200, `{"log_levels":[{"binary":"cinder-api","host":"h1","levels":{"cinder":"DEBUG"}}]}`
 	})
-	levels, err := api.GetLogLevels(context.Background(), services.WithLogBinary("cinder-api"), services.WithLogServer("h1"), services.WithLogPrefix(""))
+	levels, err := api.GetLogLevels(context.Background(), request.Custom(func(c *services.LogOpts) error { v := "cinder-api"; c.Binary = &v; return nil }), request.Custom(func(c *services.LogOpts) error { v := "h1"; c.Server = &v; return nil }), request.Custom(func(c *services.LogOpts) error { v := ""; c.Prefix = &v; return nil }))
 	if err != nil || calls.Len() != 1 || svcActionCalls(calls)[0].path != svcActionBase+"/get-log" || svcActionCalls(calls)[0].body != `{"binary":"cinder-api","prefix":"","server":"h1"}` {
 		t.Fatal(err, svcActionCalls(calls))
 	}

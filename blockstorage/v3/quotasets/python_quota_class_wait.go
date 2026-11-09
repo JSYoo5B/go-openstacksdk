@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -18,7 +19,7 @@ func (a *API) QuotaClassResources() *resource.Collection[QuotaClassRecord] {
 		WaitAttributes: func(v *QuotaClassRecord) map[string]json.RawMessage { return resource.RawResourceView(v.Resource) },
 		Kind:           "quota_class_sets",
 		Get: func(ctx context.Context, name string) (*QuotaClassRecord, error) {
-			return a.GetQuotaClassRecord(ctx, WithQuotaClassName(name))
+			return a.GetQuotaClassRecord(ctx, request.Custom(func(c *QuotaClassGetOpts) error { v := name; c.Name = &v; return nil }))
 		},
 		// The class body carries its name as id; Name references are not
 		// supported, so ID is informational only.

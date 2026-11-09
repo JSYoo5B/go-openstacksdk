@@ -53,7 +53,11 @@ func vmCall(ctx context.Context, client *gophercloud.ServiceClient, op, name str
 	return vmOutcome{resolved: result.Resolved, id: result.VolumeID, applied: result.Applied, err: err}
 }
 func vmChanged() []blockstorage.UpdateVolumeOption {
-	return []blockstorage.UpdateVolumeOption{blockstorage.WithUpdateVolumeDescription("requested")}
+	return []blockstorage.UpdateVolumeOption{func(c *blockstorage.UpdateVolumeOpts) error {
+		v := "requested"
+		c.Attributes.Description = &v
+		return nil
+	}}
 }
 func vmLookup(t *testing.T, r *http.Request, token string) {
 	t.Helper()
@@ -308,7 +312,11 @@ func TestUpdateVolumeWireAliasesAndTypedAttributesHaveDeterministicPrecedence(t 
 			w.WriteHeader(500)
 		}
 	})
-	result, err := blockstorage.UpdateVolume(context.Background(), client, blockstorage.UpdateVolumeRequest{NameOrID: "ref"}, blockstorage.WithUpdateVolumeFields(fields), blockstorage.WithUpdateVolumeName("typed name"), blockstorage.WithUpdateVolumeDescription("typed description"), blockstorage.WithUpdateVolumeMetadata(map[string]string{}))
+	result, err := blockstorage.UpdateVolume(context.Background(), client, blockstorage.UpdateVolumeRequest{NameOrID: "ref"}, blockstorage.WithUpdateVolumeFields(fields), func(c *blockstorage.UpdateVolumeOpts) error { v := "typed name"; c.Attributes.Name = &v; return nil }, func(c *blockstorage.UpdateVolumeOpts) error {
+		v := "typed description"
+		c.Attributes.Description = &v
+		return nil
+	}, blockstorage.WithUpdateVolumeMetadata(map[string]string{}))
 	if err != nil || result == nil || result.Applied == nil || calls.Load() != 2 {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -399,7 +407,11 @@ func TestUpdateVolumePartialAndFlatResponsesMergeRequestedPriorStateAtomically(t
 					w.WriteHeader(500)
 				}
 			})
-			result, err := blockstorage.UpdateVolume(context.Background(), client, blockstorage.UpdateVolumeRequest{NameOrID: "ref"}, blockstorage.WithUpdateVolumeDescription("requested"), blockstorage.WithUpdateVolumeFields(map[string]json.RawMessage{"status": json.RawMessage(`"local status"`)}))
+			result, err := blockstorage.UpdateVolume(context.Background(), client, blockstorage.UpdateVolumeRequest{NameOrID: "ref"}, func(c *blockstorage.UpdateVolumeOpts) error {
+				v := "requested"
+				c.Attributes.Description = &v
+				return nil
+			}, blockstorage.WithUpdateVolumeFields(map[string]json.RawMessage{"status": json.RawMessage(`"local status"`)}))
 			if err != nil || result == nil || result.VolumeID != vmID || result.Applied == nil || result.Applied.StatusCode != 203 || string(result.Applied.Body) != response || result.Volume == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -577,7 +589,7 @@ func TestSetVolumeBootableDefaultTrueExplicitFalseAndOpaqueSub400Acknowledgement
 				})
 				var options []blockstorage.SetVolumeBootableOption
 				if explicit {
-					options = append(options, blockstorage.WithSetVolumeBootable(false))
+					options = append(options, func(c *blockstorage.SetVolumeBootableOpts) error { v := false; c.Bootable = &v; return nil })
 				}
 				got := vmCall(context.Background(), client, "SetVolumeBootable", "ref", nil, options)
 				if got.err != nil || got.nilResult || got.id != vmID || got.applied == nil || got.applied.StatusCode != code || calls.Load() != 2 || got.resolved == nil || got.resolved.Volume == nil || string(vmFields(t, got.resolved.Value)["status"]) != `"error"` {

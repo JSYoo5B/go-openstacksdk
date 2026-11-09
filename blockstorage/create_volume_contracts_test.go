@@ -213,7 +213,7 @@ func TestCreateVolumeContractsAliasesPresenceConcreteOverridesMetadataAndHints(t
 			w.Header().Set("X-Proof", "created")
 			testcloud.JSON(w, 202, createVolumeContractBody("creating"))
 		})
-		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeWait(false), blockstorage.WithCreateVolumeFields(fields), blockstorage.WithCreateVolumeName("common name"), blockstorage.WithCreateVolumeMetadata(map[string]string{}), blockstorage.WithCreateVolumeSchedulerHints(hints))
+		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeWait(false), blockstorage.WithCreateVolumeFields(fields), func(c *blockstorage.CreateVolumeOpts) error { v := "common name"; c.Attributes.Name = &v; return nil }, blockstorage.WithCreateVolumeMetadata(map[string]string{}), blockstorage.WithCreateVolumeSchedulerHints(hints))
 		if err != nil || result == nil || calls.Load() != 1 {
 			t.Fatalf("result=%+v error=%v calls=%d", result, err, calls.Load())
 		}
@@ -534,7 +534,7 @@ func TestCreateVolumeContractsInitialLiteralErrorAndExactFreshWaitStates(t *test
 				return tc.callbackCause
 			}))}
 			if tc.callbackCause != nil {
-				options = append(options, blockstorage.WithCreateVolumeBootable(true))
+				options = append(options, func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil })
 			}
 			result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, options...)
 			createVolumeContractCreated(t, result, created)
@@ -606,7 +606,7 @@ func TestCreateVolumeContractsAcceptedCreateAndActionFailuresPreservePhaseEviden
 				w.WriteHeader(500)
 			}
 		})
-		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, blockstorage.WithCreateVolumeBootable(true))
+		result, err := blockstorage.CreateVolume(context.Background(), cinder, nil, blockstorage.CreateVolumeRequest{Size: 2}, func(c *blockstorage.CreateVolumeOpts) error { v := true; c.Bootable = &v; return nil })
 		createVolumeContractCreated(t, result, createVolumeContractBody("creating"))
 		var native gophercloud.ErrUnexpectedResponseCode
 		var accepted *resource.ResponseError

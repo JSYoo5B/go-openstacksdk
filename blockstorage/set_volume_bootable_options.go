@@ -29,9 +29,6 @@ func WithSetVolumeBootableOptions(value SetVolumeBootableOpts) SetVolumeBootable
 	owned := cloneSetVolumeBootableOptions(value)
 	return func(target *SetVolumeBootableOpts) error { *target = cloneSetVolumeBootableOptions(owned); return nil }
 }
-func WithSetVolumeBootable(value bool) SetVolumeBootableOption {
-	return func(target *SetVolumeBootableOpts) error { owned := value; target.Bootable = &owned; return nil }
-}
 
 func applySetVolumeBootableOptions(options []SetVolumeBootableOption, guard func() error) (SetVolumeBootableOpts, error) {
 	options = slices.Clone(options)

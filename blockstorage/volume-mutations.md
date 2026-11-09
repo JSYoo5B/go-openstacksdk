@@ -120,7 +120,7 @@ func InspectUpdate(result *blockstorage.UpdateVolumeResult) {
 func Update(ctx context.Context, conn *sdk.Connection) error {
     result, err := conn.UpdateVolume(ctx,
         blockstorage.UpdateVolumeRequest{NameOrID: "data"},
-        blockstorage.WithUpdateVolumeName("renamed"),
+        func(c *blockstorage.UpdateVolumeOpts) error { v := "renamed"; c.Attributes.Name = &v; return nil },
         blockstorage.WithUpdateVolumeMetadata(map[string]string{}),
         blockstorage.WithUpdateVolumeFields(map[string]json.RawMessage{
             "image_id": json.RawMessage(`"image-id"`),
@@ -149,7 +149,7 @@ func Bootable(ctx context.Context, conn *sdk.Connection) error {
     }
     if err != nil { return err }
     disabled, err := conn.SetVolumeBootable(ctx, input,
-        blockstorage.WithSetVolumeBootable(false))
+        func(c *blockstorage.SetVolumeBootableOpts) error { v := false; c.Bootable = &v; return nil })
     if disabled != nil && disabled.Applied != nil {
         fmt.Println("disable acknowledgement:", disabled.Applied.StatusCode)
     }
@@ -176,12 +176,12 @@ func UpdateWithLocation(ctx context.Context, conn *sdk.Connection) error {
 func Direct(ctx context.Context, cinder *gophercloud.ServiceClient) error {
     result, err := blockstorage.UpdateVolume(ctx, cinder,
         blockstorage.UpdateVolumeRequest{NameOrID: "data"},
-        blockstorage.WithUpdateVolumeDescription("updated"))
+        func(c *blockstorage.UpdateVolumeOpts) error { v := "updated"; c.Attributes.Description = &v; return nil })
     InspectUpdate(result)
     if err != nil { return err }
     _, err = blockstorage.SetVolumeBootable(ctx, cinder,
         blockstorage.SetVolumeBootableRequest{NameOrID: "data"},
-        blockstorage.WithSetVolumeBootable(false))
+        func(c *blockstorage.SetVolumeBootableOpts) error { v := false; c.Bootable = &v; return nil })
     return err
 }
 ```

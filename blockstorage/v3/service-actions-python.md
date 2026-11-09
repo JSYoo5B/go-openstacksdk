@@ -32,7 +32,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Disable`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithDisableReason`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Disable sends PUT os-services/disable with binary and host, or os-services/disable-log-reason with disabled_reason added for a nonempty reason.
   Tests: `blockstorage/v3/services/python_actions_test.go:TestPythonServiceActionsSendServiceBodies`.
@@ -84,8 +84,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.Failover`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithFailoverCluster`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithFailoverBackendID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Failover reads Cinder discovery once, sends PUT os-services/failover when 3.26 is supported (and matched by a configured microversion) or failover_host otherwise, with host plus nonempty cluster and backend_id, at the configured client microversion.
   Tests: `blockstorage/v3/services/python_actions_test.go:TestPythonServiceFailoverChoosesActionBySupportedMicroversion`.
@@ -104,9 +103,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.SetLogLevels`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogBinary`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogServer`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogPrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - SetLogLevels selects the configured microversion or min(3.32, server max), fails with ErrUnsupported before HTTP below 3.32, and sends PUT os-services/set-log with level, binary defaulting to "" and null server/prefix.
   Tests: `blockstorage/v3/services/python_actions_test.go:TestPythonServiceLogLevelsRequireMicroversion332`.
@@ -124,9 +121,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.API.GetLogLevels`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogBinary`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogServer`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services.WithLogPrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - GetLogLevels sends PUT os-services/get-log at 3.32 or later with binary, server and prefix, decodes every log_levels entry's binary, host and levels, and fails with the accepted response when log_levels or an entry key is missing.
   Tests: `blockstorage/v3/services/python_actions_test.go:TestPythonServiceLogLevelsRequireMicroversion332`.
@@ -152,10 +147,10 @@ for level in conn.block_storage.get_service_log_levels(binary="cinder-api"):
 api := services.New(volumeClient)
 for svc, err := range api.List(ctx, services.WithListOptions(services.ListOpts{Binary: "cinder-volume"})) {
     if err != nil { return err }
-    if _, err := api.Disable(ctx, services.TargetOf(svc), services.WithDisableReason("maintenance")); err != nil { return err }
+    if _, err := api.Disable(ctx, services.TargetOf(svc), request.Custom(func(c *services.ActionOpts) error { c.Reason = "maintenance"; return nil })); err != nil { return err }
     break
 }
-levels, err := api.GetLogLevels(ctx, services.WithLogBinary("cinder-api"))
+levels, err := api.GetLogLevels(ctx, request.Custom(func(c *services.LogOpts) error { v := "cinder-api"; c.Binary = &v; return nil }))
 if err != nil { return err }
 for _, level := range levels.Levels { fmt.Println(level.Host, level.Levels) }
 ```

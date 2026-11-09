@@ -152,28 +152,17 @@ func copyAction(v ActionOpts) ActionOpts { v.Headers = maps.Clone(v.Headers); re
 // calls fail with resource.ErrInvalidOption before HTTP.
 type ActionOption = request.WriteCall
 
-// DisableOption is one option of Disable: WithDisableReason, request.Headers
-// (replaces the headers) or request.Custom over *ActionOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP. A nonempty reason
-// selects disable-log-reason, as in Python.
+// DisableOption is one option of Disable: request.Headers (replaces the
+// headers) or request.Custom over *ActionOpts (for example to set Reason).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP. A
+// nonempty reason selects disable-log-reason, as in Python.
 type DisableOption = request.WriteCall
 
-func WithDisableReason(reason string) DisableOption {
-	return request.Custom(func(v *ActionOpts) error { v.Reason = reason; return nil })
-}
-
-// FailoverOption is one option of Failover: WithFailoverCluster,
-// WithFailoverBackendID, request.Headers (replaces the headers) or
-// request.Custom over *ActionOpts. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP. Empty values are not sent.
+// FailoverOption is one option of Failover: request.Headers (replaces the
+// headers) or request.Custom over *ActionOpts (for example to set Cluster or
+// BackendID). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP. Empty values are not sent.
 type FailoverOption = request.WriteCall
-
-func WithFailoverCluster(cluster string) FailoverOption {
-	return request.Custom(func(v *ActionOpts) error { v.Cluster = cluster; return nil })
-}
-func WithFailoverBackendID(backendID string) FailoverOption {
-	return request.Custom(func(v *ActionOpts) error { v.BackendID = backendID; return nil })
-}
 
 var actionCalls = calls.Spec[ActionOpts]{Headers: calls.Value(func(v *ActionOpts) *map[string]string { return &v.Headers })}
 
@@ -203,20 +192,10 @@ func (v LogOpts) body() map[string]json.RawMessage {
 	return map[string]json.RawMessage{"binary": binary, "server": optional(v.Server), "prefix": optional(v.Prefix)}
 }
 
-// LogOption is one option of SetLogLevels and GetLogLevels: WithLogBinary,
-// WithLogServer, WithLogPrefix, request.Headers (replaces the headers) or
-// request.Custom over *LogOpts. Other shared calls fail with
+// LogOption is one option of SetLogLevels and GetLogLevels: request.Headers
+// (replaces the headers) or request.Custom over *LogOpts (for example to set
+// Binary, Server or Prefix). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type LogOption = request.GetCall
-
-func WithLogBinary(binary string) LogOption {
-	return request.Custom(func(v *LogOpts) error { x := binary; v.Binary = &x; return nil })
-}
-func WithLogServer(server string) LogOption {
-	return request.Custom(func(v *LogOpts) error { x := server; v.Server = &x; return nil })
-}
-func WithLogPrefix(prefix string) LogOption {
-	return request.Custom(func(v *LogOpts) error { x := prefix; v.Prefix = &x; return nil })
-}
 
 var logCalls = calls.Spec[LogOpts]{Headers: calls.Value(func(v *LogOpts) *map[string]string { return &v.Headers })}

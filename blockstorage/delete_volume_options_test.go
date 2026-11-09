@@ -16,11 +16,11 @@ func TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins(t *testing.T
 	if err != nil || defaults.Wait == nil || !*defaults.Wait || defaults.Force || !preparedWait(t, defaults.WaitOptions).Unlimited || preparedWait(t, defaults.WaitOptions).Strategy.Delay(1) != 2*time.Second || preparedWait(t, defaults.WaitOptions).ProgressCallback != nil {
 		t.Fatalf("defaults=%+v error=%v", defaults, err)
 	}
-	value, err := blockstorage.PrepareDeleteVolumeOptions(context.Background(), blockstorage.WithDeleteVolumeForce(true), blockstorage.WithDeleteVolumeWait(false), blockstorage.WithDeleteVolumeOptions(blockstorage.DeleteVolumeOpts{}))
+	value, err := blockstorage.PrepareDeleteVolumeOptions(context.Background(), func(c *blockstorage.DeleteVolumeOpts) error { c.Force = true; return nil }, blockstorage.WithDeleteVolumeWait(false), blockstorage.WithDeleteVolumeOptions(blockstorage.DeleteVolumeOpts{}))
 	if err != nil || value.Wait == nil || !*value.Wait || value.Force {
 		t.Fatalf("complete replacement=%+v error=%v", value, err)
 	}
-	value, err = blockstorage.PrepareDeleteVolumeOptions(context.Background(), blockstorage.WithDeleteVolumeWait(true), blockstorage.WithDeleteVolumeWait(false), blockstorage.WithDeleteVolumeForce(true), blockstorage.WithDeleteVolumeForce(false))
+	value, err = blockstorage.PrepareDeleteVolumeOptions(context.Background(), blockstorage.WithDeleteVolumeWait(true), blockstorage.WithDeleteVolumeWait(false), func(c *blockstorage.DeleteVolumeOpts) error { c.Force = true; return nil }, func(c *blockstorage.DeleteVolumeOpts) error { c.Force = false; return nil })
 	if err != nil || *value.Wait || value.Force {
 		t.Fatalf("last options=%+v error=%v", value, err)
 	}
@@ -28,7 +28,7 @@ func TestDeleteVolumeOptionsEffectiveDefaultsReplacementAndLastWins(t *testing.T
 	value, err = blockstorage.PrepareDeleteVolumeOptions(context.Background(),
 		blockstorage.WithDeleteVolumeWaitOptions(resource.WithTimeout(timeout), resource.WithPollInterval(interval), resource.WithProgressCallback(func(int) error { t.Fatal("replaced callback ran"); return nil })),
 		blockstorage.WithDeleteVolumeOptions(blockstorage.DeleteVolumeOpts{}),
-		blockstorage.WithDeleteVolumeWait(false), blockstorage.WithDeleteVolumeForce(true),
+		blockstorage.WithDeleteVolumeWait(false), func(c *blockstorage.DeleteVolumeOpts) error { c.Force = true; return nil },
 		blockstorage.WithDeleteVolumeWaitOptions())
 	if err != nil || value.Wait == nil || *value.Wait || !value.Force || !preparedWait(t, value.WaitOptions).Unlimited || preparedWait(t, value.WaitOptions).Strategy.Delay(1) != 2*time.Second || preparedWait(t, value.WaitOptions).ProgressCallback != nil {
 		t.Fatalf("empty wait subtree replacement=%+v error=%v", value, err)
