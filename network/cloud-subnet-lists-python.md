@@ -124,7 +124,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListSubnetRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.ListSubnetRecords`
 
@@ -189,7 +188,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetReadFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithSubnetNetworkAvailable`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchSubnetRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchSubnetRecords`
 

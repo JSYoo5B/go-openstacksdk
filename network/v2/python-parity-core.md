@@ -880,7 +880,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.GetRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
 
 - Literal or recorded auth project is bound once without name lookup; actual response id may differ from request project.
@@ -907,7 +907,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
@@ -932,7 +932,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.ValidateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
 
 - Fixed fields=dry-run GET has URI project but no Resource.id seed, extra calls, client-side allocation or fabricated dry_run boolean.

@@ -129,17 +129,21 @@ func withRouterInterfaceHeaders(values map[string]string) func(*RouterInterfaceO
 // LegacySourceRoutes explicitly selects the old Source action path; both modes
 // use strict HTTP errors. A removal bridge accepts no ignored gateway fields.
 type RouterGatewayOpts struct {
-	Fields             map[string]json.RawMessage
-	Headers            map[string]string
+	Fields  map[string]json.RawMessage
+	Headers map[string]string
+	// LegacySourceRoutes chooses pinned add_gateway_router or
+	// remove_gateway_router paths only for deployments which implement them. It
+	// does not turn HTTP failures into JSON success values as the Source bug
+	// does.
 	LegacySourceRoutes bool
 }
 
 // RouterGatewayOption is one option of AddGatewayRecord and
-// RemoveGatewayRecord: WithRouterGatewayOpts, WithSourceLegacyGatewayRoutes,
-// request.Field (one gateway attribute; its marshal error is returned when
-// applied), request.Headers (replaces the headers) or request.Custom over
-// *RouterGatewayOpts. Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// RemoveGatewayRecord: WithRouterGatewayOpts, request.Field (one gateway
+// attribute; its marshal error is returned when applied), request.Headers
+// (replaces the headers) or request.Custom over *RouterGatewayOpts (for example
+// to set LegacySourceRoutes). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type RouterGatewayOption = request.WriteCall
 
 func copyRouterGatewayOpts(value RouterGatewayOpts) RouterGatewayOpts {
@@ -171,13 +175,6 @@ func withRouterGatewayField(key string, raw json.RawMessage, err error) func(*Ro
 func withRouterGatewayHeaders(values map[string]string) func(*RouterGatewayOpts) error {
 	owned := maps.Clone(values)
 	return func(config *RouterGatewayOpts) error { config.Headers = maps.Clone(owned); return nil }
-}
-
-// WithSourceLegacyGatewayRoutes chooses pinned add_gateway_router or
-// remove_gateway_router paths only for deployments which implement them. It
-// does not turn HTTP failures into JSON success values as the Source bug does.
-func WithSourceLegacyGatewayRoutes(value bool) RouterGatewayOption {
-	return request.Custom(func(config *RouterGatewayOpts) error { config.LegacySourceRoutes = value; return nil })
 }
 
 // routerInterfaceCalls interprets the shared calls of RouterInterfaceOption.

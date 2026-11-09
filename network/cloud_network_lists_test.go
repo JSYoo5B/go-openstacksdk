@@ -24,7 +24,7 @@ func TestCloudNetworkListAbsentServicePrecedesFiltersAndSearchHasNoAbsenceGate(t
 	for _, raw := range []string{`{bad`, `[1]`, `{"jmespath_filters":"length(@)"}`, `{"headers":"bad"}`} {
 		var service *network.Service
 		ownedLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`bad`)}}.Clone()
-		result, err := service.ListNetworkRecords(context.Background(), network.WithNetworkCloudServiceAvailable(false), network.WithNetworkCloudFilters(json.RawMessage(raw)), request.Custom(func(c *network.NetworkCloudListOpts) error {
+		result, err := service.ListNetworkRecords(context.Background(), request.Custom(func(c *network.NetworkCloudListOpts) error { v := false; c.ServiceAvailable = &v; return nil }), network.WithNetworkCloudFilters(json.RawMessage(raw)), request.Custom(func(c *network.NetworkCloudListOpts) error {
 			loc := ownedLocation.Clone()
 			c.CurrentLocation = &loc
 			return nil
@@ -32,14 +32,14 @@ func TestCloudNetworkListAbsentServicePrecedesFiltersAndSearchHasNoAbsenceGate(t
 		if err != nil || result == nil || result.Networks == nil || result.Values == nil || string(result.JSON) != "[]" {
 			t.Fatal(raw, result, err)
 		}
-		result, err = service.SearchNetworkRecords(context.Background(), "literal", network.WithNetworkCloudServiceAvailable(false))
+		result, err = service.SearchNetworkRecords(context.Background(), "literal", request.Custom(func(c *network.NetworkCloudListOpts) error { v := false; c.ServiceAvailable = &v; return nil }))
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err)
 		}
 	}
 	service, count := qosCloudMutationFixture(t, func(http.ResponseWriter, *http.Request) { t.Fatal("absent service HTTP") })
 	service.RawClient().Type = "compute"
-	result, err := service.ListNetworkRecords(context.Background(), network.WithNetworkCloudServiceAvailable(false), network.WithNetworkCloudFilters(json.RawMessage(`bad`)))
+	result, err := service.ListNetworkRecords(context.Background(), request.Custom(func(c *network.NetworkCloudListOpts) error { v := false; c.ServiceAvailable = &v; return nil }), network.WithNetworkCloudFilters(json.RawMessage(`bad`)))
 	if err != nil || string(result.JSON) != "[]" || count.Load() != 0 {
 		t.Fatal(result, err, count.Load())
 	}
@@ -73,7 +73,7 @@ func TestCloudNetworkListFalseyFiltersAndSearchOrderedNameUpdate(t *testing.T) {
 			}
 			testcloud.JSON(w, 200, `{"networks":[{"id":"unrelated","name":"unrelated"}]}`)
 		})
-		result, err := service.SearchNetworkRecords(context.Background(), "literal/id*", network.WithNetworkCloudFilters(json.RawMessage(tc.raw)), network.WithNetworkCloudServiceAvailable(false))
+		result, err := service.SearchNetworkRecords(context.Background(), "literal/id*", network.WithNetworkCloudFilters(json.RawMessage(tc.raw)), request.Custom(func(c *network.NetworkCloudListOpts) error { v := false; c.ServiceAvailable = &v; return nil }))
 		if err != nil || result == nil || len(result.Networks) != 1 || count.Load() != 1 {
 			t.Fatal(tc.raw, result, err, count.Load())
 		}

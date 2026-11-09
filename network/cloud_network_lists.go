@@ -28,10 +28,10 @@ type NetworkCloudListOpts struct {
 
 // NetworkCloudListOption is one option of ListNetworkRecords and
 // SearchNetworkRecords: WithNetworkCloudListOpts, WithNetworkCloudFilters,
-// WithNetworkCloudServiceAvailable, request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *NetworkCloudListOpts (for
-// example to set CurrentLocation). Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *NetworkCloudListOpts (for example to set CurrentLocation
+// or ServiceAvailable). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type NetworkCloudListOption = request.GetCall
 
 var networkCloudListCalls = calls.Spec[NetworkCloudListOpts]{
@@ -63,10 +63,6 @@ func WithNetworkCloudListOpts(v NetworkCloudListOpts) NetworkCloudListOption {
 func WithNetworkCloudFilters(raw json.RawMessage) NetworkCloudListOption {
 	owned := bytes.Clone(raw)
 	return request.Custom(func(c *NetworkCloudListOpts) error { c.Filters = bytes.Clone(owned); return nil })
-}
-
-func WithNetworkCloudServiceAvailable(v bool) NetworkCloudListOption {
-	return request.Custom(func(c *NetworkCloudListOpts) error { x := v; c.ServiceAvailable = &x; return nil })
 }
 
 // Networks are populated only for ordinary generator output. Values/JSON can

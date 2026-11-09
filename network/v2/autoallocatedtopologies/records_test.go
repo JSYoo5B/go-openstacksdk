@@ -28,7 +28,7 @@ func topoAPI(t *testing.T, reply testcloud.RoundTripperFunc) (*autoallocatedtopo
 	return autoallocatedtopologies.New(client), client
 }
 func explicit() autoallocatedtopologies.Option {
-	return autoallocatedtopologies.WithProjectID("project")
+	return request.Custom(func(c *autoallocatedtopologies.Options) error { v := "project"; c.ProjectID = &v; return nil })
 }
 func TestAutoTopologyGetBindsProjectSeedAndActualNetworkIdentity(t *testing.T) {
 	calls := 0
@@ -157,7 +157,7 @@ func TestAutoTopologyInvalidOptionsAndAcceptedDecodeFailuresAreAtomic(t *testing
 		calls++
 		return topoWire(203, `{"auto_allocated_topology":null}`), nil
 	})
-	for _, option := range []autoallocatedtopologies.Option{nil, autoallocatedtopologies.WithProjectID(""), request.IgnoreMissing(true), request.Headers(map[string]string{"X-Auth-Token": "replace"})} {
+	for _, option := range []autoallocatedtopologies.Option{nil, request.Custom(func(c *autoallocatedtopologies.Options) error { v := ""; c.ProjectID = &v; return nil }), request.IgnoreMissing(true), request.Headers(map[string]string{"X-Auth-Token": "replace"})} {
 		_, err := api.GetRecord(context.Background(), explicit(), option)
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)

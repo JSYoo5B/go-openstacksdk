@@ -109,7 +109,7 @@ func TestPythonRouterGatewayStockBridgeAndExplicitLegacyBodies(t *testing.T) {
 				escaped, match = req.URL.EscapedPath(), req.Header.Get("If-Match")
 				return nativeRouterWire(200, `{"router":{"id":"actual","external_gateway_info":null},"x_response":false}`)
 			})
-			options := []routers.RouterGatewayOption{routers.WithRouterGatewayOpts(routers.RouterGatewayOpts{Fields: sample.fields}), routers.WithSourceLegacyGatewayRoutes(sample.legacy)}
+			options := []routers.RouterGatewayOption{routers.WithRouterGatewayOpts(routers.RouterGatewayOpts{Fields: sample.fields}), request.Custom(func(c *routers.RouterGatewayOpts) error { c.LegacySourceRoutes = sample.legacy; return nil })}
 			var value *routers.RouterJSONResult
 			var err error
 			if sample.add {
@@ -132,8 +132,8 @@ func TestPythonRouterGatewayStockBridgeAndExplicitLegacyBodies(t *testing.T) {
 		{true, nil}, {true, []routers.RouterGatewayOption{request.Field("network_id", nil)}},
 		{true, []routers.RouterGatewayOption{request.Field("network_id", "")}},
 		{false, []routers.RouterGatewayOption{request.Field("network_id", "external")}},
-		{true, []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(true), request.Field("router", map[string]any{})}},
-		{false, []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(true), request.Field("session", false)}},
+		{true, []routers.RouterGatewayOption{request.Custom(func(c *routers.RouterGatewayOpts) error { c.LegacySourceRoutes = true; return nil }), request.Field("router", map[string]any{})}},
+		{false, []routers.RouterGatewayOption{request.Custom(func(c *routers.RouterGatewayOpts) error { c.LegacySourceRoutes = true; return nil }), request.Field("session", false)}},
 	} {
 		var calls []nativeRouterCall
 		api := pythonCoreRouterAPI(t, &calls, func(*http.Request) *http.Response { return nativeRouterWire(200, `{}`) })
@@ -236,9 +236,9 @@ func TestPythonRouterInterfacesWholeJSONValuesStrictStatusesAndDecodeEvidence(t 
 		api := pythonCoreRouterAPI(t, &calls, func(*http.Request) *http.Response { return nativeRouterWire(404, `{"error":"legacy path absent"}`) })
 		var err error
 		if add {
-			_, err = api.AddGatewayRecord(context.Background(), "router", routers.WithSourceLegacyGatewayRoutes(true))
+			_, err = api.AddGatewayRecord(context.Background(), "router", request.Custom(func(c *routers.RouterGatewayOpts) error { c.LegacySourceRoutes = true; return nil }))
 		} else {
-			_, err = api.RemoveGatewayRecord(context.Background(), "router", routers.WithSourceLegacyGatewayRoutes(true))
+			_, err = api.RemoveGatewayRecord(context.Background(), "router", request.Custom(func(c *routers.RouterGatewayOpts) error { c.LegacySourceRoutes = true; return nil }))
 		}
 		var native gophercloud.ErrUnexpectedResponseCode
 		if !errors.As(err, &native) || native.Actual != 404 || len(calls) != 1 {

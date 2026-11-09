@@ -55,10 +55,10 @@ type Options struct {
 }
 
 // Option is one option of GetRecord, DeleteRecord and ValidateRecord:
-// WithOptions, WithProjectID, request.IgnoreMissing (DeleteRecord only; the
-// other operations reject it), request.Headers (replaces the headers),
-// request.Microversion or request.Custom over *Options. request.Header fails
-// with resource.ErrInvalidOption before HTTP.
+// WithOptions, request.IgnoreMissing (DeleteRecord only; the other operations
+// reject it), request.Headers (replaces the headers), request.Microversion or
+// request.Custom over *Options (for example to set ProjectID). request.Header
+// fails with resource.ErrInvalidOption before HTTP.
 type Option = request.DeleteCall
 
 var optionCalls = calls.Spec[Options]{
@@ -86,9 +86,6 @@ func copyOptions(v Options) Options {
 func WithOptions(v Options) Option {
 	owned := copyOptions(v)
 	return request.Custom(func(c *Options) error { *c = copyOptions(owned); return nil })
-}
-func WithProjectID(v string) Option {
-	return request.Custom(func(c *Options) error { x := v; c.ProjectID = &x; return nil })
 }
 func invalid(format string, args ...any) error {
 	return fmt.Errorf("%w: %s", resource.ErrInvalidOption, fmt.Sprintf(format, args...))

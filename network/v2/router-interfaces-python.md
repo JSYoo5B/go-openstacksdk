@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithSourceLegacyGatewayRoutes`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Default single-gateway intent uses stock PUT /routers/{id} external_gateway_info: addition nests preserved attrs and requires a nonblank string network_id to prevent accidental clearing; removal sends explicit null and rejects attributes rather than silently discarding them. The opt-in Source legacy routes send envelope-free kwargs without defaults; reserved proxy arguments are rejected.
   Tests: `network/v2/extensions/layer3/routers/python_interfaces_contracts_test.go:TestPythonRouterGatewayStockBridgeAndExplicitLegacyBodies`.
@@ -34,7 +34,7 @@ Go API:
 Python/Go differences:
 
 - Go uses explicit literal router IDs with one-time URL escaping, complete UTF-8 JSON values and owned results rather than arbitrary Python object models. A RawResource port/subnet reference models Source Resource._get_id; ordinary Go JSON maps stay ordinary values rather than being treated as Resource instances. Whole Connection/Resource/session parity remains separately tracked.
-- Pinned Source add/remove_gateway_router action paths are absent from Neutron27.0.0 stock L3, whose constrained neutron-lib3.21.1 action map registers interface actions only. Go deliberately bridges the named single-gateway intent to stock external_gateway_info updates. WithSourceLegacyGatewayRoutes(true) restores only the exact Source action path and kwargs for a supporting backend; this is not stock legacy-route support.
+- Pinned Source add/remove_gateway_router action paths are absent from Neutron27.0.0 stock L3, whose constrained neutron-lib3.21.1 action map registers interface actions only. Go deliberately bridges the named single-gateway intent to stock external_gateway_info updates. RouterGatewayOpts.LegacySourceRoutes = true restores only the exact Source action path and kwargs for a supporting backend; this is not stock legacy-route support.
 - Pinned Source gateway methods return response.json() without raise_from_response and Proxy.request defaults raise_exc=False, allowing final4xx/5xx JSON to masquerade as returned data. Go deliberately repairs this defect by retaining strict native HTTP errors in both default and legacy-route modes; HTTP error JSON is never declared SDK success.
 - The stock bridge AddGatewayRecord requires network_id because an empty external_gateway_info object may clear a live gateway. Stock RemoveGatewayRecord has no attribute selection and rejects supplied fields instead of ignoring them. Source removal kwargs remain available only under explicit legacy route compatibility.
 - Stock external_gateway_info/network_id update permits admin or the owning-project member. enable_snat/external_fixed_ips are admin-only attribute branches. Legacy paths have no corresponding stock27 policy; their backend authorization/support cannot be inferred from the stock bridge.
@@ -83,7 +83,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterGatewayOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithSourceLegacyGatewayRoutes`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Default single-gateway intent uses stock PUT /routers/{id} external_gateway_info: addition nests preserved attrs and requires a nonblank string network_id to prevent accidental clearing; removal sends explicit null and rejects attributes rather than silently discarding them. The opt-in Source legacy routes send envelope-free kwargs without defaults; reserved proxy arguments are rejected.
   Tests: `network/v2/extensions/layer3/routers/python_interfaces_contracts_test.go:TestPythonRouterGatewayStockBridgeAndExplicitLegacyBodies`.
@@ -101,7 +101,7 @@ Go API:
 Python/Go differences:
 
 - Go uses explicit literal router IDs with one-time URL escaping, complete UTF-8 JSON values and owned results rather than arbitrary Python object models. A RawResource port/subnet reference models Source Resource._get_id; ordinary Go JSON maps stay ordinary values rather than being treated as Resource instances. Whole Connection/Resource/session parity remains separately tracked.
-- Pinned Source add/remove_gateway_router action paths are absent from Neutron27.0.0 stock L3, whose constrained neutron-lib3.21.1 action map registers interface actions only. Go deliberately bridges the named single-gateway intent to stock external_gateway_info updates. WithSourceLegacyGatewayRoutes(true) restores only the exact Source action path and kwargs for a supporting backend; this is not stock legacy-route support.
+- Pinned Source add/remove_gateway_router action paths are absent from Neutron27.0.0 stock L3, whose constrained neutron-lib3.21.1 action map registers interface actions only. Go deliberately bridges the named single-gateway intent to stock external_gateway_info updates. RouterGatewayOpts.LegacySourceRoutes = true restores only the exact Source action path and kwargs for a supporting backend; this is not stock legacy-route support.
 - Pinned Source gateway methods return response.json() without raise_from_response and Proxy.request defaults raise_exc=False, allowing final4xx/5xx JSON to masquerade as returned data. Go deliberately repairs this defect by retaining strict native HTTP errors in both default and legacy-route modes; HTTP error JSON is never declared SDK success.
 - The stock bridge AddGatewayRecord requires network_id because an empty external_gateway_info object may clear a live gateway. Stock RemoveGatewayRecord has no attribute selection and rejects supplied fields instead of ignoring them. Source removal kwargs remain available only under explicit legacy route compatibility.
 - Stock external_gateway_info/network_id update permits admin or the owning-project member. enable_snat/external_fixed_ips are admin-only attribute branches. Legacy paths have no corresponding stock27 policy; their backend authorization/support cannot be inferred from the stock bridge.
@@ -268,7 +268,7 @@ func main() {
             result, err = service.Routers.RemoveInterfaceRecord(ctx, *id, options...)
         }
     case "add-gateway", "remove-gateway":
-        options := []routers.RouterGatewayOption{routers.WithSourceLegacyGatewayRoutes(*legacy)}
+        options := []routers.RouterGatewayOption{request.Custom(func(c *routers.RouterGatewayOpts) error { c.LegacySourceRoutes = *legacy; return nil })}
         if *network != "" { options = append(options, request.Field("network_id", *network)) }
         if *action == "add-gateway" {
             result, err = service.Routers.AddGatewayRecord(ctx, *id, options...)

@@ -148,7 +148,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListNetworkRecords`
@@ -193,7 +192,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithNetworkCloudServiceAvailable`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.API.ProxyCloudListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/networks.WithCloudRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchNetworkRecords`

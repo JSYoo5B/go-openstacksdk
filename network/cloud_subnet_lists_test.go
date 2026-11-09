@@ -56,16 +56,16 @@ func TestCloudSubnetListsDirectQuerySearchOverrideAndFalseyFilters(t *testing.T)
 }
 func TestCloudSubnetListsOnlyListMissingServiceSkipsInvalidFilters(t *testing.T) {
 	var service *network.Service
-	result, err := service.ListSubnetRecords(context.Background(), network.WithSubnetNetworkAvailable(false), network.WithSubnetReadFiltersJSON(json.RawMessage(`{"headers":"bad","jmespath_filters":"bad!"}`)))
+	result, err := service.ListSubnetRecords(context.Background(), request.Custom(func(c *network.SubnetReadOpts) error { v := false; c.NetworkAvailable = &v; return nil }), network.WithSubnetReadFiltersJSON(json.RawMessage(`{"headers":"bad","jmespath_filters":"bad!"}`)))
 	if err != nil || result == nil || string(result.JSON) != "[]" || result.LastResponse != nil || len(result.Inventory) != 0 {
 		t.Fatal(result, err)
 	}
-	result, err = service.SearchSubnetRecords(context.Background(), "", network.WithSubnetNetworkAvailable(false))
+	result, err = service.SearchSubnetRecords(context.Background(), "", request.Custom(func(c *network.SubnetReadOpts) error { v := false; c.NetworkAvailable = &v; return nil }))
 	if result == nil || !errors.Is(err, resource.ErrInvalidOption) || result.JSON != nil {
 		t.Fatal(result, err)
 	}
 	active, count := qosCloudMutationFixture(t, func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 200, `{"subnets":[]}`) })
-	result, err = active.SearchSubnetRecords(context.Background(), "", network.WithSubnetNetworkAvailable(false))
+	result, err = active.SearchSubnetRecords(context.Background(), "", request.Custom(func(c *network.SubnetReadOpts) error { v := false; c.NetworkAvailable = &v; return nil }))
 	if err != nil || count.Load() != 1 {
 		t.Fatal(result, err, count.Load())
 	}

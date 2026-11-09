@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.GetRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
 
 - Literal or recorded auth project is bound once without name lookup; actual response id may differ from request project.
@@ -40,7 +40,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
@@ -65,7 +65,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.API.ValidateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies.WithOptions`
 
 - Fixed fields=dry-run GET has URI project but no Resource.id seed, extra calls, client-side allocation or fabricated dry_run boolean.
@@ -109,6 +109,7 @@ import (
     "fmt"
     "log"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/autoallocatedtopologies"
 )
@@ -120,7 +121,7 @@ func main() {
     service, err := conn.NetworkV2(ctx)
     if err != nil { log.Fatal(err) }
     api := autoallocatedtopologies.New(service.RawClient())
-    project := autoallocatedtopologies.WithProjectID("project-id")
+    project := request.Custom(func(c *autoallocatedtopologies.Options) error { v := "project-id"; c.ProjectID = &v; return nil })
     validation, err := api.ValidateRecord(ctx, project)
     if err != nil { log.Fatal(err) }
     fmt.Println(string(validation.Resource.Body["id"]), string(validation.Resource.Body["dry_run"]))
