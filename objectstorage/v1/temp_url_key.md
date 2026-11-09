@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeySecondary`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - One bodyless exact-account-Endpoint POST204 sends only selected primary or secondary X-Account-Meta-Temp-URL-Key header, transmits empty key literally, and performs no implicit HEAD/refresh.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/accounts/temp_url_key_core_test.go:TestAccountTempURLKeyCoreWireAndStatus`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
@@ -48,7 +48,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeySecondary`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - One bodyless literal container POST204 uses captured effective ResourceBase with once-escaped Unicode/percent/space/colon/question/hash name and correct X-Container-Meta-Temp-URL-Key slot; no account prefix/discovery/implicit HEAD.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/containers/temp_url_key_core_test.go:TestContainerTempURLKeyCoreWireAndStatus`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
@@ -78,11 +78,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetTempURLKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyContainer`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyNewest`
 
 - Fresh container HEAD204 prefers nonempty secondary then primary; only successful absent/empty keys cause account HEAD204 with same preference. Account-only omits container HTTP and any HTTP failure stops fallback.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreSelectionAndProof`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
@@ -143,7 +141,7 @@ func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, acco
         }),
         accounts.WithSetTempURLKeyHeaders(map[string]string{"X-Trace-Label": "account-key"}),
         request.Header("X-Request-Label", "account"),
-        accounts.WithSetTempURLKeySecondary(false),
+        request.Custom(func(c *accounts.SetTempURLKeyOpts) error { c.Secondary = false; return nil }),
     }
     accountAck, err := service.Accounts.SetTempURLKey(ctx, accountSecret, accountOptions...)
     if accountAck != nil { fmt.Println(accountAck.StatusCode) }
@@ -155,7 +153,7 @@ func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, acco
         }),
         containers.WithSetTempURLKeyHeaders(map[string]string{"X-Trace-Label": "container-key"}),
         request.Header("X-Request-Label", "container"),
-        containers.WithSetTempURLKeySecondary(true),
+        request.Custom(func(c *containers.SetTempURLKeyOpts) error { c.Secondary = true; return nil }),
     }
     containerAck, err := service.Containers.SetTempURLKey(ctx, name, containerSecret, containerOptions...)
     if containerAck != nil { fmt.Println(containerAck.StatusCode) }
@@ -165,12 +163,12 @@ func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, acco
         objectstorage.WithGetTempURLKeyOpts(objectstorage.GetTempURLKeyOpts{
             Headers: map[string]string{"X-Request-Label": "initial"},
         }),
-        objectstorage.WithGetTempURLKeyContainer(name),
+        request.Custom(func(c *objectstorage.GetTempURLKeyOpts) error { c.Container = name; return nil }),
         objectstorage.WithGetTempURLKeyHeaders(map[string]string{"X-Trace-Label": "key-discovery"}),
         request.Header("X-Request-Label", "read"),
-        objectstorage.WithGetTempURLKeyNewest(true),
+        request.Custom(func(c *objectstorage.GetTempURLKeyOpts) error { v := true; c.Newest = &v; return nil }),
         request.Custom(func(c *objectstorage.GetTempURLKeyOpts) error { c.Newest = nil; return nil }),
-        objectstorage.WithGetTempURLKeyNewest(false),
+        request.Custom(func(c *objectstorage.GetTempURLKeyOpts) error { v := false; c.Newest = &v; return nil }),
     }
     selected, err := service.GetTempURLKey(ctx, getOptions...)
     if selected != nil {

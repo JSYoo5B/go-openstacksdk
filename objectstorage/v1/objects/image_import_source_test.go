@@ -11,6 +11,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -183,7 +184,7 @@ func TestImageImportObjectFilenameReusesStaleAndArbitraryHashPolicy(t *testing.T
 	c := objectMetadataClient()
 	calls := 0
 	c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("forbidden") })
-	_, err := New(c).CreateObject(context.Background(), "box", "image", CreateObjectInput{Filename: "unopened"}, WithCreateObjectMD5("md5 value"))
+	_, err := New(c).CreateObject(context.Background(), "box", "image", CreateObjectInput{Filename: "unopened"}, request.Custom(func(c *CreateObjectOpts) error { c.MD5 = "md5 value"; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 		t.Fatal("standalone hash policy changed", err, calls)
 	}

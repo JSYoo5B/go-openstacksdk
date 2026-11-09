@@ -159,7 +159,7 @@ func TestObjectReadContractsWireAndBytes(t *testing.T) {
 				}
 				return objectReadWire(r, 206, http.Header{"Content-Range": {"bytes 1-2/9"}, "Content-Length": {"999"}, "Etag": {"not-a-payload-checksum"}, "Content-Type": {"multipart/byteranges; boundary=boundary"}}, body), nil
 			}))
-			v, err := api.GetObject(context.Background(), "c", "o", objects.WithObjectReadRange("opaque server range"))
+			v, err := api.GetObject(context.Background(), "c", "o", request.Custom(func(c *objects.ObjectReadOpts) error { c.Range = "opaque server range"; return nil }))
 			if err != nil || v == nil || v.StatusCode != 206 || !v.Complete || !bytes.Equal(v.Body, data) || v.Header.Get("Content-Range") != "bytes 1-2/9" || *v.Metadata.ETag != "not-a-payload-checksum" {
 				t.Fatalf("206=%+v err=%v", v, err)
 			}
@@ -227,7 +227,7 @@ func TestObjectReadContractsWireAndBytes(t *testing.T) {
 		}))
 		defer server.Close()
 		client := &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{HTTPClient: http.Client{}}, Endpoint: server.URL + "/catalog/v1/A/", ResourceBase: server.URL + "/reverse%20prefix/v1/A/", Type: "object-store"}
-		v, err := objects.New(client).GetObject(context.Background(), container, object, objects.WithObjectReadFilename(query.Get("filename")), objects.WithObjectReadMultipartManifest("opaque"), objects.WithObjectReadSymlink("get"), objects.WithObjectReadVersionID(query.Get("version-id")))
+		v, err := objects.New(client).GetObject(context.Background(), container, object, request.Custom(func(c *objects.ObjectReadOpts) error { c.Filename = query.Get("filename"); return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.MultipartManifest = "opaque"; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.Symlink = "get"; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.VersionID = query.Get("version-id"); return nil }))
 		if err != nil || v == nil || !bytes.Equal(v.Body, []byte{0xff, 0, 'x'}) || v.Metadata.Values["unicode"] != "雪" || count.Load() != 1 {
 			t.Fatalf("literal=%+v err=%v requests=%d", v, err, count.Load())
 		}
@@ -310,11 +310,11 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 			}
 			return objectReadWire(r, 200, nil, objectReadBytes(nil)), nil
 		}))
-		_, err := api.GetObject(context.Background(), "c", "o", objects.WithObjectReadHeaders(map[string]string{"X-Call": "one", "X-Other": "two"}), objects.WithObjectReadNewest(true), objects.WithObjectReadIfMatch("\"one\", \"two\""), objects.WithObjectReadIfNoneMatch("literal\tvalue"), objects.WithObjectReadIfModifiedSince(modified), objects.WithObjectReadIfUnmodifiedSince(unmodified), objects.WithObjectReadRange("not a locally parsed range"), objects.WithObjectReadBufferSize(1))
+		_, err := api.GetObject(context.Background(), "c", "o", objects.WithObjectReadHeaders(map[string]string{"X-Call": "one", "X-Other": "two"}), request.Custom(func(c *objects.ObjectReadOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfMatch = "\"one\", \"two\""; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfNoneMatch = "literal\tvalue"; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { v := modified; c.IfModifiedSince = &v; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { v := unmodified; c.IfUnmodifiedSince = &v; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.Range = "not a locally parsed range"; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.BufferSize = 1; return nil }))
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = api.GetObject(context.Background(), "c", "o", objects.WithObjectReadNewest(true), objects.WithObjectReadIfModifiedSince(modified), objects.WithObjectReadIfUnmodifiedSince(unmodified), request.Custom(func(c *objects.ObjectReadOpts) error { c.Newest = nil; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }), objects.WithObjectReadIfMatch("old"), objects.WithObjectReadOpts(objects.ObjectReadOpts{}))
+		_, err = api.GetObject(context.Background(), "c", "o", request.Custom(func(c *objects.ObjectReadOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { v := modified; c.IfModifiedSince = &v; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { v := unmodified; c.IfUnmodifiedSince = &v; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.Newest = nil; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfMatch = "old"; return nil }), objects.WithObjectReadOpts(objects.ObjectReadOpts{}))
 		if err != nil || calls != 2 {
 			t.Fatalf("calls=%d err=%v", calls, err)
 		}
@@ -349,7 +349,7 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 			}
 			return objectReadWire(r, 200, nil, objectReadBytes(nil)), nil
 		}))
-		if _, err := api.GetObject(context.Background(), "c", "o", request.Header("X-Literal", " 雪\tvalue "), objects.WithObjectReadIfMatch(" quoted literal ")); err != nil {
+		if _, err := api.GetObject(context.Background(), "c", "o", request.Header("X-Literal", " 雪\tvalue "), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfMatch = " quoted literal "; return nil })); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -372,7 +372,7 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 			options           []objects.ObjectReadOption
 		}{
 			{"nil-context", nil, "c", "o", nil}, {"canceled", ctx, "c", "o", nil}, {"container-dot", context.Background(), ".", "o", nil}, {"container-slash", context.Background(), "a/b", "o", nil}, {"object-dot-segment", context.Background(), "c", "a/../b", nil}, {"object-backslash", context.Background(), "c", "a\\b", nil}, {"object-control", context.Background(), "c", "a\x7fb", nil}, {"object-invalidUTF8", context.Background(), "c", string([]byte{0xff}), nil},
-			{"nil-option", context.Background(), "c", "o", []objects.ObjectReadOption{nil}}, {"negative-buffer", context.Background(), "c", "o", []objects.ObjectReadOption{objects.WithObjectReadBufferSize(-1)}}, {"large-buffer", context.Background(), "c", "o", []objects.ObjectReadOption{objects.WithObjectReadBufferSize(16*1024*1024 + 1)}}, {"date-year", context.Background(), "c", "o", []objects.ObjectReadOption{objects.WithObjectReadIfModifiedSince(badDate)}}, {"query-control", context.Background(), "c", "o", []objects.ObjectReadOption{objects.WithObjectReadVersionID("v\n")}}, {"query-invalidUTF8", context.Background(), "c", "o", []objects.ObjectReadOption{objects.WithObjectReadFilename(string([]byte{0xff}))}}, {"typed-field-control", context.Background(), "c", "o", []objects.ObjectReadOption{objects.WithObjectReadRange("x\r\n")}},
+			{"nil-option", context.Background(), "c", "o", []objects.ObjectReadOption{nil}}, {"negative-buffer", context.Background(), "c", "o", []objects.ObjectReadOption{request.Custom(func(c *objects.ObjectReadOpts) error { c.BufferSize = -1; return nil })}}, {"large-buffer", context.Background(), "c", "o", []objects.ObjectReadOption{request.Custom(func(c *objects.ObjectReadOpts) error { c.BufferSize = 16*1024*1024 + 1; return nil })}}, {"date-year", context.Background(), "c", "o", []objects.ObjectReadOption{request.Custom(func(c *objects.ObjectReadOpts) error { v := badDate; c.IfModifiedSince = &v; return nil })}}, {"query-control", context.Background(), "c", "o", []objects.ObjectReadOption{request.Custom(func(c *objects.ObjectReadOpts) error { c.VersionID = "v\n"; return nil })}}, {"query-invalidUTF8", context.Background(), "c", "o", []objects.ObjectReadOption{request.Custom(func(c *objects.ObjectReadOpts) error { c.Filename = string([]byte{0xff}); return nil })}}, {"typed-field-control", context.Background(), "c", "o", []objects.ObjectReadOption{request.Custom(func(c *objects.ObjectReadOpts) error { c.Range = "x\r\n"; return nil })}},
 		}
 		for _, c := range cases {
 			v, err := api.GetObject(c.ctx, c.container, c.object, c.options...)
@@ -571,7 +571,7 @@ func TestObjectReadContractsWriterAndStreamOwnership(t *testing.T) {
 		body := objectReadBytes([]byte("abcdefghijk"))
 		w := &objectReadWriter{}
 		api := objects.New(objectReadClient(func(r *http.Request) (*http.Response, error) { return objectReadWire(r, 200, nil, body), nil }))
-		v, err := api.DownloadObject(context.Background(), "c", "o", w, objects.WithObjectReadBufferSize(4))
+		v, err := api.DownloadObject(context.Background(), "c", "o", w, request.Custom(func(c *objects.ObjectReadOpts) error { c.BufferSize = 4; return nil }))
 		if err != nil || v == nil || !v.Complete || v.BytesWritten != 11 || w.String() != "abcdefghijk" || body.maxRead != 4 || w.maxWrite > 4 || body.shortcuts != 0 || body.closes != 1 {
 			t.Fatalf("bounded=%+v writer=%+v body=%+v err=%v", v, w, body, err)
 		}
@@ -599,7 +599,7 @@ func TestObjectReadContractsWriterAndStreamOwnership(t *testing.T) {
 				api := objects.New(objectReadClient(func(r *http.Request) (*http.Response, error) {
 					return objectReadWire(r, 206, http.Header{"X-Proof": {"count"}}, b), nil
 				}))
-				v, err := api.DownloadObject(context.Background(), "c", "o", w, objects.WithObjectReadBufferSize(4))
+				v, err := api.DownloadObject(context.Background(), "c", "o", w, request.Custom(func(c *objects.ObjectReadOpts) error { c.BufferSize = 4; return nil }))
 				if v == nil || v.Complete || v.BytesWritten != c.count || err == nil || (c.want != nil && !errors.Is(err, c.want)) || b.closes != 1 || b.shortcuts != 0 {
 					t.Fatalf("case=%s result=%+v err=%v body=%+v", c.name, v, err, b)
 				}
@@ -643,7 +643,7 @@ func TestObjectReadContractsWriterAndStreamOwnership(t *testing.T) {
 			requests++
 			return objectReadWire(r, 200, nil, body), nil
 		}))
-		v, err := api.StreamObject(context.Background(), "c", "o", objects.WithObjectReadBufferSize(1))
+		v, err := api.StreamObject(context.Background(), "c", "o", request.Custom(func(c *objects.ObjectReadOpts) error { c.BufferSize = 1; return nil }))
 		if err != nil || v == nil || v.Body == nil || requests != 1 || body.reads != 0 || body.closes != 0 {
 			t.Fatalf("open=%+v err=%v req=%d body=%+v", v, err, requests, body)
 		}

@@ -122,7 +122,7 @@ func TestTempURLKeyContractsWireAndSelection(t *testing.T) {
 				}
 				return tempKeyWire(204, "opaque acknowledgement", nil), nil
 			})
-			result, err := accounts.New(client).SetTempURLKey(context.Background(), tc.key, accounts.WithSetTempURLKeySecondary(tc.secondary))
+			result, err := accounts.New(client).SetTempURLKey(context.Background(), tc.key, request.Custom(func(c *accounts.SetTempURLKeyOpts) error { c.Secondary = tc.secondary; return nil }))
 			if err != nil || result == nil || result.StatusCode != 204 || string(result.Body) != "opaque acknowledgement" || calls != 1 {
 				t.Fatalf("result=%+v err=%v calls=%d", result, err, calls)
 			}
@@ -147,7 +147,7 @@ func TestTempURLKeyContractsWireAndSelection(t *testing.T) {
 		}))
 		defer server.Close()
 		client := &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{HTTPClient: *server.Client()}, Type: "object-store", Endpoint: server.URL + "/unused/", ResourceBase: server.URL + "/reverse/a%20b/v1/AUTH_account/"}
-		result, err := containers.New(client).SetTempURLKey(context.Background(), tempKeyName, " literal key ", containers.WithSetTempURLKeySecondary(true))
+		result, err := containers.New(client).SetTempURLKey(context.Background(), tempKeyName, " literal key ", request.Custom(func(c *containers.SetTempURLKeyOpts) error { c.Secondary = true; return nil }))
 		if err != nil || result == nil || result.StatusCode != 204 || result.Header.Get("X-Trans-Id") != "real-wire" || requests != 1 {
 			t.Fatalf("result=%+v err=%v requests=%d", result, err, requests)
 		}
@@ -185,7 +185,7 @@ func TestTempURLKeyContractsWireAndSelection(t *testing.T) {
 				}
 				return tempKeyWire(204, "raw phase", h), nil
 			})
-			result, err := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer(tc.name))
+			result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = tc.name; return nil }))
 			tempKeySelected(t, result, err, tc.want, tc.from, tc.secondary)
 			if calls != tc.calls || (tc.name != "" && (result.Container == nil || result.Container.StatusCode != 204)) || (!tc.from && result.Account == nil) {
 				t.Fatalf("proof=%+v calls=%d want=%d", result, calls, tc.calls)
@@ -203,7 +203,7 @@ func TestTempURLKeyContractsWireAndSelection(t *testing.T) {
 				var err error
 				switch op {
 				case "get":
-					result, e := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("c"))
+					result, e := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "c"; return nil }))
 					err = e
 					if result != nil {
 						t.Fatalf("unexpected getter=%+v", result)
@@ -274,7 +274,7 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 				factoryHeaders["x-call"] = "mutated"
 				extra["X-Second"] = "mutated"
 				var retained *accounts.SetTempURLKeyOpts
-				result, err := accounts.New(client).SetTempURLKey(context.Background(), "key", accounts.WithSetTempURLKeySecondary(true), request.Header("X-Discarded", "yes"), full, headers, request.Header("X-Call", "final"), request.Custom(func(cfg *accounts.SetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *accounts.SetTempURLKeyOpts) error { retained.Headers["X-Call"] = "late mutation"; return nil }))
+				result, err := accounts.New(client).SetTempURLKey(context.Background(), "key", request.Custom(func(c *accounts.SetTempURLKeyOpts) error { c.Secondary = true; return nil }), request.Header("X-Discarded", "yes"), full, headers, request.Header("X-Call", "final"), request.Custom(func(cfg *accounts.SetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *accounts.SetTempURLKeyOpts) error { retained.Headers["X-Call"] = "late mutation"; return nil }))
 				if err != nil || result == nil {
 					t.Fatalf("result=%+v err=%v", result, err)
 				}
@@ -285,7 +285,7 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 				factoryHeaders["x-call"] = "mutated"
 				extra["X-Second"] = "mutated"
 				var retained *containers.SetTempURLKeyOpts
-				result, err := containers.New(client).SetTempURLKey(context.Background(), "c", "key", containers.WithSetTempURLKeySecondary(true), request.Header("X-Discarded", "yes"), full, headers, request.Header("X-Call", "final"), request.Custom(func(cfg *containers.SetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *containers.SetTempURLKeyOpts) error {
+				result, err := containers.New(client).SetTempURLKey(context.Background(), "c", "key", request.Custom(func(c *containers.SetTempURLKeyOpts) error { c.Secondary = true; return nil }), request.Header("X-Discarded", "yes"), full, headers, request.Header("X-Call", "final"), request.Custom(func(cfg *containers.SetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *containers.SetTempURLKeyOpts) error {
 					retained.Headers["X-Call"] = "late mutation"
 					return nil
 				}))
@@ -329,7 +329,7 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 				}
 				return tempKeyWire(204, "", http.Header{http.CanonicalHeaderKey(prefix): {value}}), nil
 			})
-			opts := []v1.GetTempURLKeyOption{v1.WithGetTempURLKeyNewest(true), full, overlay, request.Header("X-Call", "final")}
+			opts := []v1.GetTempURLKeyOption{request.Custom(func(c *v1.GetTempURLKeyOpts) error { v := true; c.Newest = &v; return nil }), full, overlay, request.Header("X-Call", "final")}
 			var retained *v1.GetTempURLKeyOpts
 			opts = append(opts, request.Custom(func(cfg *v1.GetTempURLKeyOpts) error { retained = cfg; return nil }), request.Custom(func(cfg *v1.GetTempURLKeyOpts) error {
 				retained.Headers["X-Call"] = "late mutation"
@@ -354,7 +354,7 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 			return tempKeyWire(204, "", nil), nil
 		})
 		client.ResourceBase = "not a usable container URL"
-		result, err := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("prior"), v1.WithGetTempURLKeyContainer(""))
+		result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "prior"; return nil }), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = ""; return nil }))
 		tempKeySelected(t, result, err, "", false, false)
 	})
 	t.Run("result headers key bytes and concurrent option reuse independent", func(t *testing.T) {
@@ -368,7 +368,7 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 		if result.Account.Header.Get("X-Account-Meta-Temp-Url-Key-2") != "selected" || result.Account.Header.Get("X-Account-Meta-Other") != "observed" || result.Account.Metadata.Values["temp-url-key-2"] != "selected" {
 			t.Fatal("independent owned evidence aliased")
 		}
-		options := []v1.GetTempURLKeyOption{v1.WithGetTempURLKeyHeaders(map[string]string{"X-Reuse": "safe"}), v1.WithGetTempURLKeyNewest(false)}
+		options := []v1.GetTempURLKeyOption{v1.WithGetTempURLKeyHeaders(map[string]string{"X-Reuse": "safe"}), request.Custom(func(c *v1.GetTempURLKeyOpts) error { v := false; c.Newest = &v; return nil })}
 		var wg sync.WaitGroup
 		for i := 0; i < 8; i++ {
 			wg.Add(1)
@@ -428,7 +428,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 		for _, name := range []string{".", "..", "a/b", "a\\b", "\x00", "\x7f", string([]byte{0xff})} {
 			calls := 0
 			client := tempKeyClient(func(r *http.Request) (*http.Response, error) { calls++; return tempKeyWire(204, "", nil), nil })
-			result, err := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer(name))
+			result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = name; return nil }))
 			ack, e := containers.New(client).SetTempURLKey(context.Background(), name, "key")
 			if result != nil || ack != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.Is(e, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatalf("name=%q result=%+v ack=%+v errors=%v/%v calls=%d", name, result, ack, err, e, calls)
@@ -522,7 +522,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 			client = tempKeyClient(func(r *http.Request) (*http.Response, error) { calls++; return tempKeyResponse(204, body, nil), nil })
 			client.MoreHeaders = map[string]string{"X-Capture": "original"}
 			service = v1.New(client)
-			result, err := service.GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("c"))
+			result, err := service.GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "c"; return nil }))
 			if result == nil || result.Container == nil || result.Container.Metadata != nil || result.Account != nil || result.Key != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 || body.closes.Load() != 1 {
 				t.Fatalf("result=%+v err=%v calls=%d closes=%d", result, err, calls, body.closes.Load())
 			}
@@ -544,7 +544,7 @@ func TestTempURLKeyContractsPreflightAndSource(t *testing.T) {
 			return tempKeyWire(204, "", http.Header{"X-Account-Meta-Temp-Url-Key": {"account"}}), nil
 		})
 		client.MoreHeaders = map[string]string{"X-Capture": "original"}
-		result, err := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("c"))
+		result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "c"; return nil }))
 		tempKeySelected(t, result, err, "account", false, false)
 		if calls != 2 || client.MoreHeaders["X-Capture"] != "later valid source" {
 			t.Fatalf("calls=%d source=%v", calls, client.MoreHeaders)
@@ -615,7 +615,7 @@ func TestTempURLKeyContractsPhaseEvidence(t *testing.T) {
 				}
 				return tempKeyResponse(204, &tempKeyBody{Reader: strings.NewReader("account proof"), closeErr: cause}, http.Header{"X-Account-Meta-Temp-Url-Key": {"not selected"}}), nil
 			})
-			result, err := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("c"))
+			result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "c"; return nil }))
 			if result == nil || result.Container == nil || result.Container.Metadata == nil || string(result.Container.Body) != "container proof" || result.Key != nil || result.Secondary || result.FromContainer || err == nil || calls != 2 {
 				t.Fatalf("mode=%s result=%+v err=%v calls=%d", mode, result, err, calls)
 			}
@@ -651,7 +651,7 @@ func TestTempURLKeyContractsPhaseEvidence(t *testing.T) {
 				calls++
 				return tempKeyWire(204, "whole raw body", bad), nil
 			})
-			result, err := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("c"))
+			result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "c"; return nil }))
 			if result == nil || result.Container == nil || result.Container.Metadata != nil || result.Account != nil || result.Key != nil || result.FromContainer || result.Secondary || err == nil || calls != 1 {
 				t.Fatalf("bad=%v result=%+v err=%v calls=%d", bad, result, err, calls)
 			}
@@ -663,7 +663,7 @@ func TestTempURLKeyContractsPhaseEvidence(t *testing.T) {
 				calls++
 				return tempKeyWire(status, "container failure", nil), nil
 			})
-			result, err := v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("c"))
+			result, err := v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "c"; return nil }))
 			if result != nil || err == nil || calls != 1 {
 				t.Fatalf("status=%d result=%+v err=%v calls=%d", status, result, err, calls)
 			}
@@ -740,7 +740,7 @@ func TestTempURLKeyContractsNativePolicy(t *testing.T) {
 			return tempKeyWire(401, "unauthorized", nil), nil
 		})
 		client.ReauthFunc = func(ctx context.Context) error { return reauthErr }
-		result, err = v1.New(client).GetTempURLKey(context.Background(), v1.WithGetTempURLKeyContainer("c"))
+		result, err = v1.New(client).GetTempURLKey(context.Background(), request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Container = "c"; return nil }))
 		var reauth *gophercloud.ErrUnableToReauthenticate
 		if result != nil || !errors.As(err, &reauth) || reauth.ErrOriginal == nil || reauth.ErrReauth != reauthErr || errors.Is(err, reauthErr) || calls != 1 {
 			t.Fatalf("result=%+v err=%v reauth=%+v calls=%d", result, err, reauth, calls)

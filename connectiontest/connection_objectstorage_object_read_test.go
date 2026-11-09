@@ -87,7 +87,7 @@ func TestConnectionObjectReadSharesClientAndOwnsTransfer(t *testing.T) {
 	source.ResourceBase = "https://cloud.test/reverse%25/v1/AUTH_account%25/"
 	source.MoreHeaders = map[string]string{"X-Source": "0"}
 	headers := map[string]string{"X-Call": "owned"}
-	opts := []objects.ObjectReadOption{objects.WithObjectReadHeaders(headers), objects.WithObjectReadNewest(false), request.Custom(func(o *objects.ObjectReadOpts) error { provider.SetToken(fmt.Sprintf("swift-%d", calls+1)); return nil })}
+	opts := []objects.ObjectReadOption{objects.WithObjectReadHeaders(headers), request.Custom(func(c *objects.ObjectReadOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(o *objects.ObjectReadOpts) error { provider.SetToken(fmt.Sprintf("swift-%d", calls+1)); return nil })}
 	headers["X-Call"] = "late"
 	get, err := service.Objects.GetObject(ctx, container, object, opts...)
 	if err != nil || get == nil || !get.Complete || get.NotModified || get.StatusCode != 200 || !bytes.Equal(get.Body, binary) || get.Metadata == nil || get.Metadata.Values["owner"] != "" || bodies[0].closes != 1 || calls != 1 {

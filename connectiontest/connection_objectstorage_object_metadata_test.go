@@ -118,7 +118,7 @@ func TestConnectionObjectMetadataSharesClientAndOwnsPhases(t *testing.T) {
 	source = service.RawClient()
 	source.ResourceBase = "https://cloud.test/other%25/v1/AUTH_account%25/"
 	source.MoreHeaders = map[string]string{"X-Source": "source-0", "Content-Type": "source/type"}
-	get, err := service.Objects.GetMetadata(ctx, container, object, objects.WithGetMetadataNewest(false), request.Custom(func(o *objects.GetMetadataOpts) error {
+	get, err := service.Objects.GetMetadata(ctx, container, object, request.Custom(func(c *objects.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(o *objects.GetMetadataOpts) error {
 		provider.SetToken("swift-1")
 		return nil
 	}))

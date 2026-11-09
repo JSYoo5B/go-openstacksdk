@@ -22,8 +22,9 @@ type MetadataRefreshResult struct {
 
 // SetMetadataAndRefresh implements the Python container setter's default POST
 // followed by HEAD. JSON-domain values use Python string spellings; keys may be
-// suffixes, exact prefixes or audited system aliases. WithMetadataRefresh(false)
-// skips the final HEAD; existing SetMetadata remains a one-POST acknowledgement.
+// suffixes, exact prefixes or audited system aliases.
+// MetadataRefreshOpts.Refresh = false skips the final HEAD; existing
+// SetMetadata remains a one-POST acknowledgement.
 func (a *API) SetMetadataAndRefresh(ctx context.Context, container string, values map[string]any, options ...MetadataRefreshOption) (*MetadataRefreshResult, error) {
 	p, err := a.captureMetadata(ctx, container)
 	if err != nil {
@@ -164,19 +165,17 @@ type MetadataRefreshOpts struct {
 	Refresh *bool
 }
 
-// MetadataRefreshOption is one option of SetMetadataAndRefresh: the
-// WithMetadataRefresh* options, request.Header (validated and merged like a
-// one-entry WithMetadataRefreshHeaders) or request.Custom over
-// *MetadataRefreshOpts. Other shared calls, including request.Headers (the
-// WithMetadataRefreshHeaders map merges instead of replacing), fail with
-// resource.ErrInvalidOption before HTTP.
+// MetadataRefreshOption is one option of SetMetadataAndRefresh:
+// WithMetadataRefreshOpts, WithMetadataRefreshHeaders, request.Header
+// (validated and merged like a one-entry WithMetadataRefreshHeaders) or
+// request.Custom over *MetadataRefreshOpts (for example to set Refresh). Other
+// shared calls, including request.Headers (the WithMetadataRefreshHeaders map
+// merges instead of replacing), fail with resource.ErrInvalidOption before
+// HTTP.
 type MetadataRefreshOption = request.WriteCall
 
 var metadataRefreshCalls = calls.Spec[MetadataRefreshOpts]{Header: calls.MergeHeader[MetadataRefreshOpts](WithMetadataRefreshHeaders)}
 
-func WithMetadataRefresh(value bool) MetadataRefreshOption {
-	return request.Custom(func(cfg *MetadataRefreshOpts) error { owned := value; cfg.Refresh = &owned; return nil })
-}
 func WithMetadataRefreshOpts(value MetadataRefreshOpts) MetadataRefreshOption {
 	snapshot := cloneMetadataRefreshOpts(value)
 	return request.Custom(func(cfg *MetadataRefreshOpts) error { *cfg = cloneMetadataRefreshOpts(snapshot); return nil })

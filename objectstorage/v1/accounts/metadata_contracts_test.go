@@ -145,7 +145,7 @@ func TestAccountMetadataContractsWireAndPresence(t *testing.T) {
 			calls++
 			return accountMetadataResponse(204, ""), nil
 		})
-		for _, opts := range [][]accounts.GetMetadataOption{nil, {accounts.WithGetMetadataNewest(false)}, {accounts.WithGetMetadataNewest(true)}, {accounts.WithGetMetadataNewest(true), request.Custom(func(c *accounts.GetMetadataOpts) error { c.Newest = nil; return nil })}} {
+		for _, opts := range [][]accounts.GetMetadataOption{nil, {request.Custom(func(c *accounts.GetMetadataOpts) error { v := false; c.Newest = &v; return nil })}, {request.Custom(func(c *accounts.GetMetadataOpts) error { v := true; c.Newest = &v; return nil })}, {request.Custom(func(c *accounts.GetMetadataOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *accounts.GetMetadataOpts) error { c.Newest = nil; return nil })}} {
 			if _, err := accounts.New(client).GetMetadata(context.Background(), opts...); err != nil {
 				t.Fatal(err)
 			}
@@ -335,7 +335,7 @@ func TestAccountMetadataContractsPreflightAndSnapshots(t *testing.T) {
 			}
 			return accountMetadataResponse(204, ""), nil
 		})
-		if _, err := accounts.New(client).GetMetadata(context.Background(), accounts.WithGetMetadataNewest(true), request.Header("X-Discarded", "old"), accounts.WithGetMetadataOpts(accounts.GetMetadataOpts{})); err != nil {
+		if _, err := accounts.New(client).GetMetadata(context.Background(), request.Custom(func(c *accounts.GetMetadataOpts) error { v := true; c.Newest = &v; return nil }), request.Header("X-Discarded", "old"), accounts.WithGetMetadataOpts(accounts.GetMetadataOpts{})); err != nil {
 			t.Fatal(err)
 		}
 	})

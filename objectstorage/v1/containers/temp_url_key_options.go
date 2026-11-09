@@ -34,9 +34,6 @@ func WithSetTempURLKeyHeaders(values map[string]string) SetTempURLKeyOption {
 		return mergeMetadataHeaders(cfg.Headers, snapshot)
 	})
 }
-func WithSetTempURLKeySecondary(value bool) SetTempURLKeyOption {
-	return request.Custom(func(cfg *SetTempURLKeyOpts) error { cfg.Secondary = value; return nil })
-}
 
 func cloneSetTempURLKeyOpts(value SetTempURLKeyOpts) SetTempURLKeyOpts {
 	value.Headers = cloneMetadataHeaders(value.Headers)

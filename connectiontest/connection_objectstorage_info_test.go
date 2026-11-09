@@ -65,12 +65,12 @@ func TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow(t *testing.T) {
 		t.Fatal(info, err)
 	}
 	provider.SetToken("token-2")
-	result, err := service.GetObjectSegmentSize(ctx, segmentOption, swift.WithObjectSegmentSize(0))
+	result, err := service.GetObjectSegmentSize(ctx, segmentOption, request.Custom(func(c *swift.ObjectSegmentSizeOpts) error { v := int64(0); c.Size = &v; return nil }))
 	if err != nil || result == nil || result.RequestedSize != 0 || result.Size != 10 || result.MaxFileSize != 100 || result.MinSegmentSize != 10 || result.UsedFallback || result.Info == nil || result.Header.Get("X-Proof") != "2" {
 		t.Fatal(result, err)
 	}
 	provider.SetToken("token-3")
-	reset, err := service.GetObjectSegmentSize(ctx, segmentOption, swift.WithObjectSegmentSize(0), request.Custom(func(c *swift.ObjectSegmentSizeOpts) error { c.Size = nil; return nil }))
+	reset, err := service.GetObjectSegmentSize(ctx, segmentOption, request.Custom(func(c *swift.ObjectSegmentSizeOpts) error { v := int64(0); c.Size = &v; return nil }), request.Custom(func(c *swift.ObjectSegmentSizeOpts) error { c.Size = nil; return nil }))
 	if err != nil || reset == nil || reset.RequestedSize != 1073741824 || reset.Size != 100 || calls != 3 {
 		t.Fatal(reset, err, calls)
 	}

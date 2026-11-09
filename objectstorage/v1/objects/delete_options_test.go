@@ -67,7 +67,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 	}
 	for _, options := range [][]DeleteObjectOption{
 		{WithDeleteObjectStaticLargeObject(true), request.Custom(func(c *DeleteObjectOpts) error { c.StaticLargeObject = nil; return nil }), WithDeleteObjectNewest(true), request.Custom(func(c *DeleteObjectOpts) error { c.Newest = nil; return nil }), request.IgnoreMissing(false), request.Custom(func(c *DeleteObjectOpts) error { c.IgnoreMissing = nil; return nil })},
-		{WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("discard"), request.Header("X-Call", "discard"), WithDeleteObjectOpts(DeleteObjectOpts{})},
+		{WithDeleteObjectStaticLargeObject(true), request.Custom(func(c *DeleteObjectOpts) error { c.VersionID = "discard"; return nil }), request.Header("X-Call", "discard"), WithDeleteObjectOpts(DeleteObjectOpts{})},
 	} {
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Method != "HEAD" || r.URL.RawQuery != "" || r.Header.Get("X-Newest") != "" || r.Header.Get("X-Call") != "" {
@@ -96,7 +96,7 @@ func TestObjectDeleteOptionsPreflight(t *testing.T) {
 		}
 		c.MoreHeaders = nil
 	}
-	for _, option := range []DeleteObjectOption{nil, WithDeleteObjectVersionID("\xff"), WithDeleteObjectVersionID("line\nversion")} {
+	for _, option := range []DeleteObjectOption{nil, request.Custom(func(c *DeleteObjectOpts) error { c.VersionID = "\xff"; return nil }), request.Custom(func(c *DeleteObjectOpts) error { c.VersionID = "line\nversion"; return nil })} {
 		if result, err := New(c).DeleteObject(context.Background(), "box", "key", option); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err)
 		}
@@ -192,7 +192,7 @@ func TestObjectDeleteOptionsNativeRetrySnapshots(t *testing.T) {
 		}
 		return objectMetadataWire(r, 200, http.Header{}, io.NopCloser(strings.NewReader(deleteCoreBulkOK))), nil
 	})
-	result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("v% ?#"), request.Header("X-Call", "owned"), request.Custom(func(*DeleteObjectOpts) error { callbacks++; return nil }))
+	result, err := New(c).DeleteObject(context.Background(), "box", "key", WithDeleteObjectStaticLargeObject(true), request.Custom(func(c *DeleteObjectOpts) error { c.VersionID = "v% ?#"; return nil }), request.Header("X-Call", "owned"), request.Custom(func(*DeleteObjectOpts) error { callbacks++; return nil }))
 	if result == nil || result.Bulk == nil || err != nil || calls != 2 || retries != 1 || callbacks != 1 {
 		t.Fatal(result, err, calls, retries, callbacks)
 	}

@@ -49,8 +49,8 @@ func TestObjectStaleOptionsSnapshotsAndReplacement(t *testing.T) {
 	}
 	p := createUploadPrepared(t, c)
 	for _, options := range [][]IsObjectStaleOption{
-		{request.Header("X-Call", "first"), WithIsObjectStaleHeaders(map[string]string{"x-call": "last"}), WithIsObjectStaleMD5(md), WithIsObjectStaleSHA256(strings.Repeat("B", 64)), WithIsObjectStaleMD5(""), WithIsObjectStaleSHA256("")},
-		{request.Header("X-Call", "discard"), WithIsObjectStaleMD5(md), WithIsObjectStaleOpts(IsObjectStaleOpts{})},
+		{request.Header("X-Call", "first"), WithIsObjectStaleHeaders(map[string]string{"x-call": "last"}), request.Custom(func(c *IsObjectStaleOpts) error { c.MD5 = md; return nil }), request.Custom(func(c *IsObjectStaleOpts) error { c.SHA256 = strings.Repeat("B", 64); return nil }), request.Custom(func(c *IsObjectStaleOpts) error { c.MD5 = ""; return nil }), request.Custom(func(c *IsObjectStaleOpts) error { c.SHA256 = ""; return nil })},
+		{request.Header("X-Call", "discard"), request.Custom(func(c *IsObjectStaleOpts) error { c.MD5 = md; return nil }), WithIsObjectStaleOpts(IsObjectStaleOpts{})},
 	} {
 		cfg, err := p.applyStaleOptions(context.Background(), options)
 		if err != nil || cfg.MD5 != "" || cfg.SHA256 != "" {
@@ -73,7 +73,7 @@ func TestObjectStaleOptionsPreflightAndCauses(t *testing.T) {
 			t.Fatal(result, err, callbacks)
 		}
 	}
-	for _, option := range []IsObjectStaleOption{nil, WithIsObjectStaleMD5("bad"), WithIsObjectStaleSHA256(strings.Repeat("g", 64)), WithIsObjectStaleHeaders(map[string]string{"X-Call": "one", "x-call": "two"}), request.Header("Cookie", "auth"), request.Header("X-Service-Token", "auth"), request.Header("ETag", "owned"), request.Header("Content-Length", "9"), request.Header("X-Object-Meta-Tag", "owned")} {
+	for _, option := range []IsObjectStaleOption{nil, request.Custom(func(c *IsObjectStaleOpts) error { c.MD5 = "bad"; return nil }), request.Custom(func(c *IsObjectStaleOpts) error { c.SHA256 = strings.Repeat("g", 64); return nil }), WithIsObjectStaleHeaders(map[string]string{"X-Call": "one", "x-call": "two"}), request.Header("Cookie", "auth"), request.Header("X-Service-Token", "auth"), request.Header("ETag", "owned"), request.Header("Content-Length", "9"), request.Header("X-Object-Meta-Tag", "owned")} {
 		if result, err := New(c).IsObjectStale(context.Background(), "box", "key", "explicit missing", option); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(result, err)
 		}
@@ -132,7 +132,7 @@ func TestObjectStaleOptionsNativeSnapshotAndProof(t *testing.T) {
 		}
 		return objectMetadataOK(r, 200, http.Header{"X-Object-Meta-X-Sdk-Md5": {md}}), nil
 	})
-	result, err := New(c).IsObjectStale(context.Background(), "box", "key", "explicit unread", WithIsObjectStaleMD5(md), request.Header("X-Call", "owned"), request.Custom(func(*IsObjectStaleOpts) error { callbacks++; return nil }))
+	result, err := New(c).IsObjectStale(context.Background(), "box", "key", "explicit unread", request.Custom(func(c *IsObjectStaleOpts) error { c.MD5 = md; return nil }), request.Header("X-Call", "owned"), request.Custom(func(*IsObjectStaleOpts) error { callbacks++; return nil }))
 	if err != nil || result == nil || result.Stale == nil || *result.Stale || calls != 2 || retries != 1 || callbacks != 1 {
 		t.Fatal(result, err, calls, retries, callbacks)
 	}

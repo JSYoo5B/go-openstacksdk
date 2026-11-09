@@ -34,7 +34,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SearchContainers`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers`
@@ -88,7 +88,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.CreateContainer`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerPublic`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateHeaders`
 
@@ -137,9 +137,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts`
 
-- SetMetadataAndRefresh with WithMetadataRefresh(false) sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.
+- SetMetadataAndRefresh with MetadataRefreshOpts.Refresh = false sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.
   Tests: `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost`, `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError`.
 
 Python/Go differences:
@@ -154,13 +155,13 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SetContainerAccess`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessRefresh`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessHeaders`
 
-- SetMetadataAndRefresh with WithMetadataRefresh(false) sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.
+- SetMetadataAndRefresh with MetadataRefreshOpts.Refresh = false sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.
   Tests: `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost`, `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError`.
 - Only literal public/private values are accepted before callbacks/HTTP, public translates to .r:*,.rlistings and private to an explicitly present empty X-Container-Read value; cloud refresh defaults false and true explicitly performs POST then HEAD. A failed final HEAD, including clean404, remains strict and preserves the successful POST without a replay.
   Tests: `objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessOwnsTranslationAndRefreshDefault`, `objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessRejectsUnknownBeforeCallbacksOrHTTP`, `objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessRefreshFailurePreservesPostAndStrictMissing`.
@@ -348,7 +349,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchObjects`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SearchObjects`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchExpression`
 
@@ -395,9 +396,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.DeleteAutocreatedImageObjects`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImageObjectsOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImageTasks`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImageContainer`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImagePrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Task policy defaults false with no Swift requests; enabled cleanup defaults nil container to images and forwards optional prefix through lazy list records. It reads fresh metadata and deletes only exact x-sdk-autocreated=true, interleaving each object before requesting the next page.
   Tests: `objectstorage/cloud_autocreated_image_objects_test.go:TestSwiftAutocreatedImagesDefaultDisabledAndOwnedOptions`, `objectstorage/cloud_autocreated_image_objects_test.go:TestSwiftAutocreatedImagesExactMarkerLazyDeleteAndPageOrdering`.
@@ -437,8 +436,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObjectRaw`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectQueryString`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectStream`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Default stream=False and query_string=None map to library-owned omitted-query buffered GET; functional concrete options allow explicit encoded query and stream=True. Literal escaped container/object, empty obj selects container, raw repeated query order stays intact, no HEAD/metadata/content decoding. Complete opaque bytes include NUL/invalid UTF8, physical body closes once, accepted HTTP100..999 alone never raises status errors.
   Tests: `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectCloudGetObjectRawReturnsEveryStatus`, `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawBufferedDefaultOwnsOpaqueBytesAndAllowsContainerEndpoint`, `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectCloudGetObjectRawRejectsInputsBeforeHTTP`, `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawOptionBoundaryCapturesSourceBeforeCallbacks`.
@@ -469,12 +467,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.StreamObjectChunks`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.StreamObjectChunks`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamQueryString`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamCloudObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamQueryString`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Library-owned factory returns a lazy, single-use closeable binary chunk iterator; default1024 and query_string ignored even when malformed. No discovery/options/GET before iteration; connection supplies the cached Swift Cloud facade. Receipt is actual status/header and each returned chunk is independently owned.
   Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamLazyDefaultBinaryChunksAndSingleUse`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade`.
@@ -515,17 +510,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.GetObjectText`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetQueryString`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetStream`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOutfile`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetWriter`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetContent`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetOutfile`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetQueryString`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetStream`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetWriter`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCloudGetContent`

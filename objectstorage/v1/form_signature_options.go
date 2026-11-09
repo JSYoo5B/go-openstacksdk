@@ -37,12 +37,6 @@ func WithGenerateFormSignatureKey(value []byte) GenerateFormSignatureOption {
 	snapshot := cloneSigningKey(value)
 	return request.Custom(func(cfg *GenerateFormSignatureOpts) error { cfg.Key = cloneSigningKey(snapshot); return nil })
 }
-func WithGenerateFormSignatureDigest(value TempURLDigest) GenerateFormSignatureOption {
-	return request.Custom(func(cfg *GenerateFormSignatureOpts) error { cfg.Digest = value; return nil })
-}
-func WithGenerateFormSignatureTimestamp(value time.Time) GenerateFormSignatureOption {
-	return request.Custom(func(cfg *GenerateFormSignatureOpts) error { owned := value; cfg.Timestamp = &owned; return nil })
-}
 func WithGenerateFormSignatureHeaders(values map[string]string) GenerateFormSignatureOption {
 	snapshot := cloneTempURLKeyHeaders(values)
 	return request.Custom(func(cfg *GenerateFormSignatureOpts) error {
@@ -51,9 +45,6 @@ func WithGenerateFormSignatureHeaders(values map[string]string) GenerateFormSign
 		}
 		return mergeTempURLKeyHeaders(cfg.Headers, snapshot)
 	})
-}
-func WithGenerateFormSignatureNewest(value bool) GenerateFormSignatureOption {
-	return request.Custom(func(cfg *GenerateFormSignatureOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
 
 func cloneGenerateFormSignatureOpts(value GenerateFormSignatureOpts) GenerateFormSignatureOpts {

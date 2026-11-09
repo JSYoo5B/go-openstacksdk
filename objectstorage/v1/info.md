@@ -53,7 +53,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSize`
 
 - Fresh actual200 capabilities select exact int64 requested/default1073741824/explicit0 sizes using maximum first then minimum, preserve inverted-bound ordering and use0 for absent/null sections or bounds.
   Tests: `objectstorage/v1/info_contracts_test.go:TestObjectInfoContractsSegmentBounds`, `connectiontest/connection_objectstorage_info_test.go:TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow`, `objectstorage/v1/info_core_test.go:TestInfoCoreSegmentSelection`.
@@ -144,7 +143,7 @@ func capabilities(ctx context.Context, service *objectstorage.Service) error {
         }),
         objectstorage.WithObjectSegmentSizeHeaders(map[string]string{"X-Trace-Label": "segment"}),
         request.Header("X-Request-Label", "default"),
-        objectstorage.WithObjectSegmentSize(2 * 1024 * 1024 * 1024),
+        request.Custom(func(c *objectstorage.ObjectSegmentSizeOpts) error { v := int64(2 * 1024 * 1024 * 1024); c.Size = &v; return nil }),
         request.Custom(func(c *objectstorage.ObjectSegmentSizeOpts) error { c.Size = nil; return nil }),
     }
     selected, err := service.GetObjectSegmentSize(ctx, defaultOptions...)
@@ -155,7 +154,7 @@ func capabilities(ctx context.Context, service *objectstorage.Service) error {
     }
 
     selected, err = service.GetObjectSegmentSize(ctx,
-        objectstorage.WithObjectSegmentSize(large),
+        request.Custom(func(c *objectstorage.ObjectSegmentSizeOpts) error { v := large; c.Size = &v; return nil }),
     )
     showSegment(selected)
     if err != nil { reportResponseError(err) }

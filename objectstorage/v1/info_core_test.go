@@ -134,7 +134,7 @@ func TestInfoCoreSegmentBoundsAtomic(t *testing.T) {
 				c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 					return tempURLKeyTestWire(r, 200, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(body))), nil
 				})
-				result, err := New(c).GetObjectSegmentSize(context.Background(), WithObjectSegmentSize(20))
+				result, err := New(c).GetObjectSegmentSize(context.Background(), request.Custom(func(c *ObjectSegmentSizeOpts) error { v := int64(20); c.Size = &v; return nil }))
 				proof := infoCoreProof(t, err, 200, body)
 				if result == nil || result.Info == nil || result.RequestedSize != 20 || result.Size != 0 || result.MaxFileSize != 0 || result.MinSegmentSize != 0 || result.UsedFallback {
 					t.Fatal("invalid bounds committed partially", result, err)
@@ -157,7 +157,7 @@ func TestInfoCorePhysicalFallbackAndDirtyResponses(t *testing.T) {
 			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 				return tempURLKeyTestWire(r, code, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader(body))), nil
 			})
-			result, err := New(c).GetObjectSegmentSize(context.Background(), WithObjectSegmentSize(size))
+			result, err := New(c).GetObjectSegmentSize(context.Background(), request.Custom(func(c *ObjectSegmentSizeOpts) error { v := size; c.Size = &v; return nil }))
 			want := size
 			if size > 2684354561 {
 				want = 2684354561

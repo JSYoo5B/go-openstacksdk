@@ -96,7 +96,7 @@ func TestConnectionObjectDeleteSharesClientAndOwnsPhases(t *testing.T) {
 	option := objects.WithDeleteObjectHeaders(headers)
 	headers["X-Call"] = "caller mutation"
 	callbacks := 0
-	result, err := service.Objects.DeleteObject(ctx, container, object, option, objects.WithDeleteObjectVersionID(version), objects.WithDeleteObjectNewest(false), request.Custom(func(o *objects.DeleteObjectOpts) error {
+	result, err := service.Objects.DeleteObject(ctx, container, object, option, request.Custom(func(c *objects.DeleteObjectOpts) error { c.VersionID = version; return nil }), objects.WithDeleteObjectNewest(false), request.Custom(func(o *objects.DeleteObjectOpts) error {
 		callbacks++
 		source.MoreHeaders["X-Source"] = "callback change"
 		provider.SetToken("swift-1")

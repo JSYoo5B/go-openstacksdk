@@ -79,11 +79,11 @@ func TestObjectReadOptionsHeaderAndDateInputs(t *testing.T) {
 	})
 	result, err := api.GetObject(context.Background(), "c", "o",
 		WithObjectReadOpts(ObjectReadOpts{Headers: map[string]string{"x-call": "old"}}),
-		request.Header("X-Call", "new"), WithObjectReadNewest(true), request.Custom(func(c *ObjectReadOpts) error { c.Newest = nil; return nil }), WithObjectReadNewest(false),
-		WithObjectReadIfMatch("opaque\tmatch"), WithObjectReadIfNoneMatch("none"),
-		WithObjectReadIfModifiedSince(date), request.Custom(func(c *ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }),
-		WithObjectReadIfUnmodifiedSince(time.Now()), request.Custom(func(c *ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }), WithObjectReadIfUnmodifiedSince(date),
-		WithObjectReadRange("literal"), WithObjectReadFilename("한 ?#"), WithObjectReadMultipartManifest("get"), WithObjectReadSymlink("get"), WithObjectReadVersionID("v% ?#"), WithObjectReadBufferSize(1))
+		request.Header("X-Call", "new"), request.Custom(func(c *ObjectReadOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.Newest = nil; return nil }), request.Custom(func(c *ObjectReadOpts) error { v := false; c.Newest = &v; return nil }),
+		request.Custom(func(c *ObjectReadOpts) error { c.IfMatch = "opaque\tmatch"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.IfNoneMatch = "none"; return nil }),
+		request.Custom(func(c *ObjectReadOpts) error { v := date; c.IfModifiedSince = &v; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }),
+		request.Custom(func(c *ObjectReadOpts) error { v := time.Now(); c.IfUnmodifiedSince = &v; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }), request.Custom(func(c *ObjectReadOpts) error { v := date; c.IfUnmodifiedSince = &v; return nil }),
+		request.Custom(func(c *ObjectReadOpts) error { c.Range = "literal"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.Filename = "한 ?#"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.MultipartManifest = "get"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.Symlink = "get"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.VersionID = "v% ?#"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.BufferSize = 1; return nil }))
 	if err != nil || result == nil || !result.Complete || calls != 1 {
 		t.Fatalf("inputs: %+v %v calls=%d", result, err, calls)
 	}
@@ -95,11 +95,15 @@ func TestObjectReadOptionsPreflight(t *testing.T) {
 		option ObjectReadOption
 	}{
 		{"nil", nil},
-		{"negative-buffer", WithObjectReadBufferSize(-1)},
-		{"large-buffer", WithObjectReadBufferSize(16*1024*1024 + 1)},
-		{"query-control", WithObjectReadFilename("line\nname")},
-		{"field-control", WithObjectReadIfMatch("bad\rvalue")},
-		{"date-year-zero", WithObjectReadIfModifiedSince(time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC))},
+		{"negative-buffer", request.Custom(func(c *ObjectReadOpts) error { c.BufferSize = -1; return nil })},
+		{"large-buffer", request.Custom(func(c *ObjectReadOpts) error { c.BufferSize = 16*1024*1024 + 1; return nil })},
+		{"query-control", request.Custom(func(c *ObjectReadOpts) error { c.Filename = "line\nname"; return nil })},
+		{"field-control", request.Custom(func(c *ObjectReadOpts) error { c.IfMatch = "bad\rvalue"; return nil })},
+		{"date-year-zero", request.Custom(func(c *ObjectReadOpts) error {
+			v := time.Date(0, 1, 1, 0, 0, 0, 0, time.UTC)
+			c.IfModifiedSince = &v
+			return nil
+		})},
 		{"aliases", WithObjectReadHeaders(map[string]string{"x-call": "a", "X-Call": "b"})},
 	} {
 		t.Run(test.name, func(t *testing.T) {

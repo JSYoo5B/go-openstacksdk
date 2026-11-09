@@ -42,12 +42,13 @@ type ObjectSegmentSizeOpts struct {
 	Size    *int64
 }
 
-// ObjectSegmentSizeOption is one option of GetObjectSegmentSize: the
-// WithObjectSegmentSize* options, request.Header (validated and merged like a
-// one-entry WithObjectSegmentSizeHeaders) or request.Custom over
-// *ObjectSegmentSizeOpts. Other shared calls, including request.Headers (the
-// WithObjectSegmentSizeHeaders map merges instead of replacing), fail with
-// resource.ErrInvalidOption before HTTP.
+// ObjectSegmentSizeOption is one option of GetObjectSegmentSize:
+// WithObjectSegmentSizeOpts, WithObjectSegmentSizeHeaders, request.Header
+// (validated and merged like a one-entry WithObjectSegmentSizeHeaders) or
+// request.Custom over *ObjectSegmentSizeOpts (for example to set Size). Other
+// shared calls, including request.Headers (the WithObjectSegmentSizeHeaders
+// map merges instead of replacing), fail with resource.ErrInvalidOption before
+// HTTP.
 type ObjectSegmentSizeOption = request.GetCall
 
 var objectSegmentSizeCalls = calls.Spec[ObjectSegmentSizeOpts]{Header: calls.MergeHeader[ObjectSegmentSizeOpts](WithObjectSegmentSizeHeaders)}
@@ -64,9 +65,6 @@ func WithObjectSegmentSizeHeaders(values map[string]string) ObjectSegmentSizeOpt
 		}
 		return mergeInfoHeaders(cfg.Headers, snapshot)
 	})
-}
-func WithObjectSegmentSize(value int64) ObjectSegmentSizeOption {
-	return request.Custom(func(cfg *ObjectSegmentSizeOpts) error { owned := value; cfg.Size = &owned; return nil })
 }
 
 func cloneGetInfoOpts(value GetInfoOpts) GetInfoOpts {

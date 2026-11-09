@@ -78,7 +78,7 @@ func containerCloudMissing(err error) bool { return err != nil && resource.Ignor
 
 // CreateContainer returns an existing container, or creates and re-fetches it.
 // The default public=false emits no operation-owned ACL on PUT. Existing ACLs
-// are preserved even when WithContainerPublic(true) is supplied.
+// are preserved even when ContainerCreateOpts.Public = true is supplied.
 func (c *Cloud) CreateContainer(ctx context.Context, name string, options ...ContainerCreateOption) (*ContainerCreateResult, error) {
 	const operation = "CreateContainer"
 	prepared, scoped, err := c.prepareContainer(ctx, name)
@@ -116,7 +116,8 @@ func (c *Cloud) CreateContainer(ctx context.Context, name string, options ...Con
 }
 
 // SetContainerAccess accepts only public and private. The cloud default refresh
-// is false; WithContainerAccessRefresh(true) observes state with a second HEAD.
+// is false; ContainerAccessOpts.Refresh = true observes state with a second
+// HEAD.
 func (c *Cloud) SetContainerAccess(ctx context.Context, name, access string, options ...ContainerAccessOption) (*ContainerAccessUpdateResult, error) {
 	const operation = "SetContainerAccess"
 	acl, ok := map[string]string{"public": ".r:*,.rlistings", "private": ""}[access]

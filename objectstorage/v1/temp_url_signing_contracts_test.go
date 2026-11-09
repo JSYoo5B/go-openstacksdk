@@ -77,7 +77,7 @@ func TestTempURLSigningContractsKnownVectorsAndPaths(t *testing.T) {
 		} {
 			t.Run(string(tc.digest), func(t *testing.T) {
 				result, err := v1.New(client).GenerateFormSignature(context.Background(), "bucket", input,
-					v1.WithGenerateFormSignatureKey([]byte{'k', 0xff, 'y'}), v1.WithGenerateFormSignatureTimestamp(signingInstant), v1.WithGenerateFormSignatureDigest(tc.digest))
+					v1.WithGenerateFormSignatureKey([]byte{'k', 0xff, 'y'}), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := signingInstant; c.Timestamp = &v; return nil }), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { c.Digest = tc.digest; return nil }))
 				if err != nil || result == nil || result.Path != "/v1/AUTH_a/bucket/dir/% ?#한" || result.Signature != tc.want || result.Expires != 1700000060 || result.Digest != tc.digest || result.Discovery != nil {
 					t.Fatalf("result=%+v err=%v", result, err)
 				}
@@ -100,7 +100,7 @@ func TestTempURLSigningContractsKnownVectorsAndPaths(t *testing.T) {
 		} {
 			t.Run(string(tc.digest), func(t *testing.T) {
 				result, err := v1.New(signingClientNoHTTP(t)).GenerateTempURL(context.Background(), path, 60, "get",
-					v1.WithGenerateTempURLKey([]byte{'k', 0xff, 'y'}), v1.WithGenerateTempURLTimestamp(signingInstant), v1.WithGenerateTempURLDigest(tc.digest), v1.WithGenerateTempURLPrefix(true), v1.WithGenerateTempURLIPRange("2001:db8::/64"))
+					v1.WithGenerateTempURLKey([]byte{'k', 0xff, 'y'}), request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Digest = tc.digest; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Prefix = true; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.IPRange = "2001:db8::/64"; return nil }))
 				if err != nil || result == nil || result.Signature != tc.want || result.Path != path || result.Digest != tc.digest || result.Discovery != nil {
 					t.Fatalf("result=%+v err=%v", result, err)
 				}
@@ -119,7 +119,7 @@ func TestTempURLSigningContractsKnownVectorsAndPaths(t *testing.T) {
 		input.ObjectPrefix = "사진/obj %2F?#"
 		input.RedirectURL = "https://example.test/done?ok=1&value=%2F"
 		result, err := v1.New(client).GenerateFormSignature(context.Background(), "상자 %2F?#", input,
-			v1.WithGenerateFormSignatureKey([]byte("test-secret")), v1.WithGenerateFormSignatureTimestamp(signingInstant))
+			v1.WithGenerateFormSignatureKey([]byte("test-secret")), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 		if err != nil || result == nil || result.Path != "/proxy x/v1/AUTH%/상자 %2F?#/사진/obj %2F?#" || result.Signature != "cbbe6f01d8d16c3eeb12898fd9666535e106483f" {
 			t.Fatalf("result=%+v err=%v", result, err)
 		}
@@ -128,7 +128,7 @@ func TestTempURLSigningContractsKnownVectorsAndPaths(t *testing.T) {
 			t.Fatalf("URL=%q err=%v", result.URL, e)
 		}
 		prefix, err := v1.New(client).GenerateTempURL(context.Background(), "/v1/a/c/", 60, "GET",
-			v1.WithGenerateTempURLKey([]byte("test-secret")), v1.WithGenerateTempURLTimestamp(signingInstant), v1.WithGenerateTempURLPrefix(true))
+			v1.WithGenerateTempURLKey([]byte("test-secret")), request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Prefix = true; return nil }))
 		if err != nil || prefix == nil || prefix.Signature != "9be5f5e07e32bee069bb55fe089ad6518863447d" {
 			t.Fatalf("prefix=%+v err=%v", prefix, err)
 		}
@@ -142,12 +142,12 @@ func TestTempURLSigningContractsKnownVectorsAndPaths(t *testing.T) {
 	})
 	t.Run("default relative absolute ISO and custom method", func(t *testing.T) {
 		service := v1.New(signingClientNoHTTP(t))
-		result, err := service.GenerateTempURL(context.Background(), signingPath, 60, "get", v1.WithGenerateTempURLKey([]byte("test-secret")), v1.WithGenerateTempURLTimestamp(signingInstant))
+		result, err := service.GenerateTempURL(context.Background(), signingPath, 60, "get", v1.WithGenerateTempURLKey([]byte("test-secret")), request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 		signingTempOK(t, result, err, signingDefaultMAC)
 		if result.Digest != v1.TempURLDigestSHA1 {
 			t.Fatalf("default digest=%q", result.Digest)
 		}
-		iso, err := service.GenerateTempURL(context.Background(), signingPath, 1700000060, "GET", v1.WithGenerateTempURLKey([]byte("test-secret")), v1.WithGenerateTempURLTimestamp(signingInstant), v1.WithGenerateTempURLAbsolute(true), v1.WithGenerateTempURLISO8601(true))
+		iso, err := service.GenerateTempURL(context.Background(), signingPath, 1700000060, "GET", v1.WithGenerateTempURLKey([]byte("test-secret")), request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Absolute = true; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.ISO8601 = true; return nil }))
 		if err != nil || iso == nil || iso.Signature != signingDefaultMAC || iso.Expires != 1700000060 {
 			t.Fatalf("iso=%+v err=%v", iso, err)
 		}
@@ -155,7 +155,7 @@ func TestTempURLSigningContractsKnownVectorsAndPaths(t *testing.T) {
 		if e != nil || u.Query().Get("temp_url_expires") != "2023-11-14T22:14:20Z" {
 			t.Fatalf("isoURL=%q err=%v", iso.URL, e)
 		}
-		zero, err := service.GenerateTempURL(context.Background(), "/v1/a/c/o", 0, "propfind", v1.WithGenerateTempURLKey([]byte("test-secret")), v1.WithGenerateTempURLTimestamp(time.Unix(0, 0)), v1.WithGenerateTempURLAbsolute(true))
+		zero, err := service.GenerateTempURL(context.Background(), "/v1/a/c/o", 0, "propfind", v1.WithGenerateTempURLKey([]byte("test-secret")), request.Custom(func(c *v1.GenerateTempURLOpts) error { v := time.Unix(0, 0); c.Timestamp = &v; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Absolute = true; return nil }))
 		if err != nil || zero == nil || zero.Expires != 0 || zero.Signature != "dc7a77d0a77c03566e28b817d374fee98fe8cb6e" {
 			t.Fatalf("zero=%+v err=%v", zero, err)
 		}
@@ -193,7 +193,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 					return tempKeyWire(204, "opaque-phase", headers), nil
 				})
 				result, err := v1.New(client).GenerateFormSignature(context.Background(), tempKeyName, signingInput(),
-					v1.WithGenerateFormSignatureTimestamp(signingInstant), v1.WithGenerateFormSignatureHeaders(map[string]string{"x-call": "initial"}), request.Header("X-Call", "final"), v1.WithGenerateFormSignatureNewest(false))
+					request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := signingInstant; c.Timestamp = &v; return nil }), v1.WithGenerateFormSignatureHeaders(map[string]string{"x-call": "initial"}), request.Header("X-Call", "final"), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := false; c.Newest = &v; return nil }))
 				if err != nil || result == nil || result.Discovery == nil || string(result.Discovery.Key) != tc.key || result.Discovery.FromContainer != tc.from || result.Discovery.Secondary != tc.secondary || calls != tc.calls {
 					t.Fatalf("result=%+v err=%v calls=%d", result, err, calls)
 				}
@@ -218,7 +218,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 		})
 		client.ResourceBase = "unused and invalid"
 		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET",
-			v1.WithGenerateTempURLTimestamp(signingInstant), request.Header("x-call", "initial"), v1.WithGenerateTempURLHeaders(map[string]string{"X-Call": "final", "X-Extra": "kept"}), v1.WithGenerateTempURLNewest(true), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Newest = nil; return nil }))
+			request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }), request.Header("x-call", "initial"), v1.WithGenerateTempURLHeaders(map[string]string{"X-Call": "final", "X-Extra": "kept"}), request.Custom(func(c *v1.GenerateTempURLOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Newest = nil; return nil }))
 		signingTempOK(t, result, err, "b8c34dc228e9eb17451dae9cc7c5a870dea377a9")
 		if calls != 1 || result.Discovery.Container != nil || result.Discovery.Account == nil || !result.Discovery.Secondary || result.Discovery.FromContainer {
 			t.Fatalf("discovery=%+v calls=%d", result.Discovery, calls)
@@ -231,7 +231,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 			calls++
 			return tempKeyResponse(204, body, http.Header{"X-Account-Meta-Temp-Url-Key": {""}, "X-Account-Meta-Other": {"literal 한"}}), nil
 		})
-		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLTimestamp(signingInstant))
+		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 		signingUnsignedTemp(t, result)
 		var proof *resource.ResponseError
 		if !errors.Is(err, resource.ErrNotFound) || errors.As(err, &proof) || result == nil || result.Discovery == nil || result.Discovery.Key != nil || result.Discovery.Account == nil || string(result.Discovery.Account.Body) != "empty-account" || result.Discovery.Account.Metadata.Values["other"] != "literal 한" || calls != 1 || body.closes.Load() != 1 {
@@ -242,7 +242,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 			formCalls++
 			return tempKeyWire(204, "both-empty", nil), nil
 		})
-		form, err := v1.New(formClient).GenerateFormSignature(context.Background(), "bucket", signingInput(), v1.WithGenerateFormSignatureTimestamp(signingInstant), v1.WithGenerateFormSignatureNewest(true), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { c.Newest = nil; return nil }))
+		form, err := v1.New(formClient).GenerateFormSignature(context.Background(), "bucket", signingInput(), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := signingInstant; c.Timestamp = &v; return nil }), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { c.Newest = nil; return nil }))
 		signingUnsignedForm(t, form)
 		if !errors.Is(err, resource.ErrNotFound) || form == nil || form.Discovery.Container == nil || form.Discovery.Account == nil || formCalls != 2 {
 			t.Fatalf("form=%+v err=%v calls=%d", form, err, formCalls)
@@ -301,7 +301,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 		var retained *v1.GenerateTempURLOpts
 		calls := 0
 		result, err := v1.New(signingClientNoHTTP(t)).GenerateTempURL(context.Background(), signingPath, 60, "GET",
-			v1.WithGenerateTempURLDigest(v1.TempURLDigestSHA512), v1.WithGenerateTempURLPrefix(true), full,
+			request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Digest = v1.TempURLDigestSHA512; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Prefix = true; return nil }), full,
 			request.Custom(func(cfg *v1.GenerateTempURLOpts) error { calls++; retained = cfg; return nil }),
 			request.Custom(func(cfg *v1.GenerateTempURLOpts) error {
 				calls++
@@ -326,7 +326,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 		formStamp = time.Unix(3, 0)
 		formHeaders["X-Call"] = "external"
 		var first *v1.GenerateFormSignatureOpts
-		form, err := v1.New(signingClientNoHTTP(t)).GenerateFormSignature(context.Background(), "bucket", signingInput(), v1.WithGenerateFormSignatureDigest(v1.TempURLDigestSHA512), formFull,
+		form, err := v1.New(signingClientNoHTTP(t)).GenerateFormSignature(context.Background(), "bucket", signingInput(), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { c.Digest = v1.TempURLDigestSHA512; return nil }), formFull,
 			request.Custom(func(cfg *v1.GenerateFormSignatureOpts) error { first = cfg; return nil }), request.Custom(func(cfg *v1.GenerateFormSignatureOpts) error {
 				first.Key[0] = 'Q'
 				first.Headers["X-Call"] = "alias"
@@ -357,12 +357,12 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 			wg.Add(1)
 			go func() {
 				defer wg.Done()
-				result, err := service.GenerateTempURL(context.Background(), signingPath, 60, "GET", keyOpt, headerOpt, v1.WithGenerateTempURLTimestamp(signingInstant))
+				result, err := service.GenerateTempURL(context.Background(), signingPath, 60, "GET", keyOpt, headerOpt, request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 				if err != nil || result == nil || result.Signature != signingDefaultMAC {
 					t.Errorf("concurrent temp=%+v err=%v", result, err)
 					return
 				}
-				form, err := service.GenerateFormSignature(context.Background(), "bucket", signingInput(), formKeyOpt, formHeaderOpt, v1.WithGenerateFormSignatureTimestamp(signingInstant))
+				form, err := service.GenerateFormSignature(context.Background(), "bucket", signingInput(), formKeyOpt, formHeaderOpt, request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 				if err != nil || form == nil || form.Expires != 1700000060 {
 					t.Errorf("concurrent form=%+v err=%v", form, err)
 				}
@@ -384,7 +384,7 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 				return e
 			}},
 			{"digest", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLDigest("SHA256"))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Digest = "SHA256"; return nil }))
 				return e
 			}},
 			{"negative relative", func(s *v1.Service) error {
@@ -392,27 +392,27 @@ func TestTempURLSigningContractsOptionsAndPreflight(t *testing.T) {
 				return e
 			}},
 			{"overflow", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, math.MaxInt64, "GET", v1.WithGenerateTempURLTimestamp(signingInstant))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, math.MaxInt64, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 				return e
 			}},
 			{"negative clock even absolute", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, 0, "GET", v1.WithGenerateTempURLTimestamp(time.Unix(-1, 0)), v1.WithGenerateTempURLAbsolute(true))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, 0, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := time.Unix(-1, 0); c.Timestamp = &v; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Absolute = true; return nil }))
 				return e
 			}},
 			{"ISO out of range", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, 253402300800, "GET", v1.WithGenerateTempURLAbsolute(true), v1.WithGenerateTempURLISO8601(true))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, 253402300800, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Absolute = true; return nil }), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.ISO8601 = true; return nil }))
 				return e
 			}},
 			{"IP host bits", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLIPRange("192.0.2.1/24"))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { c.IPRange = "192.0.2.1/24"; return nil }))
 				return e
 			}},
 			{"IP zone", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLIPRange("fe80::1%en0"))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { c.IPRange = "fe80::1%en0"; return nil }))
 				return e
 			}},
 			{"IP surrounding space", func(s *v1.Service) error {
-				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLIPRange(" 192.0.2.1"))
+				_, e := s.GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { c.IPRange = " 192.0.2.1"; return nil }))
 				return e
 			}},
 			{"method non token", func(s *v1.Service) error {
@@ -635,7 +635,7 @@ func TestTempURLSigningContractsSourceAndContext(t *testing.T) {
 					return tempKeyResponse(204, body, http.Header{"X-Account-Meta-Temp-Url-Key": {"test-secret"}}), nil
 				})
 				service = v1.New(client)
-				result, err := service.GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLTimestamp(signingInstant))
+				result, err := service.GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 				signingUnsignedTemp(t, result)
 				tempKeyProof(t, err, 204, "owned-identity")
 				if !errors.Is(err, resource.ErrInvalidOption) || result == nil || result.Discovery.Key != nil || result.Discovery.Secondary || result.Discovery.FromContainer || result.Discovery.Account.Metadata != nil || calls != 1 || body.closes.Load() != 1 {
@@ -673,7 +673,7 @@ func TestTempURLSigningContractsSourceAndContext(t *testing.T) {
 			hooks++
 			return nil
 		}
-		result, err := v1.New(client).GenerateTempURL(ctx, signingPath, 60, "GET", v1.WithGenerateTempURLTimestamp(signingInstant))
+		result, err := v1.New(client).GenerateTempURL(ctx, signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 		signingUnsignedTemp(t, result)
 		tempKeyProof(t, err, 204, "partial-body")
 		for _, target := range []error{readErr, closeErr, context.Canceled, cause} {
@@ -708,7 +708,7 @@ func TestTempURLSigningContractsSourceAndContext(t *testing.T) {
 			}
 			return tempKeyResponse(204, body, headers), nil
 		})
-		result, err := v1.New(client).GenerateFormSignature(context.Background(), "bucket", signingInput(), v1.WithGenerateFormSignatureTimestamp(signingInstant))
+		result, err := v1.New(client).GenerateFormSignature(context.Background(), "bucket", signingInput(), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 		signingUnsignedForm(t, result)
 		tempKeyProof(t, err, 204, "phase-proof")
 		if !errors.Is(err, resource.ErrInvalidOption) || result == nil || result.Discovery.Container == nil || result.Discovery.Container.Metadata == nil || result.Discovery.Account == nil || result.Discovery.Account.Metadata != nil || result.Discovery.Key != nil || result.Discovery.FromContainer || result.Discovery.Secondary || calls != 2 {
@@ -767,7 +767,7 @@ func TestTempURLSigningContractsNativePolicy(t *testing.T) {
 			}
 			return nil
 		}
-		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLTimestamp(signingInstant))
+		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 		signingTempOK(t, result, err, signingDefaultMAC)
 		if calls != 2 || hooks != 1 || rejected.closes.Load() != 1 {
 			t.Fatalf("calls=%d hooks=%d closes=%d", calls, hooks, rejected.closes.Load())
@@ -861,7 +861,7 @@ func TestTempURLSigningContractsNativePolicy(t *testing.T) {
 			opts.MoreHeaders = map[string]string{"X-Advanced": "native"}
 			return nil
 		}
-		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLTimestamp(signingInstant))
+		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 		signingTempOK(t, result, err, signingDefaultMAC)
 		if calls != 2 || !reflect.DeepEqual(client.MoreHeaders, map[string]string{"X-Capture": "source"}) {
 			t.Fatalf("calls=%d source=%v", calls, client.MoreHeaders)
@@ -879,7 +879,7 @@ func TestTempURLSigningContractsNativePolicy(t *testing.T) {
 				}
 				return tempKeyWire(204, "", http.Header{"X-Account-Meta-Temp-Url-Key": {"test-secret"}}), nil
 			})
-			result, err = v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", v1.WithGenerateTempURLTimestamp(signingInstant))
+			result, err = v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET", request.Custom(func(c *v1.GenerateTempURLOpts) error { v := signingInstant; c.Timestamp = &v; return nil }))
 			if same {
 				signingTempOK(t, result, err, signingDefaultMAC)
 				if calls != 2 {

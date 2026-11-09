@@ -55,7 +55,7 @@ func TestTempURLOptionsSnapshotsAndReplacement(t *testing.T) {
 				t.Fatal(parsed.Query())
 			}
 		}
-		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/한국 %2F?#/tail", 60, "GET", full, WithGenerateTempURLOpts(GenerateTempURLOpts{Key: []byte("\xffsecret")}), WithGenerateTempURLTimestamp(signingTestTimestamp()), WithGenerateTempURLAbsolute(false), WithGenerateTempURLPrefix(false), WithGenerateTempURLISO8601(false), WithGenerateTempURLIPRange(""))
+		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/한국 %2F?#/tail", 60, "GET", full, WithGenerateTempURLOpts(GenerateTempURLOpts{Key: []byte("\xffsecret")}), request.Custom(func(c *GenerateTempURLOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.Absolute = false; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.Prefix = false; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.ISO8601 = false; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.IPRange = ""; return nil }))
 		if err != nil || result == nil || result.Signature != "fe5b8b5bb2a81f4ec0ece3bd7ea3665ca0677869" || result.Digest != TempURLDigestSHA1 || strings.Contains(result.URL, "temp_url_prefix") || strings.Contains(result.URL, "temp_url_ip_range") {
 			t.Fatal("full replacement lost", result, err)
 		}
@@ -80,7 +80,7 @@ func TestTempURLOptionsSnapshotsAndReplacement(t *testing.T) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Account-Meta-Temp-URL-Key-2": {"account-secondary"}}, body), nil
 		})
 		full := WithGenerateTempURLOpts(GenerateTempURLOpts{Headers: map[string]string{"x-trace": "old"}})
-		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "get", WithGenerateTempURLKey([]byte("discard")), full, WithGenerateTempURLKey(nil), WithGenerateTempURLTimestamp(signingTestTimestamp()), WithGenerateTempURLNewest(true), request.Custom(func(c *GenerateTempURLOpts) error { c.Newest = nil; return nil }), WithGenerateTempURLNewest(false), request.Custom(func(cfg *GenerateTempURLOpts) error { retained = cfg; return nil }), plural, request.Header("X-Trace", "last"))
+		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "get", WithGenerateTempURLKey([]byte("discard")), full, WithGenerateTempURLKey(nil), request.Custom(func(c *GenerateTempURLOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.Newest = nil; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(cfg *GenerateTempURLOpts) error { retained = cfg; return nil }), plural, request.Header("X-Trace", "last"))
 		if err != nil || result == nil || result.Signature != "98649f6963fef8b113423393b6c77b9fda62b2ad" || calls != 1 || result.Discovery == nil || result.Discovery.Account == nil || result.Discovery.Account.Metadata == nil {
 			t.Fatal(result, err, calls)
 		}

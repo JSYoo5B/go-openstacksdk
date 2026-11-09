@@ -49,9 +49,6 @@ func WithObjectSearchOpts(value ObjectSearchOpts) ObjectSearchOption {
 	value = copyObjectSearchOpts(value)
 	return func(c *ObjectSearchOpts) error { *c = copyObjectSearchOpts(value); return nil }
 }
-func WithObjectSearchName(value string) ObjectSearchOption {
-	return func(c *ObjectSearchOpts) error { c.Name = value; return nil }
-}
 func WithObjectSearchFiltersJSON(value json.RawMessage) ObjectSearchOption {
 	owned := bytes.Clone(value)
 	return func(c *ObjectSearchOpts) error {

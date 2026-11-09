@@ -15,12 +15,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GenerateFormSignature`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureKey`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureDigest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureTimestamp`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureNewest`
 
 - Explicit nonempty arbitrary binary key signs decoded endpoint/container/prefix path plus literal redirect, positive size/count and captured expiry as five newline-separated fields, returning owned FormSignatureResult without HTTP upload.
   Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths`, `objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreVectorsAndLiteralPaths`, `connectiontest/connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow`.
@@ -53,16 +50,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GenerateTempURL`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLKey`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLDigest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLTimestamp`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLAbsolute`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLPrefix`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLISO8601`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLIPRange`
 
 - Decoded literal UTF8 /v1/account/container/object path is signed without caller percent decoding; literal percent/question/hash/unicode and slash structure survive exactly-once URL path and url.Values query escaping.
   Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths`, `objectstorage/v1/temp_url_core_test.go:TestTempURLCoreVectorsAndEscapedOutput`.
@@ -87,7 +77,7 @@ Python/Go differences:
 
 - Go accepts decoded UTF8 string and int64 seconds, escapes path/query once and returns structured owned result; Python accepts bytes/numeric/string timestamps and concatenates a literal query.
 - Go includes SHA256/SHA512, explicit time snapshot and strict masked CIDR validation, while pinned Python signs SHA1 and applies its own parsing/warning behavior.
-- Python accepts ISO 8601 strings as seconds; Go takes int64 seconds and WithGenerateTempURLAbsolute.
+- Python accepts ISO 8601 strings as seconds; Go takes int64 seconds and GenerateTempURLOpts.Absolute.
 - Go escapes the path in the returned URL and orders query keys alphabetically; Python concatenates the literal path and temp_url_sig before temp_url_expires.
 
 ## Usage examples

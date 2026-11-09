@@ -41,15 +41,6 @@ func WithAutocreatedImageObjectsOpts(value AutocreatedImageObjectsOpts) Autocrea
 	owned := ownAutocreatedImageObjects(value)
 	return func(cfg *AutocreatedImageObjectsOpts) error { *cfg = ownAutocreatedImageObjects(owned); return nil }
 }
-func WithAutocreatedImageTasks(value bool) AutocreatedImageObjectsOption {
-	return func(cfg *AutocreatedImageObjectsOpts) error { cfg.ImageAPIUseTasks = value; return nil }
-}
-func WithAutocreatedImageContainer(value string) AutocreatedImageObjectsOption {
-	return func(cfg *AutocreatedImageObjectsOpts) error { x := value; cfg.Container = &x; return nil }
-}
-func WithAutocreatedImagePrefix(value string) AutocreatedImageObjectsOption {
-	return func(cfg *AutocreatedImageObjectsOpts) error { x := value; cfg.SegmentPrefix = &x; return nil }
-}
 
 // AutocreatedImageObjectObservation records the list row, fresh metadata and
 // optional discovery/DELETE without treating requested deletion as completion.

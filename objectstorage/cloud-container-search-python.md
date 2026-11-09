@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SearchContainers`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers`
@@ -69,7 +69,7 @@ func main() {
     conn, err := sdk.Connect(ctx)
     if err != nil { log.Fatal(err) }
     matched, err := conn.SearchContainers(ctx,
-        objectstorage.WithContainerSearchName("logs-*"),
+        func(c *objectstorage.ContainerSearchOpts) error { c.Name = "logs-*"; return nil },
         objectstorage.WithContainerSearchFiltersJSON(json.RawMessage(`{"count":1}`)))
     if err != nil { log.Fatal(err) }
     for _, row := range matched.Records {

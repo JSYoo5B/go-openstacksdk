@@ -12,6 +12,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -122,7 +123,7 @@ func TestObjectReadCoreWireAndStatus(t *testing.T) {
 					}
 					return readTestResponse(status, headers, probe), nil
 				})
-				options := []ObjectReadOption{WithObjectReadRange("opaque-range"), WithObjectReadFilename("a ?#"), WithObjectReadBufferSize(2)}
+				options := []ObjectReadOption{request.Custom(func(c *ObjectReadOpts) error { c.Range = "opaque-range"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.Filename = "a ?#"; return nil }), request.Custom(func(c *ObjectReadOpts) error { c.BufferSize = 2; return nil })}
 				var content []byte
 				var metadata *MetadataInfo
 				var observed http.Header

@@ -38,12 +38,6 @@ func WithIsObjectStaleHeaders(values map[string]string) IsObjectStaleOption {
 		return mergeMetadataHeaders(cfg.Headers, snapshot)
 	})
 }
-func WithIsObjectStaleMD5(value string) IsObjectStaleOption {
-	return request.Custom(func(cfg *IsObjectStaleOpts) error { cfg.MD5 = value; return nil })
-}
-func WithIsObjectStaleSHA256(value string) IsObjectStaleOption {
-	return request.Custom(func(cfg *IsObjectStaleOpts) error { cfg.SHA256 = value; return nil })
-}
 func cloneIsObjectStaleOpts(value IsObjectStaleOpts) IsObjectStaleOpts {
 	value.Headers = cloneMetadataHeaders(value.Headers)
 	return value

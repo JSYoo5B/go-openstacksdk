@@ -27,9 +27,6 @@ func WithGetTempURLKeyOpts(value GetTempURLKeyOpts) GetTempURLKeyOption {
 	snapshot := cloneGetTempURLKeyOpts(value)
 	return request.Custom(func(cfg *GetTempURLKeyOpts) error { *cfg = cloneGetTempURLKeyOpts(snapshot); return nil })
 }
-func WithGetTempURLKeyContainer(value string) GetTempURLKeyOption {
-	return request.Custom(func(cfg *GetTempURLKeyOpts) error { cfg.Container = value; return nil })
-}
 func WithGetTempURLKeyHeaders(values map[string]string) GetTempURLKeyOption {
 	snapshot := cloneTempURLKeyHeaders(values)
 	return request.Custom(func(cfg *GetTempURLKeyOpts) error {
@@ -38,9 +35,6 @@ func WithGetTempURLKeyHeaders(values map[string]string) GetTempURLKeyOption {
 		}
 		return mergeTempURLKeyHeaders(cfg.Headers, snapshot)
 	})
-}
-func WithGetTempURLKeyNewest(value bool) GetTempURLKeyOption {
-	return request.Custom(func(cfg *GetTempURLKeyOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
 
 func cloneTempURLKeyHeaders(value map[string]string) map[string]string {

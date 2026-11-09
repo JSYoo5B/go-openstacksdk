@@ -107,7 +107,7 @@ func TestContainerMetadataCoreRoutesAndEvidence(t *testing.T) {
 	c.ResourceBase = s.URL + "/reverse%20proxy/v1/AUTH_account/"
 	c.Type = ""
 	a := New(c)
-	get, err := a.GetMetadata(context.Background(), containerMetadataName, WithGetMetadataNewest(false))
+	get, err := a.GetMetadata(context.Background(), containerMetadataName, request.Custom(func(c *GetMetadataOpts) error { v := false; c.Newest = &v; return nil }))
 	if err != nil || get.StatusCode != 204 || get.Metadata.BytesUsed == nil || *get.Metadata.BytesUsed != 0 || *get.Metadata.ObjectCount != -2 || get.Metadata.Timestamp == nil || get.Metadata.LastModified == nil || *get.Metadata.LastModified != "literal-not-time" || get.Header.Get("X-Container-Read") != "raw ACL" || get.Metadata.Values["temp-url-key"] != "literal%20secret" {
 		t.Fatalf("GET %+v %v", get, err)
 	}

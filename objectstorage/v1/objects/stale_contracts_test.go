@@ -36,7 +36,7 @@ func TestIsObjectStaleContractsLazyFilesAndLiteralHEAD(t *testing.T) {
 			client.ResourceBase = objectMetadataBase
 			client.Endpoint = "https://swift.invalid/catalogue/v1/AUTH_else/"
 			filename := filepath.Join(t.TempDir(), "does not exist")
-			result, err := objects.New(client).IsObjectStale(context.Background(), objectMetadataContainer, objectMetadataKey, filename, objects.WithIsObjectStaleMD5(md), request.Header("X-Check", "explicit"))
+			result, err := objects.New(client).IsObjectStale(context.Background(), objectMetadataContainer, objectMetadataKey, filename, request.Custom(func(c *objects.IsObjectStaleOpts) error { c.MD5 = md; return nil }), request.Header("X-Check", "explicit"))
 			if err != nil || result == nil || result.Discovery == nil || result.Discovery.StatusCode != status || string(result.Discovery.Body) != "head-proof" || result.Stale == nil || *result.Stale != (status == 404) || calls != 1 {
 				t.Fatalf("result=%+v err=%v HTTP=%d", result, err, calls)
 			}
@@ -94,7 +94,7 @@ func TestIsObjectStaleContractsHashProjectionAndAtomicErrors(t *testing.T) {
 				}
 				return response, nil
 			})
-			result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), objects.WithIsObjectStaleMD5(tc.localMD5), objects.WithIsObjectStaleSHA256(tc.localSHA))
+			result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), request.Custom(func(c *objects.IsObjectStaleOpts) error { c.MD5 = tc.localMD5; return nil }), request.Custom(func(c *objects.IsObjectStaleOpts) error { c.SHA256 = tc.localSHA; return nil }))
 			if err != nil || result == nil || result.Stale == nil || *result.Stale != tc.stale {
 				t.Fatalf("result=%+v err=%v", result, err)
 			}
@@ -119,7 +119,7 @@ func TestIsObjectStaleContractsHashProjectionAndAtomicErrors(t *testing.T) {
 				}
 				return response, nil
 			})
-			result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), objects.WithIsObjectStaleMD5(md))
+			result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), request.Custom(func(c *objects.IsObjectStaleOpts) error { c.MD5 = md; return nil }))
 			if result == nil || result.Discovery == nil || result.Stale != nil || result.RemoteMD5 != nil || result.RemoteSHA256 != nil || err == nil {
 				t.Fatalf("result=%+v err=%v", result, err)
 			}
@@ -168,7 +168,7 @@ func TestIsObjectStaleContractsDirtyMissingAndLiveGuards(t *testing.T) {
 			response.Header.Set("X-Object-Meta-X-Sdk-Md5", strings.Repeat("a", 32))
 			return response, nil
 		})
-		result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), objects.WithIsObjectStaleMD5(strings.Repeat("a", 32)))
+		result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), request.Custom(func(c *objects.IsObjectStaleOpts) error { c.MD5 = strings.Repeat("a", 32); return nil }))
 		if result == nil || result.Discovery == nil || result.Stale != nil || result.RemoteMD5 != nil || !errors.Is(err, resource.ErrInvalidOption) || body.closes.Load() != 1 {
 			t.Fatalf("result=%+v err=%v closes=%d", result, err, body.closes.Load())
 		}
@@ -198,7 +198,7 @@ func TestIsObjectStaleContractsDirtyMissingAndLiveGuards(t *testing.T) {
 			hooks++
 			return nil
 		}
-		result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), factory, objects.WithIsObjectStaleMD5(md), request.Custom(func(*objects.IsObjectStaleOpts) error {
+		result, err := objects.New(client).IsObjectStale(context.Background(), "c", "o", filepath.Join(t.TempDir(), "unread"), factory, request.Custom(func(c *objects.IsObjectStaleOpts) error { c.MD5 = md; return nil }), request.Custom(func(*objects.IsObjectStaleOpts) error {
 			callbacks++
 			client.MoreHeaders["X-Source"] = "valid drift"
 			return nil

@@ -79,7 +79,7 @@ func TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow(t *testing.T)
 	source.ResourceBase = "invalid unused base"
 	source.MoreHeaders = map[string]string{"X-Source": "initial"}
 	key := []byte{'k', 255, 'y'}
-	explicit, err := service.GenerateTempURL(ctx, path, 60, "gEt", swift.WithGenerateTempURLKey(key), swift.WithGenerateTempURLTimestamp(stamp))
+	explicit, err := service.GenerateTempURL(ctx, path, 60, "gEt", swift.WithGenerateTempURLKey(key), request.Custom(func(c *swift.GenerateTempURLOpts) error { v := stamp; c.Timestamp = &v; return nil }))
 	if err != nil || explicit == nil || explicit.Discovery != nil || explicit.Expires != 1700000060 || calls != 0 {
 		t.Fatal(explicit, err, calls)
 	}
@@ -88,7 +88,7 @@ func TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow(t *testing.T)
 		t.Fatal(explicit, err)
 	}
 	input := swift.FormSignatureInput{ObjectPrefix: "dir/% ?#한", RedirectURL: "https://example.test/done", MaxFileSize: 123, MaxUploadCount: 3, Timeout: 60}
-	localForm, err := service.GenerateFormSignature(ctx, container, input, swift.WithGenerateFormSignatureKey(key), swift.WithGenerateFormSignatureTimestamp(stamp))
+	localForm, err := service.GenerateFormSignature(ctx, container, input, swift.WithGenerateFormSignatureKey(key), request.Custom(func(c *swift.GenerateFormSignatureOpts) error { v := stamp; c.Timestamp = &v; return nil }))
 	if err != nil || localForm == nil || localForm.Discovery != nil || calls != 0 || localForm.Path != "/v1/AUTH_account%/"+container+"/"+input.ObjectPrefix {
 		t.Fatal(localForm, err, calls)
 	}
@@ -100,7 +100,7 @@ func TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow(t *testing.T)
 	headers := map[string]string{"X-Call": "form"}
 	formOption := swift.WithGenerateFormSignatureHeaders(headers)
 	headers["X-Call"] = "caller mutation"
-	form, err := service.GenerateFormSignature(ctx, container, input, formOption, swift.WithGenerateFormSignatureNewest(false), swift.WithGenerateFormSignatureTimestamp(stamp), request.Custom(func(o *swift.GenerateFormSignatureOpts) error {
+	form, err := service.GenerateFormSignature(ctx, container, input, formOption, request.Custom(func(c *swift.GenerateFormSignatureOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(c *swift.GenerateFormSignatureOpts) error { v := stamp; c.Timestamp = &v; return nil }), request.Custom(func(o *swift.GenerateFormSignatureOpts) error {
 		source.MoreHeaders["X-Source"] = "callback mutation"
 		provider.SetToken("token-1")
 		return nil
@@ -109,7 +109,7 @@ func TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow(t *testing.T)
 		t.Fatal(form, err, calls)
 	}
 	source.ResourceBase = "invalid unused base"
-	generated, err := service.GenerateTempURL(ctx, path, 1700000060, "GET", swift.WithGenerateTempURLAbsolute(true), swift.WithGenerateTempURLTimestamp(stamp), request.Header("X-Call", "url"))
+	generated, err := service.GenerateTempURL(ctx, path, 1700000060, "GET", request.Custom(func(c *swift.GenerateTempURLOpts) error { c.Absolute = true; return nil }), request.Custom(func(c *swift.GenerateTempURLOpts) error { v := stamp; c.Timestamp = &v; return nil }), request.Header("X-Call", "url"))
 	if err != nil || generated == nil || generated.Discovery == nil || generated.Discovery.Container != nil || generated.Discovery.Account == nil || generated.Discovery.Secondary || string(generated.Discovery.Key) != "account-only" || calls != 3 {
 		t.Fatal(generated, err, calls)
 	}

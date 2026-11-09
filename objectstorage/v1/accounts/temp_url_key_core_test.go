@@ -54,7 +54,7 @@ func TestAccountTempURLKeyCoreWireAndStatus(t *testing.T) {
 				}
 				return accountMetadataWire(r, tc.status, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("ack"))), nil
 			})
-			result, err := New(c).SetTempURLKey(context.Background(), tc.key, WithSetTempURLKeySecondary(tc.secondary))
+			result, err := New(c).SetTempURLKey(context.Background(), tc.key, request.Custom(func(c *SetTempURLKeyOpts) error { c.Secondary = tc.secondary; return nil }))
 			if calls != 1 {
 				t.Fatal("implicit refresh/replay", calls)
 			}

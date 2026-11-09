@@ -4,10 +4,10 @@
 
 | Python | Go |
 |---|---|
-| connection `image_api_use_tasks` | `WithAutocreatedImageTasks(bool)`; default false |
+| connection `image_api_use_tasks` | `AutocreatedImageObjectsOpts.ImageAPIUseTasks`; default false |
 | container omitted/None | nil `Container`; default `images` |
-| `container="custom"` | `WithAutocreatedImageContainer("custom")` |
-| `segment_prefix="upload/"` | `WithAutocreatedImagePrefix("upload/")` |
+| `container="custom"` | `AutocreatedImageObjectsOpts.Container = "custom"` |
+| `segment_prefix="upload/"` | `AutocreatedImageObjectsOpts.SegmentPrefix = "upload/"` |
 | returned bool | result `Deleted`; per-object receipts retained separately |
 
 When tasks are disabled the workflow makes no Swift requests, even if the selected client is absent. When enabled it lazily lists each page with `format=json` and optional server prefix. Each yielded object gets a fresh metadata HEAD before processing the next object. Only exact custom metadata `x-sdk-autocreated == "true"` qualifies. `True`, `1`, an empty value and the older `x-shade-autocreated` marker do not qualify. A later page error preserves earlier deletions and stops the workflow.
@@ -59,9 +59,9 @@ func run(ctx context.Context, cloud, container, prefix string, tasks bool) error
     swift, err := conn.ObjectStorage(ctx)
     if err != nil { return err }
     result, err := swift.Cloud.DeleteAutocreatedImageObjects(ctx,
-        objectstorage.WithAutocreatedImageTasks(tasks),
-        objectstorage.WithAutocreatedImageContainer(container),
-        objectstorage.WithAutocreatedImagePrefix(prefix))
+        func(c *objectstorage.AutocreatedImageObjectsOpts) error { c.ImageAPIUseTasks = tasks; return nil },
+        func(c *objectstorage.AutocreatedImageObjectsOpts) error { v := container; c.Container = &v; return nil },
+        func(c *objectstorage.AutocreatedImageObjectsOpts) error { v := prefix; c.SegmentPrefix = &v; return nil })
     if err != nil { return err }
     fmt.Printf("deleted=%t observed=%d\n", result.Deleted, len(result.Observations))
     return nil

@@ -34,7 +34,7 @@ func TestSwiftCloudObjectGetEagerLowerHeadersTextAndMissingReceipt(t *testing.T)
 		_, _ = w.Write([]byte{0x80, 0xe9})
 	})
 	cloud := objectstorage.New(fixture.Client("object-store", "/account/"))
-	result, e := cloud.GetObjectText(context.Background(), "box", "file", objectstorage.WithObjectGetQueryString("bad\n%"), objectstorage.WithObjectGetStream(true), objectstorage.WithObjectGetChunkSize(0))
+	result, e := cloud.GetObjectText(context.Background(), "box", "file", func(c *objectstorage.ObjectGetOpts) error { c.QueryString = "bad\n%"; return nil }, func(c *objectstorage.ObjectGetOpts) error { c.Stream = true; return nil }, func(c *objectstorage.ObjectGetOpts) error { v := 0; c.ChunkSize = &v; return nil })
 	if e != nil || result.Body == nil || *result.Body != "\u0080é" || result.Headers["x-trans-id"] != "cloud-get-actual" || calls != 1 {
 		t.Fatal(result, e, calls)
 	}
@@ -53,7 +53,7 @@ func TestSwiftCloudObjectGetFileWriterAndFalseyOutputOptions(t *testing.T) {
 	})
 	cloud := objectstorage.New(fixture.Client("object-store", "/account/"))
 	output := filepath.Join(t.TempDir(), "body.bin")
-	result, e := cloud.GetObjectText(context.Background(), "box", "file", objectstorage.WithObjectGetOutfile(output), objectstorage.WithObjectGetChunkSize(1))
+	result, e := cloud.GetObjectText(context.Background(), "box", "file", objectstorage.WithObjectGetOutfile(output), func(c *objectstorage.ObjectGetOpts) error { v := 1; c.ChunkSize = &v; return nil })
 	stored, _ := os.ReadFile(output)
 	if e != nil || result.Body != nil || result.BytesWritten != 3 || !bytes.Equal(stored, payload) {
 		t.Fatal(result, e, stored)

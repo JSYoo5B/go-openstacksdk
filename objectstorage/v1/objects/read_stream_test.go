@@ -8,6 +8,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -19,7 +20,7 @@ func TestObjectReadStreamOwnershipAndCleanup(t *testing.T) {
 		api, _ := readTestAPI(func(*http.Request) (*http.Response, error) {
 			return readTestResponse(206, http.Header{"X-Object-Meta-K": {"wire"}}, body), nil
 		})
-		result, err := api.StreamObject(context.Background(), "c", "o", WithObjectReadBufferSize(1))
+		result, err := api.StreamObject(context.Background(), "c", "o", request.Custom(func(c *ObjectReadOpts) error { c.BufferSize = 1; return nil }))
 		if err != nil || result == nil || result.Body == nil {
 			t.Fatalf("open: %+v %v", result, err)
 		}
@@ -47,7 +48,7 @@ func TestObjectReadStreamOwnershipAndCleanup(t *testing.T) {
 	t.Run("caller-buffer-and-zero-read", func(t *testing.T) {
 		body := &readTestBody{data: []byte("abc")}
 		api, _ := readTestAPI(func(*http.Request) (*http.Response, error) { return readTestResponse(200, http.Header{}, body), nil })
-		result, err := api.StreamObject(context.Background(), "c", "o", WithObjectReadBufferSize(16*1024*1024))
+		result, err := api.StreamObject(context.Background(), "c", "o", request.Custom(func(c *ObjectReadOpts) error { c.BufferSize = 16 * 1024 * 1024; return nil }))
 		if err != nil {
 			t.Fatal(err)
 		}

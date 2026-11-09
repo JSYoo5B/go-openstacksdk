@@ -15,8 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObjectRaw`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectQueryString`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectStream`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Default stream=False and query_string=None map to library-owned omitted-query buffered GET; functional concrete options allow explicit encoded query and stream=True. Literal escaped container/object, empty obj selects container, raw repeated query order stays intact, no HEAD/metadata/content decoding. Complete opaque bytes include NUL/invalid UTF8, physical body closes once, accepted HTTP100..999 alone never raises status errors.
   Tests: `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectCloudGetObjectRawReturnsEveryStatus`, `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawBufferedDefaultOwnsOpaqueBytesAndAllowsContainerEndpoint`, `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectCloudGetObjectRawRejectsInputsBeforeHTTP`, `objectstorage/v1/objects/python_raw_get_test.go:TestPythonObjectRawOptionBoundaryCapturesSourceBeforeCallbacks`.
@@ -89,8 +88,8 @@ func run(ctx context.Context, cloud, container, object, query string, stream boo
     swift, err := conn.ObjectStorageV1(ctx)
     if err != nil { return err }
     response, requestErr := swift.Objects.GetObjectRaw(ctx, container, object,
-        objects.WithRawObjectQueryString(query),
-        objects.WithRawObjectStream(stream),
+        func(c *objects.RawObjectOpts) error { c.QueryString = query; return nil },
+        func(c *objects.RawObjectOpts) error { c.Stream = stream; return nil },
     )
     if response == nil { return requestErr }
     fmt.Fprintf(os.Stderr, "status=%d\n", response.StatusCode)

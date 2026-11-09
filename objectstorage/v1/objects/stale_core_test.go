@@ -10,6 +10,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -88,7 +89,7 @@ func TestObjectStaleCoreLazyFilesAndComparison(t *testing.T) {
 				h.Set("X-Proof", "kept")
 				return objectMetadataWire(r, tc.code, h, io.NopCloser(strings.NewReader("head raw"))), nil
 			})
-			result, err := New(c).IsObjectStale(context.Background(), "box", "key", tc.filename, WithIsObjectStaleMD5(tc.md), WithIsObjectStaleSHA256(tc.sh))
+			result, err := New(c).IsObjectStale(context.Background(), "box", "key", tc.filename, request.Custom(func(c *IsObjectStaleOpts) error { c.MD5 = tc.md; return nil }), request.Custom(func(c *IsObjectStaleOpts) error { c.SHA256 = tc.sh; return nil }))
 			if result == nil || result.Discovery == nil || result.Discovery.StatusCode != tc.code || calls != 1 {
 				t.Fatal(result, err, calls)
 			}
@@ -142,7 +143,7 @@ func TestObjectStaleCoreAcceptedFailuresAndStickyGuards(t *testing.T) {
 				}
 				return objectMetadataWire(r, code, h, body), nil
 			})
-			result, err := New(c).IsObjectStale(ctx, "box", "key", "explicit missing file", WithIsObjectStaleMD5(strings.Repeat("a", 32)))
+			result, err := New(c).IsObjectStale(ctx, "box", "key", "explicit missing file", request.Custom(func(c *IsObjectStaleOpts) error { c.MD5 = strings.Repeat("a", 32); return nil }))
 			code := 404
 			if mode == "projection" {
 				code = 200

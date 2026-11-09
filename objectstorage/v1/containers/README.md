@@ -17,7 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataNewest`
 
 - One bodyless HEAD targets the once-escaped literal container on the captured effective ResourceBase/Endpoint, including escaped reverse prefix and trailing-slash policy; strict actual204 and no discovery, Name lookup, parent HEAD or fallback.
   Tests: `objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreRoutesAndEvidence`, `objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity`, `connectiontest/connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence`, `internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry`.
@@ -53,7 +52,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeaders`
 
@@ -69,7 +68,7 @@ Go API:
   Tests: `objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreAcceptedFailures`, `objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreSourceAndTargetBoundaries`, `objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence`.
 - Set produces no result on missing404, unexpected200/201/202 or native/transport errors and preserves original typed evidence. Captured effectivebase/raw source/liveauth and request/body/status guards retain native prebody retry/reauth/redirect policy and legacy Update acceptance without performing a refresh HEAD.
   Tests: `objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreNativePolicyAndCompatibility`, `objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreSourceAndTargetBoundaries`, `objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsSourceAndNativePolicy`, `connectiontest/connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence`, `internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry`, `objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsMutationEvidence`.
-- Default refresh=true POST then HEAD and explicit false is callable through WithMetadataRefresh(false); later scalar wins and whole concrete opts resets default.
+- Default refresh=true POST then HEAD and explicit false is callable through MetadataRefreshOpts.Refresh = false; later scalar wins and whole concrete opts resets default.
   Tests: `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataSetterRefreshesObservedStateAndSourceValues`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFalseLaterOptionsAndReusableSnapshots`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataEverySystemAliasAndPrefixedConvention`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFailuresKeepAcknowledgementWithoutReplay`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataInputsCallbacksAndConcurrentReuseAreOwned`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataPreflightAndSourceStatusPolicy`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataCapturesSourceBeforeCustomJSONMarshaler`.
 - All eight Source canonical and exact wire system aliases, full custom prefix, JSON Python string conversion and physical per-phase evidence.
   Tests: `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataSetterRefreshesObservedStateAndSourceValues`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFalseLaterOptionsAndReusableSnapshots`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataEverySystemAliasAndPrefixedConvention`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFailuresKeepAcknowledgementWithoutReplay`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataInputsCallbacksAndConcurrentReuseAreOwned`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataPreflightAndSourceStatusPolicy`, `objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataCapturesSourceBeforeCustomJSONMarshaler`.
@@ -245,7 +244,7 @@ func changeContainerMetadata(ctx context.Context, api *containers.API, name stri
         }),
         containers.WithGetMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
         request.Header("X-Request-Label", "container-metadata"),
-        containers.WithGetMetadataNewest(false),
+        request.Custom(func(c *containers.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }),
     }
     before, err := api.GetMetadata(ctx, name, getOptions...)
     if before != nil { fmt.Println(before.StatusCode) }

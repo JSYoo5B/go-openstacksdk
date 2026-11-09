@@ -16,12 +16,6 @@ type ObjectStreamOption = objects.CloudStreamOption
 func WithObjectStreamOpts(value ObjectStreamOpts) ObjectStreamOption {
 	return objects.WithCloudStreamOpts(value)
 }
-func WithObjectStreamChunkSize(value int) ObjectStreamOption {
-	return objects.WithCloudStreamChunkSize(value)
-}
-func WithObjectStreamQueryString(value string) ObjectStreamOption {
-	return objects.WithCloudStreamQueryString(value)
-}
 
 // StreamObjectChunks creates a lazy stream_object(container, obj) adapter. Its
 // fixed query_string option is ignored by Source. A nil cloud fails during the

@@ -17,7 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.HeadMetadata`
 
 - GetMetadata sends one bodyless query-free normal HEAD with strict actual200 at the captured effective ResourceBase/Endpoint and once-escaped literal container/object. No parent HEAD, lookup, contents GET or metadata cache; normal server symlink semantics remain.
@@ -252,7 +251,7 @@ func ChangeObjectMetadata(ctx context.Context, conn *sdk.Connection, newest bool
 		objects.WithGetMetadataHeaders(map[string]string{"X-Example-Trace": "metadata"}),
 	}
 	if newest {
-		getOptions = append(getOptions, objects.WithGetMetadataNewest(true))
+		getOptions = append(getOptions, request.Custom(func(c *objects.GetMetadataOpts) error { v := true; c.Newest = &v; return nil }))
 	} else {
 		getOptions = append(getOptions, request.Custom(func(c *objects.GetMetadataOpts) error { c.Newest = nil; return nil }))
 	}

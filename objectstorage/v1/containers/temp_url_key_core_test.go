@@ -55,7 +55,7 @@ func TestContainerTempURLKeyCoreWireAndStatus(t *testing.T) {
 				}
 				return containerMetadataWire(r, tc.status, http.Header{"X-Proof": {"kept"}}, io.NopCloser(strings.NewReader("ack"))), nil
 			})
-			result, err := New(c).SetTempURLKey(context.Background(), "백업 %2F?#", tc.key, WithSetTempURLKeySecondary(tc.secondary))
+			result, err := New(c).SetTempURLKey(context.Background(), "백업 %2F?#", tc.key, request.Custom(func(c *SetTempURLKeyOpts) error { c.Secondary = tc.secondary; return nil }))
 			if calls != 1 {
 				t.Fatal("implicit refresh/replay", calls)
 			}

@@ -104,7 +104,7 @@ func TestConnectionContainerMetadataSharesClientAndOwnsEvidence(t *testing.T) {
 	source = service.RawClient()
 	source.ResourceBase = "https://cloud.test/other%25/v1/AUTH_account%25/"
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
-	get, err := service.Containers.GetMetadata(ctx, name, containers.WithGetMetadataNewest(false), request.Custom(func(o *containers.GetMetadataOpts) error {
+	get, err := service.Containers.GetMetadata(ctx, name, request.Custom(func(c *containers.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(o *containers.GetMetadataOpts) error {
 		source.MoreHeaders["X-Source"] = "callback"
 		provider.SetToken("swift-1")
 		return nil

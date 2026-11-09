@@ -70,7 +70,7 @@ func TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt(t *testing.T)
 		_, _ = w.Write([]byte("안녕"))
 	})
 	for range 2 {
-		value, err := conn.GetObjectText(context.Background(), "bucket", "object", objectstorage.WithObjectGetQueryString("ignored"))
+		value, err := conn.GetObjectText(context.Background(), "bucket", "object", func(c *objectstorage.ObjectGetOpts) error { c.QueryString = "ignored"; return nil })
 		if err != nil || value == nil || value.Body == nil || *value.Body != "안녕" || value.Receipt == nil || value.Receipt.StatusCode != 200 || value.Headers["x-request-id"] != "get-text" {
 			t.Fatal(value, err)
 		}

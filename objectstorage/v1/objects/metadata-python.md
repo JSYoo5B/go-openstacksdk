@@ -17,7 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.HeadMetadata`
 
 - GetMetadata sends one bodyless query-free normal HEAD with strict actual200 at the captured effective ResourceBase/Endpoint and once-escaped literal container/object. No parent HEAD, lookup, contents GET or metadata cache; normal server symlink semantics remain.

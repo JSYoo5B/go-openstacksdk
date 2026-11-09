@@ -48,8 +48,9 @@ func TestPythonObjectCloudGetObjectRawReturnsEveryStatus(t *testing.T) {
 			_, _ = w.Write([]byte("payload"))
 		}
 	})
-	// get_object_raw("box", "dir/file.bin", objects.WithRawObjectQueryString("multipart-manifest=get&format=raw"))
-	got, err := api.GetObjectRaw(ctx, "box", "dir/file.bin", objects.WithRawObjectQueryString("multipart-manifest=get&format=raw"))
+	// get_object_raw("box", "dir/file.bin") with RawObjectOpts.QueryString set to
+	// "multipart-manifest=get&format=raw".
+	got, err := api.GetObjectRaw(ctx, "box", "dir/file.bin", func(c *objects.RawObjectOpts) error { c.QueryString = "multipart-manifest=get&format=raw"; return nil })
 	if body := pythonObjectRawRead(t, got, err); body != "payload" || got.StatusCode != 200 || got.Header.Get("X-Trans-Id") != "tx-multipart-manifest=get&format=raw" {
 		t.Fatal(got, body)
 	}
@@ -58,7 +59,7 @@ func TestPythonObjectCloudGetObjectRawReturnsEveryStatus(t *testing.T) {
 	if body := pythonObjectRawRead(t, got, err); body != "payload" {
 		t.Fatal(body)
 	}
-	got, err = api.GetObjectRaw(ctx, "box", "missing", objects.WithRawObjectQueryString("symlink=get"))
+	got, err = api.GetObjectRaw(ctx, "box", "missing", func(c *objects.RawObjectOpts) error { c.QueryString = "symlink=get"; return nil })
 	if body := pythonObjectRawRead(t, got, err); body != "<html>Not Found</html>" || got.StatusCode != 404 {
 		t.Fatal(got, body)
 	}
@@ -101,7 +102,7 @@ func TestPythonObjectCloudGetObjectRawRejectsInputsBeforeHTTP(t *testing.T) {
 		{"", "file", ""},
 	} {
 		var operation *resource.OperationError
-		if got, err := api.GetObjectRaw(ctx, input.container, input.object, objects.WithRawObjectQueryString(input.query)); got != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &operation) || operation.Operation != "GetObjectRaw" {
+		if got, err := api.GetObjectRaw(ctx, input.container, input.object, func(c *objects.RawObjectOpts) error { c.QueryString = input.query; return nil }); got != nil || !errors.Is(err, resource.ErrInvalidOption) || !errors.As(err, &operation) || operation.Operation != "GetObjectRaw" {
 			t.Fatal(input, got, err)
 		}
 	}
@@ -132,7 +133,7 @@ func TestPythonObjectRawBufferedDefaultOwnsOpaqueBytesAndAllowsContainerEndpoint
 				}
 				return objectMetadataWire(status, body), nil
 			})
-			result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "", objects.WithRawObjectQueryString("prefix=a%2Fb&same=1&same=2"))
+			result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "", func(c *objects.RawObjectOpts) error { c.QueryString = "prefix=a%2Fb&same=1&same=2"; return nil })
 			if err != nil || result == nil || result.StatusCode != status || result.Header.Get("X-Trans-Id") != "actual-object" || calls != 1 || body.closes.Load() != 1 {
 				t.Fatal(result, err, calls, body.closes.Load())
 			}
@@ -186,7 +187,7 @@ func TestPythonObjectRawPhysicalFaultsPreserveActualPayloadAndNative401WithoutHo
 					backoffs++
 					return nil
 				}
-				result, err := objects.New(client).GetObjectRaw(ctx, "box", "file", objects.WithRawObjectQueryString("opaque=%2F&opaque=%252F"))
+				result, err := objects.New(client).GetObjectRaw(ctx, "box", "file", func(c *objects.RawObjectOpts) error { c.QueryString = "opaque=%2F&opaque=%252F"; return nil })
 				if err == nil || result == nil || result.StatusCode != status || result.Header.Get("X-Trans-Id") != "actual-object" || requests != 1 || body.closes.Load() != 1 || retries != 0 || reauths != 0 || backoffs != 0 {
 					t.Fatal(result, err, requests, body.closes.Load(), retries, reauths, backoffs)
 				}
@@ -275,7 +276,7 @@ func TestPythonObjectRawCleanNativeRenewalAndMixedCallbackErrorsStayDistinct(t *
 					return callbackCause
 				}
 			}
-			result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", objects.WithRawObjectQueryString("a=1&a=2"))
+			result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", func(c *objects.RawObjectOpts) error { c.QueryString = "a=1&a=2"; return nil })
 			if mode == "callback" {
 				if !errors.Is(err, callbackCause) || result == nil || result.StatusCode != 401 || requests != 1 || hooks != 1 {
 					t.Fatal(result, err, requests, hooks)
@@ -323,7 +324,7 @@ func TestPythonObjectRawStreamingIsUnreadAndGuardsOpaqueLifecycle(t *testing.T) 
 				}
 				return objectMetadataWire(status, body), nil
 			})
-			result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", objects.WithRawObjectQueryString("q=%2F&q=%252F"), objects.WithRawObjectStream(true))
+			result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", func(c *objects.RawObjectOpts) error { c.QueryString = "q=%2F&q=%252F"; return nil }, func(c *objects.RawObjectOpts) error { c.Stream = true; return nil })
 			if err != nil || result == nil || result.StatusCode != status || reads != 0 || requests != 1 || body.closes.Load() != 0 {
 				t.Fatal(result, err, reads, requests, body.closes.Load())
 			}
@@ -379,7 +380,7 @@ func TestPythonObjectRawStreamingFaultsRetainImmutableWireEvidenceAndNoReplay(t 
 				backoffs++
 				return nil
 			}
-			result, err := objects.New(client).GetObjectRaw(ctx, "box", "file", objects.WithRawObjectStream(true))
+			result, err := objects.New(client).GetObjectRaw(ctx, "box", "file", func(c *objects.RawObjectOpts) error { c.Stream = true; return nil })
 			if err != nil || result == nil || reads != 0 || body.closes.Load() != 0 {
 				t.Fatal(result, err, reads, body.closes.Load())
 			}
@@ -414,7 +415,7 @@ func TestPythonObjectRawStreamingCloseBeforeEOFAndCanceledUnreadBody(t *testing.
 		body := &objectMetadataBody{Reader: strings.NewReader("opaque bytes")}
 		requests := 0
 		client := objectMetadataClient(func(*http.Request) (*http.Response, error) { requests++; return objectMetadataWire(200, body), nil })
-		result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", objects.WithRawObjectStream(true))
+		result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", func(c *objects.RawObjectOpts) error { c.Stream = true; return nil })
 		if err != nil || result == nil {
 			t.Fatal(result, err)
 		}
@@ -439,7 +440,7 @@ func TestPythonObjectRawStreamingCloseBeforeEOFAndCanceledUnreadBody(t *testing.
 		reads, requests := 0, 0
 		body := &objectMetadataBody{Reader: objectMetadataReader(func(dst []byte) (int, error) { reads++; return copy(dst, "unexpected read"), io.EOF })}
 		client := objectMetadataClient(func(*http.Request) (*http.Response, error) { requests++; return objectMetadataWire(200, body), nil })
-		result, err := objects.New(client).GetObjectRaw(ctx, "box", "file", objects.WithRawObjectStream(true))
+		result, err := objects.New(client).GetObjectRaw(ctx, "box", "file", func(c *objects.RawObjectOpts) error { c.Stream = true; return nil })
 		if err != nil || result == nil {
 			t.Fatal(result, err)
 		}
@@ -486,7 +487,7 @@ func TestPythonObjectRawStreamingCleanAndFaultyNative401AndBackoff(t *testing.T)
 						return nil
 					}
 				}
-				result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", objects.WithRawObjectStream(true))
+				result, err := objects.New(client).GetObjectRaw(context.Background(), "box", "file", func(c *objects.RawObjectOpts) error { c.Stream = true; return nil })
 				if faulty {
 					if result == nil || result.StatusCode != status || !errors.Is(err, cause) || requests != 1 || renewals != 0 || first.closes.Load() != 1 {
 						t.Fatal(result, err, requests, renewals, first.closes.Load())

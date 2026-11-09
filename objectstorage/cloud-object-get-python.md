@@ -18,17 +18,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.GetObjectText`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetQueryString`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetStream`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOutfile`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetWriter`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetContent`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetOutfile`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetQueryString`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetStream`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetWriter`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCloudGetContent`
@@ -123,9 +118,9 @@ func run(ctx context.Context, cloud, container, object, query, outfile string,
     conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud))
     if err != nil { return err }
     options := []objectstorage.ObjectGetOption{
-        objectstorage.WithObjectGetQueryString(query),
-        objectstorage.WithObjectGetStream(stream),
-        objectstorage.WithObjectGetChunkSize(chunkSize),
+        func(c *objectstorage.ObjectGetOpts) error { c.QueryString = query; return nil },
+        func(c *objectstorage.ObjectGetOpts) error { c.Stream = stream; return nil },
+        func(c *objectstorage.ObjectGetOpts) error { v := chunkSize; c.ChunkSize = &v; return nil },
     }
     if outfile != "" { options = append(options, objectstorage.WithObjectGetOutfile(outfile)) }
     if discard {

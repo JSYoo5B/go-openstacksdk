@@ -96,7 +96,7 @@ func TestCreateObjectContractsBytesWireAndSnapshots(t *testing.T) {
 		provider.SetToken("wire-token")
 		client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "object-store", Endpoint: server.URL + "/catalogue/v1/AUTH_a/", ResourceBase: server.URL + "/reverse/a%20b/v1/AUTH_wire/"}
 		for _, data := range [][]byte{payload, {}} {
-			result, err := objects.New(client).CreateObject(context.Background(), objectMetadataContainer, objectMetadataKey, objects.CreateObjectInput{Data: data}, objects.WithCreateObjectMD5(strings.Repeat("a", 32)), objects.WithCreateObjectSegmentSize(0), objects.WithCreateObjectUseSLO(false), objects.WithCreateObjectMetadataValue("X-Sdk-Md5", "literal-metadata"))
+			result, err := objects.New(client).CreateObject(context.Background(), objectMetadataContainer, objectMetadataKey, objects.CreateObjectInput{Data: data}, request.Custom(func(c *objects.CreateObjectOpts) error { c.MD5 = strings.Repeat("a", 32); return nil }), request.Custom(func(c *objects.CreateObjectOpts) error { v := int64(0); c.SegmentSize = &v; return nil }), objects.WithCreateObjectUseSLO(false), objects.WithCreateObjectMetadataValue("X-Sdk-Md5", "literal-metadata"))
 			if err != nil || result == nil || result.Source != "bytes" || result.Mode != "ordinary" || result.Size != int64(len(data)) || result.Capabilities != nil || result.Discovery != nil || len(result.Segments) != 0 || result.MD5 != "" || result.Ordinary == nil || result.Ordinary.Acknowledgement.StatusCode != 201 || string(result.Ordinary.Acknowledgement.Body) != "wire-ack" {
 				t.Fatalf("result=%+v err=%v", result, err)
 			}
@@ -169,7 +169,7 @@ func TestCreateObjectContractsFileReaderAndHashes(t *testing.T) {
 				return objectMetadataResponse(500, "unexpected"), nil
 			}
 		})
-		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: reader}, request.Header("X-Upload", "only-write"), objects.WithCreateObjectMetadataValue("Book", "literal"), objects.WithCreateObjectMD5(strings.Repeat("0", 32)))
+		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: reader}, request.Header("X-Upload", "only-write"), objects.WithCreateObjectMetadataValue("Book", "literal"), request.Custom(func(c *objects.CreateObjectOpts) error { c.MD5 = strings.Repeat("0", 32); return nil }))
 		if err != nil || result == nil || result.Source != "reader" || result.Mode != "ordinary" || result.MD5 != md || result.SHA256 != sha || !reflect.DeepEqual(methods, []string{"GET", "HEAD", "PUT"}) || reader.closes.Load() != 0 || reader.seeks.Load() != 0 {
 			t.Fatalf("result=%+v err=%v methods=%v Close=%d Seek=%d", result, err, methods, reader.closes.Load(), reader.seeks.Load())
 		}
@@ -303,7 +303,7 @@ func TestCreateObjectContractsSLOAndDLOWire(t *testing.T) {
 				response.Header.Set("ETag", `"opaque-etag"`)
 				return response, nil
 			})
-			result, err := objects.New(client).CreateObject(context.Background(), container, key, objects.CreateObjectInput{Reader: bytes.NewReader(data)}, objects.WithCreateObjectSegmentSize(2), objects.WithCreateObjectUseSLO(useSLO), request.Header("Content-Type", "logical/type"))
+			result, err := objects.New(client).CreateObject(context.Background(), container, key, objects.CreateObjectInput{Reader: bytes.NewReader(data)}, request.Custom(func(c *objects.CreateObjectOpts) error { v := int64(2); c.SegmentSize = &v; return nil }), objects.WithCreateObjectUseSLO(useSLO), request.Header("Content-Type", "logical/type"))
 			mode := "slo"
 			if !useSLO {
 				mode = "dlo"
@@ -394,7 +394,7 @@ func TestCreateObjectContractsSLOAndDLOWire(t *testing.T) {
 			next.Header["aCcEpT"] = []string{"foreign"}
 			return nil
 		}
-		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcd")}, objects.WithCreateObjectSegmentSize(2), request.Header("Content-Type", "logical/type"))
+		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcd")}, request.Custom(func(c *objects.CreateObjectOpts) error { v := int64(2); c.SegmentSize = &v; return nil }), request.Header("Content-Type", "logical/type"))
 		if err != nil || result == nil || result.Manifest == nil || manifestCalls != 2 || redirects != 1 || len(result.Manifest.Attempts) != 2 || result.Manifest.Acknowledgement.StatusCode != 201 {
 			t.Fatalf("result=%+v err=%v manifest=%d redirect=%d", result, err, manifestCalls, redirects)
 		}
@@ -592,7 +592,7 @@ func TestCreateObjectContractsAcceptedFaultsAndUnconfirmedSegments(t *testing.T)
 				return objectMetadataResponse(500, ""), nil
 			}
 		})
-		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcd")}, objects.WithCreateObjectSegmentSize(2))
+		result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcd")}, request.Custom(func(c *objects.CreateObjectOpts) error { v := int64(2); c.SegmentSize = &v; return nil }))
 		var semantic *objects.ObjectCreateUnconfirmedSegmentError
 		if result == nil || !errors.As(err, &semantic) || semantic.Name == "" || result.Manifest != nil || len(result.Cleanup) != 0 || manifests.Load() != 0 || deletes.Load() != 0 {
 			t.Fatalf("result=%+v err=%v manifest=%d delete=%d", result, err, manifests.Load(), deletes.Load())
@@ -659,7 +659,7 @@ func TestCreateObjectContractsCleanupAndStickyAmbiguity(t *testing.T) {
 					return objectMetadataResponse(500, ""), nil
 				}
 			})
-			result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcde")}, objects.WithCreateObjectSegmentSize(2))
+			result, err := objects.New(client).CreateObject(context.Background(), "c", "o", objects.CreateObjectInput{Reader: strings.NewReader("abcde")}, request.Custom(func(c *objects.CreateObjectOpts) error { v := int64(2); c.SegmentSize = &v; return nil }))
 			if result == nil || err == nil || result.Manifest == nil || result.Manifest.Acknowledgement != nil || manifestCalls != 3 || len(result.Manifest.Attempts) != 3 || result.ManifestAmbiguous != ambiguous || len(created) != 3 {
 				t.Fatalf("result=%+v err=%v manifests=%d created=%v", result, err, manifestCalls, created)
 			}

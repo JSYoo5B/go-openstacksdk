@@ -31115,8 +31115,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataNewest"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataHeaders"
       ],
       "contracts": [
         {
@@ -31378,8 +31377,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataNewest"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeaders"
       ],
       "contracts": [
         {
@@ -31466,7 +31464,7 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshHeaders"
       ],
@@ -31530,7 +31528,7 @@
           ]
         },
         {
-          "behavior": "Default refresh=true POST then HEAD and explicit false is callable through WithMetadataRefresh(false); later scalar wins and whole concrete opts resets default.",
+          "behavior": "Default refresh=true POST then HEAD and explicit false is callable through MetadataRefreshOpts.Refresh = false; later scalar wins and whole concrete opts resets default.",
           "tests": [
             "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataSetterRefreshesObservedStateAndSourceValues",
             "objectstorage/v1/containers/metadata_refresh_test.go:TestSwiftPythonContainerMetadataRefreshFalseLaterOptionsAndReusableSnapshots",
@@ -31661,7 +31659,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithGetMetadataNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.HeadMetadata"
       ],
       "contracts": [
@@ -32209,7 +32206,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeyHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithSetTempURLKeySecondary"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -32278,7 +32275,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeyHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithSetTempURLKeySecondary"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -32345,11 +32342,9 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetTempURLKey",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyContainer",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyNewest"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeaders"
       ],
       "contracts": [
         {
@@ -32443,12 +32438,9 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GenerateFormSignature",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureKey",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureDigest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureTimestamp",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureNewest"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeaders"
       ],
       "contracts": [
         {
@@ -32530,16 +32522,9 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GenerateTempURL",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLKey",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLDigest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLTimestamp",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLNewest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLAbsolute",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLPrefix",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLISO8601",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLIPRange"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeaders"
       ],
       "contracts": [
         {
@@ -32615,7 +32600,7 @@
       "differences": [
         "Go accepts decoded UTF8 string and int64 seconds, escapes path/query once and returns structured owned result; Python accepts bytes/numeric/string timestamps and concatenates a literal query.",
         "Go includes SHA256/SHA512, explicit time snapshot and strict masked CIDR validation, while pinned Python signs SHA1 and applies its own parsing/warning behavior.",
-        "Python accepts ISO 8601 strings as seconds; Go takes int64 seconds and WithGenerateTempURLAbsolute.",
+        "Python accepts ISO 8601 strings as seconds; Go takes int64 seconds and GenerateTempURLOpts.Absolute.",
         "Go escapes the path in the returned URL and orders query keys alphabetically; Python concatenates the literal path and temp_url_sig before temp_url_expires."
       ],
       "remaining": []
@@ -32630,17 +32615,6 @@
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile",
@@ -32749,18 +32723,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders"
       ],
       "contracts": [
         {
@@ -32839,18 +32802,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders"
       ],
       "documentation": [
         "objectstorage/v1/objects/read.md"
@@ -32859,7 +32811,7 @@
         "Go exposes an eager, explicitly closeable guarded stream with delivered-byte counters and owned evidence; Python exposes requests.iter_content byte chunks.",
         "Go terminal auto-close/stable Close and strict projected metadata are deliberate contracts, rather than Requests iterator/session behavior.",
         "Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.",
-        "StreamObject returns an io.ReadCloser with delivered-byte counters instead of a Requests iter_content iterator of chunk_size bytes; WithObjectReadBufferSize sets the read buffer, the caller must close the stream and read it from one goroutine at a time, and the read does not check payload integrity; see Server guarantees outside the SDK in docs/sdk-support-ledger.md."
+        "StreamObject returns an io.ReadCloser with delivered-byte counters instead of a Requests iter_content iterator of chunk_size bytes; ObjectReadOpts.BufferSize sets the read buffer, the caller must close the stream and read it from one goroutine at a time, and the read does not check payload integrity; see Server guarantees outside the SDK in docs/sdk-support-ledger.md."
       ],
       "contracts": [
         {
@@ -33016,8 +32968,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSize"
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithObjectSegmentSizeHeaders"
       ],
       "contracts": [
         {
@@ -33115,7 +33066,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectStaticLargeObject",
         "github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectVersionID",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectNewest",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkInfo.UnmarshalJSON",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkError.Error"
@@ -33241,9 +33191,6 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectHeaders",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadata",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadataValue",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMD5",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectSHA256",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectSegmentSize",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectUseSLO",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectGenerateChecksums",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectCreateUnconfirmedSegmentError.Error"
@@ -33406,8 +33353,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleOpts",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleHeaders",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleMD5",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleSHA256"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -113106,7 +113052,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SearchContainers",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchName",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression",
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers"
@@ -113203,7 +113149,7 @@
         "github.com/JSYoo5B/go-openstacksdk/resource.ID",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.CreateContainer",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerPublic",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateHeaders"
       ],
@@ -113299,11 +113245,12 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts"
       ],
       "contracts": [
         {
-          "behavior": "SetMetadataAndRefresh with WithMetadataRefresh(false) sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.",
+          "behavior": "SetMetadataAndRefresh with MetadataRefreshOpts.Refresh = false sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.",
           "tests": [
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost",
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError"
@@ -113325,15 +113272,15 @@
       "status": "go_mapping",
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
+        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SetContainerAccess",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessRefresh",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessOpts",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessHeaders"
       ],
       "contracts": [
         {
-          "behavior": "SetMetadataAndRefresh with WithMetadataRefresh(false) sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.",
+          "behavior": "SetMetadataAndRefresh with MetadataRefreshOpts.Refresh = false sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.",
           "tests": [
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost",
             "objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError"
@@ -113682,7 +113629,7 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.SearchObjects",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SearchObjects",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchName",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchFiltersJSON",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchExpression"
       ],
@@ -113773,9 +113720,7 @@
       "go_api": [
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.DeleteAutocreatedImageObjects",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImageObjectsOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImageTasks",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImageContainer",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithAutocreatedImagePrefix"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -113843,8 +113788,7 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObjectRaw",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectQueryString",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRawObjectStream"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -113906,12 +113850,9 @@
         "github.com/JSYoo5B/go-openstacksdk.Connection.StreamObjectChunks",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.StreamObjectChunks",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamChunkSize",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamQueryString",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamCloudObject",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamChunkSize",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamQueryString"
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom"
       ],
       "contracts": [
         {
@@ -114006,17 +113947,12 @@
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.GetObjectText",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetChunkSize",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetQueryString",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetStream",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOutfile",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetWriter",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetContent",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetOutfile",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOpts",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetChunkSize",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetQueryString",
-        "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetStream",
+        "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetWriter",
         "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCloudGetContent",

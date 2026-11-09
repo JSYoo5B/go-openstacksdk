@@ -43,12 +43,6 @@ func WithCloudStreamOpts(value CloudStreamOpts) CloudStreamOption {
 	value = cloneCloudStreamOpts(value)
 	return func(cfg *CloudStreamOpts) error { *cfg = cloneCloudStreamOpts(value); return nil }
 }
-func WithCloudStreamChunkSize(value int) CloudStreamOption {
-	return func(cfg *CloudStreamOpts) error { size := value; cfg.ChunkSize = &size; return nil }
-}
-func WithCloudStreamQueryString(value string) CloudStreamOption {
-	return func(cfg *CloudStreamOpts) error { cfg.QueryString = value; return nil }
-}
 
 // CloudStreamReceipt contains actual response facts without copying or retaining
 // the object payload. Receipt returns a fresh header map on every call.

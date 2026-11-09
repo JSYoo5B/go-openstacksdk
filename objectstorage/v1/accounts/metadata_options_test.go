@@ -74,11 +74,11 @@ func TestAccountMetadataOptionsReplacementAndNewest(t *testing.T) {
 			t.Fatalf("mutation singular overwrite %#v %v", mutation.Headers, err)
 		}
 	}
-	cfg, err := applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataNewest(true), request.Header("X-Trace", "one"), WithGetMetadataOpts(GetMetadataOpts{}), WithGetMetadataHeaders(map[string]string{"x-trace": "two"}), request.Header("X-Trace", "three")})
+	cfg, err := applyGetMetadataOptions([]GetMetadataOption{request.Custom(func(c *GetMetadataOpts) error { v := true; c.Newest = &v; return nil }), request.Header("X-Trace", "one"), WithGetMetadataOpts(GetMetadataOpts{}), WithGetMetadataHeaders(map[string]string{"x-trace": "two"}), request.Header("X-Trace", "three")})
 	if err != nil || cfg.Newest != nil || cfg.Headers["X-Trace"] != "three" {
 		t.Fatalf("replace/last wins %+v %v", cfg, err)
 	}
-	cfg, err = applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataNewest(false), request.Custom(func(c *GetMetadataOpts) error { c.Newest = nil; return nil })})
+	cfg, err = applyGetMetadataOptions([]GetMetadataOption{request.Custom(func(c *GetMetadataOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(c *GetMetadataOpts) error { c.Newest = nil; return nil })})
 	if err != nil || cfg.Newest != nil {
 		t.Fatalf("clear %+v %v", cfg, err)
 	}

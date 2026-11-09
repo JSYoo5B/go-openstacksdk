@@ -65,13 +65,13 @@ func TestObjectCreateOptionsDefaultsAndReplacement(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	cfg, err := p.applyCreateOptions(context.Background(), []CreateObjectOption{WithCreateObjectSegmentSize(0), WithCreateObjectUseSLO(false), WithCreateObjectGenerateChecksums(false), WithCreateObjectMD5(strings.Repeat("A", 32)), WithCreateObjectSHA256(strings.Repeat("B", 64)), WithCreateObjectHeaders(map[string]string{"X-Call": "first"}), WithCreateObjectHeaders(map[string]string{"x-call": "last"}), WithCreateObjectMetadata(map[string]string{"Tag": "first"}), WithCreateObjectMetadata(map[string]string{"TAG": "last"})})
+	cfg, err := p.applyCreateOptions(context.Background(), []CreateObjectOption{request.Custom(func(c *CreateObjectOpts) error { v := int64(0); c.SegmentSize = &v; return nil }), WithCreateObjectUseSLO(false), WithCreateObjectGenerateChecksums(false), request.Custom(func(c *CreateObjectOpts) error { c.MD5 = strings.Repeat("A", 32); return nil }), request.Custom(func(c *CreateObjectOpts) error { c.SHA256 = strings.Repeat("B", 64); return nil }), WithCreateObjectHeaders(map[string]string{"X-Call": "first"}), WithCreateObjectHeaders(map[string]string{"x-call": "last"}), WithCreateObjectMetadata(map[string]string{"Tag": "first"}), WithCreateObjectMetadata(map[string]string{"TAG": "last"})})
 	if err = p.finishCreate(context.Background(), &cfg, "file", err); err != nil || cfg.SegmentSize == nil || *cfg.SegmentSize != 0 || cfg.UseSLO == nil || *cfg.UseSLO || cfg.GenerateChecksums == nil || *cfg.GenerateChecksums || cfg.Headers["X-Call"] != "last" || cfg.Metadata["tag"] != "last" || len(cfg.Headers) != 1 || len(cfg.Metadata) != 1 {
 		t.Fatal(cfg, err)
 	}
 	for _, options := range [][]CreateObjectOption{
-		{WithCreateObjectSegmentSize(3), request.Custom(func(c *CreateObjectOpts) error { c.SegmentSize = nil; return nil }), WithCreateObjectUseSLO(false), request.Custom(func(c *CreateObjectOpts) error { c.UseSLO = nil; return nil }), WithCreateObjectGenerateChecksums(false), request.Custom(func(c *CreateObjectOpts) error { c.GenerateChecksums = nil; return nil }), WithCreateObjectMD5(""), WithCreateObjectSHA256("")},
-		{request.Header("X-Call", "discard"), WithCreateObjectMetadataValue("tag", "discard"), WithCreateObjectSegmentSize(3), WithCreateObjectOpts(CreateObjectOpts{})},
+		{request.Custom(func(c *CreateObjectOpts) error { v := int64(3); c.SegmentSize = &v; return nil }), request.Custom(func(c *CreateObjectOpts) error { c.SegmentSize = nil; return nil }), WithCreateObjectUseSLO(false), request.Custom(func(c *CreateObjectOpts) error { c.UseSLO = nil; return nil }), WithCreateObjectGenerateChecksums(false), request.Custom(func(c *CreateObjectOpts) error { c.GenerateChecksums = nil; return nil }), request.Custom(func(c *CreateObjectOpts) error { c.MD5 = ""; return nil }), request.Custom(func(c *CreateObjectOpts) error { c.SHA256 = ""; return nil })},
+		{request.Header("X-Call", "discard"), WithCreateObjectMetadataValue("tag", "discard"), request.Custom(func(c *CreateObjectOpts) error { v := int64(3); c.SegmentSize = &v; return nil }), WithCreateObjectOpts(CreateObjectOpts{})},
 	} {
 		cfg, err = p.applyCreateOptions(context.Background(), options)
 		if err != nil || cfg.SegmentSize != nil || cfg.UseSLO != nil || cfg.GenerateChecksums != nil || cfg.MD5 != "" || cfg.SHA256 != "" || len(cfg.Headers) != 0 || len(cfg.Metadata) != 0 {
@@ -97,7 +97,7 @@ func TestObjectCreateOptionsPreflightAndCallbackCauses(t *testing.T) {
 			t.Fatal("invalid input reached callback", result, err, callbacks)
 		}
 	}
-	for _, option := range []CreateObjectOption{nil, WithCreateObjectSegmentSize(-1), WithCreateObjectMD5("short"), WithCreateObjectSHA256(strings.Repeat("g", 64)), request.Header("ETag", "owned"), request.Header("Cookie", "auth"), request.Header("X-Service-Token", "auth"), request.Header("X-Copy-From", "/other/key"), WithCreateObjectMetadataValue("x-object-meta-tag", "bad"), WithCreateObjectMetadataValue("tag", "bad\nvalue")} {
+	for _, option := range []CreateObjectOption{nil, request.Custom(func(c *CreateObjectOpts) error { v := int64(-1); c.SegmentSize = &v; return nil }), request.Custom(func(c *CreateObjectOpts) error { c.MD5 = "short"; return nil }), request.Custom(func(c *CreateObjectOpts) error { c.SHA256 = strings.Repeat("g", 64); return nil }), request.Header("ETag", "owned"), request.Header("Cookie", "auth"), request.Header("X-Service-Token", "auth"), request.Header("X-Copy-From", "/other/key"), WithCreateObjectMetadataValue("x-object-meta-tag", "bad"), WithCreateObjectMetadataValue("tag", "bad\nvalue")} {
 		reader := &createCoreBorrowed{reader: strings.NewReader("unread")}
 		result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Reader: reader}, option)
 		if result != nil || !errors.Is(err, resource.ErrInvalidOption) || reader.reads != 0 {

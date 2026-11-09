@@ -59,7 +59,7 @@ func TestSwiftCloudContainerCreateOwnsGetOrCreateAndPublicDefault(t *testing.T) 
 			})
 			var options []objectstorage.ContainerCreateOption
 			if tc.public {
-				options = append(options, objectstorage.WithContainerPublic(true))
+				options = append(options, func(c *objectstorage.ContainerCreateOpts) error { c.Public = true; return nil })
 			}
 			result, err := objectstorage.New(client).CreateContainer(context.Background(), "photos %2F?#", options...)
 			if err != nil || result == nil || result.Existing != tc.existing || result.Container == nil || string(result.Container.Resource.Body["count"]) != "4" {
@@ -148,7 +148,7 @@ func TestSwiftCloudContainerSetAccessOwnsTranslationAndRefreshDefault(t *testing
 				})
 				var opts []objectstorage.ContainerAccessOption
 				if refresh {
-					opts = append(opts, objectstorage.WithContainerAccessRefresh(true))
+					opts = append(opts, func(c *objectstorage.ContainerAccessOpts) error { c.Refresh = true; return nil })
 				}
 				result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SetContainerAccess(context.Background(), "photos", access, opts...)
 				if err != nil || result == nil || result.Requested != access || result.Acknowledgement.StatusCode != 202 || string(result.Acknowledgement.Resource.Body["read_ACL"]) != "null" {
@@ -260,7 +260,7 @@ func TestSwiftCloudContainerOptionsOwnSnapshotsAndBulkReset(t *testing.T) {
 			w.WriteHeader(204)
 		}
 	})
-	result, err := objectstorage.New(client).CreateContainer(context.Background(), "photos", objectstorage.WithContainerPublic(true), objectstorage.WithContainerCreateOpts(objectstorage.ContainerCreateOpts{}), option, func(c *objectstorage.ContainerCreateOpts) error { kept = c; return nil })
+	result, err := objectstorage.New(client).CreateContainer(context.Background(), "photos", func(c *objectstorage.ContainerCreateOpts) error { c.Public = true; return nil }, objectstorage.WithContainerCreateOpts(objectstorage.ContainerCreateOpts{}), option, func(c *objectstorage.ContainerCreateOpts) error { kept = c; return nil })
 	if err != nil || result.Container == nil || calls != 3 || client.MoreHeaders != nil {
 		t.Fatal(result, err, calls, client.MoreHeaders)
 	}
@@ -359,7 +359,7 @@ func TestSwiftCloudContainerSetAccessRefreshFailurePreservesPostAndStrictMissing
 					w.WriteHeader(status)
 				}
 			})
-			result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SetContainerAccess(context.Background(), "photos", "public", objectstorage.WithContainerAccessRefresh(true))
+			result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SetContainerAccess(context.Background(), "photos", "public", func(c *objectstorage.ContainerAccessOpts) error { c.Refresh = true; return nil })
 			if !gophercloud.ResponseCodeIs(err, status) || result == nil || result.Container != nil || result.Acknowledgement.StatusCode != 202 || result.Acknowledgement.Header.Get("X-Proof") != "acknowledged" || result.Refreshed.StatusCode != status || !reflect.DeepEqual(methods, []string{"POST", "HEAD"}) {
 				t.Fatal(result, err, methods)
 			}

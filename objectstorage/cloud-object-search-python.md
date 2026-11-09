@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchObjects`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SearchObjects`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchFiltersJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectSearchExpression`
 
@@ -71,7 +71,7 @@ func main() {
     conn, err := sdk.Connect(ctx)
     if err != nil { log.Fatal(err) }
     matched, err := conn.SearchObjects(ctx, "assets",
-        objectstorage.WithObjectSearchName("logs-*"),
+        func(c *objectstorage.ObjectSearchOpts) error { c.Name = "logs-*"; return nil },
         objectstorage.WithObjectSearchFiltersJSON(json.RawMessage(`{"content_length":5}`)))
     if err != nil { log.Fatal(err) }
     for _, row := range matched.Records {

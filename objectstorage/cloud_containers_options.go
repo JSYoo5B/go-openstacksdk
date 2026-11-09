@@ -24,9 +24,6 @@ type ContainerAccessOption func(*ContainerAccessOpts) error
 type ContainerReadOpts struct{ Headers map[string]string }
 type ContainerReadOption func(*ContainerReadOpts) error
 
-func WithContainerPublic(value bool) ContainerCreateOption {
-	return func(c *ContainerCreateOpts) error { c.Public = value; return nil }
-}
 func WithContainerCreateOpts(value ContainerCreateOpts) ContainerCreateOption {
 	value = copyContainerCreate(value)
 	return func(c *ContainerCreateOpts) error { *c = copyContainerCreate(value); return nil }
@@ -34,9 +31,6 @@ func WithContainerCreateOpts(value ContainerCreateOpts) ContainerCreateOption {
 func WithContainerCreateHeaders(value map[string]string) ContainerCreateOption {
 	value = maps.Clone(value)
 	return func(c *ContainerCreateOpts) error { c.Headers = containerMergeHeaders(c.Headers, value); return nil }
-}
-func WithContainerAccessRefresh(value bool) ContainerAccessOption {
-	return func(c *ContainerAccessOpts) error { c.Refresh = value; return nil }
 }
 func WithContainerAccessOpts(value ContainerAccessOpts) ContainerAccessOption {
 	value = copyContainerAccess(value)

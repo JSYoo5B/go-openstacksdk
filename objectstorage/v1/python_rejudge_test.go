@@ -14,6 +14,7 @@ import (
 	objectstorage "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type pythonRejudgeSwiftReply struct {
@@ -80,7 +81,7 @@ func TestPythonRejudgeSwiftTempURLKeySelection(t *testing.T) {
 		service, seen := pythonRejudgeSwiftService(t, map[string]pythonRejudgeSwiftReply{
 			"HEAD /v1/AUTH_project/c1": {204, map[string]string{"X-Container-Meta-Temp-Url-Key": "container"}, ""},
 		})
-		value, err := service.GetTempURLKey(ctx, objectstorage.WithGetTempURLKeyContainer("c1"))
+		value, err := service.GetTempURLKey(ctx, request.Custom(func(c *objectstorage.GetTempURLKeyOpts) error { c.Container = "c1"; return nil }))
 		if err != nil || string(value.Key) != "container" || !value.FromContainer || value.Secondary {
 			t.Fatal(value, err)
 		}
@@ -91,7 +92,7 @@ func TestPythonRejudgeSwiftTempURLKeySelection(t *testing.T) {
 			"HEAD /v1/AUTH_project/c1": {204, nil, ""},
 			"HEAD /v1/AUTH_project/":   {204, map[string]string{"X-Account-Meta-Temp-Url-Key": "account"}, ""},
 		})
-		value, err := service.GetTempURLKey(ctx, objectstorage.WithGetTempURLKeyContainer("c1"))
+		value, err := service.GetTempURLKey(ctx, request.Custom(func(c *objectstorage.GetTempURLKeyOpts) error { c.Container = "c1"; return nil }))
 		if err != nil || string(value.Key) != "account" || value.FromContainer {
 			t.Fatal(value, err)
 		}
@@ -107,7 +108,7 @@ func TestPythonRejudgeSwiftGenerateTempURL(t *testing.T) {
 	want := pythonRejudgeSwiftHMAC("secret", fmt.Sprintf("GET\n%d\n%s", now.Unix()+60, path))
 	t.Run("explicit key sends nothing", func(t *testing.T) {
 		service, seen := pythonRejudgeSwiftService(t, nil)
-		value, err := service.GenerateTempURL(context.Background(), path, 60, "GET", objectstorage.WithGenerateTempURLKey([]byte("secret")), objectstorage.WithGenerateTempURLTimestamp(now))
+		value, err := service.GenerateTempURL(context.Background(), path, 60, "GET", objectstorage.WithGenerateTempURLKey([]byte("secret")), request.Custom(func(c *objectstorage.GenerateTempURLOpts) error { v := now; c.Timestamp = &v; return nil }))
 		if err != nil || value.Signature != want || value.Expires != now.Unix()+60 || value.Path != path {
 			t.Fatal(value, err)
 		}
@@ -117,7 +118,7 @@ func TestPythonRejudgeSwiftGenerateTempURL(t *testing.T) {
 		service, seen := pythonRejudgeSwiftService(t, map[string]pythonRejudgeSwiftReply{
 			"HEAD /v1/AUTH_project/": {204, map[string]string{"X-Account-Meta-Temp-Url-Key": "secret"}, ""},
 		})
-		value, err := service.GenerateTempURL(context.Background(), path, 60, "GET", objectstorage.WithGenerateTempURLTimestamp(now))
+		value, err := service.GenerateTempURL(context.Background(), path, 60, "GET", request.Custom(func(c *objectstorage.GenerateTempURLOpts) error { v := now; c.Timestamp = &v; return nil }))
 		if err != nil || value.Signature != want {
 			t.Fatal(value, err)
 		}
@@ -134,7 +135,7 @@ func TestPythonRejudgeSwiftGenerateFormSignature(t *testing.T) {
 		"HEAD /v1/AUTH_project/":   {204, map[string]string{"X-Account-Meta-Temp-Url-Key": "secret"}, ""},
 	})
 	input := objectstorage.FormSignatureInput{ObjectPrefix: "uploads/", RedirectURL: "https://example.invalid/done", MaxFileSize: 1024, MaxUploadCount: 3, Timeout: 600}
-	value, err := service.GenerateFormSignature(context.Background(), "c1", input, objectstorage.WithGenerateFormSignatureTimestamp(now))
+	value, err := service.GenerateFormSignature(context.Background(), "c1", input, request.Custom(func(c *objectstorage.GenerateFormSignatureOpts) error { v := now; c.Timestamp = &v; return nil }))
 	expires := now.Unix() + 600
 	want := pythonRejudgeSwiftHMAC("secret", fmt.Sprintf("/v1/AUTH_project/c1/uploads/\nhttps://example.invalid/done\n1024\n3\n%d", expires))
 	if err != nil || value.Signature != want || value.Expires != expires {
@@ -167,7 +168,7 @@ func TestPythonRejudgeSwiftInfoAndSegmentSize(t *testing.T) {
 	})
 	t.Run("missing info falls back", func(t *testing.T) {
 		service, seen := pythonRejudgeSwiftService(t, map[string]pythonRejudgeSwiftReply{"GET /info": {404, nil, ""}})
-		value, err := service.GetObjectSegmentSize(ctx, objectstorage.WithObjectSegmentSize(4294967296))
+		value, err := service.GetObjectSegmentSize(ctx, request.Custom(func(c *objectstorage.ObjectSegmentSizeOpts) error { v := int64(4294967296); c.Size = &v; return nil }))
 		if err != nil || value.Size != 2684354561 || !value.UsedFallback {
 			t.Fatal(value, err)
 		}
@@ -192,13 +193,13 @@ func TestPythonRejudgeSwiftSetTempURLKeyRequests(t *testing.T) {
 	if _, err := accounts.New(client).SetTempURLKey(ctx, "k1"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := accounts.New(client).SetTempURLKey(ctx, "k2", accounts.WithSetTempURLKeySecondary(true)); err != nil {
+	if _, err := accounts.New(client).SetTempURLKey(ctx, "k2", request.Custom(func(c *accounts.SetTempURLKeyOpts) error { c.Secondary = true; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if _, err := containers.New(client).SetTempURLKey(ctx, "c1", "k3"); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := containers.New(client).SetTempURLKey(ctx, "c1", "k4", containers.WithSetTempURLKeySecondary(true)); err != nil {
+	if _, err := containers.New(client).SetTempURLKey(ctx, "c1", "k4", request.Custom(func(c *containers.SetTempURLKeyOpts) error { c.Secondary = true; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	pythonRejudgeSwiftSequence(t, seen,

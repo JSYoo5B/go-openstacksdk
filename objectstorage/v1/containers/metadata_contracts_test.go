@@ -221,7 +221,7 @@ func TestContainerMetadataContractsWireAndIdentity(t *testing.T) {
 			calls++
 			return containerMetadataResponse(204, ""), nil
 		})
-		for _, opts := range [][]containers.GetMetadataOption{nil, {containers.WithGetMetadataNewest(false)}, {containers.WithGetMetadataNewest(true)}, {containers.WithGetMetadataNewest(true), request.Custom(func(c *containers.GetMetadataOpts) error { c.Newest = nil; return nil })}} {
+		for _, opts := range [][]containers.GetMetadataOption{nil, {request.Custom(func(c *containers.GetMetadataOpts) error { v := false; c.Newest = &v; return nil })}, {request.Custom(func(c *containers.GetMetadataOpts) error { v := true; c.Newest = &v; return nil })}, {request.Custom(func(c *containers.GetMetadataOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *containers.GetMetadataOpts) error { c.Newest = nil; return nil })}} {
 			if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, opts...); err != nil {
 				t.Fatal(err)
 			}
@@ -436,7 +436,7 @@ func TestContainerMetadataContractsPreflightAndOptions(t *testing.T) {
 			}
 			return containerMetadataResponse(204, ""), nil
 		})
-		if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, containers.WithGetMetadataNewest(true), request.Header("X-Discarded", "old"), containers.WithGetMetadataOpts(containers.GetMetadataOpts{})); err != nil {
+		if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, request.Custom(func(c *containers.GetMetadataOpts) error { v := true; c.Newest = &v; return nil }), request.Header("X-Discarded", "old"), containers.WithGetMetadataOpts(containers.GetMetadataOpts{})); err != nil {
 			t.Fatal(err)
 		}
 	})

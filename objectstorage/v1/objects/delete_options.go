@@ -49,9 +49,6 @@ func WithDeleteObjectStaticLargeObject(value bool) DeleteObjectOption {
 	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.StaticLargeObject = cloneDeleteObjectBool(&value); return nil })
 }
 
-func WithDeleteObjectVersionID(value string) DeleteObjectOption {
-	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.VersionID = value; return nil })
-}
 func WithDeleteObjectNewest(value bool) DeleteObjectOption {
 	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.Newest = cloneDeleteObjectBool(&value); return nil })
 }

@@ -217,7 +217,7 @@ func TestPythonContainerCloudUpdateContainerAndAccessPost(t *testing.T) {
 	} {
 		t.Run(tc.label, func(t *testing.T) {
 			api, calls := pythonContainerAPI(t, func(_ pythonContainerCall, w http.ResponseWriter) { w.WriteHeader(204) })
-			result, err := api.SetMetadataAndRefresh(context.Background(), "box", tc.values, containers.WithMetadataRefresh(false))
+			result, err := api.SetMetadataAndRefresh(context.Background(), "box", tc.values, request.Custom(func(c *containers.MetadataRefreshOpts) error { v := false; c.Refresh = &v; return nil }))
 			if err != nil || result.Acknowledgement == nil || result.Acknowledgement.StatusCode != 204 || result.Refreshed != nil {
 				t.Fatal(result, err)
 			}
@@ -236,7 +236,7 @@ func TestPythonContainerCloudUpdateContainerAndAccessPost(t *testing.T) {
 
 func TestPythonContainerCloudUpdateMissingContainerIsError(t *testing.T) {
 	api, _ := pythonContainerAPI(t, func(_ pythonContainerCall, w http.ResponseWriter) { w.WriteHeader(404) })
-	_, err := api.SetMetadataAndRefresh(context.Background(), "gone", map[string]any{"owner": "x"}, containers.WithMetadataRefresh(false))
+	_, err := api.SetMetadataAndRefresh(context.Background(), "gone", map[string]any{"owner": "x"}, request.Custom(func(c *containers.MetadataRefreshOpts) error { v := false; c.Refresh = &v; return nil }))
 	if !gophercloud.ResponseCodeIs(err, 404) || resource.IgnoreMissing(err) != nil {
 		t.Fatal(err)
 	}

@@ -50,7 +50,7 @@ func TestFormSignatureOptionsSnapshotsAndReplacement(t *testing.T) {
 			return nil
 		})
 		for i := 0; i < 2; i++ {
-			result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), full, inspect, mutate, plural, request.Header("X-Trace", "last"), WithGenerateFormSignatureNewest(false))
+			result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), full, inspect, mutate, plural, request.Header("X-Trace", "last"), request.Custom(func(c *GenerateFormSignatureOpts) error { v := false; c.Newest = &v; return nil }))
 			if err != nil || result == nil || result.Signature != "74c3584806cdd2765abf0480a6ccec328683324aff8edc7bb8519f01386bdc5f" || result.Discovery != nil {
 				t.Fatal(result, err)
 			}
@@ -70,7 +70,7 @@ func TestFormSignatureOptionsSnapshotsAndReplacement(t *testing.T) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Container-Meta-Temp-URL-Key-2": {"container-secondary"}}, io.NopCloser(strings.NewReader("raw"))), nil
 		})
 		full := WithGenerateFormSignatureOpts(GenerateFormSignatureOpts{Headers: map[string]string{"x-trace": "old"}})
-		result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), WithGenerateFormSignatureKey([]byte("discard")), WithGenerateFormSignatureHeaders(map[string]string{"X-Removed": "old"}), WithGenerateFormSignatureNewest(true), full, request.Header("X-Trace", "owned"), request.Custom(func(c *GenerateFormSignatureOpts) error { c.Newest = nil; return nil }), WithGenerateFormSignatureNewest(false), WithGenerateFormSignatureTimestamp(signingTestTimestamp()), WithGenerateFormSignatureDigest(""))
+		result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), WithGenerateFormSignatureKey([]byte("discard")), WithGenerateFormSignatureHeaders(map[string]string{"X-Removed": "old"}), request.Custom(func(c *GenerateFormSignatureOpts) error { v := true; c.Newest = &v; return nil }), full, request.Header("X-Trace", "owned"), request.Custom(func(c *GenerateFormSignatureOpts) error { c.Newest = nil; return nil }), request.Custom(func(c *GenerateFormSignatureOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(c *GenerateFormSignatureOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil }), request.Custom(func(c *GenerateFormSignatureOpts) error { c.Digest = ""; return nil }))
 		if err != nil || result == nil || result.Signature != "088f8af8829bd0f68cdfeb13eabb3a2a8609039b" || result.Digest != TempURLDigestSHA1 || calls != 1 {
 			t.Fatal(result, err, calls)
 		}
@@ -81,7 +81,7 @@ func TestFormSignatureOptionsParallelReuseAndInvalidValues(t *testing.T) {
 	c := tempURLKeyTestClient()
 	headers := map[string]string{"X-Trace": "stable"}
 	key := []byte("factory-key")
-	options := []GenerateFormSignatureOption{WithGenerateFormSignatureKey(key), WithGenerateFormSignatureTimestamp(signingTestTimestamp()), WithGenerateFormSignatureHeaders(headers)}
+	options := []GenerateFormSignatureOption{WithGenerateFormSignatureKey(key), request.Custom(func(c *GenerateFormSignatureOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil }), WithGenerateFormSignatureHeaders(headers)}
 	key[0] = '!'
 	headers["X-Trace"] = "outside"
 	var workers sync.WaitGroup

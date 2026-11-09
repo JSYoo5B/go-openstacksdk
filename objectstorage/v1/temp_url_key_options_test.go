@@ -73,9 +73,9 @@ func TestTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 		newest  string
 		present bool
 	}{
-		{"explicit false after clear", []GetTempURLKeyOption{WithGetTempURLKeyContainer("box"), WithGetTempURLKeyContainer(""), WithGetTempURLKeyNewest(true), request.Custom(func(c *GetTempURLKeyOpts) error { c.Newest = nil; return nil }), WithGetTempURLKeyNewest(false)}, "false", true},
-		{"clear only", []GetTempURLKeyOption{WithGetTempURLKeyNewest(true), request.Custom(func(c *GetTempURLKeyOpts) error { c.Newest = nil; return nil })}, "", false},
-		{"full replacement", []GetTempURLKeyOption{WithGetTempURLKeyContainer("box"), WithGetTempURLKeyHeaders(map[string]string{"X-Trace": "remove"}), WithGetTempURLKeyNewest(true), WithGetTempURLKeyOpts(GetTempURLKeyOpts{})}, "", false},
+		{"explicit false after clear", []GetTempURLKeyOption{request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }), request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = ""; return nil }), request.Custom(func(c *GetTempURLKeyOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *GetTempURLKeyOpts) error { c.Newest = nil; return nil }), request.Custom(func(c *GetTempURLKeyOpts) error { v := false; c.Newest = &v; return nil })}, "false", true},
+		{"clear only", []GetTempURLKeyOption{request.Custom(func(c *GetTempURLKeyOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *GetTempURLKeyOpts) error { c.Newest = nil; return nil })}, "", false},
+		{"full replacement", []GetTempURLKeyOption{request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }), WithGetTempURLKeyHeaders(map[string]string{"X-Trace": "remove"}), request.Custom(func(c *GetTempURLKeyOpts) error { v := true; c.Newest = &v; return nil }), WithGetTempURLKeyOpts(GetTempURLKeyOpts{})}, "", false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			c := tempURLKeyTestClient()
@@ -116,7 +116,7 @@ func TestTempURLKeyOptionsParallelReuseAndPreflight(t *testing.T) {
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
-			result, err := New(c).GetTempURLKey(context.Background(), option, WithGetTempURLKeyContainer("box"), WithGetTempURLKeyNewest(false))
+			result, err := New(c).GetTempURLKey(context.Background(), option, request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }), request.Custom(func(c *GetTempURLKeyOpts) error { v := false; c.Newest = &v; return nil }))
 			if err != nil || result == nil || string(result.Key) != "key" || !result.Secondary || result.FromContainer {
 				t.Errorf("parallel discovery failed %#v %v", result, err)
 				return

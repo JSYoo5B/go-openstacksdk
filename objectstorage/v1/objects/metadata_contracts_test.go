@@ -138,7 +138,7 @@ func TestObjectMetadataContractsWireAndIdentity(t *testing.T) {
 		provider.UseTokenLock()
 		provider.SetToken("wire-token")
 		client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "object-store", Endpoint: server.URL + "/v1/AUTH_a/"}
-		result, err := objects.New(client).GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, objects.WithGetMetadataNewest(false))
+		result, err := objects.New(client).GetMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, request.Custom(func(c *objects.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }))
 		if err != nil || result == nil || result.Metadata.ContentLength == nil || *result.Metadata.ContentLength != 0 || result.Metadata.Values["empty"] != "" || calls.Load() != 1 {
 			t.Fatalf("real HEAD=%+v err=%v HTTP=%d", result, err, calls.Load())
 		}
@@ -440,10 +440,10 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 			want    string
 			present bool
 		}{
-			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true)}, "true", true},
-			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(false)}, "false", true},
-			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true), request.Custom(func(c *objects.GetMetadataOpts) error { c.Newest = nil; return nil })}, "", false},
-			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true), objects.WithGetMetadataOpts(objects.GetMetadataOpts{})}, "", false},
+			{[]objects.GetMetadataOption{request.Custom(func(c *objects.GetMetadataOpts) error { v := true; c.Newest = &v; return nil })}, "true", true},
+			{[]objects.GetMetadataOption{request.Custom(func(c *objects.GetMetadataOpts) error { v := false; c.Newest = &v; return nil })}, "false", true},
+			{[]objects.GetMetadataOption{request.Custom(func(c *objects.GetMetadataOpts) error { v := true; c.Newest = &v; return nil }), request.Custom(func(c *objects.GetMetadataOpts) error { c.Newest = nil; return nil })}, "", false},
+			{[]objects.GetMetadataOption{request.Custom(func(c *objects.GetMetadataOpts) error { v := true; c.Newest = &v; return nil }), objects.WithGetMetadataOpts(objects.GetMetadataOpts{})}, "", false},
 		} {
 			client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {
 				_, present := r.Header["X-Newest"]

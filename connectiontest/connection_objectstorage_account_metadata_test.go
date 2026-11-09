@@ -92,7 +92,7 @@ func TestConnectionAccountMetadataSharesClientAndOwnsEvidence(t *testing.T) {
 	source = service.RawClient()
 	source.ResourceBase = "https://outside.test/ignored/"
 	source.MoreHeaders = map[string]string{"X-Source": "source-0"}
-	get, err := service.Accounts.GetMetadata(ctx, accounts.WithGetMetadataNewest(false), request.Custom(func(o *accounts.GetMetadataOpts) error {
+	get, err := service.Accounts.GetMetadata(ctx, request.Custom(func(c *accounts.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }), request.Custom(func(o *accounts.GetMetadataOpts) error {
 		source.MoreHeaders["X-Source"] = "callback"
 		provider.SetToken("swift-1")
 		return nil

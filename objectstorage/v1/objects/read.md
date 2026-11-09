@@ -17,17 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile`
@@ -73,17 +62,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize`
 
 - Borrowed writer receives binary content through one GET, no HEAD/no lifecycle ownership
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_core_test.go:TestObjectReadCoreBorrowedWriter`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsSnapshots`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsPreflight`, `objectstorage/v1/objects/read_options_test.go:TestObjectReadOptionsCallbacksAndDefaults`.
@@ -119,17 +97,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadSymlink`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadVersionID`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadBufferSize`
 
 - GET eager and payload read deferred; caller buffer controls Read size; zero-length Read does not consume underlying body
   Tests: `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWireAndBytes`, `objectstorage/v1/objects/read_contracts_test.go:TestObjectReadContractsWriterAndStreamOwnership`, `objectstorage/v1/objects/read_stream_test.go:TestObjectReadStreamOwnershipAndCleanup`.
@@ -151,7 +118,7 @@ Python/Go differences:
 - Go exposes an eager, explicitly closeable guarded stream with delivered-byte counters and owned evidence; Python exposes requests.iter_content byte chunks.
 - Go terminal auto-close/stable Close and strict projected metadata are deliberate contracts, rather than Requests iterator/session behavior.
 - Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
-- StreamObject returns an io.ReadCloser with delivered-byte counters instead of a Requests iter_content iterator of chunk_size bytes; WithObjectReadBufferSize sets the read buffer, the caller must close the stream and read it from one goroutine at a time, and the read does not check payload integrity; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
+- StreamObject returns an io.ReadCloser with delivered-byte counters instead of a Requests iter_content iterator of chunk_size bytes; ObjectReadOpts.BufferSize sets the read buffer, the caller must close the stream and read it from one goroutine at a time, and the read does not check payload integrity; see Server guarantees outside the SDK in docs/sdk-support-ledger.md.
 
 ## Usage examples
 
@@ -181,13 +148,13 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 		}),
 		objects.WithObjectReadHeaders(map[string]string{"X-Audit": "read"}),
 		request.Header("X-Audit", "read-final"),
-		objects.WithObjectReadNewest(false),
-		objects.WithObjectReadBufferSize(32 * 1024),
+		request.Custom(func(c *objects.ObjectReadOpts) error { v := false; c.Newest = &v; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.BufferSize = 32 * 1024; return nil }),
 	}
 	getOpts := append(append([]objects.ObjectReadOption(nil), common...),
 		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }),
-		objects.WithObjectReadIfModifiedSince(asOf),
-		objects.WithObjectReadIfNoneMatch(etag),
+		request.Custom(func(c *objects.ObjectReadOpts) error { v := asOf; c.IfModifiedSince = &v; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfNoneMatch = etag; return nil }),
 	)
 	buffered, err := api.GetObject(ctx, "backups", "report.txt", getOpts...)
 	if buffered != nil {
@@ -200,11 +167,11 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 
 	copyOpts := append(append([]objects.ObjectReadOption(nil), common...),
 		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }),
-		objects.WithObjectReadIfUnmodifiedSince(asOf),
-		objects.WithObjectReadIfMatch(etag),
-		objects.WithObjectReadRange("bytes=0-1023"),
-		objects.WithObjectReadFilename("report.part"),
-		objects.WithObjectReadVersionID(version),
+		request.Custom(func(c *objects.ObjectReadOpts) error { v := asOf; c.IfUnmodifiedSince = &v; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfMatch = etag; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.Range = "bytes=0-1023"; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.Filename = "report.part"; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.VersionID = version; return nil }),
 	)
 	var output bytes.Buffer
 	copied, err := api.DownloadObject(ctx, "backups", "report.txt", &output, copyOpts...)
@@ -221,7 +188,7 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 		request.Custom(func(c *objects.ObjectReadOpts) error { c.Newest = nil; return nil }),
 	)
 	manifestOpts := append(append([]objects.ObjectReadOption(nil), plain...),
-		objects.WithObjectReadMultipartManifest("get"),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.MultipartManifest = "get"; return nil }),
 	)
 	streamed, err := api.StreamObject(ctx, "backups", "manifest", manifestOpts...)
 	if err != nil {
@@ -235,7 +202,7 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 	}
 
 	linkOpts := append(append([]objects.ObjectReadOption(nil), plain...),
-		objects.WithObjectReadSymlink("get"),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.Symlink = "get"; return nil }),
 	)
 	_, err = api.GetObject(ctx, "backups", "report-link", linkOpts...)
 	return err

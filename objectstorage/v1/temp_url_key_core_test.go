@@ -96,7 +96,7 @@ func TestTempURLKeyCoreSelectionAndProof(t *testing.T) {
 			})
 			var options []GetTempURLKeyOption
 			if tc.container {
-				options = []GetTempURLKeyOption{WithGetTempURLKeyContainer(name)}
+				options = []GetTempURLKeyOption{request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = name; return nil })}
 			}
 			result, err := New(c).GetTempURLKey(context.Background(), options...)
 			if err != nil || result == nil || string(result.Key) != tc.want || result.Secondary != tc.secondary || result.FromContainer != tc.fromContainer || calls != tc.calls {
@@ -184,7 +184,7 @@ func TestTempURLKeyCoreStopsOnErrors(t *testing.T) {
 				h.Set("X-Proof", "kept")
 				return tempURLKeyTestWire(r, code, h, io.NopCloser(strings.NewReader("current"))), nil
 			})
-			result, err := New(c).GetTempURLKey(context.Background(), WithGetTempURLKeyContainer("box"))
+			result, err := New(c).GetTempURLKey(context.Background(), request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }))
 			wantCalls := 1
 			if tc.second {
 				wantCalls = 2
@@ -260,13 +260,13 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 			c := tempURLKeyTestClient()
 			calls := 0
 			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
-			if result, err := New(c).GetTempURLKey(context.Background(), WithGetTempURLKeyContainer(name)); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
+			if result, err := New(c).GetTempURLKey(context.Background(), request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = name; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
 				t.Fatal(name, result, err, calls)
 			}
 		}
 		c := tempURLKeyTestClient()
 		c.ResourceBase = "http://foreign.invalid/v1/AUTH_x/"
-		if result, err := New(c).GetTempURLKey(context.Background(), WithGetTempURLKeyContainer("box")); result != nil || err == nil {
+		if result, err := New(c).GetTempURLKey(context.Background(), request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil })); result != nil || err == nil {
 			t.Fatal("foreign base accepted", result, err)
 		}
 	})
@@ -308,7 +308,7 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 				calls++
 				return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}, "X-Container-Meta-Temp-URL-Key-2": {"usable"}}, b), nil
 			})
-			result, err := s.GetTempURLKey(context.Background(), WithGetTempURLKeyContainer("box"))
+			result, err := s.GetTempURLKey(context.Background(), request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }))
 			if result == nil || result.Container == nil || result.Container.Metadata != nil || result.Account != nil || result.Key != nil || result.Secondary || result.FromContainer || calls != 1 || b.closes.Load() != 1 || !errors.Is(err, resource.ErrInvalidOption) {
 				t.Fatalf("source change bypassed guard %#v %v calls=%d", result, err, calls)
 			}
@@ -329,7 +329,7 @@ func TestTempURLKeyCorePreflightAndAcceptedSourceGuard(t *testing.T) {
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Proof": {"kept"}}, b), nil
 		})
-		result, err := New(c).GetTempURLKey(ctx, WithGetTempURLKeyContainer("box"))
+		result, err := New(c).GetTempURLKey(ctx, request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }))
 		if result == nil || result.Container == nil || result.Container.Metadata != nil || result.Account != nil || b.closes.Load() != 1 {
 			t.Fatal(result, err)
 		}
@@ -366,7 +366,7 @@ func TestTempURLKeyCoreCapturedHeadersAndNativeSigner(t *testing.T) {
 			}
 			return tempURLKeyTestWire(r, 204, h, b), nil
 		})
-		result, err := New(c).GetTempURLKey(context.Background(), WithGetTempURLKeyContainer("box"), request.Header("X-Call", "owned"), WithGetTempURLKeyNewest(false))
+		result, err := New(c).GetTempURLKey(context.Background(), request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }), request.Header("X-Call", "owned"), request.Custom(func(c *GetTempURLKeyOpts) error { v := false; c.Newest = &v; return nil }))
 		if err != nil || result == nil || string(result.Key) != "key" || !result.Secondary || result.FromContainer || calls != 2 || c.MoreHeaders["X-Source"] != "new valid value" {
 			t.Fatal(result, err, calls, c.MoreHeaders)
 		}
@@ -389,7 +389,7 @@ func TestTempURLKeyCoreCapturedHeadersAndNativeSigner(t *testing.T) {
 		if err != nil || actual != expected || calls != 1 {
 			t.Fatal("native primary policy changed", actual, expected, err, calls)
 		}
-		result, err := s.GetTempURLKey(context.Background(), WithGetTempURLKeyContainer("box"))
+		result, err := s.GetTempURLKey(context.Background(), request.Custom(func(c *GetTempURLKeyOpts) error { c.Container = "box"; return nil }))
 		if err != nil || string(result.Key) != "secondary" || !result.Secondary || !result.FromContainer || calls != 2 {
 			t.Fatal("owned discovery differs incorrectly", result, err, calls)
 		}

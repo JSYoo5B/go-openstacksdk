@@ -65,15 +65,6 @@ func WithCreateObjectMetadata(values map[string]string) CreateObjectOption {
 func WithCreateObjectMetadataValue(key, value string) CreateObjectOption {
 	return WithCreateObjectMetadata(map[string]string{key: value})
 }
-func WithCreateObjectMD5(value string) CreateObjectOption {
-	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.MD5 = value; return nil })
-}
-func WithCreateObjectSHA256(value string) CreateObjectOption {
-	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.SHA256 = value; return nil })
-}
-func WithCreateObjectSegmentSize(value int64) CreateObjectOption {
-	return request.Custom(func(cfg *CreateObjectOpts) error { owned := value; cfg.SegmentSize = &owned; return nil })
-}
 
 func WithCreateObjectUseSLO(value bool) CreateObjectOption {
 	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.UseSLO = cloneDeleteObjectBool(&value); return nil })

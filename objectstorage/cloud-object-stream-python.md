@@ -16,12 +16,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.StreamObjectChunks`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.StreamObjectChunks`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamQueryString`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamCloudObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamQueryString`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Library-owned factory returns a lazy, single-use closeable binary chunk iterator; default1024 and query_string ignored even when malformed. No discovery/options/GET before iteration; connection supplies the cached Swift Cloud facade. Receipt is actual status/header and each returned chunk is independently owned.
   Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamLazyDefaultBinaryChunksAndSingleUse`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade`.
@@ -99,8 +96,8 @@ func run(ctx context.Context, cloud, container, object, query string, chunkSize 
     conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud))
     if err != nil { return err }
     stream := conn.StreamObjectChunks(ctx, container, object,
-        objectstorage.WithObjectStreamChunkSize(chunkSize),
-        objectstorage.WithObjectStreamQueryString(query),
+        func(c *objectstorage.ObjectStreamOpts) error { v := chunkSize; c.ChunkSize = &v; return nil },
+        func(c *objectstorage.ObjectStreamOpts) error { c.QueryString = query; return nil },
     )
     defer func() {
         err = errors.Join(err, stream.Close())

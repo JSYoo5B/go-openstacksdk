@@ -261,7 +261,7 @@ func TestSwiftPythonContainerMetadataRefreshFalseLaterOptionsAndReusableSnapshot
 		t.Fatal(methods)
 	}
 	methods = nil
-	result, err := api.SetMetadataAndRefresh(context.Background(), "container", nil, reusable, containers.WithMetadataRefresh(true))
+	result, err := api.SetMetadataAndRefresh(context.Background(), "container", nil, reusable, request.Custom(func(c *containers.MetadataRefreshOpts) error { v := true; c.Refresh = &v; return nil }))
 	if err != nil || result.Refreshed == nil || !reflect.DeepEqual(methods, []string{"POST", "HEAD"}) {
 		t.Fatal(result, err, methods)
 	}
@@ -288,7 +288,7 @@ func TestSwiftPythonContainerMetadataEverySystemAliasAndPrefixedConvention(t *te
 					}
 					return containerMetadataResponse(204, ""), nil
 				})
-				if _, err := containers.New(client).SetMetadataAndRefresh(context.Background(), "container", map[string]any{key: "value"}, containers.WithMetadataRefresh(false)); err != nil || calls != 1 {
+				if _, err := containers.New(client).SetMetadataAndRefresh(context.Background(), "container", map[string]any{key: "value"}, request.Custom(func(c *containers.MetadataRefreshOpts) error { v := false; c.Refresh = &v; return nil })); err != nil || calls != 1 {
 					t.Fatal(err, calls)
 				}
 			})

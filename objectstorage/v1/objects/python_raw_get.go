@@ -36,13 +36,6 @@ type RawObjectOption func(*RawObjectOpts) error
 func WithRawObjectOpts(value RawObjectOpts) RawObjectOption {
 	return func(cfg *RawObjectOpts) error { *cfg = value; return nil }
 }
-func WithRawObjectQueryString(value string) RawObjectOption {
-	return func(cfg *RawObjectOpts) error { cfg.QueryString = value; return nil }
-}
-
-func WithRawObjectStream(value bool) RawObjectOption {
-	return func(cfg *RawObjectOpts) error { cfg.Stream = value; return nil }
-}
 
 // GetObjectRaw implements get_object_raw(container, obj, query_string=None,
 // stream=False). An empty obj selects the container itself like Source.

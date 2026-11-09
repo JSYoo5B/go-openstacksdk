@@ -19,9 +19,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadataValue`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMD5`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectSHA256`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectSegmentSize`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectUseSLO`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectGenerateChecksums`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectCreateUnconfirmedSegmentError.Error`
@@ -83,8 +80,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleMD5`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithIsObjectStaleSHA256`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Fresh bodyless HEAD uses literal names and effective ResourceBase with native200/204 and clean physical404. No capability GET, upload, implicit filename or cleanup occurs.
   Tests: `objectstorage/v1/objects/stale_contracts_test.go:TestIsObjectStaleContractsLazyFilesAndLiteralHEAD`, `objectstorage/v1/objects/stale_core_test.go:TestObjectStaleCoreLazyFilesAndComparison`.
@@ -200,8 +196,8 @@ func uploadExamples(ctx context.Context, conn *sdk.Connection,
         objects.WithCreateObjectHeaders(map[string]string{"Cache-Control": "private"}),
         objects.WithCreateObjectMetadata(map[string]string{"owner": "sdk"}),
         objects.WithCreateObjectMetadataValue("empty", ""),
-        objects.WithCreateObjectMD5(knownMD5),
-        objects.WithCreateObjectSHA256(knownSHA256),
+        request.Custom(func(c *objects.CreateObjectOpts) error { c.MD5 = knownMD5; return nil }),
+        request.Custom(func(c *objects.CreateObjectOpts) error { c.SHA256 = knownSHA256; return nil }),
         request.Custom(func(c *objects.CreateObjectOpts) error { c.SegmentSize = nil; return nil }),
         request.Custom(func(c *objects.CreateObjectOpts) error { c.UseSLO = nil; return nil }),
         request.Custom(func(c *objects.CreateObjectOpts) error { c.GenerateChecksums = nil; return nil }),
@@ -217,8 +213,8 @@ func uploadExamples(ctx context.Context, conn *sdk.Connection,
         objects.WithIsObjectStaleOpts(objects.IsObjectStaleOpts{}),
         request.Header("X-Trace", "stale"),
         objects.WithIsObjectStaleHeaders(map[string]string{"X-Trans-Id-Extra": "sdk-stale"}),
-        objects.WithIsObjectStaleMD5(knownMD5),
-        objects.WithIsObjectStaleSHA256(knownSHA256))
+        request.Custom(func(c *objects.IsObjectStaleOpts) error { c.MD5 = knownMD5; return nil }),
+        request.Custom(func(c *objects.IsObjectStaleOpts) error { c.SHA256 = knownSHA256; return nil }))
     if stale != nil {
         if stale.Discovery != nil {
             fmt.Println("standalone stale HEAD", stale.Discovery.StatusCode)
@@ -240,9 +236,9 @@ func uploadExamples(ctx context.Context, conn *sdk.Connection,
     }
     readerOptions := append([]objects.CreateObjectOption{}, options...)
     readerOptions = append(readerOptions,
-        objects.WithCreateObjectMD5(""),
-        objects.WithCreateObjectSHA256(""),
-        objects.WithCreateObjectSegmentSize(1<<30),
+        request.Custom(func(c *objects.CreateObjectOpts) error { c.MD5 = ""; return nil }),
+        request.Custom(func(c *objects.CreateObjectOpts) error { c.SHA256 = ""; return nil }),
+        request.Custom(func(c *objects.CreateObjectOpts) error { v := int64(1<<30); c.SegmentSize = &v; return nil }),
         objects.WithCreateObjectUseSLO(false),
         objects.WithCreateObjectGenerateChecksums(false))
     result, err = service.Objects.CreateObject(ctx, "backups", "stream ?.bin",

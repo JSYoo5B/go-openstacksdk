@@ -24,15 +24,19 @@ func TestTempURLCoreVectorsAndEscapedOutput(t *testing.T) {
 		options                                []GenerateTempURLOption
 	}{
 		{"SHA1 literal", "/v1/AUTH_x/box/한국 %2F?#/tail", "get", "fe5b8b5bb2a81f4ec0ece3bd7ea3665ca0677869", "1700000060", 60, nil},
-		{"SHA256 empty prefix and IP", "/v1/AUTH_x/box/", "put", "5caa6c493122e21b63ad7beb4eacf3f88e173002f8427736f9302ffc54fd7bcb", "1700000060", 60, []GenerateTempURLOption{WithGenerateTempURLDigest(TempURLDigestSHA256), WithGenerateTempURLPrefix(true), WithGenerateTempURLIPRange("192.0.2.0/24")}},
-		{"SHA512 absolute UTC", "/v1/AUTH_x/box/file", "HEAD", "6ef0670805d0ade3cc63f573d6627ab33b15cec28a63aca412fccafa7a0f3066edba8454d0d4fa89576571029aa3715dfaaa4b72f7c173464ee249becd82d442", "2023-11-14T22:30:00Z", 1700001000, []GenerateTempURLOption{WithGenerateTempURLDigest(TempURLDigestSHA512), WithGenerateTempURLAbsolute(true), WithGenerateTempURLISO8601(true)}},
+		{"SHA256 empty prefix and IP", "/v1/AUTH_x/box/", "put", "5caa6c493122e21b63ad7beb4eacf3f88e173002f8427736f9302ffc54fd7bcb", "1700000060", 60, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.Digest = TempURLDigestSHA256; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.Prefix = true; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.IPRange = "192.0.2.0/24"; return nil })}},
+		{"SHA512 absolute UTC", "/v1/AUTH_x/box/file", "HEAD", "6ef0670805d0ade3cc63f573d6627ab33b15cec28a63aca412fccafa7a0f3066edba8454d0d4fa89576571029aa3715dfaaa4b72f7c173464ee249becd82d442", "2023-11-14T22:30:00Z", 1700001000, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.Digest = TempURLDigestSHA512; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.Absolute = true; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.ISO8601 = true; return nil })}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			c := tempURLKeyTestClient()
 			c.ResourceBase = "invalid unused URL"
 			calls := 0
 			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
-			options := []GenerateTempURLOption{WithGenerateTempURLKey([]byte("\xffsecret")), WithGenerateTempURLTimestamp(signingTestTimestamp().In(time.FixedZone("nonUTC", -3600)))}
+			options := []GenerateTempURLOption{WithGenerateTempURLKey([]byte("\xffsecret")), request.Custom(func(c *GenerateTempURLOpts) error {
+				v := signingTestTimestamp().In(time.FixedZone("nonUTC", -3600))
+				c.Timestamp = &v
+				return nil
+			})}
 			options = append(options, tc.options...)
 			result, err := New(c).GenerateTempURL(context.Background(), tc.path, tc.seconds, tc.method, options...)
 			if err != nil || result == nil || result.Signature != tc.signature || result.Path != tc.path || result.Discovery != nil || calls != 0 {
@@ -61,16 +65,16 @@ func TestTempURLCorePreflightAndTimeBoundaries(t *testing.T) {
 		options            []GenerateTempURLOption
 	}{
 		{"negative seconds", "/v1/a/c/o", "GET", -1, nil}, {"wrong version", "/v2/a/c/o", "GET", 1, nil}, {"empty account", "/v1//c/o", "GET", 1, nil}, {"empty container", "/v1/a//o", "GET", 1, nil}, {"empty object", "/v1/a/c/", "GET", 1, nil}, {"dot component", "/v1/a/c/x/../y", "GET", 1, nil}, {"backslash", "/v1/a/c/a\\b", "GET", 1, nil}, {"invalid UTF8", "/v1/a/c/" + string([]byte{255}), "GET", 1, nil}, {"method token", "/v1/a/c/o", "GET POST", 1, nil},
-		{"non-nil empty key", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{WithGenerateTempURLKey([]byte{})}}, {"unsupported digest", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{WithGenerateTempURLDigest("md5")}},
-		{"relative overflow", "/v1/a/c/o", "GET", math.MaxInt64, nil}, {"negative timestamp absolute", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{WithGenerateTempURLAbsolute(true), WithGenerateTempURLTimestamp(time.Unix(-1, 0))}},
-		{"ISO year overflow", "/v1/a/c/o", "GET", 253402300800, []GenerateTempURLOption{WithGenerateTempURLAbsolute(true), WithGenerateTempURLISO8601(true)}},
-		{"CIDR host bits", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{WithGenerateTempURLIPRange("192.0.2.7/24")}}, {"scoped IPv6", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{WithGenerateTempURLIPRange("fe80::1%eth0")}}, {"padded IP", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{WithGenerateTempURLIPRange(" 192.0.2.1")}},
+		{"non-nil empty key", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{WithGenerateTempURLKey([]byte{})}}, {"unsupported digest", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.Digest = "md5"; return nil })}},
+		{"relative overflow", "/v1/a/c/o", "GET", math.MaxInt64, nil}, {"negative timestamp absolute", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.Absolute = true; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { v := time.Unix(-1, 0); c.Timestamp = &v; return nil })}},
+		{"ISO year overflow", "/v1/a/c/o", "GET", 253402300800, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.Absolute = true; return nil }), request.Custom(func(c *GenerateTempURLOpts) error { c.ISO8601 = true; return nil })}},
+		{"CIDR host bits", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.IPRange = "192.0.2.7/24"; return nil })}}, {"scoped IPv6", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.IPRange = "fe80::1%eth0"; return nil })}}, {"padded IP", "/v1/a/c/o", "GET", 1, []GenerateTempURLOption{request.Custom(func(c *GenerateTempURLOpts) error { c.IPRange = " 192.0.2.1"; return nil })}},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			c := tempURLKeyTestClient()
 			calls := 0
 			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("HTTP") })
-			options := []GenerateTempURLOption{WithGenerateTempURLKey([]byte("key")), WithGenerateTempURLTimestamp(signingTestTimestamp())}
+			options := []GenerateTempURLOption{WithGenerateTempURLKey([]byte("key")), request.Custom(func(c *GenerateTempURLOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil })}
 			options = append(options, tc.options...)
 			result, err := New(c).GenerateTempURL(context.Background(), tc.path, tc.seconds, tc.method, options...)
 			if result != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
@@ -80,7 +84,7 @@ func TestTempURLCorePreflightAndTimeBoundaries(t *testing.T) {
 	}
 	t.Run("absolute int64 without ISO and nonstandard token", func(t *testing.T) {
 		c := tempURLKeyTestClient()
-		result, err := New(c).GenerateTempURL(context.Background(), "/v1/a/c/o", math.MaxInt64, "x-CUSTOM", WithGenerateTempURLKey([]byte("key")), WithGenerateTempURLAbsolute(true))
+		result, err := New(c).GenerateTempURL(context.Background(), "/v1/a/c/o", math.MaxInt64, "x-CUSTOM", WithGenerateTempURLKey([]byte("key")), request.Custom(func(c *GenerateTempURLOpts) error { c.Absolute = true; return nil }))
 		if err != nil || result == nil || result.Expires != math.MaxInt64 || result.Signature == "" {
 			t.Fatal(result, err)
 		}
@@ -108,7 +112,7 @@ func TestTempURLCoreDiscoveryAndNativePolicy(t *testing.T) {
 			}
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Account-Meta-Temp-URL-Key": {"primary"}, "X-Account-Meta-Temp-URL-Key-2": {"account-secondary"}}, io.NopCloser(strings.NewReader("account proof"))), nil
 		})
-		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "GET", WithGenerateTempURLTimestamp(signingTestTimestamp()))
+		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "GET", request.Custom(func(c *GenerateTempURLOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil }))
 		if err != nil || result == nil || result.Signature != "98649f6963fef8b113423393b6c77b9fda62b2ad" || result.Discovery == nil || result.Discovery.Account == nil || result.Discovery.Container != nil || !result.Discovery.Secondary || result.Discovery.FromContainer || string(result.Discovery.Account.Body) != "account proof" || calls != 1 {
 			t.Fatal(result, err, calls)
 		}

@@ -34,7 +34,7 @@ func TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing(t *testing.T
 		_, _ = w.Write([]byte{0, 255, 'a', 'b', 'c'})
 	})
 	cloud := objectstorage.New(fixture.Client("object-store", "/account/"))
-	stream := cloud.StreamObjectChunks(context.Background(), "box", "file", objectstorage.WithObjectStreamOpts(objectstorage.ObjectStreamOpts{QueryString: "?bad\n%"}), objectstorage.WithObjectStreamChunkSize(2), func(*objectstorage.ObjectStreamOpts) error { options++; return nil })
+	stream := cloud.StreamObjectChunks(context.Background(), "box", "file", objectstorage.WithObjectStreamOpts(objectstorage.ObjectStreamOpts{QueryString: "?bad\n%"}), func(c *objectstorage.ObjectStreamOpts) error { v := 2; c.ChunkSize = &v; return nil }, func(*objectstorage.ObjectStreamOpts) error { options++; return nil })
 	if requests != 0 || options != 0 {
 		t.Fatal(requests, options)
 	}
@@ -48,7 +48,7 @@ func TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing(t *testing.T
 	if !reflect.DeepEqual(chunks, [][]byte{{0, 255}, {'a', 'b'}, {'c'}}) || stream.Err() != nil || requests != 1 || options != 1 || stream.Receipt().Header.Get("X-Trans-Id") != "cloud-actual" {
 		t.Fatal(chunks, stream.Err(), requests, options, stream.Receipt())
 	}
-	missing := cloud.StreamObjectChunks(context.Background(), "box", "missing", objectstorage.WithObjectStreamQueryString("bad?query"))
+	missing := cloud.StreamObjectChunks(context.Background(), "box", "missing", func(c *objectstorage.ObjectStreamOpts) error { c.QueryString = "bad?query"; return nil })
 	for chunk, e := range missing.Chunks() {
 		t.Fatal(chunk, e)
 	}

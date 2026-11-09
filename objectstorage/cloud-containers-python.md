@@ -17,7 +17,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.ID`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.CreateContainer`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerPublic`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerCreateHeaders`
 
@@ -49,13 +49,13 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.SetMetadataAndRefresh`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefresh`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithMetadataRefreshOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.SetContainerAccess`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessRefresh`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerAccessHeaders`
 
-- SetMetadataAndRefresh with WithMetadataRefresh(false) sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.
+- SetMetadataAndRefresh with MetadataRefreshOpts.Refresh = false sends one bodyless POST whose headers translate suffix keys to X-Container-Meta-*, keep prefixed keys and map system aliases such as read_ACL and write_ACL to X-Container-Read and X-Container-Write, including an empty X-Container-Read value; a 404 stays an error.
   Tests: `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateContainerAndAccessPost`, `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudUpdateMissingContainerIsError`.
 - Only literal public/private values are accepted before callbacks/HTTP, public translates to .r:*,.rlistings and private to an explicitly present empty X-Container-Read value; cloud refresh defaults false and true explicitly performs POST then HEAD. A failed final HEAD, including clean404, remains strict and preserves the successful POST without a replay.
   Tests: `objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessOwnsTranslationAndRefreshDefault`, `objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessRejectsUnknownBeforeCallbacksOrHTTP`, `objectstorage/cloud_containers_test.go:TestSwiftCloudContainerSetAccessRefreshFailurePreservesPostAndStrictMissing`.
@@ -147,7 +147,7 @@ func main() {
     if err != nil { log.Fatal(err) }
 
     created, err := swift.Cloud.CreateContainer(ctx, "photos",
-        objectstorage.WithContainerPublic(true))
+        func(c *objectstorage.ContainerCreateOpts) error { c.Public = true; return nil })
     if err != nil { log.Fatal(err) }
     if created.Container != nil {
         fmt.Printf("existing=%t name=%s ACL=%s\n", created.Existing,
@@ -160,7 +160,7 @@ func main() {
     fmt.Printf("POST=%d requested=%s\n", updated.Acknowledgement.StatusCode, updated.Requested)
 
     observed, err := swift.Cloud.SetContainerAccess(ctx, "photos", "public",
-        objectstorage.WithContainerAccessRefresh(true))
+        func(c *objectstorage.ContainerAccessOpts) error { c.Refresh = true; return nil })
     if err != nil { log.Fatal(err) }
     fmt.Printf("POST=%d HEAD=%d observed ACL=%s\n",
         observed.Acknowledgement.StatusCode, observed.Refreshed.StatusCode,

@@ -126,7 +126,7 @@ func TestConnectionObjectCreateSharesClientAndOwnsSources(t *testing.T) {
 	if err != nil || created == nil || created.Source != "bytes" || created.Mode != "ordinary" || created.Size != int64(len(data)) || created.Capabilities != nil || created.Discovery != nil || created.Ordinary == nil || created.Ordinary.Acknowledgement == nil || created.Ordinary.Acknowledgement.StatusCode != 201 || string(created.Ordinary.Acknowledgement.Body) != "bytes-ack" || created.Skipped || callbacks != 1 || calls != 1 {
 		t.Fatal(created, err, callbacks, calls)
 	}
-	stale, err := service.Objects.IsObjectStale(ctx, container, object, "/explicit/path/which/does/not/exist", objects.WithIsObjectStaleMD5(md5Digest), request.Header("X-Call", "stale-owned"))
+	stale, err := service.Objects.IsObjectStale(ctx, container, object, "/explicit/path/which/does/not/exist", request.Custom(func(c *objects.IsObjectStaleOpts) error { c.MD5 = md5Digest; return nil }), request.Header("X-Call", "stale-owned"))
 	if err != nil || stale == nil || stale.Stale == nil || *stale.Stale || stale.Discovery == nil || stale.Discovery.StatusCode != 200 || stale.MD5 != md5Digest || stale.RemoteMD5 == nil || *stale.RemoteMD5 != md5Digest || calls != 2 {
 		t.Fatal(stale, err, calls)
 	}

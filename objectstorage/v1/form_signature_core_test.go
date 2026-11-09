@@ -34,7 +34,11 @@ func TestFormSignatureCoreVectorsAndLiteralPaths(t *testing.T) {
 			c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(*http.Request) (*http.Response, error) { calls++; return nil, errors.New("unexpected HTTP") })
 			input := FormSignatureInput{ObjectPrefix: "prefix/책%2F?#", RedirectURL: "https://app.example/result?x=%2F#ok", MaxFileSize: 1048576, MaxUploadCount: 3, Timeout: 123}
 			result, err := New(c).GenerateFormSignature(context.Background(), "백업 %2F?#", input,
-				WithGenerateFormSignatureKey([]byte("\xffsecret")), WithGenerateFormSignatureDigest(digest), WithGenerateFormSignatureTimestamp(signingTestTimestamp().In(time.FixedZone("local", 3600))))
+				WithGenerateFormSignatureKey([]byte("\xffsecret")), request.Custom(func(c *GenerateFormSignatureOpts) error { c.Digest = digest; return nil }), request.Custom(func(c *GenerateFormSignatureOpts) error {
+					v := signingTestTimestamp().In(time.FixedZone("local", 3600))
+					c.Timestamp = &v
+					return nil
+				}))
 			if err != nil || result == nil || result.Signature != signature || result.Expires != 1700000123 || result.Digest != digest || result.Discovery != nil || calls != 0 {
 				t.Fatalf("vector/proof %#v %v calls=%d", result, err, calls)
 			}
@@ -47,7 +51,7 @@ func TestFormSignatureCoreVectorsAndLiteralPaths(t *testing.T) {
 	for _, endpoint := range []string{"http://cloud.invalid/v1/a/", "http://cloud.invalid/v1/a"} {
 		c := tempURLKeyTestClient()
 		c.Endpoint = endpoint
-		result, err := New(c).GenerateFormSignature(context.Background(), "box", FormSignatureInput{MaxFileSize: 1, MaxUploadCount: 1, Timeout: 1}, WithGenerateFormSignatureKey([]byte("key")), WithGenerateFormSignatureTimestamp(signingTestTimestamp()))
+		result, err := New(c).GenerateFormSignature(context.Background(), "box", FormSignatureInput{MaxFileSize: 1, MaxUploadCount: 1, Timeout: 1}, WithGenerateFormSignatureKey([]byte("key")), request.Custom(func(c *GenerateFormSignatureOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil }))
 		if err != nil || result == nil || result.Path != "/v1/a/box/" {
 			t.Fatal(result, err)
 		}
@@ -86,7 +90,7 @@ func TestFormSignatureCoreDiscoveryAndPhaseProof(t *testing.T) {
 				}
 				return tempURLKeyTestWire(r, 204, h, body), nil
 			})
-			result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), WithGenerateFormSignatureTimestamp(signingTestTimestamp()), request.Header("X-Trace", "owned"), WithGenerateFormSignatureNewest(false))
+			result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), request.Custom(func(c *GenerateFormSignatureOpts) error { v := signingTestTimestamp(); c.Timestamp = &v; return nil }), request.Header("X-Trace", "owned"), request.Custom(func(c *GenerateFormSignatureOpts) error { v := false; c.Newest = &v; return nil }))
 			want, callsWant := "088f8af8829bd0f68cdfeb13eabb3a2a8609039b", 1
 			if fallback {
 				want, callsWant = "03b9a415c089df6c06c47768a2c1114f1c837470", 2

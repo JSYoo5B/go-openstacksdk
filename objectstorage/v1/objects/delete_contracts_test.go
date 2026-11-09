@@ -69,7 +69,7 @@ func TestObjectDeleteContractsRoutesAndSelection(t *testing.T) {
 		}))
 		defer server.Close()
 		client := &gophercloud.ServiceClient{ProviderClient: &gophercloud.ProviderClient{HTTPClient: *server.Client()}, Type: "object-store", Endpoint: server.URL + "/catalog/v1/A/", ResourceBase: server.URL + "/reverse/a%2Fb/v1/A/"}
-		result, err := objects.New(client).DeleteObject(context.Background(), objectMetadataContainer, objectMetadataKey, objects.WithDeleteObjectVersionID(version), objects.WithDeleteObjectNewest(false), request.Header("X-Call", "owned"))
+		result, err := objects.New(client).DeleteObject(context.Background(), objectMetadataContainer, objectMetadataKey, request.Custom(func(c *objects.DeleteObjectOpts) error { c.VersionID = version; return nil }), objects.WithDeleteObjectNewest(false), request.Header("X-Call", "owned"))
 		if err != nil || result == nil || result.Discovery == nil || result.Deletion == nil || result.Discovery.StatusCode != 200 || result.Deletion.StatusCode != 200 || result.StaticLargeObject == nil || !*result.StaticLargeObject || result.Bulk == nil || calls.Load() != 2 {
 			t.Fatalf("result=%+v err=%v calls=%d", result, err, calls.Load())
 		}

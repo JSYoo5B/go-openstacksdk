@@ -114,7 +114,7 @@ func TestObjectMetadataCoreRoutesAndMerge(t *testing.T) {
 	c.ResourceBase = s.URL + "/reverse%20proxy/v1/AUTH_a/"
 	c.MoreHeaders = map[string]string{"Content-Type": "application/source", "X-Source": "owned"}
 	a := New(c)
-	get, err := a.GetMetadata(context.Background(), objectMetadataContainer, objectMetadataName, WithGetMetadataNewest(false), request.Header("X-Call", "get"))
+	get, err := a.GetMetadata(context.Background(), objectMetadataContainer, objectMetadataName, request.Custom(func(c *GetMetadataOpts) error { v := false; c.Newest = &v; return nil }), request.Header("X-Call", "get"))
 	if err != nil || get.Metadata.Values["keep"] != "untouched" || *get.Metadata.LastModified != "not a time" {
 		t.Fatalf("GET %#v %v", get, err)
 	}

@@ -56,15 +56,6 @@ func WithCloudGetOpts(value CloudGetOpts) CloudGetOption {
 	value = cloneCloudGetOpts(value)
 	return func(cfg *CloudGetOpts) error { *cfg = cloneCloudGetOpts(value); return nil }
 }
-func WithCloudGetChunkSize(value int) CloudGetOption {
-	return func(cfg *CloudGetOpts) error { size := value; cfg.ChunkSize = &size; return nil }
-}
-func WithCloudGetQueryString(value string) CloudGetOption {
-	return func(cfg *CloudGetOpts) error { cfg.QueryString = value; return nil }
-}
-func WithCloudGetStream(value bool) CloudGetOption {
-	return func(cfg *CloudGetOpts) error { cfg.Stream = value; return nil }
-}
 func WithCloudGetOutfile(value string) CloudGetOption {
 	return func(cfg *CloudGetOpts) error {
 		path := value

@@ -76,7 +76,11 @@ func TestSwiftAutocreatedImagesExactMarkerLazyDeleteAndPageOrdering(t *testing.T
 			w.WriteHeader(404)
 		}
 	})
-	got, err := objectstorage.New(client).DeleteAutocreatedImageObjects(context.Background(), objectstorage.WithAutocreatedImageTasks(true), objectstorage.WithAutocreatedImagePrefix("seg/"))
+	got, err := objectstorage.New(client).DeleteAutocreatedImageObjects(context.Background(), func(c *objectstorage.AutocreatedImageObjectsOpts) error { c.ImageAPIUseTasks = true; return nil }, func(c *objectstorage.AutocreatedImageObjectsOpts) error {
+		v := "seg/"
+		c.SegmentPrefix = &v
+		return nil
+	})
 	want := []string{"GET /v1/AUTH_project/images?format=json&prefix=seg%2F", "HEAD /v1/AUTH_project/images/a?", "DELETE /v1/AUTH_project/images/a?", "HEAD /v1/AUTH_project/images/b?", "GET /v1/AUTH_project/images?format=json&marker=b&prefix=seg%2F", "HEAD /v1/AUTH_project/images/c?"}
 	if err != nil || got == nil || !got.Deleted || len(got.Observations) != 3 || !got.Observations[0].IgnoredMissing || got.Observations[1].Matched || got.Observations[2].Matched || !reflect.DeepEqual(calls, want) {
 		t.Fatal(got, err, calls)
@@ -126,7 +130,7 @@ func TestSwiftAutocreatedImagesSLOTruthinessAndSecondHead(t *testing.T) {
 					w.WriteHeader(202)
 				}
 			})
-			got, err := objectstorage.New(client).DeleteAutocreatedImageObjects(context.Background(), objectstorage.WithAutocreatedImageTasks(true))
+			got, err := objectstorage.New(client).DeleteAutocreatedImageObjects(context.Background(), func(c *objectstorage.AutocreatedImageObjectsOpts) error { c.ImageAPIUseTasks = true; return nil })
 			wantHeads := 1
 			if mode == "second head" || mode == "second missing" {
 				wantHeads = 2
@@ -185,7 +189,7 @@ func TestSwiftAutocreatedImagesErrorsStopAfterCompletedPhases(t *testing.T) {
 					fmt.Fprint(w, `{"error":"delete"}`)
 				}
 			})
-			got, err := objectstorage.New(client).DeleteAutocreatedImageObjects(context.Background(), objectstorage.WithAutocreatedImageTasks(true))
+			got, err := objectstorage.New(client).DeleteAutocreatedImageObjects(context.Background(), func(c *objectstorage.AutocreatedImageObjectsOpts) error { c.ImageAPIUseTasks = true; return nil })
 			var native gophercloud.ErrUnexpectedResponseCode
 			if err == nil || got == nil || got.Deleted || !errors.As(err, &native) {
 				t.Fatal(got, err, calls)

@@ -14,15 +14,10 @@ type ObjectGetOpts = objects.CloudGetOpts
 type ObjectGetOption = objects.CloudGetOption
 
 func WithObjectGetOpts(value ObjectGetOpts) ObjectGetOption { return objects.WithCloudGetOpts(value) }
-func WithObjectGetChunkSize(value int) ObjectGetOption      { return objects.WithCloudGetChunkSize(value) }
-func WithObjectGetQueryString(value string) ObjectGetOption {
-	return objects.WithCloudGetQueryString(value)
-}
-func WithObjectGetStream(value bool) ObjectGetOption      { return objects.WithCloudGetStream(value) }
-func WithObjectGetOutfile(value string) ObjectGetOption   { return objects.WithCloudGetOutfile(value) }
-func WithObjectGetWriter(value io.Writer) ObjectGetOption { return objects.WithCloudGetWriter(value) }
-func WithoutObjectGetContent() ObjectGetOption            { return objects.WithoutCloudGetContent() }
-func WithoutObjectGetOutfile() ObjectGetOption            { return objects.WithoutCloudGetOutfile() }
+func WithObjectGetOutfile(value string) ObjectGetOption     { return objects.WithCloudGetOutfile(value) }
+func WithObjectGetWriter(value io.Writer) ObjectGetOption   { return objects.WithCloudGetWriter(value) }
+func WithoutObjectGetContent() ObjectGetOption              { return objects.WithoutCloudGetContent() }
+func WithoutObjectGetOutfile() ObjectGetOption              { return objects.WithoutCloudGetOutfile() }
 
 // GetObjectText eagerly gets the closed cloud string-name branch. Path output
 // is SDK-owned; Writer output remains caller-owned and may implement Flush.

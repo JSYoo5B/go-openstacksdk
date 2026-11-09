@@ -49,9 +49,6 @@ func WithContainerSearchOpts(value ContainerSearchOpts) ContainerSearchOption {
 	value = copyContainerSearchOpts(value)
 	return func(c *ContainerSearchOpts) error { *c = copyContainerSearchOpts(value); return nil }
 }
-func WithContainerSearchName(value string) ContainerSearchOption {
-	return func(c *ContainerSearchOpts) error { c.Name = value; return nil }
-}
 func WithContainerSearchFiltersJSON(value json.RawMessage) ContainerSearchOption {
 	owned := bytes.Clone(value)
 	return func(c *ContainerSearchOpts) error {

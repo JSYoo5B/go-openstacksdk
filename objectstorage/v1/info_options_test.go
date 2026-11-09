@@ -66,8 +66,8 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 		t.Fatal(result, err)
 	}
 	for _, options := range [][]ObjectSegmentSizeOption{
-		{WithObjectSegmentSize(0), request.Custom(func(c *ObjectSegmentSizeOpts) error { c.Size = nil; return nil })},
-		{WithObjectSegmentSize(0), WithObjectSegmentSizeHeaders(map[string]string{"X-Trace": "discarded"}), WithObjectSegmentSizeOpts(ObjectSegmentSizeOpts{})},
+		{request.Custom(func(c *ObjectSegmentSizeOpts) error { v := int64(0); c.Size = &v; return nil }), request.Custom(func(c *ObjectSegmentSizeOpts) error { c.Size = nil; return nil })},
+		{request.Custom(func(c *ObjectSegmentSizeOpts) error { v := int64(0); c.Size = &v; return nil }), WithObjectSegmentSizeHeaders(map[string]string{"X-Trace": "discarded"}), WithObjectSegmentSizeOpts(ObjectSegmentSizeOpts{})},
 	} {
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {
 			if r.Header.Get("X-Trace") != "" {
@@ -108,7 +108,7 @@ func TestInfoOptionsHeaderValidationAndPreflight(t *testing.T) {
 	if result, err := New(c).GetObjectSegmentSize(context.Background(), nil); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(result, err)
 	}
-	if result, err := New(c).GetObjectSegmentSize(context.Background(), WithObjectSegmentSize(-1)); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
+	if result, err := New(c).GetObjectSegmentSize(context.Background(), request.Custom(func(c *ObjectSegmentSizeOpts) error { v := int64(-1); c.Size = &v; return nil })); result != nil || !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(result, err)
 	}
 	callbacks := 0
@@ -144,7 +144,7 @@ func TestInfoOptionsParallelReuse(t *testing.T) {
 				t.Errorf("GetInfo reuse failed %#v %v", info, err)
 				return
 			}
-			result, err := New(c).GetObjectSegmentSize(context.Background(), segment, WithObjectSegmentSize(0))
+			result, err := New(c).GetObjectSegmentSize(context.Background(), segment, request.Custom(func(c *ObjectSegmentSizeOpts) error { v := int64(0); c.Size = &v; return nil }))
 			if err != nil || result == nil || result.Size != 0 {
 				t.Errorf("segment reuse failed %#v %v", result, err)
 				return

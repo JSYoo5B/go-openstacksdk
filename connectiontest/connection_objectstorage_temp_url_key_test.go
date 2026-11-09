@@ -109,15 +109,15 @@ func TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow(t *testing.T) 
 	if err != nil || account == nil || account.StatusCode != 204 || calls != 1 {
 		t.Fatal(account, err, calls)
 	}
-	container, err := service.Containers.SetTempURLKey(ctx, name, "", containers.WithSetTempURLKeySecondary(true))
+	container, err := service.Containers.SetTempURLKey(ctx, name, "", request.Custom(func(c *containers.SetTempURLKeyOpts) error { c.Secondary = true; return nil }))
 	if err != nil || container == nil || calls != 2 {
 		t.Fatal(container, err, calls)
 	}
-	selected, err := service.GetTempURLKey(ctx, swift.WithGetTempURLKeyContainer(name))
+	selected, err := service.GetTempURLKey(ctx, request.Custom(func(c *swift.GetTempURLKeyOpts) error { c.Container = name; return nil }))
 	if err != nil || selected == nil || string(selected.Key) != "보조 key" || !selected.Secondary || !selected.FromContainer || selected.Container == nil || selected.Account != nil || calls != 3 {
 		t.Fatal(selected, err, calls)
 	}
-	fallback, err := service.GetTempURLKey(ctx, swift.WithGetTempURLKeyOpts(swift.GetTempURLKeyOpts{Container: name}), request.Header("X-Call", "fallback"), swift.WithGetTempURLKeyNewest(false))
+	fallback, err := service.GetTempURLKey(ctx, swift.WithGetTempURLKeyOpts(swift.GetTempURLKeyOpts{Container: name}), request.Header("X-Call", "fallback"), request.Custom(func(c *swift.GetTempURLKeyOpts) error { v := false; c.Newest = &v; return nil }))
 	if err != nil || fallback == nil || string(fallback.Key) != "account-secondary" || !fallback.Secondary || fallback.FromContainer || fallback.Container == nil || fallback.Account == nil || calls != 5 {
 		t.Fatal(fallback, err, calls)
 	}

@@ -409,7 +409,7 @@ func TestObjectInfoContractsFallbackEvidence(t *testing.T) {
 					hooks++
 					return errors.New("should bypass")
 				}
-				got, err := v1.New(client).GetObjectSegmentSize(context.Background(), v1.WithObjectSegmentSize(requested))
+				got, err := v1.New(client).GetObjectSegmentSize(context.Background(), request.Custom(func(c *v1.ObjectSegmentSizeOpts) error { v := requested; c.Size = &v; return nil }))
 				want := requested
 				if requested > 2684354561 {
 					want = 2684354561

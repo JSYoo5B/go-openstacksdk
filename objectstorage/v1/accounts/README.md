@@ -17,7 +17,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/accounts.WithGetMetadataNewest`
 
 - One bodyless HEAD targets the exact query-free account Endpoint including reverse prefix/escaped path/trailing slash; ResourceBase does not change it. Only actual204 is accepted, with no Ref/Name/discovery/detail/list fallback.
   Tests: `objectstorage/v1/accounts/metadata_core_test.go:TestAccountMetadataCoreRoutesAndEvidence`, `objectstorage/v1/accounts/metadata_contracts_test.go:TestAccountMetadataContractsWireAndPresence`, `connectiontest/connection_objectstorage_account_metadata_test.go:TestConnectionAccountMetadataSharesClientAndOwnsEvidence`, `internal/cmd/sdkgen/swift_account_metadata_test.go:TestSwiftAccountMetadataPreservesNativeAndRegistry`.
@@ -139,7 +138,7 @@ func changeAccountMetadata(ctx context.Context, api *accounts.API) error {
         }),
         accounts.WithGetMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
         request.Header("X-Request-Label", "account-metadata"),
-        accounts.WithGetMetadataNewest(false),
+        request.Custom(func(c *accounts.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }),
     }
     before, err := api.GetMetadata(ctx, getOptions...)
     if err != nil { return err }

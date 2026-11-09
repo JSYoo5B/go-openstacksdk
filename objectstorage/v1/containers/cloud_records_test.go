@@ -33,7 +33,7 @@ func cloudContainerFaultLanes() []cloudContainerFaultLane {
 			return r.Initial, r.Creation, e
 		}},
 		{"create PUT", 1, []int{404}, func(ctx context.Context, c *objectstorage.Cloud) (*containers.ContainerRecord, *containers.ContainerRecord, error) {
-			r, e := c.CreateContainer(ctx, containerMetadataName, objectstorage.WithContainerPublic(true))
+			r, e := c.CreateContainer(ctx, containerMetadataName, func(c *objectstorage.ContainerCreateOpts) error { c.Public = true; return nil })
 			if r == nil {
 				return nil, nil, e
 			}
@@ -54,7 +54,7 @@ func cloudContainerFaultLanes() []cloudContainerFaultLane {
 			return r.Acknowledgement, nil, e
 		}},
 		{"set refresh HEAD", 1, []int{202}, func(ctx context.Context, c *objectstorage.Cloud) (*containers.ContainerRecord, *containers.ContainerRecord, error) {
-			r, e := c.SetContainerAccess(ctx, containerMetadataName, "public", objectstorage.WithContainerAccessRefresh(true))
+			r, e := c.SetContainerAccess(ctx, containerMetadataName, "public", func(c *objectstorage.ContainerAccessOpts) error { c.Refresh = true; return nil })
 			if r == nil {
 				return nil, nil, e
 			}
@@ -283,7 +283,7 @@ func TestSwiftCloudContainerClean401RenewalKeepsMethodACLAndLiveToken(t *testing
 			var err error
 			switch operation {
 			case "create":
-				_, err = cloud.CreateContainer(context.Background(), containerMetadataName, objectstorage.WithContainerPublic(true))
+				_, err = cloud.CreateContainer(context.Background(), containerMetadataName, func(c *objectstorage.ContainerCreateOpts) error { c.Public = true; return nil })
 			case "set":
 				_, err = cloud.SetContainerAccess(context.Background(), containerMetadataName, "private")
 			case "get":
@@ -366,7 +366,7 @@ func TestSwiftCloudContainerCleanRetryCannotChangeSelectedACLOrBodylessFraming(t
 			var err error
 			switch operation {
 			case "create public ACL":
-				r, e := cloud.CreateContainer(context.Background(), containerMetadataName, objectstorage.WithContainerPublic(true))
+				r, e := cloud.CreateContainer(context.Background(), containerMetadataName, func(c *objectstorage.ContainerCreateOpts) error { c.Public = true; return nil })
 				record, err = r.Creation, e
 			case "set private ACL":
 				r, e := cloud.SetContainerAccess(context.Background(), containerMetadataName, "private")

@@ -42,9 +42,6 @@ func WithGetMetadataHeaders(values map[string]string) GetMetadataOption {
 	snapshot := cloneMetadataHeaders(values)
 	return request.Custom(func(cfg *GetMetadataOpts) error { return mergeMetadataHeaders(cfg.Headers, snapshot) })
 }
-func WithGetMetadataNewest(value bool) GetMetadataOption {
-	return request.Custom(func(cfg *GetMetadataOpts) error { owned := value; cfg.Newest = &owned; return nil })
-}
 
 func WithMetadataOpts(value MetadataOpts) MetadataOption {
 	snapshot := cloneMetadataOpts(value)

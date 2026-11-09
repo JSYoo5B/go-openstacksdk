@@ -38,12 +38,6 @@ func WithGenerateTempURLKey(value []byte) GenerateTempURLOption {
 	snapshot := cloneSigningKey(value)
 	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Key = cloneSigningKey(snapshot); return nil })
 }
-func WithGenerateTempURLDigest(value TempURLDigest) GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Digest = value; return nil })
-}
-func WithGenerateTempURLTimestamp(value time.Time) GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { owned := value; cfg.Timestamp = &owned; return nil })
-}
 func WithGenerateTempURLHeaders(values map[string]string) GenerateTempURLOption {
 	snapshot := cloneTempURLKeyHeaders(values)
 	return request.Custom(func(cfg *GenerateTempURLOpts) error {
@@ -52,22 +46,6 @@ func WithGenerateTempURLHeaders(values map[string]string) GenerateTempURLOption 
 		}
 		return mergeTempURLKeyHeaders(cfg.Headers, snapshot)
 	})
-}
-func WithGenerateTempURLNewest(value bool) GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { owned := value; cfg.Newest = &owned; return nil })
-}
-
-func WithGenerateTempURLAbsolute(value bool) GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Absolute = value; return nil })
-}
-func WithGenerateTempURLPrefix(value bool) GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Prefix = value; return nil })
-}
-func WithGenerateTempURLISO8601(value bool) GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.ISO8601 = value; return nil })
-}
-func WithGenerateTempURLIPRange(value string) GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.IPRange = value; return nil })
 }
 
 func cloneGenerateTempURLOpts(value GenerateTempURLOpts) GenerateTempURLOpts {

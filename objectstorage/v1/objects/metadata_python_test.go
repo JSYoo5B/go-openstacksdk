@@ -35,7 +35,7 @@ func TestSwiftPythonObjectMetadataHeadOwnsQueryFreeResponseAndSourceStatuses(t *
 		w.Header().Set("X-Proof", "head")
 		w.WriteHeader(203)
 	})
-	result, err := objects.New(client).HeadMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, objects.WithGetMetadataNewest(false))
+	result, err := objects.New(client).HeadMetadata(context.Background(), objectMetadataContainer, objectMetadataKey, request.Custom(func(c *objects.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }))
 	if err != nil || result.StatusCode != 203 || result.Metadata.Values["owner"] != "observed" || result.Header.Get("X-Proof") != "head" {
 		t.Fatal(result, err)
 	}

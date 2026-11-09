@@ -34,9 +34,9 @@ func TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade(t *testi
 		w.WriteHeader(200)
 		_, _ = w.Write([]byte("abcde"))
 	})
-	options := []objectstorage.ObjectStreamOption{objectstorage.WithObjectStreamChunkSize(2), objectstorage.WithObjectStreamQueryString("ignored\nquery"), func(*objectstorage.ObjectStreamOpts) error { callbacks++; return nil }}
+	options := []objectstorage.ObjectStreamOption{func(c *objectstorage.ObjectStreamOpts) error { v := 2; c.ChunkSize = &v; return nil }, func(c *objectstorage.ObjectStreamOpts) error { c.QueryString = "ignored\nquery"; return nil }, func(*objectstorage.ObjectStreamOpts) error { callbacks++; return nil }}
 	stream := conn.StreamObjectChunks(context.Background(), "bucket", "object", options...)
-	options[0] = objectstorage.WithObjectStreamChunkSize(4)
+	options[0] = func(c *objectstorage.ObjectStreamOpts) error { v := 4; c.ChunkSize = &v; return nil }
 	if locates != 0 || requests != 0 || callbacks != 0 || stream.Receipt() != nil || stream.Err() != nil {
 		t.Fatal(locates, requests, callbacks, stream.Receipt(), stream.Err())
 	}
@@ -67,7 +67,7 @@ func TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade(t *testi
 	if err != nil || service.Cloud == nil || locates != 1 {
 		t.Fatal(service, err, locates)
 	}
-	next := conn.StreamObjectChunks(context.Background(), "bucket", "object", objectstorage.WithObjectStreamChunkSize(1))
+	next := conn.StreamObjectChunks(context.Background(), "bucket", "object", func(c *objectstorage.ObjectStreamOpts) error { v := 1; c.ChunkSize = &v; return nil })
 	for chunk, err := range next.Chunks() {
 		if err != nil || string(chunk) != "a" {
 			t.Fatal(chunk, err)
@@ -185,7 +185,7 @@ func TestConnectionSwiftChunkStreamCleanupErrorsKeepPrivateProof(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	stream := conn.StreamObjectChunks(context.Background(), "bucket", "object", objectstorage.WithObjectStreamChunkSize(2))
+	stream := conn.StreamObjectChunks(context.Background(), "bucket", "object", func(c *objectstorage.ObjectStreamOpts) error { v := 2; c.ChunkSize = &v; return nil })
 	for data, err := range stream.Chunks() {
 		if err != nil || string(data) != "ab" {
 			t.Fatal(data, err)

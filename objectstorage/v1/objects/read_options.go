@@ -49,62 +49,6 @@ func WithObjectReadHeaders(values map[string]string) ObjectReadOption {
 	})
 }
 
-func WithObjectReadNewest(value bool) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error {
-		owned := value
-		cfg.Newest = &owned
-		return nil
-	})
-}
-
-func WithObjectReadIfMatch(value string) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfMatch = value; return nil })
-}
-
-func WithObjectReadIfNoneMatch(value string) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfNoneMatch = value; return nil })
-}
-
-func WithObjectReadIfModifiedSince(value time.Time) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error {
-		owned := value
-		cfg.IfModifiedSince = &owned
-		return nil
-	})
-}
-
-func WithObjectReadIfUnmodifiedSince(value time.Time) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error {
-		owned := value
-		cfg.IfUnmodifiedSince = &owned
-		return nil
-	})
-}
-
-func WithObjectReadRange(value string) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Range = value; return nil })
-}
-
-func WithObjectReadFilename(value string) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Filename = value; return nil })
-}
-
-func WithObjectReadMultipartManifest(value string) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.MultipartManifest = value; return nil })
-}
-
-func WithObjectReadSymlink(value string) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Symlink = value; return nil })
-}
-
-func WithObjectReadVersionID(value string) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.VersionID = value; return nil })
-}
-
-func WithObjectReadBufferSize(value int) ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.BufferSize = value; return nil })
-}
-
 func cloneObjectReadOpts(value ObjectReadOpts) ObjectReadOpts {
 	value.Headers = cloneMetadataHeaders(value.Headers)
 	if value.Newest != nil {

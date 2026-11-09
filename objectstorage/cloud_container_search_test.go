@@ -32,7 +32,7 @@ func TestSwiftCloudContainerSearchCollectsEveryPageBeforeIdentifierAndMapping(t 
 			testcloud.JSON(w, 200, `[{"name":"alpha","count":1},{"name":"beta","count":1}]`)
 		}
 	})
-	result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SearchContainers(context.Background(), objectstorage.WithContainerSearchName("alpha*"), objectstorage.WithContainerSearchFiltersJSON(json.RawMessage(`{"count":2}`)))
+	result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SearchContainers(context.Background(), func(c *objectstorage.ContainerSearchOpts) error { c.Name = "alpha*"; return nil }, objectstorage.WithContainerSearchFiltersJSON(json.RawMessage(`{"count":2}`)))
 	if err != nil || len(result.AllRecords) != 3 || len(result.Records) != 1 || string(result.Records[0].Resource.Body["name"]) != `"alpha-final"` || result.LastPage.StatusCode != 203 || !reflect.DeepEqual(queries, []string{"", "marker=beta"}) {
 		t.Fatal(result, err, queries)
 	}
@@ -48,7 +48,7 @@ func TestSwiftCloudContainerSearchNameUsesFnmatchAndDeclaredAliases(t *testing.T
 		name  string
 		count int
 	}{{"", 5}, {"alpha", 2}, {"a[lp]*", 2}, {"beta", 1}, {"None", 1}, {"literal*", 1}, {"none", 0}} {
-		r, e := cloud.SearchContainers(context.Background(), objectstorage.WithContainerSearchName(tc.name))
+		r, e := cloud.SearchContainers(context.Background(), func(c *objectstorage.ContainerSearchOpts) error { c.Name = tc.name; return nil })
 		if e != nil || len(r.Records) != tc.count {
 			t.Fatal(tc.name, r, e)
 		}
@@ -91,7 +91,7 @@ func TestSwiftCloudContainerSearchExpressionsReturnArbitraryJSONWithoutRowAssoci
 			t.Fatal(tc, r, e)
 		}
 	}
-	r, e := cloud.SearchContainers(context.Background(), objectstorage.WithContainerSearchName("absent"), objectstorage.WithContainerSearchExpression("["))
+	r, e := cloud.SearchContainers(context.Background(), func(c *objectstorage.ContainerSearchOpts) error { c.Name = "absent"; return nil }, objectstorage.WithContainerSearchExpression("["))
 	if e == nil || r.Value != nil || r.Records != nil || len(r.AllRecords) != 2 {
 		t.Fatal(r, e)
 	}
@@ -107,7 +107,7 @@ func TestSwiftCloudContainerSearchPreservesLazyMissingAndNestedMappingFailures(t
 		name, filter string
 		failure      bool
 	}{{"", `{"count":0,"missing":true}`, false}, {"", `{"missing":true,"count":0}`, true}, {"absent", `{"missing":true}`, false}, {"", `{"location":{"project":{"id":null}}}`, false}, {"", `{"name":{}}`, false}, {"", `{"name":{"a":true}}`, true}, {"", `true`, true}, {"absent", `true`, false}, {"", `{"foreign":true}`, true}} {
-		r, e := cloud.SearchContainers(context.Background(), objectstorage.WithContainerSearchName(tc.name), objectstorage.WithContainerSearchFiltersJSON(json.RawMessage(tc.filter)))
+		r, e := cloud.SearchContainers(context.Background(), func(c *objectstorage.ContainerSearchOpts) error { c.Name = tc.name; return nil }, objectstorage.WithContainerSearchFiltersJSON(json.RawMessage(tc.filter)))
 		if (e != nil) != tc.failure || r == nil || len(r.AllRecords) != 1 {
 			t.Fatal(tc, r, e)
 		}

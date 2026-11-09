@@ -76,7 +76,7 @@ func TestAccountTempURLKeyOptionsParallelAndInvalidHeaders(t *testing.T) {
 		workers.Add(1)
 		go func() {
 			defer workers.Done()
-			if _, err := New(c).SetTempURLKey(context.Background(), "key", option, WithSetTempURLKeySecondary(true)); err != nil {
+			if _, err := New(c).SetTempURLKey(context.Background(), "key", option, request.Custom(func(c *SetTempURLKeyOpts) error { c.Secondary = true; return nil })); err != nil {
 				t.Error(err)
 			}
 		}()

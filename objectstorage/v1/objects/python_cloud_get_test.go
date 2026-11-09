@@ -62,7 +62,7 @@ func TestPythonCloudObjectGetDefaultTextLowerHeadersEagerAndIgnoredControls(t *t
 		}
 		return wire, nil
 	})
-	result, e := objects.New(client).GetCloudObjectText(context.Background(), "box", "dir/file", objects.WithCloudGetQueryString("%broken\n?#"), objects.WithCloudGetStream(true), objects.WithCloudGetChunkSize(0))
+	result, e := objects.New(client).GetCloudObjectText(context.Background(), "box", "dir/file", func(c *objects.CloudGetOpts) error { c.QueryString = "%broken\n?#"; return nil }, func(c *objects.CloudGetOpts) error { c.Stream = true; return nil }, func(c *objects.CloudGetOpts) error { v := 0; c.ChunkSize = &v; return nil })
 	if e != nil || result == nil || result.Body == nil || *result.Body != "a\x00\ufffd\ufffd" || result.Missing || result.BytesWritten != 0 || calls != 1 || body.closes.Load() != 1 || result.Headers["x-unknown"] != "one, two" || result.Headers["set-cookie"] != "a=1, b=2" || result.Headers["content-type"] != "application/json" || result.Receipt.StatusCode != 203 {
 		t.Fatal(result, e, calls, body.closes.Load())
 	}
@@ -187,7 +187,7 @@ func TestPythonCloudObjectGetPathOutputBinaryOwnedCloseAndMissingNoTruncation(t 
 	if e != nil || !result.Missing || result.Body != nil || result.Headers != nil || result.Receipt.StatusCode != 404 || string(stored) != "old" {
 		t.Fatal(result, e, stored)
 	}
-	result, e = objects.New(client).GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetOutfile(path), objects.WithCloudGetChunkSize(2))
+	result, e = objects.New(client).GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetOutfile(path), func(c *objects.CloudGetOpts) error { v := 2; c.ChunkSize = &v; return nil })
 	stored, _ = os.ReadFile(path)
 	if e != nil || result.Missing || result.Body != nil || result.BytesWritten != int64(len(payload)) || !bytes.Equal(stored, payload) || calls != 2 {
 		t.Fatal(result, e, stored, calls)
@@ -203,7 +203,7 @@ func TestPythonCloudObjectGetBorrowedWriterFlushOnlyAndNoStatisticalTextRead(t *
 	body := &objectMetadataBody{Reader: strings.NewReader("caf\xe9")}
 	wire := objectMetadataWire(200, body)
 	wire.Header.Set("Content-Type", "application/octet-stream")
-	result, e := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetWriter(writer), objects.WithCloudGetChunkSize(2))
+	result, e := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetWriter(writer), func(c *objects.CloudGetOpts) error { v := 2; c.ChunkSize = &v; return nil })
 	if e != nil || result.Body != nil || result.BytesWritten != 4 || writer.String() != "caf\xe9" || writer.writes != 2 || writer.flushes != 1 || writer.closes != 0 || body.closes.Load() != 1 {
 		t.Fatal(result, e, writer.writes, writer.flushes, writer.closes, body.closes.Load())
 	}
@@ -218,7 +218,7 @@ func TestPythonCloudObjectGetFalseyNonNoneOutfileSkipsReadWriteTextAndChunkValid
 	for _, option := range []objects.CloudGetOption{objects.WithCloudGetOutfile(""), objects.WithoutCloudGetContent()} {
 		reads := 0
 		body := &objectMetadataBody{Reader: objectMetadataReader(func(data []byte) (int, error) { reads++; return copy(data, "unexpected"), io.EOF })}
-		result, e := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return objectMetadataWire(200, body), nil })).GetCloudObjectText(context.Background(), "box", "file", option, objects.WithCloudGetChunkSize(-1))
+		result, e := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return objectMetadataWire(200, body), nil })).GetCloudObjectText(context.Background(), "box", "file", option, func(c *objects.CloudGetOpts) error { v := -1; c.ChunkSize = &v; return nil })
 		if e != nil || result.Body != nil || result.Missing || result.Receipt.StatusCode != 200 || reads != 0 || body.closes.Load() != 1 {
 			t.Fatal(result, e, reads, body.closes.Load())
 		}
@@ -239,7 +239,7 @@ func TestPythonCloudObjectGetWriterFailureShortWriteFlushFailurePreserveStageAnd
 				writer.flushErr = cause
 			}
 			body := &objectMetadataBody{Reader: strings.NewReader("abcd")}
-			result, e := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return objectMetadataWire(206, body), nil })).GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetWriter(writer), objects.WithCloudGetChunkSize(2))
+			result, e := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return objectMetadataWire(206, body), nil })).GetCloudObjectText(context.Background(), "box", "file", objects.WithCloudGetWriter(writer), func(c *objects.CloudGetOpts) error { v := 2; c.ChunkSize = &v; return nil })
 			if mode == "short" {
 				cause = io.ErrShortWrite
 			}
@@ -349,7 +349,7 @@ func TestPythonCloudObjectGetWriterSourceCancellationIsStickyAcrossRestoringClos
 	body := &objectMetadataBody{Reader: strings.NewReader("abcdef"), onClose: func() { client.Endpoint = objectMetadataBase }}
 	client = objectMetadataClient(func(*http.Request) (*http.Response, error) { return objectMetadataWire(203, body), nil })
 	writer := &cloudGetWriter{onWrite: func() { client.Endpoint = objectMetadataBase + "changed/"; cancel(cause) }}
-	result, e := objects.New(client).GetCloudObjectText(ctx, "box", "file", objects.WithCloudGetWriter(writer), objects.WithCloudGetChunkSize(2))
+	result, e := objects.New(client).GetCloudObjectText(ctx, "box", "file", objects.WithCloudGetWriter(writer), func(c *objects.CloudGetOpts) error { v := 2; c.ChunkSize = &v; return nil })
 	if !errors.Is(e, resource.ErrInvalidOption) || !errors.Is(e, context.Canceled) || !errors.Is(e, cause) || result.BytesWritten != 2 || writer.String() != "ab" || writer.flushes != 0 || writer.closes != 0 || body.closes.Load() != 1 {
 		t.Fatal(result, e, writer.String(), writer.flushes, writer.closes, body.closes.Load())
 	}
@@ -382,7 +382,7 @@ func TestPythonCloudObjectGetOptionsSnapshotsPreflightAndDestinationReset(t *tes
 		container, object string
 		options           []objects.CloudGetOption
 	}{
-		{nil, context.Background(), "box", "file", nil}, {api, nil, "box", "file", nil}, {api, ctx, "box", "file", nil}, {api, context.Background(), "", "file", nil}, {api, context.Background(), "box", "", nil}, {api, context.Background(), "box", "file", []objects.CloudGetOption{nil}}, {api, context.Background(), "box", "file", []objects.CloudGetOption{objects.WithCloudGetWriter(nilWriter)}}, {api, context.Background(), "box", "file", []objects.CloudGetOption{objects.WithCloudGetOpts(objects.CloudGetOpts{Writer: &cloudGetWriter{}, OmitContent: true})}}, {api, context.Background(), "box", "file", []objects.CloudGetOption{objects.WithCloudGetWriter(&cloudGetWriter{}), objects.WithCloudGetChunkSize(0)}},
+		{nil, context.Background(), "box", "file", nil}, {api, nil, "box", "file", nil}, {api, ctx, "box", "file", nil}, {api, context.Background(), "", "file", nil}, {api, context.Background(), "box", "", nil}, {api, context.Background(), "box", "file", []objects.CloudGetOption{nil}}, {api, context.Background(), "box", "file", []objects.CloudGetOption{objects.WithCloudGetWriter(nilWriter)}}, {api, context.Background(), "box", "file", []objects.CloudGetOption{objects.WithCloudGetOpts(objects.CloudGetOpts{Writer: &cloudGetWriter{}, OmitContent: true})}}, {api, context.Background(), "box", "file", []objects.CloudGetOption{objects.WithCloudGetWriter(&cloudGetWriter{}), func(c *objects.CloudGetOpts) error { v := 0; c.ChunkSize = &v; return nil }}},
 	} {
 		result, e := tc.api.GetCloudObjectText(tc.ctx, tc.container, tc.object, tc.options...)
 		if result != nil || e == nil {

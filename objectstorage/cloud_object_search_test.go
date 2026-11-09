@@ -32,7 +32,7 @@ func TestSwiftCloudObjectSearchCollectsEveryPageBeforeIdentifierAndMapping(t *te
 			testcloud.JSON(w, 200, `[{"name":"alpha","content_length":1},{"name":"beta","content_length":1}]`)
 		}
 	})
-	result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SearchObjects(context.Background(), "bucket", objectstorage.WithObjectSearchName("alpha*"), objectstorage.WithObjectSearchFiltersJSON(json.RawMessage(`{"content_length":2}`)))
+	result, err := objectstorage.New(fixture.Client("object-store", "/account/")).SearchObjects(context.Background(), "bucket", func(c *objectstorage.ObjectSearchOpts) error { c.Name = "alpha*"; return nil }, objectstorage.WithObjectSearchFiltersJSON(json.RawMessage(`{"content_length":2}`)))
 	if err != nil || len(result.AllRecords) != 3 || len(result.Records) != 1 || string(result.Records[0].Resource.Body["name"]) != `"alpha-final"` || result.LastPage.StatusCode != 203 || !reflect.DeepEqual(queries, []string{"format=json", "format=json&marker=beta"}) {
 		t.Fatal(result, err, queries)
 	}
@@ -48,7 +48,7 @@ func TestSwiftCloudObjectSearchNameUsesFnmatchAndDeclaredAliases(t *testing.T) {
 		name  string
 		count int
 	}{{"", 5}, {"alpha", 2}, {"a[lp]*", 2}, {"beta", 1}, {"None", 2}, {"literal*", 1}, {"none", 0}} {
-		r, e := cloud.SearchObjects(context.Background(), "bucket", objectstorage.WithObjectSearchName(tc.name))
+		r, e := cloud.SearchObjects(context.Background(), "bucket", func(c *objectstorage.ObjectSearchOpts) error { c.Name = tc.name; return nil })
 		if e != nil || len(r.Records) != tc.count {
 			t.Fatal(tc.name, r, e)
 		}
@@ -91,7 +91,7 @@ func TestSwiftCloudObjectSearchExpressionsReturnArbitraryJSONWithoutRowAssociati
 			t.Fatal(tc, r, e)
 		}
 	}
-	r, e := cloud.SearchObjects(context.Background(), "bucket", objectstorage.WithObjectSearchName("absent"), objectstorage.WithObjectSearchExpression("["))
+	r, e := cloud.SearchObjects(context.Background(), "bucket", func(c *objectstorage.ObjectSearchOpts) error { c.Name = "absent"; return nil }, objectstorage.WithObjectSearchExpression("["))
 	if e == nil || r.Value != nil || r.Records != nil || len(r.AllRecords) != 2 {
 		t.Fatal(r, e)
 	}
@@ -107,7 +107,7 @@ func TestSwiftCloudObjectSearchPreservesLazyMissingAndNestedMappingFailures(t *t
 		name, filter string
 		failure      bool
 	}{{"", `{"content_length":0,"missing":true}`, false}, {"", `{"missing":true,"content_length":0}`, true}, {"absent", `{"missing":true}`, false}, {"", `{"location":null}`, false}, {"", `{"name":{}}`, false}, {"", `{"name":{"a":true}}`, true}, {"", `true`, true}, {"absent", `true`, false}, {"", `{"foreign":true}`, true}} {
-		r, e := cloud.SearchObjects(context.Background(), "bucket", objectstorage.WithObjectSearchName(tc.name), objectstorage.WithObjectSearchFiltersJSON(json.RawMessage(tc.filter)))
+		r, e := cloud.SearchObjects(context.Background(), "bucket", func(c *objectstorage.ObjectSearchOpts) error { c.Name = tc.name; return nil }, objectstorage.WithObjectSearchFiltersJSON(json.RawMessage(tc.filter)))
 		if (e != nil) != tc.failure || r == nil || len(r.AllRecords) != 1 {
 			t.Fatal(tc, r, e)
 		}

@@ -119,11 +119,11 @@ func TestObjectCreateCoreChecksumDecisions(t *testing.T) {
 		meta           bool
 		skip           bool
 	}{
-		{"default recomputes both", []CreateObjectOption{WithCreateObjectMD5(strings.Repeat("0", 32))}, 404, nil, md, sh, true, false},
-		{"known both trusted case", []CreateObjectOption{WithCreateObjectMD5(upperMD), WithCreateObjectSHA256(upperSH)}, 200, http.Header{"X-Object-Meta-X-Sdk-Md5": {upperMD}, "X-Object-Meta-X-Sdk-Sha256": {upperSH}}, upperMD, upperSH, true, true},
+		{"default recomputes both", []CreateObjectOption{request.Custom(func(c *CreateObjectOpts) error { c.MD5 = strings.Repeat("0", 32); return nil })}, 404, nil, md, sh, true, false},
+		{"known both trusted case", []CreateObjectOption{request.Custom(func(c *CreateObjectOpts) error { c.MD5 = upperMD; return nil }), request.Custom(func(c *CreateObjectOpts) error { c.SHA256 = upperSH; return nil })}, 200, http.Header{"X-Object-Meta-X-Sdk-Md5": {upperMD}, "X-Object-Meta-X-Sdk-Sha256": {upperSH}}, upperMD, upperSH, true, true},
 		{"disabled missing skips comparison hashing", []CreateObjectOption{WithCreateObjectGenerateChecksums(false)}, 404, nil, "", "", false, false},
 		{"disabled existing comparison only", []CreateObjectOption{WithCreateObjectGenerateChecksums(false)}, 200, http.Header{}, md, sh, false, false},
-		{"disabled known one skips file hash", []CreateObjectOption{WithCreateObjectGenerateChecksums(false), WithCreateObjectMD5(upperMD)}, 204, http.Header{"X-Object-Meta-X-Sdk-Md5": {upperMD}}, upperMD, "", true, true},
+		{"disabled known one skips file hash", []CreateObjectOption{WithCreateObjectGenerateChecksums(false), request.Custom(func(c *CreateObjectOpts) error { c.MD5 = upperMD; return nil })}, 204, http.Header{"X-Object-Meta-X-Sdk-Md5": {upperMD}}, upperMD, "", true, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			c := objectMetadataClient()
@@ -176,7 +176,7 @@ func TestObjectCreateCoreChecksumDecisions(t *testing.T) {
 		}
 		return objectMetadataOK(r, 202, http.Header{}), nil
 	})
-	result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Data: []byte("bytes")}, WithCreateObjectMD5(md), WithCreateObjectMetadataValue("x-sdk-md5", "literal"))
+	result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Data: []byte("bytes")}, request.Custom(func(c *CreateObjectOpts) error { c.MD5 = md; return nil }), WithCreateObjectMetadataValue("x-sdk-md5", "literal"))
 	if err != nil || result == nil || result.MD5 != "" || result.SHA256 != "" || result.Capabilities != nil || result.Discovery != nil || result.Ordinary.Acknowledgement.StatusCode != 202 {
 		t.Fatal(result, err)
 	}
@@ -271,7 +271,7 @@ func TestObjectCreateCoreEmptyAndZeroBounds(t *testing.T) {
 			}
 			return nil, errors.New("unexpected")
 		})
-		result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Reader: bytes.NewBufferString(data)}, WithCreateObjectSegmentSize(0))
+		result, err := New(c).CreateObject(context.Background(), "box", "key", CreateObjectInput{Reader: bytes.NewBufferString(data)}, request.Custom(func(c *CreateObjectOpts) error { v := int64(0); c.SegmentSize = &v; return nil }))
 		if result == nil || result.Capabilities == nil || result.Discovery == nil || result.Capabilities.Size != 0 {
 			t.Fatal(result, err)
 		}

@@ -19,7 +19,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectStaticLargeObject`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectVersionID`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkInfo.UnmarshalJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkError.Error`
@@ -125,7 +124,7 @@ func deleteObjects(ctx context.Context, api *objects.API, versionID string) erro
         request.Custom(func(c *objects.DeleteObjectOpts) error { c.StaticLargeObject = nil; return nil }),
         request.IgnoreMissing(false),
         request.Custom(func(c *objects.DeleteObjectOpts) error { c.IgnoreMissing = nil; return nil }),
-        objects.WithDeleteObjectVersionID(versionID),
+        request.Custom(func(c *objects.DeleteObjectOpts) error { c.VersionID = versionID; return nil }),
         objects.WithDeleteObjectNewest(true),
         request.Custom(func(c *objects.DeleteObjectOpts) error { c.Newest = nil; return nil }),
         objects.WithDeleteObjectNewest(false),

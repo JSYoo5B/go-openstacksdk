@@ -54,7 +54,7 @@ func TestPythonCloudObjectStreamLazyDefaultBinaryChunksAndSingleUse(t *testing.T
 		}
 		return objectMetadataWire(200, body), nil
 	})
-	stream := objects.New(client).StreamCloudObject(context.Background(), "box", "dir/file", func(cfg *objects.CloudStreamOpts) error { optionCalls++; return nil }, objects.WithCloudStreamQueryString("broken=%\n\xff?#"))
+	stream := objects.New(client).StreamCloudObject(context.Background(), "box", "dir/file", func(cfg *objects.CloudStreamOpts) error { optionCalls++; return nil }, func(c *objects.CloudStreamOpts) error { c.QueryString = "broken=%\n\xff?#"; return nil })
 	if calls != 0 || optionCalls != 0 || stream.Receipt() != nil || stream.Err() != nil {
 		t.Fatal(calls, optionCalls, stream.Receipt(), stream.Err())
 	}
@@ -100,7 +100,7 @@ func TestPythonCloudObjectStreamChunkSizeSnapshotShortReadsAndValidation(t *test
 		t.Fatal(chunks, stream.Err(), calls, body.closes.Load())
 	}
 	for _, n := range []int{0, -1, 16777217} {
-		s := api.StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(n))
+		s := api.StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := n; c.ChunkSize = &v; return nil })
 		_, e := cloudStreamCollect(s)
 		if !errors.Is(e, resource.ErrInvalidOption) {
 			t.Fatal(n, e)
@@ -117,7 +117,7 @@ func TestPythonCloudObjectStreamSourceSuccessStatusAnd304Body(t *testing.T) {
 			wire := objectMetadataWire(status, &objectMetadataBody{Reader: strings.NewReader("abc")})
 			body := wire.Body.(*objectMetadataBody)
 			calls := 0
-			stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return wire, nil })).StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(2))
+			stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return wire, nil })).StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := 2; c.ChunkSize = &v; return nil })
 			chunks, e := cloudStreamCollect(stream)
 			if e != nil || string(bytes.Join(chunks, nil)) != "abc" || !reflect.DeepEqual(cloudStreamSizes(chunks), []int{2, 1}) || stream.Receipt().StatusCode != status || calls != 1 || body.closes.Load() != 1 {
 				t.Fatal(chunks, e, stream.Receipt(), calls, body.closes.Load())
@@ -189,7 +189,7 @@ func TestPythonCloudObjectStreamPartialReadCloseAndImmutableCurrentChunkProof(t 
 		}
 		return copy(dst, "bad"), errors.Join(io.EOF, readCause)
 	}), closeErr: closeCause}
-	stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return objectMetadataWire(206, body), nil })).StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(3))
+	stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return objectMetadataWire(206, body), nil })).StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := 3; c.ChunkSize = &v; return nil })
 	chunks, e := cloudStreamCollect(stream)
 	if !errors.Is(e, readCause) || !errors.Is(e, closeCause) || string(bytes.Join(chunks, nil)) != "okb" || body.closes.Load() != 1 {
 		t.Fatal(chunks, e, body.closes.Load())
@@ -209,7 +209,7 @@ func TestPythonCloudObjectStreamBreakClosesOnceAndRetainsCleanupFailure(t *testi
 	body := &objectMetadataBody{Reader: strings.NewReader("abcdef"), closeErr: closeCause}
 	calls := 0
 	api := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { calls++; return objectMetadataWire(200, body), nil }))
-	stream := api.StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(2))
+	stream := api.StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := 2; c.ChunkSize = &v; return nil })
 	for chunk, e := range stream.Chunks() {
 		if e != nil || string(chunk) != "ab" {
 			t.Fatal(chunk, e)
@@ -381,7 +381,7 @@ func TestPythonCloudObjectStreamRequestsCodecsAndReverseEncodingChain(t *testing
 			body := &objectMetadataBody{Reader: bytes.NewReader(payload)}
 			wire := objectMetadataWire(200, body)
 			wire.Header.Set("Content-Encoding", encoding)
-			stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(2))
+			stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := 2; c.ChunkSize = &v; return nil })
 			chunks, e := cloudStreamCollect(stream)
 			if e != nil || !bytes.Equal(bytes.Join(chunks, nil), input) || !reflect.DeepEqual(cloudStreamSizes(chunks), []int{2, 2, 2, 1}) || body.closes.Load() != 1 || stream.Receipt().Header.Get("Content-Encoding") != encoding {
 				t.Fatal(chunks, e, body.closes.Load(), stream.Receipt())
@@ -451,7 +451,7 @@ func TestPythonCloudObjectStreamCloseFromOptionsAndConsumerStopsBeforeAnotherRea
 	if len(chunks) != 0 || e != nil || calls != 0 || unopened.Receipt() != nil {
 		t.Fatal(chunks, e, calls, unopened.Receipt())
 	}
-	stream := api.StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(2))
+	stream := api.StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := 2; c.ChunkSize = &v; return nil })
 	yields := 0
 	for chunk, e := range stream.Chunks() {
 		yields++
@@ -592,7 +592,7 @@ func TestPythonCloudObjectStreamDeflateFallsBackAfterValidZlibPrefix(t *testing.
 			body := &objectMetadataBody{Reader: bytes.NewReader(payload)}
 			wire := objectMetadataWire(200, body)
 			wire.Header.Set("Content-Encoding", "deflate")
-			stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(size))
+			stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := size; c.ChunkSize = &v; return nil })
 			chunks, e := cloudStreamCollect(stream)
 			if e != nil || !bytes.Equal(bytes.Join(chunks, nil), bytes.Repeat([]byte{'A'}, 156)) || body.closes.Load() != 1 {
 				t.Fatal(chunks, e, body.closes.Load())
@@ -649,7 +649,7 @@ func TestPythonCloudObjectStreamGzipCleanEOFTrailerTailHeaderAndCompressed404(t 
 				body := &objectMetadataBody{Reader: bytes.NewReader(tc.payload)}
 				wire := objectMetadataWire(status, body)
 				wire.Header.Set("Content-Encoding", "gzip")
-				stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).StreamCloudObject(context.Background(), "box", "file", objects.WithCloudStreamChunkSize(2))
+				stream := objects.New(objectMetadataClient(func(*http.Request) (*http.Response, error) { return wire, nil })).StreamCloudObject(context.Background(), "box", "file", func(c *objects.CloudStreamOpts) error { v := 2; c.ChunkSize = &v; return nil })
 				chunks, e := cloudStreamCollect(stream)
 				want := tc.want
 				if status == 404 {
