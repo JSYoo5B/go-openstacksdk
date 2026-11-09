@@ -60,9 +60,7 @@ func WithObjectSearchFiltersJSON(value json.RawMessage) ObjectSearchOption {
 		return nil
 	}
 }
-func WithoutObjectSearchFilters() ObjectSearchOption {
-	return func(c *ObjectSearchOpts) error { c.Filters = nil; return nil }
-}
+
 func WithObjectSearchExpression(value string) ObjectSearchOption {
 	raw, _ := json.Marshal(value)
 	return WithObjectSearchFiltersJSON(raw)

@@ -48,20 +48,12 @@ func WithDeleteObjectHeaders(values map[string]string) DeleteObjectOption {
 func WithDeleteObjectStaticLargeObject(value bool) DeleteObjectOption {
 	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.StaticLargeObject = cloneDeleteObjectBool(&value); return nil })
 }
-func WithoutDeleteObjectStaticLargeObject() DeleteObjectOption {
-	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.StaticLargeObject = nil; return nil })
-}
-func WithoutDeleteObjectIgnoreMissing() DeleteObjectOption {
-	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.IgnoreMissing = nil; return nil })
-}
+
 func WithDeleteObjectVersionID(value string) DeleteObjectOption {
 	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.VersionID = value; return nil })
 }
 func WithDeleteObjectNewest(value bool) DeleteObjectOption {
 	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.Newest = cloneDeleteObjectBool(&value); return nil })
-}
-func WithoutDeleteObjectNewest() DeleteObjectOption {
-	return request.Custom(func(cfg *DeleteObjectOpts) error { cfg.Newest = nil; return nil })
 }
 
 func cloneDeleteObjectBool(value *bool) *bool {

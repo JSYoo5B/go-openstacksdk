@@ -14,6 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.CreateObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMetadata`
@@ -21,11 +22,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectMD5`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectSHA256`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectSegmentSize`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCreateObjectSegmentSize`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectUseSLO`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCreateObjectUseSLO`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateObjectGenerateChecksums`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCreateObjectGenerateChecksums`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectCreateUnconfirmedSegmentError.Error`
 
 - Explicit Data selects one ordinary binary PUT, preserves nonnil empty input and native201/202 raw acknowledgement, and bypasses capabilities, HEAD, hashing and segmentation.
@@ -204,9 +202,9 @@ func uploadExamples(ctx context.Context, conn *sdk.Connection,
         objects.WithCreateObjectMetadataValue("empty", ""),
         objects.WithCreateObjectMD5(knownMD5),
         objects.WithCreateObjectSHA256(knownSHA256),
-        objects.WithoutCreateObjectSegmentSize(),
-        objects.WithoutCreateObjectUseSLO(),
-        objects.WithoutCreateObjectGenerateChecksums(),
+        request.Custom(func(c *objects.CreateObjectOpts) error { c.SegmentSize = nil; return nil }),
+        request.Custom(func(c *objects.CreateObjectOpts) error { c.UseSLO = nil; return nil }),
+        request.Custom(func(c *objects.CreateObjectOpts) error { c.GenerateChecksums = nil; return nil }),
     }
     result, err := service.Objects.CreateObject(ctx, "backups", "empty ?.bin",
         objects.CreateObjectInput{Data: []byte{}}, options...)

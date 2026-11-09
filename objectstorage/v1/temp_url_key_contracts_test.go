@@ -339,7 +339,7 @@ func TestTempURLKeyContractsPresenceAndOptions(t *testing.T) {
 				return nil
 			}))
 			if tc.clear {
-				opts = append(opts, v1.WithoutGetTempURLKeyNewest())
+				opts = append(opts, request.Custom(func(c *v1.GetTempURLKeyOpts) error { c.Newest = nil; return nil }))
 			}
 			result, err := v1.New(client).GetTempURLKey(context.Background(), opts...)
 			tempKeySelected(t, result, err, "account", false, false)

@@ -17,10 +17,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureDigest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureTimestamp`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateFormSignatureNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGenerateFormSignatureNewest`
 
 - Explicit nonempty arbitrary binary key signs decoded endpoint/container/prefix path plus literal redirect, positive size/count and captured expiry as five newline-separated fields, returning owned FormSignatureResult without HTTP upload.
   Tests: `objectstorage/v1/temp_url_signing_contracts_test.go:TestTempURLSigningContractsKnownVectorsAndPaths`, `objectstorage/v1/form_signature_core_test.go:TestFormSignatureCoreVectorsAndLiteralPaths`, `connectiontest/connection_objectstorage_signing_test.go:TestConnectionSwiftSigningSharesClientAndCapturesEachWorkflow`.
@@ -55,10 +55,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLDigest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLTimestamp`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGenerateTempURLNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLAbsolute`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLPrefix`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGenerateTempURLISO8601`

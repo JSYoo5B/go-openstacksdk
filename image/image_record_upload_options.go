@@ -105,11 +105,6 @@ func WithImageRecordUploadSize(value int64) ImageRecordUploadOption {
 	return request.Custom(func(config *ImageRecordUploadOpts) error { owned := value; config.Size = &owned; return nil })
 }
 
-// WithoutImageRecordUploadSize clears explicit Size; default inference remains
-// enabled. WithImageRecordUploadSizeInference(false) disables size inspection.
-func WithoutImageRecordUploadSize() ImageRecordUploadOption {
-	return request.Custom(func(config *ImageRecordUploadOpts) error { config.Size = nil; return nil })
-}
 func WithImageRecordUploadSizeInference(enabled bool) ImageRecordUploadOption {
 	return request.Custom(func(config *ImageRecordUploadOpts) error { config.DisableSizeInference = !enabled; return nil })
 }

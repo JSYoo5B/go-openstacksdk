@@ -42,9 +42,6 @@ func WithGetTempURLKeyHeaders(values map[string]string) GetTempURLKeyOption {
 func WithGetTempURLKeyNewest(value bool) GetTempURLKeyOption {
 	return request.Custom(func(cfg *GetTempURLKeyOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
-func WithoutGetTempURLKeyNewest() GetTempURLKeyOption {
-	return request.Custom(func(cfg *GetTempURLKeyOpts) error { cfg.Newest = nil; return nil })
-}
 
 func cloneTempURLKeyHeaders(value map[string]string) map[string]string {
 	result := make(map[string]string, len(value))

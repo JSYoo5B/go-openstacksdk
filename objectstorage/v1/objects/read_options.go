@@ -57,10 +57,6 @@ func WithObjectReadNewest(value bool) ObjectReadOption {
 	})
 }
 
-func WithoutObjectReadNewest() ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.Newest = nil; return nil })
-}
-
 func WithObjectReadIfMatch(value string) ObjectReadOption {
 	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfMatch = value; return nil })
 }
@@ -77,20 +73,12 @@ func WithObjectReadIfModifiedSince(value time.Time) ObjectReadOption {
 	})
 }
 
-func WithoutObjectReadIfModifiedSince() ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfModifiedSince = nil; return nil })
-}
-
 func WithObjectReadIfUnmodifiedSince(value time.Time) ObjectReadOption {
 	return request.Custom(func(cfg *ObjectReadOpts) error {
 		owned := value
 		cfg.IfUnmodifiedSince = &owned
 		return nil
 	})
-}
-
-func WithoutObjectReadIfUnmodifiedSince() ObjectReadOption {
-	return request.Custom(func(cfg *ObjectReadOpts) error { cfg.IfUnmodifiedSince = nil; return nil })
 }
 
 func WithObjectReadRange(value string) ObjectReadOption {

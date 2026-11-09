@@ -66,7 +66,7 @@ func TestInfoOptionsFactoryAndCallbackOwnership(t *testing.T) {
 		t.Fatal(result, err)
 	}
 	for _, options := range [][]ObjectSegmentSizeOption{
-		{WithObjectSegmentSize(0), WithoutObjectSegmentSize()},
+		{WithObjectSegmentSize(0), request.Custom(func(c *ObjectSegmentSizeOpts) error { c.Size = nil; return nil })},
 		{WithObjectSegmentSize(0), WithObjectSegmentSizeHeaders(map[string]string{"X-Trace": "discarded"}), WithObjectSegmentSizeOpts(ObjectSegmentSizeOpts{})},
 	} {
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {

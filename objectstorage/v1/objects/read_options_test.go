@@ -79,10 +79,10 @@ func TestObjectReadOptionsHeaderAndDateInputs(t *testing.T) {
 	})
 	result, err := api.GetObject(context.Background(), "c", "o",
 		WithObjectReadOpts(ObjectReadOpts{Headers: map[string]string{"x-call": "old"}}),
-		request.Header("X-Call", "new"), WithObjectReadNewest(true), WithoutObjectReadNewest(), WithObjectReadNewest(false),
+		request.Header("X-Call", "new"), WithObjectReadNewest(true), request.Custom(func(c *ObjectReadOpts) error { c.Newest = nil; return nil }), WithObjectReadNewest(false),
 		WithObjectReadIfMatch("opaque\tmatch"), WithObjectReadIfNoneMatch("none"),
-		WithObjectReadIfModifiedSince(date), WithoutObjectReadIfModifiedSince(),
-		WithObjectReadIfUnmodifiedSince(time.Now()), WithoutObjectReadIfUnmodifiedSince(), WithObjectReadIfUnmodifiedSince(date),
+		WithObjectReadIfModifiedSince(date), request.Custom(func(c *ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }),
+		WithObjectReadIfUnmodifiedSince(time.Now()), request.Custom(func(c *ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }), WithObjectReadIfUnmodifiedSince(date),
 		WithObjectReadRange("literal"), WithObjectReadFilename("한 ?#"), WithObjectReadMultipartManifest("get"), WithObjectReadSymlink("get"), WithObjectReadVersionID("v% ?#"), WithObjectReadBufferSize(1))
 	if err != nil || result == nil || !result.Complete || calls != 1 {
 		t.Fatalf("inputs: %+v %v calls=%d", result, err, calls)

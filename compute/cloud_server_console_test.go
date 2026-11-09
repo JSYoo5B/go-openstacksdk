@@ -165,7 +165,7 @@ func TestCloudServerConsoleLengthServerSnapshotsRecordAndReset(t *testing.T) {
 	if err != nil || result.Server != nil || f.bodies[0] != `{"os-getConsoleOutput":{"length":{"raw":false}}}` || f.calls[0] != "POST /nova/v2.1/servers/s1/action?" {
 		t.Fatal(result, err, f.calls, f.bodies)
 	}
-	_, err = f.service.GetServerConsole(context.Background(), "vm", option, compute.WithoutServerConsoleServer(), compute.WithoutServerConsoleLength())
+	_, err = f.service.GetServerConsole(context.Background(), "vm", option, func(c *compute.ServerConsoleOpts) error { c.Server = nil; return nil }, func(c *compute.ServerConsoleOpts) error { c.Length = nil; return nil })
 	if err != nil || len(f.calls) != 3 || f.calls[2] != "POST /nova/v2.1/servers/s2/action?" || f.bodies[2] != `{"os-getConsoleOutput":{}}` {
 		t.Fatal(err, f.calls, f.bodies)
 	}

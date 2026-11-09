@@ -55,9 +55,6 @@ func WithGenerateFormSignatureHeaders(values map[string]string) GenerateFormSign
 func WithGenerateFormSignatureNewest(value bool) GenerateFormSignatureOption {
 	return request.Custom(func(cfg *GenerateFormSignatureOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
-func WithoutGenerateFormSignatureNewest() GenerateFormSignatureOption {
-	return request.Custom(func(cfg *GenerateFormSignatureOpts) error { cfg.Newest = nil; return nil })
-}
 
 func cloneGenerateFormSignatureOpts(value GenerateFormSignatureOpts) GenerateFormSignatureOpts {
 	value.Key = cloneSigningKey(value.Key)

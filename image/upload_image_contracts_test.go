@@ -174,7 +174,7 @@ func TestImageUploadContractsWireAndOwnership(t *testing.T) {
 					})
 					opts := []image.ImageUploadOption{image.WithImageUploadField("cleared", true), image.WithImageUploadFields(nil), image.WithImageUploadTags(), image.WithImageUploadSize(size)}
 					if reset {
-						opts = append(opts, image.WithoutImageUploadSize())
+						opts = append(opts, request.Custom(func(c *image.ImageUploadOpts) error { c.Size = nil; return nil }))
 					}
 					result, e := image.New(c).UploadImage(context.Background(), uploadImageContractInput(strings.NewReader("data")), opts...)
 					if e != nil || result == nil || calls.Load() != 2 {

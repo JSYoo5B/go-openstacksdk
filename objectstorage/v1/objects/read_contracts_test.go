@@ -314,7 +314,7 @@ func TestObjectReadContractsOptionsAndPreflight(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		_, err = api.GetObject(context.Background(), "c", "o", objects.WithObjectReadNewest(true), objects.WithObjectReadIfModifiedSince(modified), objects.WithObjectReadIfUnmodifiedSince(unmodified), objects.WithoutObjectReadNewest(), objects.WithoutObjectReadIfModifiedSince(), objects.WithoutObjectReadIfUnmodifiedSince(), objects.WithObjectReadIfMatch("old"), objects.WithObjectReadOpts(objects.ObjectReadOpts{}))
+		_, err = api.GetObject(context.Background(), "c", "o", objects.WithObjectReadNewest(true), objects.WithObjectReadIfModifiedSince(modified), objects.WithObjectReadIfUnmodifiedSince(unmodified), request.Custom(func(c *objects.ObjectReadOpts) error { c.Newest = nil; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }), request.Custom(func(c *objects.ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }), objects.WithObjectReadIfMatch("old"), objects.WithObjectReadOpts(objects.ObjectReadOpts{}))
 		if err != nil || calls != 2 {
 			t.Fatalf("calls=%d err=%v", calls, err)
 		}

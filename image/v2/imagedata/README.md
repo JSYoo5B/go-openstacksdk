@@ -16,6 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.API.StageKnownImage`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageOpts`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageSize`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata.WithStageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.StageImageRecord`
@@ -24,7 +25,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageSize`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordStageSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageSizeInference`
 
 - Legacy native/ref strict200/204 stage profile only: StageImage performs a fresh explicit-ID metadata GET before streaming, while StageKnownImage snapshots only supplied native ID/status before option callbacks and skips that initial GET. Both require exact queued status before PUT and leave the supplied model unchanged.
@@ -65,7 +65,7 @@ Go API:
   Tests: `image/image_record_stage_test.go:TestImageRecordStageSizePolicyUsesTotalLengthWithoutChangingCursor`, `image/image_record_stage_test.go:TestImageRecordStageSizeInferenceKeepsSeekFailuresAndESPIPEUnknown`.
 - Explicit signed int64 Size, including zero and negative values, emits exact decimal X-OpenStack-Image-Size only on PUT and skips seeking. It sets neither Content-Length nor a truncation limit. A nil Size infers by default; WithImageRecordStageSizeInference(false) never seeks. Python bool and unbounded integer sizes are explicit typed representation differences.
   Tests: `image/image_record_stage_test.go:TestImageRecordStageSizePolicyUsesTotalLengthWithoutChangingCursor`.
-- The six concrete factories own headers and size pointers. Whole opts replaces complete configuration; singular/plural headers merge with canonical sequential last-wins. WithoutImageRecordStageSize clears only explicit Size and preserves inference policy; WithImageRecordStageSizeInference(true) reenables default inference. Parsed custom callbacks run once with owned before/after snapshots and sticky context/source/outer guards.
+- The six concrete factories own headers and size pointers. Whole opts replaces complete configuration; singular/plural headers merge with canonical sequential last-wins. Clearing Size through request.Custom removes only the explicit Size and preserves inference policy; WithImageRecordStageSizeInference(true) reenables default inference. Parsed custom callbacks run once with owned before/after snapshots and sticky context/source/outer guards.
   Tests: `image/image_record_stage_test.go:TestImageRecordStageOptionsKeepBulkMergeFullReplacementAndGuardOwnership`, `image/image_record_stage_test.go:TestImageRecordStageCapturesRequestOptionsLocationAndOrdinaryHeadersOnce`.
 - Exactly one SDK binary PUT uses captured fixed /images/{privateID}/stage, once-escaped identity, octet-stream Content-Type and empty Accept. Captured ordinary headers and original live authentication/transport/timeout remain distinct. The binary provider disables SDK retry, reauth, backoff and redirects; accepted-body or reader failure never replays consumed data.
   Tests: `image/image_record_stage_test.go:TestImageRecordStageFixedRoutesAndOpaqueAcceptedReceipts`, `image/image_record_stage_test.go:TestImageRecordStageBinaryRejectionsNeverReplayReauthenticateOrBackoff`, `image/image_record_stage_test.go:TestImageRecordStageBorrowedReadErrorsAndTransportCausesStopFinalFetch`.

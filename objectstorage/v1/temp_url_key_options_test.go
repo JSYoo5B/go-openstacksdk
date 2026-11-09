@@ -73,8 +73,8 @@ func TestTempURLKeyOptionsSnapshotsAndReplacement(t *testing.T) {
 		newest  string
 		present bool
 	}{
-		{"explicit false after clear", []GetTempURLKeyOption{WithGetTempURLKeyContainer("box"), WithGetTempURLKeyContainer(""), WithGetTempURLKeyNewest(true), WithoutGetTempURLKeyNewest(), WithGetTempURLKeyNewest(false)}, "false", true},
-		{"clear only", []GetTempURLKeyOption{WithGetTempURLKeyNewest(true), WithoutGetTempURLKeyNewest()}, "", false},
+		{"explicit false after clear", []GetTempURLKeyOption{WithGetTempURLKeyContainer("box"), WithGetTempURLKeyContainer(""), WithGetTempURLKeyNewest(true), request.Custom(func(c *GetTempURLKeyOpts) error { c.Newest = nil; return nil }), WithGetTempURLKeyNewest(false)}, "false", true},
+		{"clear only", []GetTempURLKeyOption{WithGetTempURLKeyNewest(true), request.Custom(func(c *GetTempURLKeyOpts) error { c.Newest = nil; return nil })}, "", false},
 		{"full replacement", []GetTempURLKeyOption{WithGetTempURLKeyContainer("box"), WithGetTempURLKeyHeaders(map[string]string{"X-Trace": "remove"}), WithGetTempURLKeyNewest(true), WithGetTempURLKeyOpts(GetTempURLKeyOpts{})}, "", false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

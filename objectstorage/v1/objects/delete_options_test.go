@@ -66,7 +66,7 @@ func TestObjectDeleteOptionsSnapshots(t *testing.T) {
 		t.Fatal("callbacks replayed or options changed", callbacks, calls)
 	}
 	for _, options := range [][]DeleteObjectOption{
-		{WithDeleteObjectStaticLargeObject(true), WithoutDeleteObjectStaticLargeObject(), WithDeleteObjectNewest(true), WithoutDeleteObjectNewest(), request.IgnoreMissing(false), WithoutDeleteObjectIgnoreMissing()},
+		{WithDeleteObjectStaticLargeObject(true), request.Custom(func(c *DeleteObjectOpts) error { c.StaticLargeObject = nil; return nil }), WithDeleteObjectNewest(true), request.Custom(func(c *DeleteObjectOpts) error { c.Newest = nil; return nil }), request.IgnoreMissing(false), request.Custom(func(c *DeleteObjectOpts) error { c.IgnoreMissing = nil; return nil })},
 		{WithDeleteObjectStaticLargeObject(true), WithDeleteObjectVersionID("discard"), request.Header("X-Call", "discard"), WithDeleteObjectOpts(DeleteObjectOpts{})},
 	} {
 		c.HTTPClient.Transport = testcloud.RoundTripperFunc(func(r *http.Request) (*http.Response, error) {

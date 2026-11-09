@@ -70,7 +70,7 @@ func TestConnectionSwiftInfoSharesClientAndCapturesEachWorkflow(t *testing.T) {
 		t.Fatal(result, err)
 	}
 	provider.SetToken("token-3")
-	reset, err := service.GetObjectSegmentSize(ctx, segmentOption, swift.WithObjectSegmentSize(0), swift.WithoutObjectSegmentSize())
+	reset, err := service.GetObjectSegmentSize(ctx, segmentOption, swift.WithObjectSegmentSize(0), request.Custom(func(c *swift.ObjectSegmentSizeOpts) error { c.Size = nil; return nil }))
 	if err != nil || reset == nil || reset.RequestedSize != 1073741824 || reset.Size != 100 || calls != 3 {
 		t.Fatal(reset, err, calls)
 	}

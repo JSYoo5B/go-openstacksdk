@@ -60,9 +60,7 @@ func WithContainerSearchFiltersJSON(value json.RawMessage) ContainerSearchOption
 		return nil
 	}
 }
-func WithoutContainerSearchFilters() ContainerSearchOption {
-	return func(c *ContainerSearchOpts) error { c.Filters = nil; return nil }
-}
+
 func WithContainerSearchExpression(value string) ContainerSearchOption {
 	raw, _ := json.Marshal(value)
 	return WithContainerSearchFiltersJSON(raw)

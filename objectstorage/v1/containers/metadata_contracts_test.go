@@ -221,7 +221,7 @@ func TestContainerMetadataContractsWireAndIdentity(t *testing.T) {
 			calls++
 			return containerMetadataResponse(204, ""), nil
 		})
-		for _, opts := range [][]containers.GetMetadataOption{nil, {containers.WithGetMetadataNewest(false)}, {containers.WithGetMetadataNewest(true)}, {containers.WithGetMetadataNewest(true), containers.WithoutGetMetadataNewest()}} {
+		for _, opts := range [][]containers.GetMetadataOption{nil, {containers.WithGetMetadataNewest(false)}, {containers.WithGetMetadataNewest(true)}, {containers.WithGetMetadataNewest(true), request.Custom(func(c *containers.GetMetadataOpts) error { c.Newest = nil; return nil })}} {
 			if _, err := containers.New(client).GetMetadata(context.Background(), containerMetadataName, opts...); err != nil {
 				t.Fatal(err)
 			}

@@ -74,20 +74,13 @@ func WithCreateObjectSHA256(value string) CreateObjectOption {
 func WithCreateObjectSegmentSize(value int64) CreateObjectOption {
 	return request.Custom(func(cfg *CreateObjectOpts) error { owned := value; cfg.SegmentSize = &owned; return nil })
 }
-func WithoutCreateObjectSegmentSize() CreateObjectOption {
-	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.SegmentSize = nil; return nil })
-}
+
 func WithCreateObjectUseSLO(value bool) CreateObjectOption {
 	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.UseSLO = cloneDeleteObjectBool(&value); return nil })
 }
-func WithoutCreateObjectUseSLO() CreateObjectOption {
-	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.UseSLO = nil; return nil })
-}
+
 func WithCreateObjectGenerateChecksums(value bool) CreateObjectOption {
 	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.GenerateChecksums = cloneDeleteObjectBool(&value); return nil })
-}
-func WithoutCreateObjectGenerateChecksums() CreateObjectOption {
-	return request.Custom(func(cfg *CreateObjectOpts) error { cfg.GenerateChecksums = nil; return nil })
 }
 
 func cloneCreateObjectOpts(value CreateObjectOpts) CreateObjectOpts {

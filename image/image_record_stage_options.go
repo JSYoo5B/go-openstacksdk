@@ -38,12 +38,6 @@ func WithImageRecordStageSize(value int64) ImageRecordStageOption {
 	return request.Custom(func(config *ImageRecordStageOpts) error { owned := value; config.Size = &owned; return nil })
 }
 
-// WithoutImageRecordStageSize clears an explicit Size. Default size inference
-// remains enabled; use WithImageRecordStageSizeInference(false) to avoid seeking.
-func WithoutImageRecordStageSize() ImageRecordStageOption {
-	return request.Custom(func(config *ImageRecordStageOpts) error { config.Size = nil; return nil })
-}
-
 func WithImageRecordStageSizeInference(enabled bool) ImageRecordStageOption {
 	return request.Custom(func(config *ImageRecordStageOpts) error { config.DisableSizeInference = !enabled; return nil })
 }

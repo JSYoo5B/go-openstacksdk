@@ -82,7 +82,7 @@ func TestPythonCloudConsoleRecordOptionsAreOwnedAndReset(t *testing.T) {
 	}
 	(*retained.Length)[2] = 'z'
 	_, err = api.ConsoleOutputRecord(context.Background(), "vm", opt)
-	_, resetErr := api.ConsoleOutputRecord(context.Background(), "vm", servers.WithCloudConsoleLength(0), servers.WithoutCloudConsoleLength())
+	_, resetErr := api.ConsoleOutputRecord(context.Background(), "vm", servers.WithCloudConsoleLength(0), func(c *servers.CloudConsoleOpts) error { c.Length = nil; return nil })
 	if err != nil || resetErr != nil || calls[1].body != calls[0].body || calls[2].body != `{"os-getConsoleOutput":{}}` {
 		t.Fatal(err, resetErr, calls)
 	}

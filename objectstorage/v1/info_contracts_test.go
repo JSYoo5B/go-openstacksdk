@@ -177,7 +177,7 @@ func TestObjectInfoContractsOptionsAndSource(t *testing.T) {
 			}()
 		}
 		wg.Wait()
-		got, err := service.GetObjectSegmentSize(context.Background(), option, v1.WithoutObjectSegmentSize())
+		got, err := service.GetObjectSegmentSize(context.Background(), option, request.Custom(func(c *v1.ObjectSegmentSizeOpts) error { c.Size = nil; return nil }))
 		if err != nil || got == nil || got.RequestedSize != 1073741824 || got.Size != 1073741824 || calls.Load() != 5 {
 			t.Fatalf("segment=%+v err=%v calls=%d", got, err, calls.Load())
 		}

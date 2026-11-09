@@ -70,7 +70,7 @@ func TestFormSignatureOptionsSnapshotsAndReplacement(t *testing.T) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Container-Meta-Temp-URL-Key-2": {"container-secondary"}}, io.NopCloser(strings.NewReader("raw"))), nil
 		})
 		full := WithGenerateFormSignatureOpts(GenerateFormSignatureOpts{Headers: map[string]string{"x-trace": "old"}})
-		result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), WithGenerateFormSignatureKey([]byte("discard")), WithGenerateFormSignatureHeaders(map[string]string{"X-Removed": "old"}), WithGenerateFormSignatureNewest(true), full, request.Header("X-Trace", "owned"), WithoutGenerateFormSignatureNewest(), WithGenerateFormSignatureNewest(false), WithGenerateFormSignatureTimestamp(signingTestTimestamp()), WithGenerateFormSignatureDigest(""))
+		result, err := New(c).GenerateFormSignature(context.Background(), "box", signingTestInput(), WithGenerateFormSignatureKey([]byte("discard")), WithGenerateFormSignatureHeaders(map[string]string{"X-Removed": "old"}), WithGenerateFormSignatureNewest(true), full, request.Header("X-Trace", "owned"), request.Custom(func(c *GenerateFormSignatureOpts) error { c.Newest = nil; return nil }), WithGenerateFormSignatureNewest(false), WithGenerateFormSignatureTimestamp(signingTestTimestamp()), WithGenerateFormSignatureDigest(""))
 		if err != nil || result == nil || result.Signature != "088f8af8829bd0f68cdfeb13eabb3a2a8609039b" || result.Digest != TempURLDigestSHA1 || calls != 1 {
 			t.Fatal(result, err, calls)
 		}

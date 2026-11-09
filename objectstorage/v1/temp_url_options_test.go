@@ -80,7 +80,7 @@ func TestTempURLOptionsSnapshotsAndReplacement(t *testing.T) {
 			return tempURLKeyTestWire(r, 204, http.Header{"X-Account-Meta-Temp-URL-Key-2": {"account-secondary"}}, body), nil
 		})
 		full := WithGenerateTempURLOpts(GenerateTempURLOpts{Headers: map[string]string{"x-trace": "old"}})
-		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "get", WithGenerateTempURLKey([]byte("discard")), full, WithGenerateTempURLKey(nil), WithGenerateTempURLTimestamp(signingTestTimestamp()), WithGenerateTempURLNewest(true), WithoutGenerateTempURLNewest(), WithGenerateTempURLNewest(false), request.Custom(func(cfg *GenerateTempURLOpts) error { retained = cfg; return nil }), plural, request.Header("X-Trace", "last"))
+		result, err := New(c).GenerateTempURL(context.Background(), "/v1/AUTH_x/box/file", 60, "get", WithGenerateTempURLKey([]byte("discard")), full, WithGenerateTempURLKey(nil), WithGenerateTempURLTimestamp(signingTestTimestamp()), WithGenerateTempURLNewest(true), request.Custom(func(c *GenerateTempURLOpts) error { c.Newest = nil; return nil }), WithGenerateTempURLNewest(false), request.Custom(func(cfg *GenerateTempURLOpts) error { retained = cfg; return nil }), plural, request.Header("X-Trace", "last"))
 		if err != nil || result == nil || result.Signature != "98649f6963fef8b113423393b6c77b9fda62b2ad" || calls != 1 || result.Discovery == nil || result.Discovery.Account == nil || result.Discovery.Account.Metadata == nil {
 			t.Fatal(result, err, calls)
 		}

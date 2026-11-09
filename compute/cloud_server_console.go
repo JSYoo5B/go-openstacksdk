@@ -39,9 +39,7 @@ func WithServerConsoleLengthJSON(value json.RawMessage) ServerConsoleOption {
 		return nil
 	}
 }
-func WithoutServerConsoleLength() ServerConsoleOption {
-	return func(c *ServerConsoleOpts) error { c.Length = nil; return nil }
-}
+
 func WithServerConsoleServerJSON(value json.RawMessage) ServerConsoleOption {
 	owned := bytes.Clone(value)
 	return func(c *ServerConsoleOpts) error {
@@ -66,9 +64,7 @@ func WithServerConsoleServerRecord(value *servers.ServerFindRecord) ServerConsol
 	}
 	return WithServerConsoleServerJSON(raw)
 }
-func WithoutServerConsoleServer() ServerConsoleOption {
-	return func(c *ServerConsoleOpts) error { c.Server = nil; return nil }
-}
+
 func copyServerConsoleOpts(value ServerConsoleOpts) ServerConsoleOpts {
 	if value.Length != nil {
 		raw := json.RawMessage(bytes.Clone(*value.Length))

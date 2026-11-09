@@ -70,7 +70,7 @@ func TestObjectCreateOptionsDefaultsAndReplacement(t *testing.T) {
 		t.Fatal(cfg, err)
 	}
 	for _, options := range [][]CreateObjectOption{
-		{WithCreateObjectSegmentSize(3), WithoutCreateObjectSegmentSize(), WithCreateObjectUseSLO(false), WithoutCreateObjectUseSLO(), WithCreateObjectGenerateChecksums(false), WithoutCreateObjectGenerateChecksums(), WithCreateObjectMD5(""), WithCreateObjectSHA256("")},
+		{WithCreateObjectSegmentSize(3), request.Custom(func(c *CreateObjectOpts) error { c.SegmentSize = nil; return nil }), WithCreateObjectUseSLO(false), request.Custom(func(c *CreateObjectOpts) error { c.UseSLO = nil; return nil }), WithCreateObjectGenerateChecksums(false), request.Custom(func(c *CreateObjectOpts) error { c.GenerateChecksums = nil; return nil }), WithCreateObjectMD5(""), WithCreateObjectSHA256("")},
 		{request.Header("X-Call", "discard"), WithCreateObjectMetadataValue("tag", "discard"), WithCreateObjectSegmentSize(3), WithCreateObjectOpts(CreateObjectOpts{})},
 	} {
 		cfg, err = p.applyCreateOptions(context.Background(), options)

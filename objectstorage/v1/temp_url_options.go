@@ -56,9 +56,7 @@ func WithGenerateTempURLHeaders(values map[string]string) GenerateTempURLOption 
 func WithGenerateTempURLNewest(value bool) GenerateTempURLOption {
 	return request.Custom(func(cfg *GenerateTempURLOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
-func WithoutGenerateTempURLNewest() GenerateTempURLOption {
-	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Newest = nil; return nil })
-}
+
 func WithGenerateTempURLAbsolute(value bool) GenerateTempURLOption {
 	return request.Custom(func(cfg *GenerateTempURLOpts) error { cfg.Absolute = value; return nil })
 }

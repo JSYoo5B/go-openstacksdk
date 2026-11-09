@@ -14,10 +14,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.GetMetadata`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithGetMetadataNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithoutGetMetadataNewest`
 
 - One bodyless HEAD targets the once-escaped literal container on the captured effective ResourceBase/Endpoint, including escaped reverse prefix and trailing-slash policy; strict actual204 and no discovery, Name lookup, parent HEAD or fallback.
   Tests: `objectstorage/v1/containers/metadata_core_test.go:TestContainerMetadataCoreRoutesAndEvidence`, `objectstorage/v1/containers/metadata_contracts_test.go:TestContainerMetadataContractsWireAndIdentity`, `connectiontest/connection_objectstorage_container_metadata_test.go:TestConnectionContainerMetadataSharesClientAndOwnsEvidence`, `internal/cmd/sdkgen/swift_container_metadata_test.go:TestSwiftContainerMetadataPreservesNativeAndRegistry`.
@@ -266,7 +266,7 @@ func changeContainerMetadata(ctx context.Context, api *containers.API, name stri
     if err != nil { return err }
 
     refreshOptions := append([]containers.GetMetadataOption(nil), getOptions...)
-    refreshOptions = append(refreshOptions, containers.WithoutGetMetadataNewest())
+    refreshOptions = append(refreshOptions, request.Custom(func(c *containers.GetMetadataOpts) error { c.Newest = nil; return nil }))
     refreshed, err := api.GetMetadata(ctx, name, refreshOptions...)
     if err != nil { return err }
     fmt.Println(refreshed.Metadata.Values["book"])

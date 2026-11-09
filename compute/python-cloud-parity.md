@@ -733,15 +733,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleLength`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleLengthJSON`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithoutServerConsoleLength`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleServerJSON`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithServerConsoleServerRecord`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithoutServerConsoleServer`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutputRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCloudConsoleOpts`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCloudConsoleLength`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithCloudConsoleLengthJSON`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithoutCloudConsoleLength`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerConsole`
 
 - Existing typed FindRecord and ConsoleOutput preserve their original lookup/action and 400 error contract. The separate GetServerConsole helper below owns the clean-action400 empty-string transformation.

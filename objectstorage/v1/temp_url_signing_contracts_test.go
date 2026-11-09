@@ -218,7 +218,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 		})
 		client.ResourceBase = "unused and invalid"
 		result, err := v1.New(client).GenerateTempURL(context.Background(), signingPath, 60, "GET",
-			v1.WithGenerateTempURLTimestamp(signingInstant), request.Header("x-call", "initial"), v1.WithGenerateTempURLHeaders(map[string]string{"X-Call": "final", "X-Extra": "kept"}), v1.WithGenerateTempURLNewest(true), v1.WithoutGenerateTempURLNewest())
+			v1.WithGenerateTempURLTimestamp(signingInstant), request.Header("x-call", "initial"), v1.WithGenerateTempURLHeaders(map[string]string{"X-Call": "final", "X-Extra": "kept"}), v1.WithGenerateTempURLNewest(true), request.Custom(func(c *v1.GenerateTempURLOpts) error { c.Newest = nil; return nil }))
 		signingTempOK(t, result, err, "b8c34dc228e9eb17451dae9cc7c5a870dea377a9")
 		if calls != 1 || result.Discovery.Container != nil || result.Discovery.Account == nil || !result.Discovery.Secondary || result.Discovery.FromContainer {
 			t.Fatalf("discovery=%+v calls=%d", result.Discovery, calls)
@@ -242,7 +242,7 @@ func TestTempURLSigningContractsDiscoveryAndEvidence(t *testing.T) {
 			formCalls++
 			return tempKeyWire(204, "both-empty", nil), nil
 		})
-		form, err := v1.New(formClient).GenerateFormSignature(context.Background(), "bucket", signingInput(), v1.WithGenerateFormSignatureTimestamp(signingInstant), v1.WithGenerateFormSignatureNewest(true), v1.WithoutGenerateFormSignatureNewest())
+		form, err := v1.New(formClient).GenerateFormSignature(context.Background(), "bucket", signingInput(), v1.WithGenerateFormSignatureTimestamp(signingInstant), v1.WithGenerateFormSignatureNewest(true), request.Custom(func(c *v1.GenerateFormSignatureOpts) error { c.Newest = nil; return nil }))
 		signingUnsignedForm(t, form)
 		if !errors.Is(err, resource.ErrNotFound) || form == nil || form.Discovery.Container == nil || form.Discovery.Account == nil || formCalls != 2 {
 			t.Fatalf("form=%+v err=%v calls=%d", form, err, formCalls)

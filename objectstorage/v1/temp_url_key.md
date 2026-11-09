@@ -79,10 +79,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.Service.GetTempURLKey`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyOpts`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyContainer`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithGetTempURLKeyNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1.WithoutGetTempURLKeyNewest`
 
 - Fresh container HEAD204 prefers nonempty secondary then primary; only successful absent/empty keys cause account HEAD204 with same preference. Account-only omits container HTTP and any HTTP failure stops fallback.
   Tests: `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsWireAndSelection`, `objectstorage/v1/temp_url_key_contracts_test.go:TestTempURLKeyContractsPhaseEvidence`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreSelectionAndProof`, `objectstorage/v1/temp_url_key_core_test.go:TestTempURLKeyCoreStopsOnErrors`, `connectiontest/connection_objectstorage_temp_url_key_test.go:TestConnectionTempURLKeySharesClientAndSnapshotsEachWorkflow`.
@@ -169,7 +169,7 @@ func tempURLKeys(ctx context.Context, service *objectstorage.Service, name, acco
         objectstorage.WithGetTempURLKeyHeaders(map[string]string{"X-Trace-Label": "key-discovery"}),
         request.Header("X-Request-Label", "read"),
         objectstorage.WithGetTempURLKeyNewest(true),
-        objectstorage.WithoutGetTempURLKeyNewest(),
+        request.Custom(func(c *objectstorage.GetTempURLKeyOpts) error { c.Newest = nil; return nil }),
         objectstorage.WithGetTempURLKeyNewest(false),
     }
     selected, err := service.GetTempURLKey(ctx, getOptions...)

@@ -46,9 +46,7 @@ func WithCloudConsoleLengthJSON(value json.RawMessage) CloudConsoleOption {
 		return nil
 	}
 }
-func WithoutCloudConsoleLength() CloudConsoleOption {
-	return func(c *CloudConsoleOpts) error { c.Length = nil; return nil }
-}
+
 func cloneCloudConsoleOpts(value CloudConsoleOpts) CloudConsoleOpts {
 	if value.Length != nil {
 		raw := json.RawMessage(bytes.Clone(*value.Length))

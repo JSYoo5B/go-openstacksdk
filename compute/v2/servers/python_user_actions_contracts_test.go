@@ -43,7 +43,7 @@ func TestPythonUserActionsRoutesDefaultsAndOptionalValues(t *testing.T) {
 		{`{"lock":{"locked_reason":"because"}}`, func() error { return api.LockWithOptions(ctx, "s1", servers.WithLockedReason("because")) }},
 		{`{"lock":{"locked_reason":""}}`, func() error { return api.LockWithOptions(ctx, "s1", servers.WithLockedReason("")) }},
 		{`{"lock":null}`, func() error {
-			return api.LockWithOptions(ctx, "s1", servers.WithLockedReason("because"), servers.WithoutLockedReason())
+			return api.LockWithOptions(ctx, "s1", servers.WithLockedReason("because"), request.Custom(func(c *request.Config[servers.LockServerOpts]) error { c.Options.LockedReason = nil; return nil }))
 		}},
 		{`{"unshelve":null}`, func() error { return api.UnshelveWithOptions(ctx, "s1") }},
 		{`{"unshelve":null}`, func() error { return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveHost("")) }},
@@ -96,7 +96,7 @@ func TestPythonUserActionsDirectIPsNeedNoInventory(t *testing.T) {
 			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", servers.WithFloatingIPFixedAddress(""))
 		}},
 		{`{"addFloatingIp":{"address":"203.0.113.1"}}`, func() error {
-			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", servers.WithFloatingIPFixedAddress("10.0.0.1"), servers.WithoutFloatingIPFixedAddress())
+			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", servers.WithFloatingIPFixedAddress("10.0.0.1"), request.Custom(func(c *request.Config[servers.FloatingIPServerOpts]) error { c.Options.FixedAddress = nil; return nil }))
 		}},
 		{`{"removeFloatingIp":{"address":"203.0.113.1"}}`, func() error { return api.RemoveFloatingIP(ctx, "s1", "203.0.113.1") }},
 		{`{"addFixedIp":{"networkId":""}}`, func() error { return api.AddFixedIP(ctx, "s1", "") }},

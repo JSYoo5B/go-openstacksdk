@@ -22,9 +22,9 @@ type LockServerOpts struct {
 }
 
 // LockServerOption is one option of LockWithOptions: WithLockedReason,
-// WithoutLockedReason, request.Header, request.Field or request.Custom over
-// *request.Config[LockServerOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.Header, request.Field or request.Custom over
+// *request.Config[LockServerOpts] (for example to clear LockedReason). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type LockServerOption = request.WriteCall
 
 func WithLockedReason(value string) LockServerOption {
@@ -33,11 +33,6 @@ func WithLockedReason(value string) LockServerOption {
 		c.Options.LockedReason = &owned
 		return nil
 	})
-}
-
-// WithoutLockedReason restores the Python default when composing options.
-func WithoutLockedReason() LockServerOption {
-	return request.Custom(func(c *request.Config[LockServerOpts]) error { c.Options.LockedReason = nil; return nil })
 }
 
 // UnshelveServerOpts separates the default zone from an explicit null zone.
@@ -89,9 +84,10 @@ type FloatingIPServerOpts struct {
 }
 
 // FloatingIPServerOption is one option of AddFloatingIP:
-// WithFloatingIPFixedAddress, WithoutFloatingIPFixedAddress, request.Header,
-// request.Field or request.Custom over *request.Config[FloatingIPServerOpts].
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithFloatingIPFixedAddress, request.Header, request.Field or request.Custom
+// over *request.Config[FloatingIPServerOpts] (for example to clear
+// FixedAddress). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type FloatingIPServerOption = request.WriteCall
 
 func WithFloatingIPFixedAddress(value string) FloatingIPServerOption {
@@ -100,7 +96,4 @@ func WithFloatingIPFixedAddress(value string) FloatingIPServerOption {
 		c.Options.FixedAddress = &owned
 		return nil
 	})
-}
-func WithoutFloatingIPFixedAddress() FloatingIPServerOption {
-	return request.Custom(func(c *request.Config[FloatingIPServerOpts]) error { c.Options.FixedAddress = nil; return nil })
 }

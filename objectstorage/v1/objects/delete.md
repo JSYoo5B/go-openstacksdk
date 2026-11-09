@@ -14,15 +14,13 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectStaticLargeObject`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectStaticLargeObject`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectIgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectVersionID`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutDeleteObjectNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkInfo.UnmarshalJSON`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkError.Error`
 
@@ -124,12 +122,12 @@ func deleteObjects(ctx context.Context, api *objects.API, versionID string) erro
         }),
         objects.WithDeleteObjectHeaders(map[string]string{"X-Trace-Label": "object-delete"}),
         request.Header("X-Request-Label", "auto"),
-        objects.WithoutDeleteObjectStaticLargeObject(),
+        request.Custom(func(c *objects.DeleteObjectOpts) error { c.StaticLargeObject = nil; return nil }),
         request.IgnoreMissing(false),
-        objects.WithoutDeleteObjectIgnoreMissing(),
+        request.Custom(func(c *objects.DeleteObjectOpts) error { c.IgnoreMissing = nil; return nil }),
         objects.WithDeleteObjectVersionID(versionID),
         objects.WithDeleteObjectNewest(true),
-        objects.WithoutDeleteObjectNewest(),
+        request.Custom(func(c *objects.DeleteObjectOpts) error { c.Newest = nil; return nil }),
         objects.WithDeleteObjectNewest(false),
     }
     result, err := api.DeleteObject(ctx, "backups", "report.txt", auto...)

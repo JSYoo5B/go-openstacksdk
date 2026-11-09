@@ -145,7 +145,7 @@ func TestAccountMetadataContractsWireAndPresence(t *testing.T) {
 			calls++
 			return accountMetadataResponse(204, ""), nil
 		})
-		for _, opts := range [][]accounts.GetMetadataOption{nil, {accounts.WithGetMetadataNewest(false)}, {accounts.WithGetMetadataNewest(true)}, {accounts.WithGetMetadataNewest(true), accounts.WithoutGetMetadataNewest()}} {
+		for _, opts := range [][]accounts.GetMetadataOption{nil, {accounts.WithGetMetadataNewest(false)}, {accounts.WithGetMetadataNewest(true)}, {accounts.WithGetMetadataNewest(true), request.Custom(func(c *accounts.GetMetadataOpts) error { c.Newest = nil; return nil })}} {
 			if _, err := accounts.New(client).GetMetadata(context.Background(), opts...); err != nil {
 				t.Fatal(err)
 			}

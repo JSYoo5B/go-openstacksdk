@@ -78,7 +78,7 @@ func TestContainerMetadataOptionsReplacementAndNewest(t *testing.T) {
 	if err != nil || cfg.Newest != nil || cfg.Headers["X-Trace"] != "three" {
 		t.Fatalf("replace/last wins %+v %v", cfg, err)
 	}
-	cfg, err = applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataNewest(false), WithoutGetMetadataNewest()})
+	cfg, err = applyGetMetadataOptions([]GetMetadataOption{WithGetMetadataNewest(false), request.Custom(func(c *GetMetadataOpts) error { c.Newest = nil; return nil })})
 	if err != nil || cfg.Newest != nil {
 		t.Fatalf("clear %+v %v", cfg, err)
 	}

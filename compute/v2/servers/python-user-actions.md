@@ -118,14 +118,15 @@ func main() {
 
 ## Options and error evidence
 
-`WithLockedReason("")` includes the empty string; no option or
-`WithoutLockedReason()` sends `lock:null`. `WithUnshelveHost("")` omits host, as
+`WithLockedReason("")` includes the empty string; no option or a
+nil `LockServerOpts.LockedReason` sends `lock:null`. `WithUnshelveHost("")` omits host, as
 Python does. `WithUnshelveAvailabilityZone("")` includes the empty string,
 `WithUnshelveUnpinnedAvailabilityZone()` includes JSON null, and
 `WithUnshelveDefaultAvailabilityZone()` restores omission. Host-only requests
 nest host inside `unshelve`, and a null zone remains inside that object.
 `WithFloatingIPFixedAddress("")` includes the empty string while
-`WithoutFloatingIPFixedAddress()` restores omission. Later options win.
+clearing `FloatingIPServerOpts.FixedAddress` through `request.Custom` restores
+omission. Later options win.
 
 Concrete `With*Header` helpers use the shared SDK header validation. Auth,
 service origin, microversion, and protocol headers retain library ownership.

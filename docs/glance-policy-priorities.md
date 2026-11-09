@@ -956,10 +956,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.UploadImage`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadSize`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadField`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadFields`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageUploadTags`
@@ -972,7 +972,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithoutImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSizeInference`
 
 - Legacy typed strict201/204 upload profile only: One fixed POST201 metadata creation followed by one PUT204 binary upload uses canonical response ID, defaults qcow2/bare/private, and performs no additional detail GET, queued status gate, checksum/import/Task/Swift/wait/cleanup.

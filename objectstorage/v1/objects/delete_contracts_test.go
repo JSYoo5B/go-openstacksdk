@@ -274,7 +274,7 @@ func TestObjectDeleteContractsOptionsAndSnapshots(t *testing.T) {
 			workers.Add(1)
 			go func() {
 				defer workers.Done()
-				result, err := api.DeleteObject(context.Background(), "c", "o", option, objects.WithoutDeleteObjectNewest())
+				result, err := api.DeleteObject(context.Background(), "c", "o", option, request.Custom(func(c *objects.DeleteObjectOpts) error { c.Newest = nil; return nil }))
 				if err != nil || result == nil || result.Discovery != nil || result.StaticLargeObject == nil || *result.StaticLargeObject {
 					t.Errorf("result=%+v err=%v", result, err)
 				}

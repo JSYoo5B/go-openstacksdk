@@ -14,16 +14,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadIfModifiedSince`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadIfUnmodifiedSince`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest`
@@ -72,16 +70,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadIfModifiedSince`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadIfUnmodifiedSince`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest`
@@ -120,16 +116,14 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadOpts`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadNewest`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfMatch`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfNoneMatch`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfModifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadIfModifiedSince`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadIfUnmodifiedSince`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutObjectReadIfUnmodifiedSince`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadRange`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadFilename`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithObjectReadMultipartManifest`
@@ -191,7 +185,7 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 		objects.WithObjectReadBufferSize(32 * 1024),
 	}
 	getOpts := append(append([]objects.ObjectReadOption(nil), common...),
-		objects.WithoutObjectReadIfUnmodifiedSince(),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }),
 		objects.WithObjectReadIfModifiedSince(asOf),
 		objects.WithObjectReadIfNoneMatch(etag),
 	)
@@ -205,7 +199,7 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 	}
 
 	copyOpts := append(append([]objects.ObjectReadOption(nil), common...),
-		objects.WithoutObjectReadIfModifiedSince(),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }),
 		objects.WithObjectReadIfUnmodifiedSince(asOf),
 		objects.WithObjectReadIfMatch(etag),
 		objects.WithObjectReadRange("bytes=0-1023"),
@@ -222,9 +216,9 @@ func readObjects(ctx context.Context, api *objects.API, etag string, asOf time.T
 	}
 
 	plain := append(append([]objects.ObjectReadOption(nil), common...),
-		objects.WithoutObjectReadIfModifiedSince(),
-		objects.WithoutObjectReadIfUnmodifiedSince(),
-		objects.WithoutObjectReadNewest(),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfModifiedSince = nil; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.IfUnmodifiedSince = nil; return nil }),
+		request.Custom(func(c *objects.ObjectReadOpts) error { c.Newest = nil; return nil }),
 	)
 	manifestOpts := append(append([]objects.ObjectReadOption(nil), plain...),
 		objects.WithObjectReadMultipartManifest("get"),

@@ -68,9 +68,6 @@ func WithObjectSegmentSizeHeaders(values map[string]string) ObjectSegmentSizeOpt
 func WithObjectSegmentSize(value int64) ObjectSegmentSizeOption {
 	return request.Custom(func(cfg *ObjectSegmentSizeOpts) error { owned := value; cfg.Size = &owned; return nil })
 }
-func WithoutObjectSegmentSize() ObjectSegmentSizeOption {
-	return request.Custom(func(cfg *ObjectSegmentSizeOpts) error { cfg.Size = nil; return nil })
-}
 
 func cloneGetInfoOpts(value GetInfoOpts) GetInfoOpts {
 	value.Headers = cloneTempURLKeyHeaders(value.Headers)

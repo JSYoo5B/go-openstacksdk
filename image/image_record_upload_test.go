@@ -499,7 +499,7 @@ func TestImageRecordUploadInfersTotalSizeAfterPOSTAndRestoresBorrowedCursor(t *t
 				size = ""
 				infer = false
 			case "without restores inference":
-				options = append(options, WithImageRecordUploadSize(99), WithoutImageRecordUploadSize())
+				options = append(options, WithImageRecordUploadSize(99), request.Custom(func(c *ImageRecordUploadOpts) error { c.Size = nil; return nil }))
 			case "explicit overrides disabled":
 				options = append(options, WithImageRecordUploadSizeInference(false), WithImageRecordUploadSize(0))
 				size = "0"
@@ -509,7 +509,7 @@ func TestImageRecordUploadInfersTotalSizeAfterPOSTAndRestoresBorrowedCursor(t *t
 			case "full options replace":
 				options = append(options, WithImageRecordUploadSize(-9), WithImageRecordUploadSizeInference(false), WithImageRecordUploadOpts(ImageRecordUploadOpts{ContainerFormat: json.RawMessage(`"bare"`), DiskFormat: json.RawMessage(`"qcow2"`)}))
 			case "without preserves disabled":
-				options = append(options, WithImageRecordUploadSize(99), WithImageRecordUploadSizeInference(false), WithoutImageRecordUploadSize())
+				options = append(options, WithImageRecordUploadSize(99), WithImageRecordUploadSizeInference(false), request.Custom(func(c *ImageRecordUploadOpts) error { c.Size = nil; return nil }))
 				size = ""
 				infer = false
 			}

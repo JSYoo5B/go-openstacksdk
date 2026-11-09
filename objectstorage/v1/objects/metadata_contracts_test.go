@@ -442,7 +442,7 @@ func TestObjectMetadataContractsPreflightAndOptions(t *testing.T) {
 		}{
 			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true)}, "true", true},
 			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(false)}, "false", true},
-			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true), objects.WithoutGetMetadataNewest()}, "", false},
+			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true), request.Custom(func(c *objects.GetMetadataOpts) error { c.Newest = nil; return nil })}, "", false},
 			{[]objects.GetMetadataOption{objects.WithGetMetadataNewest(true), objects.WithGetMetadataOpts(objects.GetMetadataOpts{})}, "", false},
 		} {
 			client.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(r *http.Request) (*http.Response, error) {

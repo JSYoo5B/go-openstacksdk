@@ -45,9 +45,7 @@ func WithGetMetadataHeaders(values map[string]string) GetMetadataOption {
 func WithGetMetadataNewest(value bool) GetMetadataOption {
 	return request.Custom(func(cfg *GetMetadataOpts) error { owned := value; cfg.Newest = &owned; return nil })
 }
-func WithoutGetMetadataNewest() GetMetadataOption {
-	return request.Custom(func(cfg *GetMetadataOpts) error { cfg.Newest = nil; return nil })
-}
+
 func WithMetadataOpts(value MetadataOpts) MetadataOption {
 	snapshot := cloneMetadataOpts(value)
 	return request.Custom(func(cfg *MetadataOpts) error { *cfg = cloneMetadataOpts(snapshot); return nil })

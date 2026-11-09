@@ -100,7 +100,7 @@ func TestObjectMetadataOptionsReplacementAndRetainedHandles(t *testing.T) {
 		}
 		return objectMetadataOK(r, 200, http.Header{}), nil
 	})
-	if _, err := New(c).GetMetadata(context.Background(), "container", "object", request.Header("X-Old", "gone"), WithGetMetadataNewest(true), WithGetMetadataOpts(GetMetadataOpts{}), WithGetMetadataHeaders(map[string]string{"X-New": "plural"}), request.Header("x-new", "final"), WithGetMetadataNewest(false), WithoutGetMetadataNewest()); err != nil {
+	if _, err := New(c).GetMetadata(context.Background(), "container", "object", request.Header("X-Old", "gone"), WithGetMetadataNewest(true), WithGetMetadataOpts(GetMetadataOpts{}), WithGetMetadataHeaders(map[string]string{"X-New": "plural"}), request.Header("x-new", "final"), WithGetMetadataNewest(false), request.Custom(func(c *GetMetadataOpts) error { c.Newest = nil; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	var retained *MetadataOpts

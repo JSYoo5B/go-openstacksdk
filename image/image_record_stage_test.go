@@ -410,7 +410,7 @@ func TestImageRecordStageSizePolicyUsesTotalLengthWithoutChangingCursor(t *testi
 				wantSize = ""
 				infer = false
 			case "without size restores inference":
-				options = []ImageRecordStageOption{WithImageRecordStageSize(99), WithoutImageRecordStageSize()}
+				options = []ImageRecordStageOption{WithImageRecordStageSize(99), request.Custom(func(c *ImageRecordStageOpts) error { c.Size = nil; return nil })}
 			case "explicit overrides disabled":
 				options = []ImageRecordStageOption{WithImageRecordStageSizeInference(false), WithImageRecordStageSize(0)}
 				wantSize = "0"
