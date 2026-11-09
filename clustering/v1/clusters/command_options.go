@@ -111,24 +111,14 @@ func WithScaleInCount(value int) ScaleInOption {
 		return nil
 	})
 }
-func WithScaleInCountNull() ScaleInOption {
-	return request.Custom(func(config *request.Config[ScaleInOpts]) error {
-		config.Options.Count = request.Null[int]()
-		return nil
-	})
-}
+
 func WithScaleOutCount(value int) ScaleOutOption {
 	return request.Custom(func(config *request.Config[ScaleOutOpts]) error {
 		config.Options.Count = request.Present(value)
 		return nil
 	})
 }
-func WithScaleOutCountNull() ScaleOutOption {
-	return request.Custom(func(config *request.Config[ScaleOutOpts]) error {
-		config.Options.Count = request.Null[int]()
-		return nil
-	})
-}
+
 func WithResizeAdjustmentType(value AdjustmentType) ResizeOption {
 	return request.Custom(func(config *request.Config[ResizeOpts]) error {
 		config.Options.AdjustmentType = request.Present(value)

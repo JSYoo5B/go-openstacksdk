@@ -444,9 +444,9 @@ cluster = conn.clustering.get_cluster(cluster.id)
 service, err := conn.ClusteringV1(ctx)
 if err != nil { return err }
 cluster, err := service.Clusters.Create(ctx, clusters.CreateOpts{
-    Name: "workers", ProfileID: "PROFILE_ID",
+    Name: "workers", ProfileID: "PROFILE_ID", Timeout: request.Null[int](),
 }, clusters.WithCreateMinSize(0), clusters.WithCreateMaxSize(-1),
-   clusters.WithCreateDesiredCapacity(1), clusters.WithCreateTimeoutNull(),
+   clusters.WithCreateDesiredCapacity(1),
    clusters.WithCreateMetadata(map[string]any{"team": "infra"}))
 if err != nil { return err }
 cluster, err = service.Clusters.Get(ctx, cluster.ID)
@@ -462,8 +462,8 @@ cluster = conn.clustering.update_cluster(
 
 ```go
 api := clusters.New(client)
-cluster, err := api.Update(ctx, resource.Name("workers"), clusters.UpdateOpts{},
-    clusters.WithUpdateName("workers_v2"), clusters.WithUpdateTimeoutNull(),
+cluster, err := api.Update(ctx, resource.Name("workers"), clusters.UpdateOpts{Timeout: request.Null[int]()},
+    clusters.WithUpdateName("workers_v2"),
     clusters.WithUpdateMetadata(map[string]any{}), clusters.WithUpdateProfileOnly(false))
 if err != nil { return err }
 fmt.Println(cluster.ID, cluster.Operation.ActionID)

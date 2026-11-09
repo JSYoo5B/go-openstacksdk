@@ -60,7 +60,10 @@ func TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission(t *tes
 			return api.AttachPolicy(ctx, ref, clusters.AttachPolicyOpts{PolicyID: "named-policy", Enabled: request.Present(true)})
 		}},
 		{"attach-null", `{"policy_attach":{"enabled":null,"policy_id":"named-policy"}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.AttachPolicy(ctx, ref, clusters.AttachPolicyOpts{PolicyID: "named-policy", Enabled: request.Present(true)}, clusters.WithAttachPolicyEnabledNull())
+			return api.AttachPolicy(ctx, ref, clusters.AttachPolicyOpts{PolicyID: "named-policy", Enabled: request.Present(true)}, request.Custom(func(c *request.Config[clusters.AttachPolicyOpts]) error {
+				c.Options.Enabled = request.Null[bool]()
+				return nil
+			}))
 		}},
 		{"attach-snapshot-false", `{"policy_attach":{"enabled":false,"policy_id":"named-policy"}}`, func(api *clusters.API) (*actions.Submission, error) {
 			return api.AttachPolicy(ctx, ref, clusters.AttachPolicyOpts{}, clusters.WithAttachPolicyOptions(clusters.AttachPolicyOpts{PolicyID: "named-policy", Enabled: request.Present(false)}))
@@ -72,7 +75,10 @@ func TestClusteringClusterPolicyCommandsWireDefaultsPresenceAndSubmission(t *tes
 			return api.UpdatePolicy(ctx, ref, clusters.UpdatePolicyOpts{PolicyID: "named-policy"}, clusters.WithUpdatePolicyEnabled(true))
 		}},
 		{"update-null", `{"policy_update":{"enabled":null,"policy_id":"named-policy"}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.UpdatePolicy(ctx, ref, clusters.UpdatePolicyOpts{PolicyID: "named-policy", Enabled: request.Present(false)}, clusters.WithUpdatePolicyEnabledNull())
+			return api.UpdatePolicy(ctx, ref, clusters.UpdatePolicyOpts{PolicyID: "named-policy", Enabled: request.Present(false)}, request.Custom(func(c *request.Config[clusters.UpdatePolicyOpts]) error {
+				c.Options.Enabled = request.Null[bool]()
+				return nil
+			}))
 		}},
 		{"update-snapshot-null", `{"policy_update":{"enabled":null,"policy_id":"named-policy"}}`, func(api *clusters.API) (*actions.Submission, error) {
 			return api.UpdatePolicy(ctx, ref, clusters.UpdatePolicyOpts{}, clusters.WithUpdatePolicyOptions(clusters.UpdatePolicyOpts{PolicyID: "named-policy", Enabled: request.Null[bool]()}))

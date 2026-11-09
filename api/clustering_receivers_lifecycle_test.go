@@ -156,7 +156,13 @@ func TestClusteringReceiverTrackedEmptyNullAndRemovalPresence(t *testing.T) {
 			if mode == "empty" {
 				err = tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName(""), receivers.WithUpdateAction(""), receivers.WithUpdateParams(map[string]any{}))
 			} else if mode != "removal" {
-				err = tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateNameNull(), receivers.WithUpdateActionNull(), receivers.WithUpdateParams(nil))
+				err = tracked.Edit(receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+					c.Options.Name = request.Null[string]()
+					return nil
+				}), request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+					c.Options.Action = request.Null[string]()
+					return nil
+				}), receivers.WithUpdateParams(nil))
 			}
 			if err != nil || !tracked.Dirty() {
 				t.Fatal(err, tracked.Value())
@@ -203,7 +209,10 @@ func TestClusteringReceiverTrackedAtomicEditAndHeaderOnlyCommitProtection(t *tes
 	if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateName("Pending")); err != nil {
 		t.Fatal(err)
 	}
-	invalidCommit := []receivers.UpdateOption{nil, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), receivers.WithUpdateParams(nil), request.Field("vendor", false), request.Custom(request.WithQuery[receivers.UpdateOpts]("vendor", "value")), request.Custom(request.WithArgument[receivers.UpdateOpts]("foreign", true)), request.Header("X-Auth-Token", "override"), request.Header("OpenStack-API-Version", "clustering 1.4")}
+	invalidCommit := []receivers.UpdateOption{nil, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Null[string]()
+		return nil
+	}), receivers.WithUpdateAction(""), receivers.WithUpdateParams(nil), request.Field("vendor", false), request.Custom(request.WithQuery[receivers.UpdateOpts]("vendor", "value")), request.Custom(request.WithArgument[receivers.UpdateOpts]("foreign", true)), request.Header("X-Auth-Token", "override"), request.Header("OpenStack-API-Version", "clustering 1.4")}
 	for index, option := range invalidCommit {
 		if _, err := tracked.Commit(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) || !tracked.Dirty() || tracked.Value().Name != "Pending" || calls.Load() != 0 {
 			t.Fatalf("commit option %d: %v, %#v, calls=%d", index, err, tracked.Value(), calls.Load())
@@ -622,7 +631,10 @@ func TestClusteringReceiverUpdateScopeRoutesSnapshotsLiveTokensAndIsolation(t *t
 	if _, err := loaded.Commit(context.Background()); err != nil {
 		t.Fatal(err)
 	}
-	_, err = right.Update(context.Background(), resource.Name("A"), receivers.UpdateOpts{}, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), receivers.WithUpdateParams(map[string]json.Number{"large": "9007199254740993"}), request.Header("X-Snapshot", "captured"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { captured = config; return nil }))
+	_, err = right.Update(context.Background(), resource.Name("A"), receivers.UpdateOpts{}, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+		c.Options.Name = request.Null[string]()
+		return nil
+	}), receivers.WithUpdateAction(""), receivers.WithUpdateParams(map[string]json.Number{"large": "9007199254740993"}), request.Header("X-Snapshot", "captured"), request.Custom(func(config *request.Config[receivers.UpdateOpts]) error { captured = config; return nil }))
 	if err != nil {
 		t.Fatal(err)
 	}

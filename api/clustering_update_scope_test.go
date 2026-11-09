@@ -103,14 +103,14 @@ var clusteringUpdateScopeCases = []clusteringUpdateScopeCase{
 				return nil, err
 			}
 			return &clusteringUpdateScopeHandle{clusteringAsyncNodeHandle(value), func() error {
-				return value.Edit(nodes.UpdateOpts{}, nodes.WithUpdateTaintedNull())
+				return value.Edit(nodes.UpdateOpts{}, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Tainted = request.Null[bool](); return nil }))
 			}}, nil
 		}
 		return &clusteringUpdateScopeAPI{
 			update: func(ctx context.Context, ref resource.Ref, name string, gated bool, captured *func()) (clusteringAsyncTrackedView, error) {
 				options := []nodes.UpdateOption{nodes.WithUpdateName(name), nodes.WithUpdateMetadata(map[string]json.Number{"big": "9007199254740993"}), request.Field("vendor", false), request.Header("X-Snapshot", "captured")}
 				if gated {
-					options = append(options, nodes.WithUpdateTaintedNull())
+					options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Tainted = request.Null[bool](); return nil }))
 				}
 				if captured != nil {
 					options = append(options, request.Custom(func(config *request.Config[nodes.UpdateOpts]) error {

@@ -71,19 +71,28 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 				switch key {
 				case "name":
 					if value == nil {
-						options = append(options, clusters.WithUpdateNameNull())
+						options = append(options, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+							c.Options.Name = request.Null[string]()
+							return nil
+						}))
 					} else {
 						options = append(options, clusters.WithUpdateName(value.(string)))
 					}
 				case "profile_id":
 					if value == nil {
-						options = append(options, clusters.WithUpdateProfileIDNull())
+						options = append(options, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+							c.Options.ProfileID = request.Null[string]()
+							return nil
+						}))
 					} else {
 						options = append(options, clusters.WithUpdateProfileID(value.(string)))
 					}
 				case "timeout":
 					if value == nil {
-						options = append(options, clusters.WithUpdateTimeoutNull())
+						options = append(options, request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+							c.Options.Timeout = request.Null[int]()
+							return nil
+						}))
 					} else {
 						options = append(options, clusters.WithUpdateTimeout(value.(int)))
 					}
@@ -156,7 +165,10 @@ func clusteringAsyncClusterHandle(tracked *clusters.TrackedCluster) *clusteringA
 			var option clusters.UpdateOption
 			switch mode {
 			case "name":
-				option = clusters.WithUpdateNameNull()
+				option = request.Custom(func(c *request.Config[clusters.UpdateOpts]) error {
+					c.Options.Name = request.Null[string]()
+					return nil
+				})
 			case "zero":
 				option = clusters.WithUpdateTimeout(0)
 			case "false":
@@ -197,25 +209,28 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 				switch key {
 				case "name":
 					if value == nil {
-						options = append(options, nodes.WithUpdateNameNull())
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Null[string](); return nil }))
 					} else {
 						options = append(options, nodes.WithUpdateName(value.(string)))
 					}
 				case "profile_id":
 					if value == nil {
-						options = append(options, nodes.WithUpdateProfileIDNull())
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error {
+							c.Options.ProfileID = request.Null[string]()
+							return nil
+						}))
 					} else {
 						options = append(options, nodes.WithUpdateProfileID(value.(string)))
 					}
 				case "role":
 					if value == nil {
-						options = append(options, nodes.WithUpdateRoleNull())
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Role = request.Null[string](); return nil }))
 					} else {
 						options = append(options, nodes.WithUpdateRole(value.(string)))
 					}
 				case "tainted":
 					if value == nil {
-						options = append(options, nodes.WithUpdateTaintedNull())
+						options = append(options, request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Tainted = request.Null[bool](); return nil }))
 					} else {
 						options = append(options, nodes.WithUpdateTainted(value.(bool)))
 					}
@@ -282,7 +297,7 @@ func clusteringAsyncNodeHandle(tracked *nodes.TrackedNode) *clusteringAsyncTrack
 			var option nodes.UpdateOption
 			switch mode {
 			case "name":
-				option = nodes.WithUpdateNameNull()
+				option = request.Custom(func(c *request.Config[nodes.UpdateOpts]) error { c.Options.Name = request.Null[string](); return nil })
 			case "zero":
 				option = nodes.WithUpdateRole("")
 			case "false":

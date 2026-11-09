@@ -96,7 +96,7 @@ func TestClusteringNodeCommandsRecoverNullableSnapshotAndReuse(t *testing.T) {
 			t.Fatal(value, err)
 		}
 	}
-	if _, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, nodes.WithRecoverOperationParams(nil), nodes.WithRecoverCheckNull(), request.Header("X-Vendor", "retained")); err != nil {
+	if _, err := api.Recover(context.Background(), resource.ID("node-id"), nodes.RecoverOpts{}, nodes.WithRecoverOperationParams(nil), request.Custom(func(c *request.Config[nodes.RecoverOpts]) error { c.Options.Check = request.Null[bool](); return nil }), request.Header("X-Vendor", "retained")); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 {
@@ -148,7 +148,10 @@ func TestClusteringNodeCommandsRecoverOperationOmittedEmptyAndNull(t *testing.T)
 	for _, options := range [][]nodes.RecoverOption{
 		nil,
 		{nodes.WithRecoverOperation("")},
-		{nodes.WithRecoverOperationNull()},
+		{request.Custom(func(c *request.Config[nodes.RecoverOpts]) error {
+			c.Options.Operation = request.Null[string]()
+			return nil
+		})},
 		{nodes.WithRecoverOptions(nodes.RecoverOpts{Operation: request.Present("")})},
 		{nodes.WithRecoverOptions(nodes.RecoverOpts{Operation: request.Null[string]()})},
 	} {

@@ -76,14 +76,14 @@ func TestClusteringNodeAdoptPresenceSnapshotsAndIndependentReuse(t *testing.T) {
 	extension := request.Field("vendor", vendor)
 	vendor["zero"] = 1
 	for range 2 {
-		value, err := api.Adopt(context.Background(), nodes.AdoptOpts{}, snapshot, nodes.WithAdoptName(""), nodes.WithAdoptRoleNull(), nodes.WithAdoptSnapshot(false), nodes.WithAdoptOverrides(map[string]any{}), extension, request.Header("X-Vendor", "retained"))
+		value, err := api.Adopt(context.Background(), nodes.AdoptOpts{}, snapshot, nodes.WithAdoptName(""), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Role = request.Null[string](); return nil }), nodes.WithAdoptSnapshot(false), nodes.WithAdoptOverrides(map[string]any{}), extension, request.Header("X-Vendor", "retained"))
 		if err != nil || value.ID != "adopted" || value.Operation != nil || string(value.UserMetadata["big"]) != "9007199254740993" || value.Header.Get("X-Request-ID") != "owned-response" {
 			t.Fatal(value, err)
 		}
 		value.UserMetadata["big"][0] = 'X'
 		value.Header.Set("X-Request-ID", "consumer-change")
 	}
-	if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, nodes.WithAdoptNameNull(), nodes.WithAdoptRole(""), nodes.WithAdoptSnapshotNull(), nodes.WithAdoptMetadata(nil), nodes.WithAdoptOverrides(nil), request.Header("X-Vendor", "retained")); err != nil {
+	if _, err := api.Adopt(context.Background(), nodes.AdoptOpts{Identity: "physical", Type: "os.nova.server-1.0"}, request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Name = request.Null[string](); return nil }), nodes.WithAdoptRole(""), request.Custom(func(c *request.Config[nodes.AdoptOpts]) error { c.Options.Snapshot = request.Null[bool](); return nil }), nodes.WithAdoptMetadata(nil), nodes.WithAdoptOverrides(nil), request.Header("X-Vendor", "retained")); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 3 {
@@ -158,7 +158,10 @@ func TestClusteringNodeAdoptPreviewSnapshotsFalseNullAndEmptyObject(t *testing.T
 	}
 	for _, options := range [][]nodes.AdoptPreviewOption{
 		{nodes.WithAdoptPreviewOverrides(map[string]any{}), nodes.WithAdoptPreviewSnapshot(true)},
-		{nodes.WithAdoptPreviewOverrides(nil), nodes.WithAdoptPreviewSnapshotNull()},
+		{nodes.WithAdoptPreviewOverrides(nil), request.Custom(func(c *request.Config[nodes.AdoptPreviewOpts]) error {
+			c.Options.Snapshot = request.Null[bool]()
+			return nil
+		})},
 	} {
 		options = append(options, request.Header("X-Vendor", "retained"))
 		if _, err := api.AdoptPreview(context.Background(), nodes.AdoptPreviewOpts{Identity: "physical", Type: "os.nova.server-1.0"}, options...); err != nil {

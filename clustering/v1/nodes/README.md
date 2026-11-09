@@ -285,8 +285,8 @@ node = conn.clustering.update_node(
 
 ```go
 api := nodes.New(client)
-node, err := api.Update(ctx, resource.Name("worker_1"), nodes.UpdateOpts{},
-    nodes.WithUpdateName("worker_2"), nodes.WithUpdateRoleNull(),
+node, err := api.Update(ctx, resource.Name("worker_1"), nodes.UpdateOpts{Role: request.Null[string]()},
+    nodes.WithUpdateName("worker_2"),
     nodes.WithUpdateTainted(false), nodes.WithUpdateMetadata(map[string]any{}))
 if err != nil { return err }
 fmt.Println(node.ID, node.Operation.ActionID)

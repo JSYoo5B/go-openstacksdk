@@ -33,23 +33,9 @@ func WithCreateTimeout(value int) CreateOption {
 	})
 }
 
-func WithCreateTimeoutNull() CreateOption {
-	return request.Custom(func(config *request.Config[CreateOpts]) error {
-		config.Options.Timeout = request.Null[int]()
-		return nil
-	})
-}
-
 func WithUpdateName(value string) UpdateOption {
 	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Name = request.Present(value)
-		return nil
-	})
-}
-
-func WithUpdateNameNull() UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		config.Options.Name = request.Null[string]()
 		return nil
 	})
 }
@@ -61,23 +47,9 @@ func WithUpdateProfileID(value string) UpdateOption {
 	})
 }
 
-func WithUpdateProfileIDNull() UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		config.Options.ProfileID = request.Null[string]()
-		return nil
-	})
-}
-
 func WithUpdateTimeout(value int) UpdateOption {
 	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Timeout = request.Present(value)
-		return nil
-	})
-}
-
-func WithUpdateTimeoutNull() UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		config.Options.Timeout = request.Null[int]()
 		return nil
 	})
 }

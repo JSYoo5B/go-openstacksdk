@@ -97,7 +97,7 @@ func UpdateReceiverAt(ctx context.Context, conn *sdk.Connection, collectionPath,
     if err != nil { return nil, err }
     tracked, err := scope.Load(ctx, resource.ID(receiverID))
     if err != nil { return nil, err }
-    if err := tracked.Edit(receivers.UpdateOpts{}, receivers.WithUpdateActionNull()); err != nil {
+    if err := tracked.Edit(receivers.UpdateOpts{Action: request.Null[string]()}); err != nil {
         return nil, err
     }
     return tracked.Commit(ctx)

@@ -80,45 +80,24 @@ func WithCreateClusterID(value string) CreateOption {
 		return nil
 	})
 }
-func WithCreateClusterIDNull() CreateOption {
-	return request.Custom(func(config *request.Config[CreateOpts]) error {
-		config.Options.ClusterID = request.Null[string]()
-		return nil
-	})
-}
+
 func WithCreateAction(value string) CreateOption {
 	return request.Custom(func(config *request.Config[CreateOpts]) error {
 		config.Options.Action = request.Present(value)
 		return nil
 	})
 }
-func WithCreateActionNull() CreateOption {
-	return request.Custom(func(config *request.Config[CreateOpts]) error {
-		config.Options.Action = request.Null[string]()
-		return nil
-	})
-}
+
 func WithUpdateName(value string) UpdateOption {
 	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Name = request.Present(value)
 		return nil
 	})
 }
-func WithUpdateNameNull() UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		config.Options.Name = request.Null[string]()
-		return nil
-	})
-}
+
 func WithUpdateAction(value string) UpdateOption {
 	return request.Custom(func(config *request.Config[UpdateOpts]) error {
 		config.Options.Action = request.Present(value)
-		return nil
-	})
-}
-func WithUpdateActionNull() UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		config.Options.Action = request.Null[string]()
 		return nil
 	})
 }

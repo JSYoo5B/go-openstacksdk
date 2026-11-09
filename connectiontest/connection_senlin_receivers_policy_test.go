@@ -2,6 +2,7 @@ package connectiontest_test
 
 import (
 	"context"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"io"
 	"net/http"
 	"sync/atomic"
@@ -84,7 +85,10 @@ func TestConnectionSenlinReceiversAndPolicyCommandsShareSelectedSource(t *testin
 	if err != nil || attached == nil || attached.ActionID != "policy-action" || attached.StatusCode != 202 {
 		t.Fatal(attached, err)
 	}
-	updated, err := service.Clusters.UpdatePolicy(ctx, resource.ID("cluster-id"), clusters.UpdatePolicyOpts{PolicyID: "policy-name"}, clusters.WithUpdatePolicyEnabledNull())
+	updated, err := service.Clusters.UpdatePolicy(ctx, resource.ID("cluster-id"), clusters.UpdatePolicyOpts{PolicyID: "policy-name"}, request.Custom(func(c *request.Config[clusters.UpdatePolicyOpts]) error {
+		c.Options.Enabled = request.Null[bool]()
+		return nil
+	}))
 	if err != nil || updated == nil || updated.ActionID != "policy-action" {
 		t.Fatal(updated, err)
 	}

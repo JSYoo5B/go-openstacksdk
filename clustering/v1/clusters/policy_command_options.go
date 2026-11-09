@@ -56,23 +56,9 @@ func WithAttachPolicyEnabled(value bool) AttachPolicyOption {
 	})
 }
 
-func WithAttachPolicyEnabledNull() AttachPolicyOption {
-	return request.Custom(func(config *request.Config[AttachPolicyOpts]) error {
-		config.Options.Enabled = request.Null[bool]()
-		return nil
-	})
-}
-
 func WithUpdatePolicyEnabled(value bool) UpdatePolicyOption {
 	return request.Custom(func(config *request.Config[UpdatePolicyOpts]) error {
 		config.Options.Enabled = request.Present(value)
-		return nil
-	})
-}
-
-func WithUpdatePolicyEnabledNull() UpdatePolicyOption {
-	return request.Custom(func(config *request.Config[UpdatePolicyOpts]) error {
-		config.Options.Enabled = request.Null[bool]()
 		return nil
 	})
 }

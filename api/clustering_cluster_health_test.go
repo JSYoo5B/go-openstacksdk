@@ -35,13 +35,25 @@ func TestClusteringClusterHealthWirePresenceAndRoutes(t *testing.T) {
 			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, clusters.WithRecoverCheck(false))
 		}},
 		{"recover-check-only-null", "1.6", "actions", `{"recover":{"check":null}}`, func(a *clusters.API) (*actions.Submission, error) {
-			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, clusters.WithRecoverCheckNull())
+			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.Check = request.Null[bool]()
+				return nil
+			}))
 		}},
 		{"recover-false", "1.7", "actions", `{"recover":{"check":false,"check_capacity":false,"operation":"","operation_params":{}}}`, func(a *clusters.API) (*actions.Submission, error) {
 			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, clusters.WithRecoverOperation(""), clusters.WithRecoverOperationParams(map[string]any{}), clusters.WithRecoverCheck(false), clusters.WithRecoverCheckCapacity(false))
 		}},
 		{"recover-null", "1.7", "actions", `{"recover":{"check":null,"check_capacity":null,"operation":null,"operation_params":null}}`, func(a *clusters.API) (*actions.Submission, error) {
-			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, clusters.WithRecoverOperationNull(), clusters.WithRecoverOperationParams(nil), clusters.WithRecoverCheckNull(), clusters.WithRecoverCheckCapacityNull())
+			return a.Recover(ctx, resource.ID("controller-id"), clusters.RecoverOpts{}, request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.Operation = request.Null[string]()
+				return nil
+			}), clusters.WithRecoverOperationParams(nil), request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.Check = request.Null[bool]()
+				return nil
+			}), request.Custom(func(c *request.Config[clusters.RecoverOpts]) error {
+				c.Options.CheckCapacity = request.Null[bool]()
+				return nil
+			}))
 		}},
 		{"operation-empty", "1.4", "ops", `{"reboot":{}}`, func(a *clusters.API) (*actions.Submission, error) {
 			return a.PerformOperation(ctx, resource.ID("controller-id"), "reboot", clusters.PerformOperationOpts{})

@@ -45,10 +45,13 @@ func TestClusteringClusterCommandsWireDefaultsAndPresence(t *testing.T) {
 			return api.ScaleOut(ctx, resource.ID("controller-name"), clusters.ScaleOutOpts{}, clusters.WithScaleOutCount(2), request.Field("action", "plugin-action"), request.Field("id", "plugin-id"), request.Field("location", "plugin-location"), request.Field("status", "plugin-status"))
 		}},
 		{"scale-in-explicit-null", `{"scale_in":{"count":null}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.ScaleIn(ctx, resource.ID("controller-name"), clusters.ScaleInOpts{Count: request.Present(2)}, clusters.WithScaleInCountNull())
+			return api.ScaleIn(ctx, resource.ID("controller-name"), clusters.ScaleInOpts{Count: request.Present(2)}, request.Custom(func(c *request.Config[clusters.ScaleInOpts]) error { c.Options.Count = request.Null[int](); return nil }))
 		}},
 		{"scale-out-explicit-null", `{"scale_out":{"count":null}}`, func(api *clusters.API) (*actions.Submission, error) {
-			return api.ScaleOut(ctx, resource.ID("controller-name"), clusters.ScaleOutOpts{Count: request.Present(2)}, clusters.WithScaleOutCountNull())
+			return api.ScaleOut(ctx, resource.ID("controller-name"), clusters.ScaleOutOpts{Count: request.Present(2)}, request.Custom(func(c *request.Config[clusters.ScaleOutOpts]) error {
+				c.Options.Count = request.Null[int]()
+				return nil
+			}))
 		}},
 		{"resize-empty", `{"resize":{}}`, func(api *clusters.API) (*actions.Submission, error) {
 			return api.Resize(ctx, resource.ID("controller-name"), clusters.ResizeOpts{})

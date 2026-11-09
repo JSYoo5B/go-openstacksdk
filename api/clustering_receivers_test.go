@@ -117,7 +117,13 @@ func TestClusteringReceiversMessagePresenceSnapshotsAndReuse(t *testing.T) {
 	extension := request.Field("vendor", vendor)
 	vendor["zero"] = 1
 	for range 2 {
-		value, err := api.Create(context.Background(), receivers.CreateOpts{}, options, receivers.WithCreateClusterIDNull(), receivers.WithCreateActionNull(), receivers.WithCreateActor(nil), extension)
+		value, err := api.Create(context.Background(), receivers.CreateOpts{}, options, request.Custom(func(c *request.Config[receivers.CreateOpts]) error {
+			c.Options.ClusterID = request.Null[string]()
+			return nil
+		}), request.Custom(func(c *request.Config[receivers.CreateOpts]) error {
+			c.Options.Action = request.Null[string]()
+			return nil
+		}), receivers.WithCreateActor(nil), extension)
 		if err != nil || value.ClusterID != nil || value.Action != nil || value.Actor != nil || string(value.Body["cluster_id"]) != "null" || string(value.Channel["number"]) != "9007199254740993" {
 			t.Fatal(value, err)
 		}
@@ -166,7 +172,10 @@ func TestClusteringReceiversUpdateNameLookupFreezesInputsAndRechecksSource(t *te
 			raw := json.RawMessage(`{"big":9007199254740993,"off":false}`)
 			option := receivers.WithUpdateOptions(receivers.UpdateOpts{Params: raw})
 			raw[2] = 'X'
-			value, err := receivers.New(client).Update(context.Background(), resource.Name("selected"), receivers.UpdateOpts{}, option, receivers.WithUpdateNameNull(), receivers.WithUpdateAction(""), request.Field("vendor", false), request.Header("X-Vendor", "original"), request.Custom(capture))
+			value, err := receivers.New(client).Update(context.Background(), resource.Name("selected"), receivers.UpdateOpts{}, option, request.Custom(func(c *request.Config[receivers.UpdateOpts]) error {
+				c.Options.Name = request.Null[string]()
+				return nil
+			}), receivers.WithUpdateAction(""), request.Field("vendor", false), request.Header("X-Vendor", "original"), request.Custom(capture))
 			if changed {
 				if value != nil || !errors.Is(err, resource.ErrInvalidOption) || patches.Load() != 0 {
 					t.Fatal(value, err, patches.Load())

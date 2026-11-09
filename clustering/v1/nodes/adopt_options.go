@@ -53,36 +53,21 @@ func WithAdoptName(value string) AdoptOption {
 		return nil
 	})
 }
-func WithAdoptNameNull() AdoptOption {
-	return request.Custom(func(config *request.Config[AdoptOpts]) error {
-		config.Options.Name = request.Null[string]()
-		return nil
-	})
-}
+
 func WithAdoptRole(value string) AdoptOption {
 	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Role = request.Present(value)
 		return nil
 	})
 }
-func WithAdoptRoleNull() AdoptOption {
-	return request.Custom(func(config *request.Config[AdoptOpts]) error {
-		config.Options.Role = request.Null[string]()
-		return nil
-	})
-}
+
 func WithAdoptSnapshot(value bool) AdoptOption {
 	return request.Custom(func(config *request.Config[AdoptOpts]) error {
 		config.Options.Snapshot = request.Present(value)
 		return nil
 	})
 }
-func WithAdoptSnapshotNull() AdoptOption {
-	return request.Custom(func(config *request.Config[AdoptOpts]) error {
-		config.Options.Snapshot = request.Null[bool]()
-		return nil
-	})
-}
+
 func WithAdoptMetadata(value any) AdoptOption {
 	return request.Custom(withJSON(value, func(opts *AdoptOpts, raw json.RawMessage) { opts.Metadata = raw }))
 }
@@ -99,12 +84,6 @@ func WithAdoptPreviewOverrides(value any) AdoptPreviewOption {
 func WithAdoptPreviewSnapshot(value bool) AdoptPreviewOption {
 	return request.Custom(func(config *request.Config[AdoptPreviewOpts]) error {
 		config.Options.Snapshot = request.Present(value)
-		return nil
-	})
-}
-func WithAdoptPreviewSnapshotNull() AdoptPreviewOption {
-	return request.Custom(func(config *request.Config[AdoptPreviewOpts]) error {
-		config.Options.Snapshot = request.Null[bool]()
 		return nil
 	})
 }
