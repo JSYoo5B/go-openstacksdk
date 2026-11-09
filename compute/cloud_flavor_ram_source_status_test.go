@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"io"
 	"net/http"
@@ -79,7 +80,7 @@ func TestCloudFlavorRAMSourceStatusPreservesExistingReaders(t *testing.T) {
 			case "AllFlavors":
 				_, err = s.AllFlavors(context.Background())
 			case "AllFlavorsExtra":
-				_, err = s.AllFlavors(context.Background(), compute.WithFlavorQueryExtraSpecs(true))
+				_, err = s.AllFlavors(context.Background(), request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error { v := true; c.Options.GetExtra = &v; return nil }))
 			case "SearchFlavors":
 				_, err = s.SearchFlavors(context.Background(), "m1")
 			case "GetFlavor":

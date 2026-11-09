@@ -21,12 +21,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.FindFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindLimit`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMarker`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -390,7 +386,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.CreateConsole`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithConsoleProtocol`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithConsoleProtocolValue`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - CreateConsole first reads the captured endpoint version path without body/query/microversion headers, preserving the selected live token, source header and reverse-proxy prefix. Nova row eligibility requires a permitted status and usable self-link; missing ID/status, unknown or experimental status (even with malformed ID), or no self-link is excluded without following the link. Catalog v2.1 selects an exact eligible v2.1 API row rather than v2.0; flat/version/versions/versions.values documents use the common engine. Clean404/405 allows only the finite root attempt and valid accepted201/300 discovery is parsed.
   Tests: `api/compute_console_composition_test.go:TestComputeConsoleCompositionAdvertisedAndSelectedBranches`.
@@ -534,7 +530,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetFlavorByID`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorByIDOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorByIDExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - GetFlavorByID owns Cloud's default-false get_extra flag and strict GET-only behavior: one native flavor GET, no query/body/list/automatic discovery, and400/403/404 stay original HTTP errors rather than name fallback or nil success. It returns canonical native flavor fields and keeps the selected client2.55/live token.
   Tests: `api/compute_flavor_by_id_test.go:TestComputeCloudGetFlavorByIDOwnsStrictDefaultsAndNativeEnrichment`, `api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsGETAndExtraSpecsPresence`, `api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsMissingPoliciesAndUnsafeNames`.
@@ -561,8 +557,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -601,7 +596,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.AllFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
@@ -627,7 +622,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -654,7 +649,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
@@ -680,7 +675,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListAvailabilityZoneNames`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAvailabilityZoneNamesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithUnavailableZones`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 

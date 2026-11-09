@@ -27,15 +27,27 @@ func TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership(t *testin
 		options                         []remoteconsoles.ConsoleCreateOption
 	}{
 		{"empty defaults", `{"remote_console":{}}`, `null`, `null`, `null`, nil},
-		{"null protocol", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc"), remoteconsoles.WithConsoleCreateProtocolValue(request.Null[string]())}},
+		{"null protocol", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc"), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = request.Null[string]()
+			return nil
+		})}},
 		{"empty protocol seed", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `""`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc"), remoteconsoles.WithConsoleCreateProtocol("")}},
 		{"unknown type", `{"remote_console":{"protocol":null,"type":"vendor-console"}}`, `null`, `"vendor-console"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("vendor-console")}},
 		{"explicit protocol preserved", `{"remote_console":{"protocol":"inconsistent","type":"novnc"}}`, `"inconsistent"`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateProtocol("inconsistent"), remoteconsoles.WithConsoleCreateType("novnc")}},
-		{"null type no derivation", `{"remote_console":{"protocol":"","type":null}}`, `""`, `null`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateTypeValue(request.Null[string]()), remoteconsoles.WithConsoleCreateProtocol("")}},
+		{"null type no derivation", `{"remote_console":{"protocol":"","type":null}}`, `""`, `null`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Null[string]()
+			return nil
+		}), remoteconsoles.WithConsoleCreateProtocol("")}},
 		{"empty type no derivation", `{"remote_console":{"type":""}}`, `null`, `""`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("")}},
 		{"URL body attribute", `{"remote_console":{"url":"passive://seed"}}`, `null`, `null`, `"passive://seed"`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateURL("passive://seed")}},
-		{"null URL", `{"remote_console":{"url":null}}`, `null`, `null`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateURLValue(request.Null[string]())}},
-		{"unset restores omission", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateProtocol("discarded"), remoteconsoles.WithConsoleCreateProtocolValue(request.Optional[string]{}), remoteconsoles.WithConsoleCreateType("novnc")}},
+		{"null URL", `{"remote_console":{"url":null}}`, `null`, `null`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.URL = request.Null[string]()
+			return nil
+		})}},
+		{"unset restores omission", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateProtocol("discarded"), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = request.Optional[string]{}
+			return nil
+		}), remoteconsoles.WithConsoleCreateType("novnc")}},
 	}
 	for kind, protocol := range map[string]string{"novnc": "vnc", "xvpvnc": "vnc", "spice-html5": "spice", "spice-direct": "spice", "rdp-html5": "rdp", "serial": "serial", "webmks": "mks"} {
 		tests = append(tests, struct {
@@ -145,7 +157,10 @@ func TestComputeRemoteConsoleWinningTypeSelectedVersionGates(t *testing.T) {
 		{"no local 2.6 prerequisite", "2.5", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc")}, true},
 		{"winning type only", "2.5", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks"), remoteconsoles.WithConsoleCreateType("novnc")}, true},
 		{"bulk clears earlier gate", "2.7", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks"), remoteconsoles.WithConsoleCreateOptions(remoteconsoles.ConsoleCreateOpts{})}, true},
-		{"null clears earlier gate", "", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct"), remoteconsoles.WithConsoleCreateTypeValue(request.Null[string]())}, true},
+		{"null clears earlier gate", "", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct"), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Null[string]()
+			return nil
+		})}, true},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)

@@ -21,12 +21,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.FindFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FindFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindLimit`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMarker`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorFindPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
@@ -81,8 +77,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -121,7 +116,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.AllFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
@@ -147,7 +142,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -174,7 +169,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
@@ -221,6 +216,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
 )
@@ -263,12 +259,12 @@ func run(ctx context.Context, cloud, identity string, extra bool) error {
     }
     for record, err := range service.ListFlavors(ctx,
         request.MaxItems(20),
-        flavors.WithFlavorListExtraSpecs(extra)) {
+        request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error { c.Options.GetExtraSpecs = extra; return nil })) {
         if printErr := printRecord("list", record); printErr != nil { return errors.Join(err, printErr) }
         if err != nil { return fmt.Errorf("list flavors: %w", err) }
     }
     if identity == "" { return nil }
-    record, err := service.FindFlavor(ctx, identity, flavors.WithFlavorFindExtraSpecs(extra))
+    record, err := service.FindFlavor(ctx, identity, request.Custom(func(c *request.Config[flavors.FlavorFindOpts]) error { c.Options.GetExtraSpecs = extra; return nil }))
     if printErr := printRecord("find", record); printErr != nil { return errors.Join(err, printErr) }
     if err != nil { return fmt.Errorf("find flavor: %w", err) }
     if record == nil { fmt.Println("flavor not found") }

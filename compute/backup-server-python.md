@@ -156,7 +156,7 @@ and `Image` is the final or latest known image. Action acceptance and actual
 Glance observations remain separate. An image/dependency/timeout error returns
 known progress without cleanup, backup deletion, or another createBackup POST.
 
-Direct clients can use `compute.WithBackupImageService(imageService)` with an
+Direct clients can set `compute.BackupServerOpts.ImageService` to an
 existing concrete Glance service. Connection users need no override. The
 selected Compute source is captured before options and Glance bindings stay
 fixed across lookup/wait; callbacks or physical response handling cannot switch

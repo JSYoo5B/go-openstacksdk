@@ -88,7 +88,7 @@ func TestCloudNetDetachNeutronSourceRunsNeutronBranchOnNovaFallbackRow(t *testin
 func TestCloudNetDetachNeutronSourceStrictFallbackRowHasNoPortID(t *testing.T) {
 	deleted := false
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNeutron, cloudNetNovaFallbackHandler(`"srv-1"`, &deleted))
-	result, err := conn.DetachIPFromServer(context.Background(), compute.DetachFloatingIPRequest{ServerID: "srv-1", FloatingIPID: "12"}, compute.WithFloatingIPQueryStrict(true))
+	result, err := conn.DetachIPFromServer(context.Background(), compute.DetachFloatingIPRequest{ServerID: "srv-1", FloatingIPID: "12"}, func(c *compute.FloatingIPQueryOpts) error { c.Strict = true; return nil })
 	if !errors.Is(err, resource.ErrInvalidOption) || result == nil || result.Outcome != "" || len(cloudNetMutations(f.keys())) != 0 {
 		t.Fatal(result, err, f.keys())
 	}
@@ -131,7 +131,7 @@ func TestCloudNetDetachNeutronLookupNotFoundRunsNovaBranch(t *testing.T) {
 		return 0, ""
 	}
 	conn, f := newR2CloudNetFixture(t, compute.FloatingIPNeutron, handle)
-	result, err := conn.DetachIPFromServer(context.Background(), compute.DetachFloatingIPRequest{ServerID: "srv-1", FloatingIPID: id}, compute.WithFloatingIPQueryDirectGet(true))
+	result, err := conn.DetachIPFromServer(context.Background(), compute.DetachFloatingIPRequest{ServerID: "srv-1", FloatingIPID: id}, func(c *compute.FloatingIPQueryOpts) error { c.DirectGet = true; return nil })
 	if err == nil || result == nil || result.NeutronNotFound == nil || result.NeutronLookup == nil || result.Backend != compute.FloatingIPNova || result.Outcome != "" {
 		t.Fatal(result, err, f.keys())
 	}

@@ -109,9 +109,9 @@ func TestFloatingIPDeleteRetryZeroNegativeAndBulkOptions(t *testing.T) {
 				}
 				return 200, `{"floatingips":[]}`
 			}
-			option := compute.WithFloatingIPDeleteRetries(0)
+			option := func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil }
 			if mode == "negative" {
-				option = compute.WithFloatingIPDeleteRetries(-5)
+				option = func(c *compute.FloatingIPDeleteOpts) error { c.Retries = -5; return nil }
 			}
 			if mode == "bulk zero" {
 				option = compute.WithFloatingIPDeleteOptions(compute.FloatingIPDeleteOpts{})
@@ -172,7 +172,7 @@ func TestFloatingIPDeleteNotFoundIsFalseWithoutFallback(t *testing.T) {
 			t.Run(fmt.Sprint(source, retry), func(t *testing.T) {
 				_, conn, state := floatingDeleteFixture(t, source)
 				state.reply = func(*http.Request) (int, string) { return 404, `{"missing":true}` }
-				result, err := conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, compute.WithFloatingIPDeleteRetries(retry))
+				result, err := conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, func(c *compute.FloatingIPDeleteOpts) error { c.Retries = retry; return nil })
 				if err != nil || result.Deleted || len(result.Attempts) != 1 || result.Attempts[0].Accepted || !gophercloud.ResponseCodeIs(result.Attempts[0].NotFound, 404) || result.Failure.StatusCode != 404 || len(state.events) != 1 || len(state.locators) != 1 {
 					t.Fatal(result, err, state)
 				}
@@ -253,7 +253,7 @@ func TestFloatingIPDeletePassiveBodyAndSuccessfulStatusPolicy(t *testing.T) {
 		t.Run(fmt.Sprint(code), func(t *testing.T) {
 			_, conn, state := floatingDeleteFixture(t, compute.FloatingIPNeutron)
 			state.reply = func(*http.Request) (int, string) { return code, "malformed body {" }
-			result, err := conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, compute.WithFloatingIPDeleteRetries(0))
+			result, err := conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil })
 			if err != nil || !result.Deleted || !result.Attempts[0].Accepted || result.Attempts[0].Response.StatusCode != code || string(result.Attempts[0].Response.Envelope) != "malformed body {" || len(state.events) != 1 {
 				t.Fatal(result, err, state)
 			}

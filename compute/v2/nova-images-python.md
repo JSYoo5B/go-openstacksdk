@@ -195,6 +195,7 @@ import (
     "strings"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/images"
 )
@@ -222,7 +223,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     api := service.Images
     for value, err := range api.ListRecords(ctx,
-        images.WithListDetails(false), request.MaxItems(100)) {
+        request.Custom(func(c *images.ListOpts) error { v := false; c.Details = &v; return nil }), request.MaxItems(100)) {
         if err != nil { log.Fatal(err) }
         printImage(value)
     }

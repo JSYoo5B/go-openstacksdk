@@ -25,7 +25,7 @@ func TestPythonGroupFindRecordUsesGETThenExactIDOrNameAndAllProjects(t *testing.
 				}
 				return pythonServerGroupWire(200, `{"server_groups":[{"id":"unrelated","name":"other"},{"id":"web","name":"different","members":["s"],"member_ids":["last"],"rules":"not a mapping","policy":false,"opaque":9999999999999999999999999}]}`)
 			})
-			value, err := api.FindRecord(context.Background(), "web", servergroups.WithGroupFindAllProjects(true))
+			value, err := api.FindRecord(context.Background(), "web", request.Custom(func(c *servergroups.GroupFindOpts) error { c.AllProjects = true; return nil }))
 			if err != nil || value == nil || string(value.Resource.Body["id"]) != `"web"` || string(value.Resource.Body["name"]) != `"different"` || string(value.Resource.Body["member_ids"]) != `["last"]` || string(value.Resource.Body["rules"]) != `{}` || string(value.Resource.Body["policy"]) != "false" || string(value.Resource.Body["metadata"]) != "null" || string(value.Wire.Body["opaque"]) != "9999999999999999999999999" || calls.Len() != 2 || calls.Calls()[0].Path != pythonServerGroupBase+"/web" || calls.Calls()[0].RawQuery != "" || calls.Calls()[1].RawQuery != "all_projects=True" {
 				t.Fatal(value, err, pythonServerGroupCalls(calls))
 			}
@@ -34,7 +34,7 @@ func TestPythonGroupFindRecordUsesGETThenExactIDOrNameAndAllProjects(t *testing.
 	api, calls := pythonServerGroupAPI(t, func(*http.Request) *http.Response {
 		return pythonServerGroupWire(200, `{"server_group":{"id":"g","name":"other","rules":null}}`)
 	})
-	value, err := api.FindRecord(context.Background(), "web", servergroups.WithGroupFindAllProjects(true))
+	value, err := api.FindRecord(context.Background(), "web", request.Custom(func(c *servergroups.GroupFindOpts) error { c.AllProjects = true; return nil }))
 	if err != nil || value == nil || string(value.Resource.Body["rules"]) != "null" || calls.Len() != 1 || calls.Calls()[0].RawQuery != "" {
 		t.Fatal(value, err, pythonServerGroupCalls(calls))
 	}

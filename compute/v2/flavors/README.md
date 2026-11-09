@@ -147,7 +147,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetFlavorByID`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorByIDOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorByIDExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - GetFlavorByID owns Cloud's default-false get_extra flag and strict GET-only behavior: one native flavor GET, no query/body/list/automatic discovery, and400/403/404 stay original HTTP errors rather than name fallback or nil success. It returns canonical native flavor fields and keeps the selected client2.55/live token.
   Tests: `api/compute_flavor_by_id_test.go:TestComputeCloudGetFlavorByIDOwnsStrictDefaultsAndNativeEnrichment`, `api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsGETAndExtraSpecsPresence`, `api/find_identity_flavors_test.go:TestNativeFindIdentityFlavorsMissingPoliciesAndUnsafeNames`.
@@ -174,8 +174,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorListExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`

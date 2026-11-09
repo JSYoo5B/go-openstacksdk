@@ -21,12 +21,11 @@ type EvacuateServerOpts struct {
 }
 
 // EvacuateServerOption is one option of EvacuateWithOptions:
-// WithEvacuateServerOptions, WithEvacuateServerHost,
-// WithEvacuateServerAdminPass, WithEvacuateServerForce,
-// WithEvacuateServerOnSharedStorage, request.Header, request.Field (an
-// extension key inside the evacuate object; keys owned by EvacuateServerOpts
-// are rejected) or request.Custom over *request.Config[EvacuateServerOpts].
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithEvacuateServerOptions, request.Header, request.Field (an extension key
+// inside the evacuate object; keys owned by EvacuateServerOpts are rejected) or
+// request.Custom over *request.Config[EvacuateServerOpts] (for example to set
+// Host, AdminPass, Force or OnSharedStorage). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type EvacuateServerOption = request.WriteCall
 
 func WithEvacuateServerOptions(value EvacuateServerOpts) EvacuateServerOption {
@@ -35,18 +34,6 @@ func WithEvacuateServerOptions(value EvacuateServerOpts) EvacuateServerOption {
 		c.Options = cloneEvacuateServerOpts(value)
 		return nil
 	})
-}
-func WithEvacuateServerHost(value string) EvacuateServerOption {
-	return request.Custom(func(c *request.Config[EvacuateServerOpts]) error { c.Options.Host = &value; return nil })
-}
-func WithEvacuateServerAdminPass(value string) EvacuateServerOption {
-	return request.Custom(func(c *request.Config[EvacuateServerOpts]) error { c.Options.AdminPass = &value; return nil })
-}
-func WithEvacuateServerForce(value bool) EvacuateServerOption {
-	return request.Custom(func(c *request.Config[EvacuateServerOpts]) error { c.Options.Force = &value; return nil })
-}
-func WithEvacuateServerOnSharedStorage(value bool) EvacuateServerOption {
-	return request.Custom(func(c *request.Config[EvacuateServerOpts]) error { c.Options.OnSharedStorage = &value; return nil })
 }
 
 func cloneEvacuateServerOpts(v EvacuateServerOpts) EvacuateServerOpts {
@@ -105,16 +92,11 @@ type MigrateServerOpts struct {
 	Host string `json:"host"`
 }
 
-// MigrateServerOption is one option of MigrateWithOptions:
-// WithMigrateServerHost, request.Header, request.Field (an extension key
-// inside the migrate object) or request.Custom over
-// *request.Config[MigrateServerOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// MigrateServerOption is one option of MigrateWithOptions: request.Header,
+// request.Field (an extension key inside the migrate object) or request.Custom
+// over *request.Config[MigrateServerOpts] (for example to set Host). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type MigrateServerOption = request.WriteCall
-
-func WithMigrateServerHost(value string) MigrateServerOption {
-	return request.Custom(func(c *request.Config[MigrateServerOpts]) error { c.Options.Host = value; return nil })
-}
 
 // MigrateWithOptions implements migrate_server: {"migrate": null} without a
 // host and {"migrate": {"host": h}} with one. A host needs selected Nova 2.56
@@ -158,13 +140,12 @@ type LiveMigrateServerOpts struct {
 }
 
 // LiveMigrateServerOption is one option of LiveMigrateWithOptions:
-// WithLiveMigrateServerOptions, WithLiveMigrateServerHost,
-// WithLiveMigrateServerForce, WithLiveMigrateServerBlockMigration,
-// WithLiveMigrateServerAutoBlockMigration,
-// WithLiveMigrateServerDiskOverCommit, request.Header, request.Field (an
+// WithLiveMigrateServerOptions, WithLiveMigrateServerBlockMigration,
+// WithLiveMigrateServerAutoBlockMigration, request.Header, request.Field (an
 // extension key inside os-migrateLive) or request.Custom over
-// *request.Config[LiveMigrateServerOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// *request.Config[LiveMigrateServerOpts] (for example to set Host, Force or
+// DiskOverCommit). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type LiveMigrateServerOption = request.WriteCall
 
 func WithLiveMigrateServerOptions(value LiveMigrateServerOpts) LiveMigrateServerOption {
@@ -173,12 +154,6 @@ func WithLiveMigrateServerOptions(value LiveMigrateServerOpts) LiveMigrateServer
 		c.Options = cloneLiveMigrateServerOpts(value)
 		return nil
 	})
-}
-func WithLiveMigrateServerHost(value string) LiveMigrateServerOption {
-	return request.Custom(func(c *request.Config[LiveMigrateServerOpts]) error { c.Options.Host = value; return nil })
-}
-func WithLiveMigrateServerForce(value bool) LiveMigrateServerOption {
-	return request.Custom(func(c *request.Config[LiveMigrateServerOpts]) error { c.Options.Force = value; return nil })
 }
 
 // WithLiveMigrateServerBlockMigration sends a boolean block_migration and
@@ -197,9 +172,6 @@ func WithLiveMigrateServerAutoBlockMigration() LiveMigrateServerOption {
 		c.Options.BlockMigration, c.Options.AutoBlockMigration = nil, true
 		return nil
 	})
-}
-func WithLiveMigrateServerDiskOverCommit(value bool) LiveMigrateServerOption {
-	return request.Custom(func(c *request.Config[LiveMigrateServerOpts]) error { c.Options.DiskOverCommit = &value; return nil })
 }
 
 func cloneLiveMigrateServerOpts(v LiveMigrateServerOpts) LiveMigrateServerOpts {

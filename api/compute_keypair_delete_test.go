@@ -298,7 +298,10 @@ func TestComputeKeypairDeleteOwnedPreflightAndOptionOwnership(t *testing.T) {
 			sharedHeaders := map[string]string{"X-Extension": "kept"}
 			var callbacks atomic.Int32
 			options := []keypairs.KeypairDeleteOption{
-				request.IgnoreMissing(false), keypairs.WithKeypairDeleteUserID("first-owner"),
+				request.IgnoreMissing(false), request.Custom(func(c *request.Config[keypairs.KeypairDeleteOpts]) error {
+					c.Options.UserID = "first-owner"
+					return nil
+				}),
 				request.Custom(func(config *request.Config[keypairs.KeypairDeleteOpts]) error {
 					callbacks.Add(1)
 					config.Query = sharedQuery
@@ -313,7 +316,7 @@ func TestComputeKeypairDeleteOwnedPreflightAndOptionOwnership(t *testing.T) {
 				}),
 			}
 			if mode == "last wins" {
-				options = append(options, keypairs.WithKeypairDeleteUserID("last-owner"), request.IgnoreMissing(true))
+				options = append(options, request.Custom(func(c *request.Config[keypairs.KeypairDeleteOpts]) error { c.Options.UserID = "last-owner"; return nil }), request.IgnoreMissing(true))
 			} else {
 				options = append(options, keypairs.WithKeypairDeleteOptions(keypairs.KeypairDeleteOpts{}))
 			}

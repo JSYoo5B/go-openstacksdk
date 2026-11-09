@@ -15,11 +15,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.API.CreateConsole`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateProtocol`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateProtocolValue`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateType`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateTypeValue`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURL`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURLValue`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
@@ -49,7 +47,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.DeleteKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteUserID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteQuery`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
@@ -184,7 +182,7 @@ func run(ctx context.Context, serverID, keyName, ownerID string, strict bool) er
         request.IgnoreMissing(!strict),
     }
     if ownerID != "" {
-        options = append(options, keypairs.WithKeypairDeleteUserID(ownerID))
+        options = append(options, request.Custom(func(c *request.Config[keypairs.KeypairDeleteOpts]) error { c.Options.UserID = ownerID; return nil }))
     }
     if err := service.KeyPairs.DeleteKeypair(ctx, keyName, options...); err != nil {
         return fmt.Errorf("delete keypair: %w", err)

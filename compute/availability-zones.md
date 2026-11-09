@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListAvailabilityZoneNames`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithAvailabilityZoneNamesOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithUnavailableZones`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
@@ -124,6 +124,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
 )
@@ -172,7 +173,7 @@ func run(ctx context.Context, cloudName string, unavailable bool) error {
     }
 
     options := make([]compute.AvailabilityZoneNamesOption, 0)
-    if unavailable { options = append(options, compute.WithUnavailableZones(true)) }
+    if unavailable { options = append(options, request.Custom(func(c *request.Config[compute.AvailabilityZoneNamesOpts]) error { c.Options.Unavailable = true; return nil })) }
     result, readErr := service.ListAvailabilityZoneNames(ctx, options...)
     if result != nil {
         suppressed := ""

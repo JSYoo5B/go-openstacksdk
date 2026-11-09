@@ -31,10 +31,10 @@ type KeypairQueryOpts struct {
 
 // KeypairQueryOption is one option of ListKeypairs, SearchKeypairs and
 // GetKeypair: WithKeypairQueryOptions, WithKeypairQueryFilters,
-// WithKeypairQueryExpression, WithKeypairQueryUserID, request.Microversion,
-// request.MaxItems, request.Paginated, request.Header or request.Custom over
-// *request.Config[KeypairQueryOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithKeypairQueryExpression, request.Microversion, request.MaxItems,
+// request.Paginated, request.Header or request.Custom over
+// *request.Config[KeypairQueryOpts] (for example to set UserID). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type KeypairQueryOption = request.ListCall
 
 var keypairQueryCalls = calls.Spec[request.Config[KeypairQueryOpts]]{
@@ -82,9 +82,6 @@ func WithKeypairQueryFilters(value json.RawMessage) KeypairQueryOption {
 func WithKeypairQueryExpression(expression string) KeypairQueryOption {
 	raw, _ := json.Marshal(expression)
 	return WithKeypairQueryFilters(raw)
-}
-func WithKeypairQueryUserID(value string) KeypairQueryOption {
-	return request.Custom(func(c *request.Config[KeypairQueryOpts]) error { c.Options.UserID = value; return nil })
 }
 
 // Inventory is the actual consumed inventory, including partial work on error.
@@ -445,7 +442,8 @@ func (s *Service) GetKeypair(ctx context.Context, nameOrID string, options ...Ke
 	}
 	result := &GetKeypairResult{}
 	if !present {
-		options := []keypairs.KeypairFindOption{keypairs.WithKeypairFindUserID(c.Options.UserID)}
+		userID := c.Options.UserID
+		options := []keypairs.KeypairFindOption{request.Custom(func(o *request.Config[keypairs.KeypairFindOpts]) error { o.Options.UserID = userID; return nil })}
 		if c.Options.Microversion != nil {
 			options = append(options, request.Microversion(*c.Options.Microversion))
 		}

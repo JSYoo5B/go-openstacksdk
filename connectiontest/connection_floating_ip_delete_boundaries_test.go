@@ -25,7 +25,7 @@ func TestFloatingIPDeleteNegativeAndAdditionalRetryLimits(t *testing.T) {
 				}
 				return 200, `{"floatingips":[{"id":"ip","status":"ACTIVE"}]}`
 			}
-			result, err := conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, compute.WithFloatingIPDeleteRetries(retries))
+			result, err := conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, func(c *compute.FloatingIPDeleteOpts) error { c.Retries = retries; return nil })
 			expected := max(0, retries) + 1
 			var failure *compute.FloatingIPDeleteVerificationError
 			if !errors.As(err, &failure) || failure.Attempts != expected || len(result.Attempts) != expected || len(state.events) != 2*expected || result.Deleted {
@@ -104,7 +104,7 @@ func TestFloatingIPDeleteDirectVerificationAndMemberNotFound(t *testing.T) {
 			}
 			var options []compute.FloatingIPDeleteOption
 			if mode != "default" {
-				options = append(options, compute.WithFloatingIPDeleteDirectGet(true))
+				options = append(options, func(c *compute.FloatingIPDeleteOpts) error { c.DirectGet = true; return nil })
 			}
 			result, err := conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: target}, options...)
 			if len(state.events) != 2 || !result.Attempts[0].Accepted {
@@ -419,11 +419,11 @@ func TestFloatingIPDeleteServiceUsesCachedConnectionDependencies(t *testing.T) {
 		t.Fatal(err)
 	}
 	state.reply = func(*http.Request) (int, string) { return 204, "" }
-	result, err := service.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, compute.WithFloatingIPDeleteRetries(0))
+	result, err := service.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil })
 	if err != nil || !result.Deleted || result.Backend != compute.FloatingIPNeutron || !reflect.DeepEqual(state.locators, []string{"compute", "network"}) || len(state.events) != 1 {
 		t.Fatal(result, err, state)
 	}
-	result, err = conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, compute.WithFloatingIPDeleteRetries(0))
+	result, err = conn.DeleteFloatingIP(context.Background(), compute.DeleteFloatingIPRequest{ID: "ip"}, func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil })
 	if err != nil || !result.Deleted || len(state.locators) != 2 || len(state.events) != 2 {
 		t.Fatal(result, err, state)
 	}

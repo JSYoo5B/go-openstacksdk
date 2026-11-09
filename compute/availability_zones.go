@@ -123,10 +123,10 @@ type AvailabilityZoneNamesOpts struct {
 }
 
 // AvailabilityZoneNamesOption is one option of ListAvailabilityZoneNames:
-// WithAvailabilityZoneNamesOptions, WithUnavailableZones,
-// request.Microversion, request.Header or request.Custom over
-// *request.Config[AvailabilityZoneNamesOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithAvailabilityZoneNamesOptions, request.Microversion, request.Header or
+// request.Custom over *request.Config[AvailabilityZoneNamesOpts] (for example
+// to set Unavailable). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type AvailabilityZoneNamesOption = request.GetCall
 
 var availabilityZoneNamesCalls = calls.Spec[request.Config[AvailabilityZoneNamesOpts]]{
@@ -151,9 +151,6 @@ func WithAvailabilityZoneNamesOptions(value AvailabilityZoneNamesOpts) Availabil
 		ownZoneNames(c)
 		return nil
 	})
-}
-func WithUnavailableZones(value bool) AvailabilityZoneNamesOption {
-	return request.Custom(func(c *request.Config[AvailabilityZoneNamesOpts]) error { c.Options.Unavailable = value; return nil })
 }
 
 // Names and Value are completed results. SuppressedError explains a source-

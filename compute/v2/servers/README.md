@@ -221,7 +221,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputLength`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 

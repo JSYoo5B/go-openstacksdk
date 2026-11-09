@@ -41,7 +41,7 @@ func TestPythonAttachmentRecordsListIsLazyAndPagesLimitOffset(t *testing.T) {
 			return pythonVolumeAttachWire(200, `{"volumeAttachments":[]}`)
 		}
 	})
-	sequence := api.ListRecords(context.Background(), "s1", request.Limit(3), volumeattach.WithAttachmentOffset(2))
+	sequence := api.ListRecords(context.Background(), "s1", request.Limit(3), request.Custom(func(c *volumeattach.AttachmentListOpts) error { v := 2; c.Offset = &v; return nil }))
 	if calls.Len() != 0 {
 		t.Fatal(pythonVolumeAttachCalls(calls))
 	}
@@ -163,7 +163,10 @@ func TestPythonAttachmentRecordsRejectInvalidInputsBeforeHTTP(t *testing.T) {
 		call func() error
 	}{
 		{"negative limit", func() error { _, err := attachmentRecordIDs(t, api, request.Limit(-1)); return err }},
-		{"negative offset", func() error { _, err := attachmentRecordIDs(t, api, volumeattach.WithAttachmentOffset(-1)); return err }},
+		{"negative offset", func() error {
+			_, err := attachmentRecordIDs(t, api, request.Custom(func(c *volumeattach.AttachmentListOpts) error { v := -1; c.Offset = &v; return nil }))
+			return err
+		}},
 		{"negative cap", func() error {
 			_, err := attachmentRecordIDs(t, api, request.MaxItems(-1))
 			return err

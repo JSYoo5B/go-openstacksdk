@@ -243,9 +243,13 @@ func TestCloudFlavorByRAMOwnsOptionsAndInheritedReadTransportOptions(t *testing.
 	raw := json.RawMessage(`"first"`)
 	include := compute.WithFlavorRAMInclude(raw)
 	raw[1] = 'X'
-	query := []compute.FlavorQueryOption{compute.WithFlavorQueryExtraSpecs(false), request.Header("X-Owned", "before"), request.Microversion("2.55")}
+	query := []compute.FlavorQueryOption{request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error {
+		v := false
+		c.Options.GetExtra = &v
+		return nil
+	}), request.Header("X-Owned", "before"), request.Microversion("2.55")}
 	queryOption := compute.WithFlavorRAMQueryOptions(query...)
-	query[0] = compute.WithFlavorQueryExtraSpecs(true)
+	query[0] = request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error { v := true; c.Options.GetExtra = &v; return nil })
 	var retained *compute.FlavorRAMOpts
 	original := c.ProviderClient.HTTPClient.Transport
 	c.ProviderClient.HTTPClient.Transport = testcloud.LinkRequest(func(req *http.Request) (*http.Response, error) {
@@ -256,7 +260,7 @@ func TestCloudFlavorByRAMOwnsOptionsAndInheritedReadTransportOptions(t *testing.
 	})
 	r, e := s.GetFlavorByRAM(context.Background(), 4, queryOption, include, func(v *compute.FlavorRAMOpts) error { retained = v; return nil }, func(*compute.FlavorRAMOpts) error {
 		(*retained.Include)[1] = 'X'
-		retained.QueryOptions[0] = compute.WithFlavorQueryExtraSpecs(true)
+		retained.QueryOptions[0] = request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error { v := true; c.Options.GetExtra = &v; return nil })
 		return nil
 	})
 	if e != nil || flavorRAMID(t, r) != "first" || len(*calls) != 1 {

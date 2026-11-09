@@ -208,9 +208,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListFloatingIPs`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout`
 
@@ -264,10 +263,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchFloatingIPs`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryExpression`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout`
 
@@ -318,11 +316,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetFloatingIP`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryExpression`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryDirectGet`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout`
 
@@ -375,8 +371,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetFloatingIPByID`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryStrict`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout`
 
@@ -416,7 +411,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ListFloatingIPPools`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPQueryTimeout`
@@ -445,7 +440,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchFloatingIPPools`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQuerySource`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPQueryTimeout`
@@ -513,11 +508,11 @@ func run(ctx context.Context, cloud, source, id, filters string, direct bool) er
     }
     options := []compute.FloatingIPQueryOption{
         compute.WithFloatingIPQueryTimeout(time.Minute),
-        compute.WithFloatingIPQueryDirectGet(direct),
+        func(c *compute.FloatingIPQueryOpts) error { c.DirectGet = direct; return nil },
     }
     if source != "" {
         options = append(options,
-            compute.WithFloatingIPQuerySource(compute.FloatingIPSource(source)))
+            func(c *compute.FloatingIPQueryOpts) error { v := compute.FloatingIPSource(source); c.Source = &v; return nil })
     }
     if filters != "" {
         options = append(options,

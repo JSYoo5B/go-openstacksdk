@@ -14,10 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.EvacuateWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerHost`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerAdminPass`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerForce`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithEvacuateServerOnSharedStorage`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
@@ -40,7 +37,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.MigrateWithOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithMigrateServerHost`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
@@ -63,11 +60,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.LiveMigrateWithOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerHost`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerForce`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerBlockMigration`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerAutoBlockMigration`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithLiveMigrateServerDiskOverCommit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.AllFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
@@ -40,7 +40,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.SearchFlavors`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExpression`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -67,7 +67,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetFlavor`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryFilters`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`

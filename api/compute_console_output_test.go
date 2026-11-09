@@ -35,12 +35,12 @@ func TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility(t *
 		want    string
 	}{
 		{"default", nil, `{"os-getConsoleOutput":{}}`},
-		{"zero", []servers.ConsoleOutputOption{servers.WithConsoleOutputLength(0)}, `{"os-getConsoleOutput":{"length":0}}`},
-		{"positive", []servers.ConsoleOutputOption{servers.WithConsoleOutputLength(5)}, `{"os-getConsoleOutput":{"length":5}}`},
-		{"negative forwarded", []servers.ConsoleOutputOption{servers.WithConsoleOutputLength(-3)}, `{"os-getConsoleOutput":{"length":-3}}`},
+		{"zero", []servers.ConsoleOutputOption{request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 0; c.Options.Length = &v; return nil })}, `{"os-getConsoleOutput":{"length":0}}`},
+		{"positive", []servers.ConsoleOutputOption{request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 5; c.Options.Length = &v; return nil })}, `{"os-getConsoleOutput":{"length":5}}`},
+		{"negative forwarded", []servers.ConsoleOutputOption{request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := -3; c.Options.Length = &v; return nil })}, `{"os-getConsoleOutput":{"length":-3}}`},
 		{"pointer snapshot", []servers.ConsoleOutputOption{frozen}, `{"os-getConsoleOutput":{"length":0}}`},
-		{"last individual wins", []servers.ConsoleOutputOption{servers.WithConsoleOutputLength(5), servers.WithConsoleOutputLength(0)}, `{"os-getConsoleOutput":{"length":0}}`},
-		{"bulk restores omission", []servers.ConsoleOutputOption{servers.WithConsoleOutputLength(0), servers.WithConsoleOutputOptions(servers.ConsoleOutputOpts{})}, `{"os-getConsoleOutput":{}}`},
+		{"last individual wins", []servers.ConsoleOutputOption{request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 5; c.Options.Length = &v; return nil }), request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 0; c.Options.Length = &v; return nil })}, `{"os-getConsoleOutput":{"length":0}}`},
+		{"bulk restores omission", []servers.ConsoleOutputOption{request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 0; c.Options.Length = &v; return nil }), servers.WithConsoleOutputOptions(servers.ConsoleOutputOpts{})}, `{"os-getConsoleOutput":{}}`},
 		{"extension snapshot", []servers.ConsoleOutputOption{extension}, `{"os-getConsoleOutput":{"vendor":{"values":["original"]}}}`},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
@@ -131,7 +131,7 @@ func TestComputeConsoleOutputLiteralLengthOwnedOptionsAndNativeCompatibility(t *
 			}
 			testcloud.JSON(w, 200, `{"output":"same projection"}`)
 		})
-		owned, err := api.ConsoleOutput(context.Background(), "server-id", servers.WithConsoleOutputLength(0))
+		owned, err := api.ConsoleOutput(context.Background(), "server-id", request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 0; c.Options.Length = &v; return nil }))
 		var nativeOptions servers.ShowConsoleOutputOpts
 		native, nativeErr := api.ShowConsoleOutput(context.Background(), "server-id", nativeOptions)
 		if err != nil || nativeErr != nil || owned != "same projection" || native != owned || calls.Load() != 2 {
@@ -414,7 +414,7 @@ func TestComputeConsoleOutputSourceContextAndAcceptedBodyBoundaries(t *testing.T
 			return nil
 		}
 		api := servers.New(client)
-		value, err := api.ConsoleOutput(context.Background(), "server-id", servers.WithConsoleOutputLength(0), request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error { callbacks.Add(1); return nil }))
+		value, err := api.ConsoleOutput(context.Background(), "server-id", request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 0; c.Options.Length = &v; return nil }), request.Custom(func(_ *request.Config[servers.ConsoleOutputOpts]) error { callbacks.Add(1); return nil }))
 		if err != nil || value != "retry accepted" || calls.Load() != 2 || callbacks.Load() != 1 || reauth.Load() != 1 || api.RawClient() != client || client.ProviderClient != cloud.Provider || client.Microversion != "2.87" {
 			t.Fatal("native auth/body/options/source changed", value, err, calls.Load(), callbacks.Load(), reauth.Load())
 		}

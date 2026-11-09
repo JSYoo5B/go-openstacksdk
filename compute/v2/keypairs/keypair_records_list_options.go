@@ -29,14 +29,13 @@ type KeypairListOpts struct {
 }
 
 // KeypairListOption is one option of ListRecords: WithKeypairListOptions,
-// WithKeypairListUserID, WithKeypairListFilter, WithKeypairListFilters,
-// request.Query with a string or []string value (a raw wire query that
-// overrides the same typed query; operation controls require their dedicated
-// calls), request.Limit, request.Marker,
-// request.MaxItems (caps consumed raw rows before local Body filtering),
-// request.Paginated, request.Microversion, request.Header or request.Custom
-// over *request.Config[KeypairListOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithKeypairListFilter, WithKeypairListFilters, request.Query with a string or
+// []string value (a raw wire query that overrides the same typed query;
+// operation controls require their dedicated calls), request.Limit,
+// request.Marker, request.MaxItems (caps consumed raw rows before local Body
+// filtering), request.Paginated, request.Microversion, request.Header or
+// request.Custom over *request.Config[KeypairListOpts] (for example to set
+// UserID). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type KeypairListOption = request.ListCall
 
 var keypairListCalls = calls.Spec[request.Config[KeypairListOpts]]{
@@ -71,9 +70,6 @@ func WithKeypairListOptions(value KeypairListOpts) KeypairListOption {
 		config.Options = copyKeypairListOptions(owned)
 		return nil
 	})
-}
-func WithKeypairListUserID(value string) KeypairListOption {
-	return request.Custom(func(config *request.Config[KeypairListOpts]) error { config.Options.UserID = value; return nil })
 }
 
 const keypairListFiltersArgument = "keypair_record_filters"

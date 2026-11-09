@@ -43,18 +43,6 @@ func WithFloatingIPCreateOptions(value FloatingIPCreateOpts) FloatingIPCreateOpt
 	owned := cloneFloatingIPCreateOptions(value)
 	return func(o *FloatingIPCreateOpts) error { *o = cloneFloatingIPCreateOptions(owned); return nil }
 }
-func WithFloatingIPCreateServer(value resource.Ref) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { o.Server = value; return nil }
-}
-func WithFloatingIPCreatePort(value string) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { o.PortID = value; return nil }
-}
-func WithFloatingIPCreateFixedAddress(value string) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { o.FixedAddress = value; return nil }
-}
-func WithFloatingIPCreateNATDestination(value string) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { o.NATDestination = value; return nil }
-}
 func WithFloatingIPCreateWait(value bool) FloatingIPCreateOption {
 	return func(o *FloatingIPCreateOpts) error { o.Wait = value; return nil }
 }
@@ -68,16 +56,7 @@ func WithFloatingIPCreateWaitOptions(options ...resource.WaitOption) FloatingIPC
 	owned := slices.Clone(options)
 	return func(o *FloatingIPCreateOpts) error { o.WaitOptions = append(o.WaitOptions, owned...); return nil }
 }
-func WithFloatingIPCreateSource(value FloatingIPSource) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { copy := value; o.Source = &copy; return nil }
-}
 
-func WithFloatingIPCreateStrict(value bool) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { o.Strict = value; return nil }
-}
-func WithFloatingIPCreateDirectGet(value bool) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { o.DirectGet = value; return nil }
-}
 func WithFloatingIPCreateTimeout(value time.Duration) FloatingIPCreateOption {
 	return func(o *FloatingIPCreateOpts) error {
 		if value <= 0 {

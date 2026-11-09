@@ -128,7 +128,7 @@ func TestComputeFlavorRecordsQueryProjectionAndOwnedViews(t *testing.T) {
 			switch mode {
 			case "summary null public":
 				path = flavorIdentityPath
-				options = append(options, flavors.WithFlavorListDetails(false), flavors.WithFlavorListFilter("is_public", nil))
+				options = append(options, request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error { v := false; c.Options.Details = &v; return nil }), flavors.WithFlavorListFilter("is_public", nil))
 			case "empty public":
 				options = append(options, flavors.WithFlavorListFilter("is_public", ""))
 				want.Set("is_public", "")
@@ -518,7 +518,10 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			})
 			var result *flavors.FlavorRecord
 			count := 0
-			for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(tc.enabled), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil })) {
+			for value, err := range flavors.New(client).ListRecords(context.Background(), request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error {
+				c.Options.GetExtraSpecs = tc.enabled
+				return nil
+			}), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil })) {
 				if err != nil {
 					t.Fatal(value, err)
 				}
@@ -554,7 +557,7 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			client := flavorIdentityClient(cloud)
 			client.Microversion = "2.55"
 			var lists, specs atomic.Int32
-			options := []flavors.FlavorListOption{flavors.WithFlavorListExtraSpecs(true)}
+			options := []flavors.FlavorListOption{request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error { c.Options.GetExtraSpecs = true; return nil })}
 			rows := `{"id":"7","disk":2},{"id":"8","disk":1}`
 			if mode == "filtered row is not enriched" {
 				options = append(options, flavors.WithFlavorListFilter("disk", 1))
@@ -605,7 +608,7 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			testcloud.JSON(w, 200, flavorIdentityPage(`{"id":7}`, ""))
 		})
 		failures := 0
-		for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(true)) {
+		for value, err := range flavors.New(client).ListRecords(context.Background(), request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error { c.Options.GetExtraSpecs = true; return nil })) {
 			failures++
 			if value == nil || value.Resource == nil || string(value.Resource.Body["id"]) != `7` || !errors.Is(err, resource.ErrInvalidOption) || value.Enrichment != nil {
 				t.Fatal(value, err)
@@ -653,7 +656,7 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 				testcloud.JSON(w, status, body)
 			})
 			failures := 0
-			for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(true)) {
+			for value, err := range flavors.New(client).ListRecords(context.Background(), request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error { c.Options.GetExtraSpecs = true; return nil })) {
 				failures++
 				if err == nil || value == nil || value.Wire == nil || string(value.Envelope) != row || string(value.Wire.Body["id"]) != `"7"` || errors.Is(err, resource.ErrNotFound) {
 					t.Fatal("enrichment error lost original row or became missing", value, err)
@@ -731,7 +734,7 @@ func TestComputeFlavorRecordsConditionalExtraSpecsEnrichment(t *testing.T) {
 			}
 		})
 		count := 0
-		for value, err := range flavors.New(client).ListRecords(context.Background(), flavors.WithFlavorListExtraSpecs(true), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil })) {
+		for value, err := range flavors.New(client).ListRecords(context.Background(), request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error { c.Options.GetExtraSpecs = true; return nil }), request.Custom(func(_ *request.Config[flavors.FlavorListOpts]) error { callbacks.Add(1); return nil })) {
 			if err != nil || value == nil || value.Enrichment == nil {
 				t.Fatal(value, err)
 			}

@@ -28,10 +28,10 @@ type ConsoleOutputOpts struct {
 }
 
 // ConsoleOutputOption is one option of ConsoleOutput: WithConsoleOutputOptions,
-// WithConsoleOutputLength, request.Field (a JSON extension inside
-// os-getConsoleOutput; the declared length must be set with the concrete
-// length options) or request.Custom over *request.Config[ConsoleOutputOpts].
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Field (a JSON extension inside os-getConsoleOutput; the declared
+// length must be set with the concrete length options) or request.Custom over
+// *request.Config[ConsoleOutputOpts] (for example to set Length). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type ConsoleOutputOption = request.WriteCall
 
 var consoleOutputCalls = calls.Spec[request.Config[ConsoleOutputOpts]]{Field: calls.ConfigField[ConsoleOutputOpts]}
@@ -41,14 +41,6 @@ func WithConsoleOutputOptions(value ConsoleOutputOpts) ConsoleOutputOption {
 	owned := cloneConsoleOutputOptions(value)
 	return request.Custom(func(config *request.Config[ConsoleOutputOpts]) error {
 		config.Options = cloneConsoleOutputOptions(owned)
-		return nil
-	})
-}
-
-func WithConsoleOutputLength(value int) ConsoleOutputOption {
-	return request.Custom(func(config *request.Config[ConsoleOutputOpts]) error {
-		copy := value
-		config.Options.Length = &copy
 		return nil
 	})
 }

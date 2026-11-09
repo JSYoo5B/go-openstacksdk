@@ -72,7 +72,7 @@ func TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback(t *testi
 				w.Header().Set("X-Find-Proof", tc.name)
 				testcloud.JSON(w, tc.status, tc.body)
 			})
-			value, err := keypairs.New(client).FindKeypair(context.Background(), "target", keypairs.WithKeypairFindUserID("owner+team"))
+			value, err := keypairs.New(client).FindKeypair(context.Background(), "target", request.Custom(func(c *request.Config[keypairs.KeypairFindOpts]) error { c.Options.UserID = "owner+team"; return nil }))
 			if (err != nil) != tc.failure || value == nil || value.StatusCode != tc.status || string(value.Envelope) != tc.body || value.Header.Get("X-Find-Proof") != tc.name || gets.Load() != 1 || other.Load() != 0 || client.Microversion != "2.55" {
 				t.Fatal(value, err, gets.Load(), other.Load())
 			}
@@ -140,7 +140,7 @@ func TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback(t *testi
 				}
 				testcloud.JSON(w, 200, `{"keypair":{}}`)
 			})
-			value, err := keypairs.New(client).FindKeypair(context.Background(), identity, keypairs.WithKeypairFindUserID("owner+team"))
+			value, err := keypairs.New(client).FindKeypair(context.Background(), identity, request.Custom(func(c *request.Config[keypairs.KeypairFindOpts]) error { c.Options.UserID = "owner+team"; return nil }))
 			seed, _ := json.Marshal(identity)
 			if err != nil || value == nil || value.Resource == nil || string(value.Resource.Body["name"]) != string(seed) || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
@@ -245,7 +245,7 @@ func TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback(t *testi
 				}
 				testcloud.JSON(w, 200, `{"keypairs":[`+rows+`]`+next+`}`)
 			})
-			options := []keypairs.KeypairFindOption{keypairs.WithKeypairFindUserID(owner)}
+			options := []keypairs.KeypairFindOption{request.Custom(func(c *request.Config[keypairs.KeypairFindOpts]) error { c.Options.UserID = owner; return nil })}
 			if mode == "strict missing" {
 				options = append(options, request.IgnoreMissing(false))
 			}
@@ -346,7 +346,7 @@ func TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback(t *testi
 				w.WriteHeader(500)
 			}
 		})
-		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", keypairs.WithKeypairFindUserID("owner"), request.Header("X-Find-Option", "owned"), request.Custom(func(_ *request.Config[keypairs.KeypairFindOpts]) error { callbacks.Add(1); return nil }))
+		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", request.Custom(func(c *request.Config[keypairs.KeypairFindOpts]) error { c.Options.UserID = "owner"; return nil }), request.Header("X-Find-Option", "owned"), request.Custom(func(_ *request.Config[keypairs.KeypairFindOpts]) error { callbacks.Add(1); return nil }))
 		if err != nil || value == nil || value.Resource == nil || discoveries.Load() != 1 || gets.Load() != 1 || lists.Load() != 1 || callbacks.Load() != 1 || client.Microversion != "" || client.ResourceBase != cloud.Server.URL+"/reverse/nova/v2.1/project/" {
 			t.Fatal(value, err, discoveries.Load(), gets.Load(), lists.Load(), callbacks.Load(), client)
 		}
@@ -608,7 +608,7 @@ func TestComputeFindKeypairOwnedOptionsPreflightAndPhysicalTerminalErrors(t *tes
 			}
 			testcloud.JSON(w, 200, `{"keypair":{"name":"actual"}}`)
 		})
-		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", keypairs.WithKeypairFindUserID("owner"), request.Microversion("2.55"))
+		value, err := keypairs.New(client).FindKeypair(context.Background(), "target", request.Custom(func(c *request.Config[keypairs.KeypairFindOpts]) error { c.Options.UserID = "owner"; return nil }), request.Microversion("2.55"))
 		if err != nil || value == nil || value.Resource == nil || string(value.Resource.Body["name"]) != `"actual"` || calls.Load() != 2 || reauths.Load() != 1 || client.Microversion != "2.55" {
 			t.Fatal(value, err, calls.Load(), reauths.Load())
 		}

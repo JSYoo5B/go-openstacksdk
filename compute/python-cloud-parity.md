@@ -156,7 +156,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMGetExtra`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMGetExtraValue`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorRAMQueryOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryExtraSpecs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithFlavorQueryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.ListSourceRecords`

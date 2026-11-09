@@ -275,7 +275,7 @@ func TestFloatingIPUnattachedResourcePortTruthinessAndStrictFallback(t *testing.
 			}
 			return 204, ""
 		}
-		result, err := conn.DeleteUnattachedFloatingIPs(context.Background(), compute.WithFloatingIPDeleteRetries(0), compute.WithFloatingIPDeleteStrict(true))
+		result, err := conn.DeleteUnattachedFloatingIPs(context.Background(), func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil }, func(c *compute.FloatingIPDeleteOpts) error { c.Strict = true; return nil })
 		if err != nil || result == nil || result.Count != 7 || !result.AllDeleted || len(result.Items) != 7 || len(state.events) != 8 {
 			t.Fatal(result, err, state)
 		}
@@ -304,7 +304,7 @@ func TestFloatingIPUnattachedResourcePortTruthinessAndStrictFallback(t *testing.
 				}
 				return 404, "no neutron floating IP inventory"
 			}
-			result, err := conn.DeleteUnattachedFloatingIPs(context.Background(), compute.WithFloatingIPDeleteRetries(0), compute.WithFloatingIPDeleteStrict(strict))
+			result, err := conn.DeleteUnattachedFloatingIPs(context.Background(), func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil }, func(c *compute.FloatingIPDeleteOpts) error { c.Strict = strict; return nil })
 			if result == nil || !result.Eligible || result.Inventory == nil || result.Inventory.Backend != compute.FloatingIPNova || result.Inventory.FallbackError == nil {
 				t.Fatal(result, err)
 			}
@@ -442,7 +442,7 @@ func TestFloatingIPUnattachedSequentialInvalidIDAndDuplicateHistory(t *testing.T
 				}
 				return 202, "accepted"
 			}
-			result, err := conn.DeleteUnattachedFloatingIPs(context.Background(), compute.WithFloatingIPDeleteRetries(0))
+			result, err := conn.DeleteUnattachedFloatingIPs(context.Background(), func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil })
 			if result == nil || !result.Eligible || result.AllDeleted || result.Inventory == nil || len(result.Inventory.FloatingIPs) != 4 || !result.Items[0].Deletion.Deleted || !result.Items[0].Deletion.Attempts[0].Accepted {
 				t.Fatal(result, err)
 			}
@@ -512,7 +512,7 @@ func TestFloatingIPUnattachedAcceptedFailuresAndOneOperationBudget(t *testing.T)
 				}
 				return nil
 			}
-			options := []compute.FloatingIPDeleteOption{compute.WithFloatingIPDeleteRetries(0)}
+			options := []compute.FloatingIPDeleteOption{func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil }}
 			if mode == "timeout" || mode == "parent" {
 				options = append(options, compute.WithFloatingIPDeleteTimeout(2*time.Minute))
 			}

@@ -81,11 +81,11 @@ type ListOpts struct {
 	Paginated *bool
 }
 
-// ListOption is one option of ListRecords: WithListOpts, WithListDetails,
-// request.Query (a Source keyword argument sent as JSON; unknown keywords are
-// discarded, matching Resource.list), request.Limit, request.Marker,
-// request.MaxItems, request.Paginated, request.Headers (replaces the
-// headers) or request.Custom over *ListOpts. Other shared calls fail with
+// ListOption is one option of ListRecords: WithListOpts, request.Query (a
+// Source keyword argument sent as JSON; unknown keywords are discarded,
+// matching Resource.list), request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, request.Headers (replaces the headers) or request.Custom
+// over *ListOpts (for example to set Details). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
@@ -132,9 +132,6 @@ func copyList(v ListOpts) ListOpts {
 func WithListOpts(value ListOpts) ListOption {
 	owned := copyList(value)
 	return request.Custom(func(c *ListOpts) error { *c = copyList(owned); return nil })
-}
-func WithListDetails(value bool) ListOption {
-	return request.Custom(func(c *ListOpts) error { v := value; c.Details = &v; return nil })
 }
 
 var imageQueries = map[string]string{"server": "server", "name": "name", "status": "status", "type": "type", "min_disk": "minDisk", "min_ram": "minRam", "changes_since": "changes-since"}

@@ -28,10 +28,10 @@ type FlavorQueryOpts struct {
 }
 
 // FlavorQueryOption is one option of AllFlavors, SearchFlavors and GetFlavor:
-// WithFlavorQueryOptions, WithFlavorQueryExtraSpecs, WithFlavorQueryFilters,
-// WithFlavorQueryExpression, request.Microversion, request.Header or
-// request.Custom over *request.Config[FlavorQueryOpts]. Other shared calls
-// fail with resource.ErrInvalidOption before HTTP.
+// WithFlavorQueryOptions, WithFlavorQueryFilters, WithFlavorQueryExpression,
+// request.Microversion, request.Header or request.Custom over
+// *request.Config[FlavorQueryOpts] (for example to set GetExtra). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type FlavorQueryOption = request.GetCall
 
 var flavorQueryCalls = calls.Spec[request.Config[FlavorQueryOpts]]{
@@ -58,13 +58,6 @@ func WithFlavorQueryOptions(value FlavorQueryOpts) FlavorQueryOption {
 	owned := cloneFlavorQueryOptions(value)
 	return request.Custom(func(config *request.Config[FlavorQueryOpts]) error {
 		config.Options = cloneFlavorQueryOptions(owned)
-		return nil
-	})
-}
-func WithFlavorQueryExtraSpecs(value bool) FlavorQueryOption {
-	return request.Custom(func(config *request.Config[FlavorQueryOpts]) error {
-		owned := value
-		config.Options.GetExtra = &owned
 		return nil
 	})
 }
@@ -139,7 +132,12 @@ func (p *flavorRecordWorkflow) queryInventory(config request.Config[FlavorQueryO
 
 func (p *flavorRecordWorkflow) queryInventorySource(config request.Config[FlavorQueryOpts], defaultExtra, sourceStatuses bool) (*FlavorQueryResult, error) {
 	result := &FlavorQueryResult{Inventory: []*flavors.FlavorRecord{}}
-	options := []flavors.FlavorListOption{flavors.WithFlavorListDetails(true), flavors.WithFlavorListExtraSpecs(flavorQueryExtra(config.Options, defaultExtra))}
+	extra := flavorQueryExtra(config.Options, defaultExtra)
+	options := []flavors.FlavorListOption{request.Custom(func(c *request.Config[flavors.FlavorListOpts]) error {
+		details := true
+		c.Options.Details, c.Options.GetExtraSpecs = &details, extra
+		return nil
+	})}
 	if config.Options.Microversion != nil {
 		options = append(options, request.Microversion(*config.Options.Microversion))
 	}
@@ -248,7 +246,8 @@ func (s *Service) GetFlavor(ctx context.Context, nameOrID string, options ...Fla
 	if err != nil {
 		return fail(nil, err)
 	}
-	findOptions := []flavors.FlavorFindOption{request.IgnoreMissing(true), flavors.WithFlavorFindExtraSpecs(flavorQueryExtra(config.Options, true))}
+	extra := flavorQueryExtra(config.Options, true)
+	findOptions := []flavors.FlavorFindOption{request.IgnoreMissing(true), request.Custom(func(c *request.Config[flavors.FlavorFindOpts]) error { c.Options.GetExtraSpecs = extra; return nil })}
 	if config.Options.Microversion != nil {
 		findOptions = append(findOptions, request.Microversion(*config.Options.Microversion))
 	}

@@ -17,18 +17,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network.FloatingIPs.Allocate`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateServer`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreatePort`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateFixedAddress`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateNATDestination`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWait`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateSource`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateStrict`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateDirectGet`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPCreateTimeout`
 
@@ -96,7 +90,7 @@ Examples use the surrounding guide's service object and context unless they decl
 networkName := "public"
 result, err := conn.CreateFloatingIP(ctx,
 	compute.CreateFloatingIPRequest{Network: &networkName},
-	compute.WithFloatingIPCreateServer(resource.ID(serverID)),
+	func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID(serverID); return nil },
 	compute.WithFloatingIPCreateWait(true),
 )
 ```
@@ -145,17 +139,17 @@ func run() error {
 		}
 	})
 	opts := []compute.FloatingIPCreateOption{
-		compute.WithFloatingIPCreatePort(*portID),
-		compute.WithFloatingIPCreateFixedAddress(*fixed),
-		compute.WithFloatingIPCreateNATDestination(*nat),
+		func(c *compute.FloatingIPCreateOpts) error { c.PortID = *portID; return nil },
+		func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = *fixed; return nil },
+		func(c *compute.FloatingIPCreateOpts) error { c.NATDestination = *nat; return nil },
 		compute.WithFloatingIPCreateWait(*wait),
 		compute.WithFloatingIPCreateWaitTimeout(*waitTimeout),
 	}
 	if *serverID != "" {
-		opts = append(opts, compute.WithFloatingIPCreateServer(resource.ID(*serverID)))
+		opts = append(opts, func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID(*serverID); return nil })
 	}
 	if *source != "" {
-		opts = append(opts, compute.WithFloatingIPCreateSource(compute.FloatingIPSource(*source)))
+		opts = append(opts, func(c *compute.FloatingIPCreateOpts) error { v := compute.FloatingIPSource(*source); c.Source = &v; return nil })
 	}
 	if *timeout != 0 {
 		opts = append(opts, compute.WithFloatingIPCreateTimeout(*timeout))

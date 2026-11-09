@@ -16,7 +16,7 @@ func TestFloatingIPCreateOptionsDefaultsBulkAndIgnoredSelectors(t *testing.T) {
 	if err != nil || p.Wait || p.WaitTimeout != time.Minute || p.WaitOptions != nil || p.Timeout != 0 || p.Source != nil {
 		t.Fatal(p, err)
 	}
-	p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateWaitTimeout(-time.Second), compute.WithFloatingIPCreateServer(resource.ID("ignored/path")), compute.WithFloatingIPCreateFixedAddress("literal IPv6 or arbitrary"))
+	p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateWaitTimeout(-time.Second), func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID("ignored/path"); return nil }, func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = "literal IPv6 or arbitrary"; return nil })
 	if err != nil || p.WaitTimeout != -time.Second || p.Server.String() != "ignored/path" {
 		t.Fatal(p, err)
 	}
@@ -50,7 +50,11 @@ func TestFloatingIPCreateOptionsOwnSnapshotsAndApplyOnce(t *testing.T) {
 	}
 }
 func TestFloatingIPCreateOptionsPreflightAndCancellation(t *testing.T) {
-	for _, option := range []compute.FloatingIPCreateOption{nil, compute.WithFloatingIPCreateSource("invalid"), compute.WithFloatingIPCreateTimeout(0), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(0)), compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{WaitOptions: []resource.WaitOption{resource.WithPollInterval(-1)}})} {
+	for _, option := range []compute.FloatingIPCreateOption{nil, func(c *compute.FloatingIPCreateOpts) error {
+		v := compute.FloatingIPSource("invalid")
+		c.Source = &v
+		return nil
+	}, compute.WithFloatingIPCreateTimeout(0), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(0)), compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{WaitOptions: []resource.WaitOption{resource.WithPollInterval(-1)}})} {
 		if _, err := compute.PrepareFloatingIPCreateOptions(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

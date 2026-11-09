@@ -15,6 +15,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/jsonfilter"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -256,14 +257,14 @@ func (s *Service) GetFlavorByRAM(ctx context.Context, ram any, options ...Flavor
 	if err != nil {
 		return nil, flavorCloudFailure(op, invalid("include requires complete UTF-8 JSON: %v", err))
 	}
-	queryOptions := []FlavorQueryOption{WithFlavorQueryExtraSpecs(true)}
+	queryOptions := []FlavorQueryOption{request.Custom(func(c *request.Config[FlavorQueryOpts]) error { v := true; c.Options.GetExtra = &v; return nil })}
 	queryOptions = append(queryOptions, cfg.QueryOptions...)
 	if cfg.GetExtra != nil {
 		extra, cause := cloudfilter.PythonJSONTruthy(*cfg.GetExtra)
 		if cause != nil {
 			return nil, flavorCloudFailure(op, invalid("get_extra requires JSON: %v", cause))
 		}
-		queryOptions = append(queryOptions, WithFlavorQueryExtraSpecs(extra))
+		queryOptions = append(queryOptions, request.Custom(func(c *request.Config[FlavorQueryOpts]) error { v := extra; c.Options.GetExtra = &v; return nil }))
 	}
 	prepared, err := p.prepareQuery(queryOptions)
 	if err == nil && prepared.Options.Filters != nil {

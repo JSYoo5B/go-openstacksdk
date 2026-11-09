@@ -21,19 +21,11 @@ type LockServerOpts struct {
 	LockedReason *string `json:"locked_reason"`
 }
 
-// LockServerOption is one option of LockWithOptions: WithLockedReason,
-// request.Header, request.Field or request.Custom over
-// *request.Config[LockServerOpts] (for example to clear LockedReason). Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// LockServerOption is one option of LockWithOptions: request.Header,
+// request.Field or request.Custom over *request.Config[LockServerOpts] (for
+// example to set LockedReason, or to clear LockedReason). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type LockServerOption = request.WriteCall
-
-func WithLockedReason(value string) LockServerOption {
-	return request.Custom(func(c *request.Config[LockServerOpts]) error {
-		owned := value
-		c.Options.LockedReason = &owned
-		return nil
-	})
-}
 
 // UnshelveServerOpts separates the default zone from an explicit null zone.
 // ZoneSet=true, AvailabilityZone=nil unpins the zone (microversion 2.91).
@@ -44,16 +36,13 @@ type UnshelveServerOpts struct {
 	ZoneSet          bool    `json:"-"`
 }
 
-// UnshelveServerOption is one option of UnshelveWithOptions: WithUnshelveHost,
+// UnshelveServerOption is one option of UnshelveWithOptions:
 // WithUnshelveAvailabilityZone, WithUnshelveUnpinnedAvailabilityZone,
 // WithUnshelveDefaultAvailabilityZone, request.Header, request.Field or
-// request.Custom over *request.Config[UnshelveServerOpts]. Other shared calls
-// fail with resource.ErrInvalidOption before HTTP.
+// request.Custom over *request.Config[UnshelveServerOpts] (for example to set
+// Host). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type UnshelveServerOption = request.WriteCall
 
-func WithUnshelveHost(value string) UnshelveServerOption {
-	return request.Custom(func(c *request.Config[UnshelveServerOpts]) error { c.Options.Host = value; return nil })
-}
 func WithUnshelveAvailabilityZone(value string) UnshelveServerOption {
 	return request.Custom(func(c *request.Config[UnshelveServerOpts]) error {
 		owned := value
@@ -83,17 +72,8 @@ type FloatingIPServerOpts struct {
 	FixedAddress *string `json:"fixed_address"`
 }
 
-// FloatingIPServerOption is one option of AddFloatingIP:
-// WithFloatingIPFixedAddress, request.Header, request.Field or request.Custom
-// over *request.Config[FloatingIPServerOpts] (for example to clear
-// FixedAddress). Other shared calls fail with resource.ErrInvalidOption before
-// HTTP.
+// FloatingIPServerOption is one option of AddFloatingIP: request.Header,
+// request.Field or request.Custom over *request.Config[FloatingIPServerOpts]
+// (for example to set FixedAddress, or to clear FixedAddress). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type FloatingIPServerOption = request.WriteCall
-
-func WithFloatingIPFixedAddress(value string) FloatingIPServerOption {
-	return request.Custom(func(c *request.Config[FloatingIPServerOpts]) error {
-		owned := value
-		c.Options.FixedAddress = &owned
-		return nil
-	})
-}

@@ -111,7 +111,7 @@ func TestComputeCloudKeypairQueryCompositionAndPresence(t *testing.T) {
 				options = append(options, compute.WithKeypairQueryFilters(json.RawMessage(tc.filters)))
 			}
 			if tc.operation == "get" {
-				options = append(options, compute.WithKeypairQueryUserID("owner+team"))
+				options = append(options, request.Custom(func(c *request.Config[compute.KeypairQueryOpts]) error { c.Options.UserID = "owner+team"; return nil }))
 			}
 			var inventory, selected []*keypairs.KeypairRecord
 			var value json.RawMessage
@@ -212,7 +212,10 @@ func TestComputeCloudKeypairCreateAndDeleteOutcomes(t *testing.T) {
 				}
 				testcloud.JSON(w, 201, `{"keypair":{}}`)
 			})
-			record, err := compute.New(client, compute.Dependencies{}).CreateKeypair(context.Background(), tc.name, compute.WithCloudKeypairPublicKey(tc.publicKey), request.Header("X-Cloud-Create", "owned"))
+			record, err := compute.New(client, compute.Dependencies{}).CreateKeypair(context.Background(), tc.name, request.Custom(func(c *request.Config[compute.CloudKeypairCreateOpts]) error {
+				c.Options.PublicKey = tc.publicKey
+				return nil
+			}), request.Header("X-Cloud-Create", "owned"))
 			name, _ := json.Marshal(tc.name)
 			if err != nil || record == nil || record.Resource == nil || string(record.Resource.Body["name"]) != string(name) || string(record.Resource.Body["type"]) != `"ssh"` || string(record.Resource.Body["location"]) != `null` || calls.Load() != 1 {
 				t.Fatal("Cloud create lost seed/default or rejected body name", record, err, calls.Load())

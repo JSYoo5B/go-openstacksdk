@@ -13,7 +13,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups.WithGroupFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -45,7 +45,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.VolumeAttachmentScope.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentOffset`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach.WithAttachmentListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
@@ -127,6 +128,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/servergroups"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/volumeattach"
@@ -156,7 +158,7 @@ func main() {
     if *serverID != "" {
         for value, err := range service.VolumeAttachments.ListRecords(ctx, *serverID,
             request.Limit(20),
-            volumeattach.WithAttachmentOffset(0),
+            request.Custom(func(c *volumeattach.AttachmentListOpts) error { v := 0; c.Offset = &v; return nil }),
             request.MaxItems(100)) {
             if err != nil { log.Fatal(err) }
             printJSON(value.Resource)
@@ -165,7 +167,7 @@ func main() {
     if *groupName != "" {
         value, err := service.ServerGroups.FindRecord(ctx, *groupName,
             request.IgnoreMissing(false),
-            servergroups.WithGroupFindAllProjects(*allProjects))
+            request.Custom(func(c *servergroups.GroupFindOpts) error { c.AllProjects = *allProjects; return nil }))
         if err != nil { log.Fatal(err) }
         printJSON(value.Resource)
     }

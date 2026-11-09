@@ -66,7 +66,7 @@ func TestFloatingIPQueryMemberProjectionAndUUIDDirectGet(t *testing.T) {
 			state.reply = func(r *http.Request) (int, string) {
 				return 200, `{"floatingip":{"floating_ip_address":null,"extension":true}}`
 			}
-			result, err := conn.GetFloatingIP(context.Background(), compute.GetFloatingIPRequest{ID: id}, compute.WithFloatingIPQueryDirectGet(true), compute.WithFloatingIPQueryFilters(json.RawMessage(`invalid`)))
+			result, err := conn.GetFloatingIP(context.Background(), compute.GetFloatingIPRequest{ID: id}, func(c *compute.FloatingIPQueryOpts) error { c.DirectGet = true; return nil }, compute.WithFloatingIPQueryFilters(json.RawMessage(`invalid`)))
 			if err != nil || result.Observed.StatusCode != 200 || len(state.paths) != 1 || !strings.Contains(state.paths[0], "/floatingips/") {
 				t.Fatal(result, err, state)
 			}
@@ -282,7 +282,7 @@ func TestFloatingIPQueryOptionsBudgetOwnershipAndSourceCapture(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	_, err = service.ListFloatingIPs(context.Background(), beforeAvailableOption(func() { service.Servers = nil }, compute.WithFloatingIPQuerySource(compute.FloatingIPNova)))
+	_, err = service.ListFloatingIPs(context.Background(), beforeAvailableOption(func() { service.Servers = nil }, func(c *compute.FloatingIPQueryOpts) error { v := compute.FloatingIPNova; c.Source = &v; return nil }))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(state.paths) != 0 {
 		t.Fatal(err, state)
 	}
@@ -374,7 +374,7 @@ func TestFloatingIPQueryNovaMemberStrictAndActualResponse(t *testing.T) {
 				state.reply = func(*http.Request) (int, string) {
 					return 200, `{"floating_ip":{"id":9007199254740993,"ip":"known","pool":"public","status":"ERROR","vendor":true}}`
 				}
-				result, err := conn.GetFloatingIPByID(context.Background(), compute.GetFloatingIPByIDRequest{ID: "9007199254740993"}, compute.WithFloatingIPQueryStrict(strict))
+				result, err := conn.GetFloatingIPByID(context.Background(), compute.GetFloatingIPByIDRequest{ID: "9007199254740993"}, func(c *compute.FloatingIPQueryOpts) error { c.Strict = strict; return nil })
 				if err != nil || result.FloatingIP == nil || result.Observed == nil || result.Failure != nil || result.Observed.StatusCode != 200 || len(state.paths) != 1 || result.FloatingIP.Backend != compute.FloatingIPNova {
 					t.Fatal(result, err, state)
 				}

@@ -228,7 +228,7 @@ func TestPythonNovaImageListQueryDetailLocalFiltersAndCaps(t *testing.T) {
 	if call.path != "/nova/v2.1/images/detail" || call.query != want {
 		t.Fatal(call)
 	}
-	ids, err = novaImageIDs(t, api, images.WithListDetails(false), request.Limit(0), request.MaxItems(1), request.Query("created_at", "other"))
+	ids, err = novaImageIDs(t, api, request.Custom(func(c *images.ListOpts) error { v := false; c.Details = &v; return nil }), request.Limit(0), request.MaxItems(1), request.Query("created_at", "other"))
 	if err != nil || len(ids) != 0 {
 		t.Fatal("cap must count raw rows before filter", ids, err)
 	}

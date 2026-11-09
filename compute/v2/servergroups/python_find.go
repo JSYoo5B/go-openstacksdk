@@ -260,9 +260,9 @@ type GroupFindOpts struct {
 }
 
 // GroupFindOption is one option of FindRecord: WithGroupFindOpts,
-// WithGroupFindAllProjects, request.IgnoreMissing, request.Headers (replaces
-// the headers) or request.Custom over *GroupFindOpts. Other shared calls fail
-// with resource.ErrInvalidOption before HTTP.
+// request.IgnoreMissing, request.Headers (replaces the headers) or
+// request.Custom over *GroupFindOpts (for example to set AllProjects). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type GroupFindOption = request.FindCall
 
 var groupFindCalls = calls.Spec[GroupFindOpts]{
@@ -281,9 +281,6 @@ func copyGroupFind(v GroupFindOpts) GroupFindOpts {
 func WithGroupFindOpts(value GroupFindOpts) GroupFindOption {
 	owned := copyGroupFind(value)
 	return request.Custom(func(v *GroupFindOpts) error { *v = copyGroupFind(owned); return nil })
-}
-func WithGroupFindAllProjects(value bool) GroupFindOption {
-	return request.Custom(func(v *GroupFindOpts) error { v.AllProjects = value; return nil })
 }
 
 // FindRecord GETs the literal identity first; a fault-free 400/403/404 permits

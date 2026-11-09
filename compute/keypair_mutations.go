@@ -17,17 +17,14 @@ import (
 // versioned CreateKeypair remains available for nullable full-body attributes.
 type CloudKeypairCreateOpts struct{ PublicKey string }
 
-// CloudKeypairCreateOption is one option of CreateKeypair:
-// WithCloudKeypairPublicKey, request.Header or request.Custom over
-// *request.Config[CloudKeypairCreateOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// CloudKeypairCreateOption is one option of CreateKeypair: request.Header or
+// request.Custom over *request.Config[CloudKeypairCreateOpts] (for example to
+// set PublicKey). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type CloudKeypairCreateOption = request.WriteCall
 
 var cloudKeypairCreateCalls = calls.Spec[request.Config[CloudKeypairCreateOpts]]{Header: calls.ConfigHeader[CloudKeypairCreateOpts]}
 
-func WithCloudKeypairPublicKey(value string) CloudKeypairCreateOption {
-	return request.Custom(func(c *request.Config[CloudKeypairCreateOpts]) error { c.Options.PublicKey = value; return nil })
-}
 func (s *Service) CreateKeypair(ctx context.Context, name string, options ...CloudKeypairCreateOption) (*keypairs.KeypairRecord, error) {
 	p, err := s.captureKeypairs(ctx)
 	if err != nil {

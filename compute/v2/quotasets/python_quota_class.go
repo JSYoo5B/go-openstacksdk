@@ -65,9 +65,10 @@ type QuotaClassGetOpts struct {
 }
 
 // QuotaClassGetOption is one option of GetQuotaClassRecord:
-// WithQuotaClassGetOpts, WithQuotaClassName, request.Headers (replaces the
-// headers), request.Microversion or request.Custom over *QuotaClassGetOpts.
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithQuotaClassGetOpts, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *QuotaClassGetOpts (for example
+// to set Name). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type QuotaClassGetOption = request.GetCall
 
 var quotaClassGetCalls = calls.Spec[QuotaClassGetOpts]{
@@ -90,9 +91,6 @@ func copyQuotaClassGetOpts(v QuotaClassGetOpts) QuotaClassGetOpts {
 func WithQuotaClassGetOpts(v QuotaClassGetOpts) QuotaClassGetOption {
 	owned := copyQuotaClassGetOpts(v)
 	return request.Custom(func(c *QuotaClassGetOpts) error { *c = copyQuotaClassGetOpts(owned); return nil })
-}
-func WithQuotaClassName(v string) QuotaClassGetOption {
-	return request.Custom(func(c *QuotaClassGetOpts) error { x := v; c.Name = &x; return nil })
 }
 
 // QuotaClassUpdateOpts describes a newly seeded string-ID commit. Attributes

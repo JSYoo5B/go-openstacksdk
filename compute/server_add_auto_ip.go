@@ -206,7 +206,7 @@ func (s *Service) AddAutoIP(ctx context.Context, server *Server, options ...AddA
 		result.NeutronFloating = available.Backend == FloatingIPNeutron || available.FallbackError != nil
 		port, _ = floatingIPRowString(available.FloatingIP, "port_id")
 	} else {
-		create := append([]FloatingIPCreateOption{WithFloatingIPCreateServer(resource.ID(snapshot.ID)), WithFloatingIPCreateWait(o.wait), o.createWaitBudget()}, o.create...)
+		create := append([]FloatingIPCreateOption{func(c *FloatingIPCreateOpts) error { c.Server = resource.ID(snapshot.ID); return nil }, WithFloatingIPCreateWait(o.wait), o.createWaitBudget()}, o.create...)
 		created, err := s.CreateFloatingIP(ctx, CreateFloatingIPRequest{}, create...)
 		result.Creation = created
 		if err != nil {

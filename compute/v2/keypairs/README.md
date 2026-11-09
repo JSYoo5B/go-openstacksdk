@@ -36,7 +36,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.DeleteKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteUserID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairDeleteQuery`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
@@ -185,7 +185,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.FindKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindUserID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Find always attempts the escaped fixed member GET for accepted literal UTF-8 input and optional truthy owner. A successful member response returns its input-name/owner-seeded Resource with response fields overriding seed including null, while Wire and Envelope contain only actual response data. Opaque/malformed/empty accepted bodies retain the seed with nil Wire; valid nonobject/envelope failures retain a receipt beside the error.

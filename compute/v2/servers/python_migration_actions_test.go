@@ -36,11 +36,23 @@ func TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys(t *testing.T) {
 		{`{"evacuate":{}}`, func() error { return api.EvacuateWithOptions(ctx, "s1") }},
 		// evacuate_server(server, host="h", admin_pass="", force=False)
 		{`{"evacuate":{"adminPass":"","force":false,"host":"h"}}`, func() error {
-			return api.EvacuateWithOptions(ctx, "s1", servers.WithEvacuateServerHost("h"), servers.WithEvacuateServerAdminPass(""), servers.WithEvacuateServerForce(false))
+			return api.EvacuateWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.EvacuateServerOpts]) error { v := "h"; c.Options.Host = &v; return nil }), request.Custom(func(c *request.Config[servers.EvacuateServerOpts]) error {
+				v := ""
+				c.Options.AdminPass = &v
+				return nil
+			}), request.Custom(func(c *request.Config[servers.EvacuateServerOpts]) error {
+				v := false
+				c.Options.Force = &v
+				return nil
+			}))
 		}},
 		// evacuate_server(server, on_shared_storage=True)
 		{`{"evacuate":{"onSharedStorage":true}}`, func() error {
-			return api.EvacuateWithOptions(ctx, "s1", servers.WithEvacuateServerOnSharedStorage(true))
+			return api.EvacuateWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.EvacuateServerOpts]) error {
+				v := true
+				c.Options.OnSharedStorage = &v
+				return nil
+			}))
 		}},
 		{`{"evacuate":{"host":"h","x-ext":1}}`, func() error {
 			return api.EvacuateWithOptions(ctx, "s1", servers.WithEvacuateServerOptions(servers.EvacuateServerOpts{Host: pythonMigrationPtr("h")}), request.Field("x-ext", 1))
@@ -48,9 +60,13 @@ func TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys(t *testing.T) {
 		// migrate_server(server)
 		{`{"migrate":null}`, func() error { return api.MigrateWithOptions(ctx, "s1") }},
 		// migrate_server(server, host="") keeps Python's truthiness check.
-		{`{"migrate":null}`, func() error { return api.MigrateWithOptions(ctx, "s1", servers.WithMigrateServerHost("")) }},
+		{`{"migrate":null}`, func() error {
+			return api.MigrateWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.MigrateServerOpts]) error { c.Options.Host = ""; return nil }))
+		}},
 		// migrate_server(server, host="h")
-		{`{"migrate":{"host":"h"}}`, func() error { return api.MigrateWithOptions(ctx, "s1", servers.WithMigrateServerHost("h")) }},
+		{`{"migrate":{"host":"h"}}`, func() error {
+			return api.MigrateWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.MigrateServerOpts]) error { c.Options.Host = "h"; return nil }))
+		}},
 	}
 	for i, step := range steps {
 		if err := step.call(); err != nil {
@@ -63,7 +79,7 @@ func TestPythonMigrationEvacuateAndMigrateSendOnlySuppliedKeys(t *testing.T) {
 	}
 
 	old, oldCalls := pythonMigrationAPI(t, "2.55", http.StatusAccepted)
-	if err := old.MigrateWithOptions(ctx, "s1", servers.WithMigrateServerHost("h")); !errors.Is(err, resource.ErrUnsupported) {
+	if err := old.MigrateWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.MigrateServerOpts]) error { c.Options.Host = "h"; return nil })); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
 	if err := old.MigrateWithOptions(ctx, "s1"); err != nil {
@@ -84,17 +100,17 @@ func TestPythonMigrationLiveMigrateFollowsSelectedMicroversionShape(t *testing.T
 		{"default 2.30", "2.96", "2.30", `{"os-migrateLive":{"block_migration":"auto","host":null}}`, nil},
 		{"latest", "latest", "2.30", `{"os-migrateLive":{"block_migration":"auto","host":null}}`, nil},
 		{"host force 2.30", "2.30", "2.30", `{"os-migrateLive":{"block_migration":false,"force":true,"host":"h"}}`, []servers.LiveMigrateServerOption{
-			servers.WithLiveMigrateServerHost("h"), servers.WithLiveMigrateServerForce(true), servers.WithLiveMigrateServerBlockMigration(false),
+			request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Host = "h"; return nil }), request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Force = true; return nil }), servers.WithLiveMigrateServerBlockMigration(false),
 		}},
 		{"host without force 2.30", "2.96", "2.30", `{"os-migrateLive":{"block_migration":"auto","host":"h"}}`, []servers.LiveMigrateServerOption{
-			servers.WithLiveMigrateServerHost("h"),
+			request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Host = "h"; return nil }),
 		}},
 		{"force without host 2.30", "2.96", "2.30", `{"os-migrateLive":{"block_migration":true,"host":null}}`, []servers.LiveMigrateServerOption{
-			servers.WithLiveMigrateServerForce(true), servers.WithLiveMigrateServerBlockMigration(true),
+			request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Force = true; return nil }), servers.WithLiveMigrateServerBlockMigration(true),
 		}},
 		{"default 2.25", "2.29", "2.25", `{"os-migrateLive":{"block_migration":"auto","host":null}}`, nil},
 		{"host force 2.25", "2.25", "2.25", `{"os-migrateLive":{"block_migration":"auto","host":"h"}}`, []servers.LiveMigrateServerOption{
-			servers.WithLiveMigrateServerHost("h"), servers.WithLiveMigrateServerForce(true), servers.WithLiveMigrateServerBlockMigration(true), servers.WithLiveMigrateServerAutoBlockMigration(),
+			request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Host = "h"; return nil }), request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Force = true; return nil }), servers.WithLiveMigrateServerBlockMigration(true), servers.WithLiveMigrateServerAutoBlockMigration(),
 		}},
 		{"default legacy", "2.24", "2.24", `{"os-migrateLive":{"block_migration":false,"disk_over_commit":false,"host":null}}`, nil},
 		{"legacy values", "2.1", "2.1", `{"os-migrateLive":{"block_migration":true,"disk_over_commit":true,"host":"h"}}`, []servers.LiveMigrateServerOption{
@@ -118,8 +134,8 @@ func TestPythonMigrationLiveMigrateFollowsSelectedMicroversionShape(t *testing.T
 		name, client string
 		options      []servers.LiveMigrateServerOption
 	}{
-		{"host without force 2.25", "2.29", []servers.LiveMigrateServerOption{servers.WithLiveMigrateServerHost("h")}},
-		{"host without force legacy", "2.24", []servers.LiveMigrateServerOption{servers.WithLiveMigrateServerHost("h")}},
+		{"host without force 2.25", "2.29", []servers.LiveMigrateServerOption{request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Host = "h"; return nil })}},
+		{"host without force legacy", "2.24", []servers.LiveMigrateServerOption{request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Host = "h"; return nil })}},
 		{"auto legacy", "2.24", []servers.LiveMigrateServerOption{servers.WithLiveMigrateServerAutoBlockMigration()}},
 		{"auto and boolean", "2.96", []servers.LiveMigrateServerOption{
 			servers.WithLiveMigrateServerOptions(servers.LiveMigrateServerOpts{AutoBlockMigration: true, BlockMigration: pythonMigrationPtr(false)}),
@@ -177,7 +193,7 @@ func TestPythonMigrationActionsStatusesAndPreflight(t *testing.T) {
 		api.EvacuateWithOptions(ctx, "s1", nil),
 		api.EvacuateWithOptions(ctx, "s1", request.Field("onSharedStorage", false)),
 		api.MigrateWithOptions(ctx, "s1", request.Field("host", "h")),
-		api.LiveMigrateWithOptions(ctx, "", servers.WithLiveMigrateServerHost("h")),
+		api.LiveMigrateWithOptions(ctx, "", request.Custom(func(c *request.Config[servers.LiveMigrateServerOpts]) error { c.Options.Host = "h"; return nil })),
 	} {
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)

@@ -36,7 +36,11 @@ func TestFloatingIPUnattachedPreflightAndCapturedSource(t *testing.T) {
 			case "nil-option":
 				options = []compute.FloatingIPDeleteOption{nil}
 			case "source":
-				options = []compute.FloatingIPDeleteOption{compute.WithFloatingIPDeleteSource("invalid")}
+				options = []compute.FloatingIPDeleteOption{func(c *compute.FloatingIPDeleteOpts) error {
+					v := compute.FloatingIPSource("invalid")
+					c.Source = &v
+					return nil
+				}}
 			case "timeout":
 				options = []compute.FloatingIPDeleteOption{compute.WithFloatingIPDeleteTimeout(0)}
 			case "bulk-timeout":
@@ -97,7 +101,7 @@ func TestFloatingIPUnattachedCompletedDeleteSurvivesAggregateGuardFailure(t *tes
 			}
 			return nil
 		})
-		result, err := conn.DeleteUnattachedFloatingIPs(ctx, compute.WithFloatingIPDeleteRetries(0))
+		result, err := conn.DeleteUnattachedFloatingIPs(ctx, func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 0; return nil })
 		if failAt != 0 {
 			if !errors.Is(err, cause) || (result != nil && result.AllDeleted) || len(unattachedDeletes(state.events)) > 1 {
 				t.Fatal(failAt, result, err, state)
@@ -145,7 +149,7 @@ func TestFloatingIPUnattachedCachedServiceAndConnectionShareDependencies(t *test
 	}
 	calls := 0
 	options := []compute.FloatingIPDeleteOption{
-		compute.WithFloatingIPDeleteSource(compute.FloatingIPNeutron),
+		func(c *compute.FloatingIPDeleteOpts) error { v := compute.FloatingIPNeutron; c.Source = &v; return nil },
 		compute.WithFloatingIPDeleteTimeout(time.Minute),
 		func(*compute.FloatingIPDeleteOpts) error { calls++; return nil },
 	}

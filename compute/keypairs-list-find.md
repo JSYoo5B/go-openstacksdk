@@ -45,7 +45,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.API.FindKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs.WithKeypairFindUserID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Find always attempts the escaped fixed member GET for accepted literal UTF-8 input and optional truthy owner. A successful member response returns its input-name/owner-seeded Resource with response fields overriding seed including null, while Wire and Envelope contain only actual response data. Opaque/malformed/empty accepted bodies retain the seed with nil Wire; valid nonobject/envelope failures retain a receipt beside the error.
@@ -119,7 +119,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithKeypairQueryFilters`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithKeypairQueryUserID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithKeypairQueryOptions`
 
 - Absent or explicit JSON null filters delegate to the existing FindKeypair with the supplied owner. Even a present empty dictionary or empty string delegates to complete Cloud search instead of member lookup and intentionally does not forward UserID. This follows filters-is-not-None rather than filters truthiness.
   Tests: `api/compute_keypair_cloud_test.go:TestComputeCloudKeypairQueryCompositionAndPresence`, `api/compute_keypair_find_test.go:TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback`.
@@ -166,6 +167,7 @@ import (
     "os"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
 )
@@ -206,7 +208,7 @@ func run(ctx context.Context, name, owner, kind string, maximum int, strict bool
     }
     if name != "" {
         options := []keypairs.KeypairFindOption{
-            keypairs.WithKeypairFindUserID(owner),
+            request.Custom(func(c *request.Config[keypairs.KeypairFindOpts]) error { c.Options.UserID = owner; return nil }),
             request.IgnoreMissing(!strict),
         }
         if versionSet { options = append(options, request.Microversion(version)) }
@@ -219,7 +221,7 @@ func run(ctx context.Context, name, owner, kind string, maximum int, strict bool
         return nil
     }
     options := []keypairs.KeypairListOption{
-        keypairs.WithKeypairListUserID(owner),
+        request.Custom(func(c *request.Config[keypairs.KeypairListOpts]) error { c.Options.UserID = owner; return nil }),
         request.MaxItems(maximum),
     }
     if kind != "" { options = append(options, keypairs.WithKeypairListFilter("type", kind)) }

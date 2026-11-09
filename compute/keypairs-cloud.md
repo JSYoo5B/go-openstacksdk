@@ -66,7 +66,8 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.GetKeypair`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithKeypairQueryFilters`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithKeypairQueryUserID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/compute.WithKeypairQueryOptions`
 
 - Absent or explicit JSON null filters delegate to the existing FindKeypair with the supplied owner. Even a present empty dictionary or empty string delegates to complete Cloud search instead of member lookup and intentionally does not forward UserID. This follows filters-is-not-None rather than filters truthiness.
   Tests: `api/compute_keypair_cloud_test.go:TestComputeCloudKeypairQueryCompositionAndPresence`, `api/compute_keypair_find_test.go:TestComputeFindKeypairDirectSeedAndOwnerPreservingFullListFallback`.
@@ -91,7 +92,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.CreateKeypair`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithCloudKeypairPublicKey`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
 - Cloud CreateKeypair always supplies name as literal body data, including an empty or path-like body name, and supplies public_key only for a nonempty string. Empty public key is omitted rather than forwarded as the leaf's explicit empty attribute. The library composes the existing one fixed keypair-enveloped collection POST without lookup, wait or cleanup.
@@ -157,6 +158,7 @@ import (
     "os"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
 )
@@ -184,7 +186,7 @@ func run(ctx context.Context, operation, name, filters string, filtersSet bool, 
     if err != nil { return err }
     service, err := conn.Compute(ctx)
     if err != nil { return err }
-    options := []compute.KeypairQueryOption{compute.WithKeypairQueryUserID(owner)}
+    options := []compute.KeypairQueryOption{request.Custom(func(c *request.Config[compute.KeypairQueryOpts]) error { c.Options.UserID = owner; return nil })}
     if filtersSet {
         options = append(options, compute.WithKeypairQueryFilters(json.RawMessage(filters)))
     }
@@ -204,7 +206,7 @@ func run(ctx context.Context, operation, name, filters string, filtersSet bool, 
         result, err := service.GetKeypair(ctx, name, options...)
         return printResult(result, err)
     case "create":
-        result, err := service.CreateKeypair(ctx, name, compute.WithCloudKeypairPublicKey(publicKey))
+        result, err := service.CreateKeypair(ctx, name, request.Custom(func(c *request.Config[compute.CloudKeypairCreateOpts]) error { c.Options.PublicKey = publicKey; return nil }))
         return printResult(result, err)
     case "delete":
         deleted, err := service.DeleteKeypair(ctx, name)

@@ -213,7 +213,7 @@ func TestComputeFindFlavorFallbackTerminalErrorsAndConnectedLocation(t *testing.
 				options = append(options, request.Microversion(""))
 			}
 			if mode == "unique enriches after full list" || mode == "duplicate next page" || mode == "late403 after match" {
-				options = append(options, flavors.WithFlavorFindExtraSpecs(true))
+				options = append(options, request.Custom(func(c *request.Config[flavors.FlavorFindOpts]) error { c.Options.GetExtraSpecs = true; return nil }))
 			}
 			var gets, lists, specs, discoveries, callbacks atomic.Int32
 			options = append(options, request.Custom(func(_ *request.Config[flavors.FlavorFindOpts]) error { callbacks.Add(1); return nil }))

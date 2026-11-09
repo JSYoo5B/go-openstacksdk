@@ -30,9 +30,9 @@ type KeypairDeleteOpts struct {
 }
 
 // KeypairDeleteOption is one option of DeleteKeypair: WithKeypairDeleteOptions,
-// WithKeypairDeleteUserID, WithKeypairDeleteQuery, request.IgnoreMissing,
-// request.Header or request.Custom over *request.Config[KeypairDeleteOpts].
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// WithKeypairDeleteQuery, request.IgnoreMissing, request.Header or
+// request.Custom over *request.Config[KeypairDeleteOpts] (for example to set
+// UserID). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type KeypairDeleteOption = request.DeleteCall
 
 var keypairDeleteCalls = calls.Spec[request.Config[KeypairDeleteOpts]]{
@@ -45,13 +45,6 @@ var keypairDeleteCalls = calls.Spec[request.Config[KeypairDeleteOpts]]{
 
 func WithKeypairDeleteOptions(value KeypairDeleteOpts) KeypairDeleteOption {
 	return request.Custom(request.WithOptions(value))
-}
-
-func WithKeypairDeleteUserID(value string) KeypairDeleteOption {
-	return request.Custom(func(config *request.Config[KeypairDeleteOpts]) error {
-		config.Options.UserID = value
-		return nil
-	})
 }
 
 // WithKeypairDeleteQuery adds a wire extension. The owner and local missing

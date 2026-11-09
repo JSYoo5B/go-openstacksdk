@@ -137,12 +137,12 @@ func (s *Service) AddIPFromPool(ctx context.Context, server *Server, pool resour
 		port, _ = floatingIPRowString(available.FloatingIP, "port_id")
 	} else {
 		name := pool.String()
-		create := []FloatingIPCreateOption{WithFloatingIPCreateServer(resource.ID(snapshot.ID)), WithFloatingIPCreateWait(o.auto.wait), o.auto.createWaitBudget()}
+		create := []FloatingIPCreateOption{func(c *FloatingIPCreateOpts) error { c.Server = resource.ID(snapshot.ID); return nil }, WithFloatingIPCreateWait(o.auto.wait), o.auto.createWaitBudget()}
 		if o.fixed != "" {
-			create = append(create, WithFloatingIPCreateFixedAddress(o.fixed))
+			create = append(create, func(c *FloatingIPCreateOpts) error { c.FixedAddress = o.fixed; return nil })
 		}
 		if o.natDest != "" {
-			create = append(create, WithFloatingIPCreateNATDestination(o.natDest))
+			create = append(create, func(c *FloatingIPCreateOpts) error { c.NATDestination = o.natDest; return nil })
 		}
 		created, err := s.CreateFloatingIP(ctx, CreateFloatingIPRequest{Network: &name}, append(create, o.auto.create...)...)
 		result.Creation = created

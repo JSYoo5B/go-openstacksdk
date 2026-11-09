@@ -32,11 +32,10 @@ type ConsoleCreateOpts struct {
 }
 
 // ConsoleCreateOption is one option of CreateConsole: WithConsoleCreateOptions,
-// WithConsoleCreateProtocol, WithConsoleCreateProtocolValue,
-// WithConsoleCreateType, WithConsoleCreateTypeValue, WithConsoleCreateURL,
-// WithConsoleCreateURLValue, request.Field, request.Header or request.Custom
-// over *request.Config[ConsoleCreateOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithConsoleCreateProtocol, WithConsoleCreateType, WithConsoleCreateURL,
+// request.Field, request.Header or request.Custom over
+// *request.Config[ConsoleCreateOpts] (for example to set Protocol, Type or
+// URL). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type ConsoleCreateOption = request.WriteCall
 
 var consoleCreateCalls = calls.Spec[request.Config[ConsoleCreateOpts]]{
@@ -48,22 +47,16 @@ func WithConsoleCreateOptions(value ConsoleCreateOpts) ConsoleCreateOption {
 	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options = value; return nil })
 }
 func WithConsoleCreateProtocol(value string) ConsoleCreateOption {
-	return WithConsoleCreateProtocolValue(request.Present(value))
-}
-func WithConsoleCreateProtocolValue(value request.Optional[string]) ConsoleCreateOption {
-	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options.Protocol = value; return nil })
+	return request.Custom(func(c *request.Config[ConsoleCreateOpts]) error {
+		c.Options.Protocol = request.Present(value)
+		return nil
+	})
 }
 func WithConsoleCreateType(value string) ConsoleCreateOption {
-	return WithConsoleCreateTypeValue(request.Present(value))
-}
-func WithConsoleCreateTypeValue(value request.Optional[string]) ConsoleCreateOption {
-	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options.Type = value; return nil })
+	return request.Custom(func(c *request.Config[ConsoleCreateOpts]) error { c.Options.Type = request.Present(value); return nil })
 }
 func WithConsoleCreateURL(value string) ConsoleCreateOption {
-	return WithConsoleCreateURLValue(request.Present(value))
-}
-func WithConsoleCreateURLValue(value request.Optional[string]) ConsoleCreateOption {
-	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options.URL = value; return nil })
+	return request.Custom(func(c *request.Config[ConsoleCreateOpts]) error { c.Options.URL = request.Present(value); return nil })
 }
 
 // ConsoleRecord separates seeded attributes from the actual selected response

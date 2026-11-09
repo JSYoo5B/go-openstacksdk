@@ -329,7 +329,10 @@ func TestComputeAvailabilityZoneNamesTruthinessSuppressionAndPartialInventory(t 
 			})
 			var options []compute.AvailabilityZoneNamesOption
 			if tc.unavailable {
-				options = append(options, compute.WithUnavailableZones(true))
+				options = append(options, request.Custom(func(c *request.Config[compute.AvailabilityZoneNamesOpts]) error {
+					c.Options.Unavailable = true
+					return nil
+				}))
 			}
 			result, err := compute.New(client, compute.Dependencies{}).ListAvailabilityZoneNames(context.Background(), options...)
 			if result == nil || (err != nil) != tc.invalid || calls.Load() != 1 || len(result.Inventory) != tc.inventory || result.SuppressedError != nil {

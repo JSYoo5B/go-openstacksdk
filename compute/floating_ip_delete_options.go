@@ -29,19 +29,7 @@ func WithFloatingIPDeleteOptions(value FloatingIPDeleteOpts) FloatingIPDeleteOpt
 	owned := cloneFloatingIPDeleteOptions(value)
 	return func(o *FloatingIPDeleteOpts) error { *o = cloneFloatingIPDeleteOptions(owned); return nil }
 }
-func WithFloatingIPDeleteRetries(value int) FloatingIPDeleteOption {
-	return func(o *FloatingIPDeleteOpts) error { o.Retries = value; return nil }
-}
-func WithFloatingIPDeleteSource(value FloatingIPSource) FloatingIPDeleteOption {
-	return func(o *FloatingIPDeleteOpts) error { copy := value; o.Source = &copy; return nil }
-}
 
-func WithFloatingIPDeleteStrict(value bool) FloatingIPDeleteOption {
-	return func(o *FloatingIPDeleteOpts) error { o.Strict = value; return nil }
-}
-func WithFloatingIPDeleteDirectGet(value bool) FloatingIPDeleteOption {
-	return func(o *FloatingIPDeleteOpts) error { o.DirectGet = value; return nil }
-}
 func WithFloatingIPDeleteTimeout(value time.Duration) FloatingIPDeleteOption {
 	return func(o *FloatingIPDeleteOpts) error {
 		if value <= 0 {

@@ -488,7 +488,7 @@ func deleteFloatingIPs(ctx context.Context, deps Dependencies, record *servers.S
 		if err := json.Unmarshal(found.FloatingIP.Resource.Body["id"], &id); err != nil || id == "" {
 			return fmt.Errorf("%w: floating IP %s has no string ID", resource.ErrInvalidOption, address)
 		}
-		deleteOptions := append(slices.Clone(cfg.FloatingIPDelete), compute.WithFloatingIPDeleteRetries(retries))
+		deleteOptions := append(slices.Clone(cfg.FloatingIPDelete), func(c *compute.FloatingIPDeleteOpts) error { c.Retries = retries; return nil })
 		deleted, err := deps.DeleteFloatingIP(ctx, compute.DeleteFloatingIPRequest{ID: id}, deleteOptions...)
 		if err != nil {
 			return err

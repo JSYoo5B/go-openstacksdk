@@ -153,7 +153,11 @@ func TestComputeCloudFlavorEagerInventoryDefaultsAndPartialEvidence(t *testing.T
 				request.Custom(func(_ *request.Config[compute.FlavorQueryOpts]) error { callbacks.Add(1); return nil }),
 			}
 			if tc.extra >= 0 {
-				options = append(options, compute.WithFlavorQueryExtraSpecs(tc.extra == 1))
+				options = append(options, request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error {
+					v := tc.extra == 1
+					c.Options.GetExtra = &v
+					return nil
+				}))
 			}
 			if tc.filters != "" {
 				options = append(options, compute.WithFlavorQueryFilters(json.RawMessage(tc.filters)))
@@ -266,7 +270,11 @@ func TestComputeCloudFlavorSelectionOwnedOptionsAndLocation(t *testing.T) {
 				}
 				testcloud.JSON(w, 200, flavorIdentityPage(tc.inventoryRows, ""))
 			})
-			options := []compute.FlavorQueryOption{compute.WithFlavorQueryExtraSpecs(false)}
+			options := []compute.FlavorQueryOption{request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error {
+				v := false
+				c.Options.GetExtra = &v
+				return nil
+			})}
 			if tc.expression {
 				options = append(options, compute.WithFlavorQueryExpression(tc.filters))
 			} else if tc.filters != "" {
@@ -545,7 +553,11 @@ func TestComputeCloudFlavorGetFindBindingAndFilterPreflight(t *testing.T) {
 				options = append(options, compute.WithFlavorQueryExpression("length(@)"), compute.WithFlavorQueryFilters(nil))
 			}
 			if tc.extra >= 0 {
-				options = append(options, compute.WithFlavorQueryExtraSpecs(tc.extra == 1))
+				options = append(options, request.Custom(func(c *request.Config[compute.FlavorQueryOpts]) error {
+					v := tc.extra == 1
+					c.Options.GetExtra = &v
+					return nil
+				}))
 			}
 			if tc.name == "explicit empty microversion owns member and child without discovery" {
 				options = append(options, request.Microversion(""))

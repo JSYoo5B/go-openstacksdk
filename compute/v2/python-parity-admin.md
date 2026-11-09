@@ -730,7 +730,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.GetQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 

@@ -16,10 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.DeleteUnattachedFloatingIPs`
 - `github.com/JSYoo5B/go-openstacksdk/compute.PrepareFloatingIPDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteRetries`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteSource`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteStrict`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteDirectGet`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPDeleteTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/compute.WithUnlimitedFloatingIPDeleteTimeout`
 
@@ -70,7 +67,7 @@ Examples use the surrounding guide's service object and context unless they decl
 
 ```go
 result, err := conn.DeleteUnattachedFloatingIPs(ctx,
-	compute.WithFloatingIPDeleteRetries(1),
+	func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 1; return nil },
 	compute.WithFloatingIPDeleteTimeout(time.Minute),
 )
 ```
@@ -117,12 +114,12 @@ func run() error {
 		return err
 	}
 	opts := []compute.FloatingIPDeleteOption{
-		compute.WithFloatingIPDeleteRetries(*retry),
-		compute.WithFloatingIPDeleteStrict(*strict),
-		compute.WithFloatingIPDeleteDirectGet(*direct),
+		func(c *compute.FloatingIPDeleteOpts) error { c.Retries = *retry; return nil },
+		func(c *compute.FloatingIPDeleteOpts) error { c.Strict = *strict; return nil },
+		func(c *compute.FloatingIPDeleteOpts) error { c.DirectGet = *direct; return nil },
 	}
 	if *source != "" {
-		opts = append(opts, compute.WithFloatingIPDeleteSource(compute.FloatingIPSource(*source)))
+		opts = append(opts, func(c *compute.FloatingIPDeleteOpts) error { v := compute.FloatingIPSource(*source); c.Source = &v; return nil })
 	}
 	if *timeout == 0 {
 		opts = append(opts, compute.WithUnlimitedFloatingIPDeleteTimeout())

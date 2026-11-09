@@ -136,7 +136,7 @@ func TestFloatingIPQueryOptionsOwnBulkJSONSourceAndLocation(t *testing.T) {
 }
 
 func TestFloatingIPQueryOptionsPreflightAndUnlimitedDefaults(t *testing.T) {
-	for _, options := range [][]FloatingIPQueryOption{{nil}, {WithFloatingIPQuerySource("invalid")}, {WithFloatingIPQueryTimeout(0)}, {WithFloatingIPQueryOptions(FloatingIPQueryOpts{Timeout: -1})}} {
+	for _, options := range [][]FloatingIPQueryOption{{nil}, {func(c *FloatingIPQueryOpts) error { v := FloatingIPSource("invalid"); c.Source = &v; return nil }}, {WithFloatingIPQueryTimeout(0)}, {WithFloatingIPQueryOptions(FloatingIPQueryOpts{Timeout: -1})}} {
 		if _, err := PrepareFloatingIPQueryOptions(context.Background(), options...); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

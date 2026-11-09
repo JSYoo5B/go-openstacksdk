@@ -38,9 +38,6 @@ func WithFloatingIPQueryOptions(value FloatingIPQueryOpts) FloatingIPQueryOption
 	owned := cloneFloatingIPQueryOptions(value)
 	return func(o *FloatingIPQueryOpts) error { *o = cloneFloatingIPQueryOptions(owned); return nil }
 }
-func WithFloatingIPQuerySource(source FloatingIPSource) FloatingIPQueryOption {
-	return func(o *FloatingIPQueryOpts) error { copy := source; o.Source = &copy; return nil }
-}
 func WithFloatingIPQueryFilters(value json.RawMessage) FloatingIPQueryOption {
 	owned := bytes.Clone(value)
 	return func(o *FloatingIPQueryOpts) error {
@@ -54,12 +51,6 @@ func WithFloatingIPQueryExpression(expression string) FloatingIPQueryOption {
 	return WithFloatingIPQueryFilters(raw)
 }
 
-func WithFloatingIPQueryStrict(strict bool) FloatingIPQueryOption {
-	return func(o *FloatingIPQueryOpts) error { o.Strict = strict; return nil }
-}
-func WithFloatingIPQueryDirectGet(enabled bool) FloatingIPQueryOption {
-	return func(o *FloatingIPQueryOpts) error { o.DirectGet = enabled; return nil }
-}
 func WithFloatingIPQueryTimeout(timeout time.Duration) FloatingIPQueryOption {
 	return func(o *FloatingIPQueryOpts) error {
 		if timeout <= 0 {

@@ -35,7 +35,9 @@ type BackupServerOpts struct {
 	Timeout       *time.Duration
 	WaitOptions   []resource.WaitOption
 	ActionOptions []servers.BackupActionOption
-	ImageService  *image.Service
+	// ImageService supplies a concrete Glance service for direct clients. Nil
+	// restores lazy Connection dependency selection.
+	ImageService *image.Service
 }
 type BackupServerOption func(*BackupServerOpts) error
 
@@ -59,12 +61,6 @@ func WithBackupServerWaitOptions(options ...resource.WaitOption) BackupServerOpt
 func WithBackupServerActionOptions(values ...servers.BackupActionOption) BackupServerOption {
 	owned := slices.Clone(values)
 	return func(c *BackupServerOpts) error { c.ActionOptions = append(c.ActionOptions, owned...); return nil }
-}
-
-// WithBackupImageService supplies a concrete Glance service for direct clients.
-// Passing nil restores lazy Connection dependency selection.
-func WithBackupImageService(value *image.Service) BackupServerOption {
-	return func(c *BackupServerOpts) error { c.ImageService = value; return nil }
 }
 
 func copyBackupServerOptions(value BackupServerOpts) BackupServerOpts {
@@ -177,7 +173,7 @@ func (s *Service) BackupServer(ctx context.Context, serverID string, input Backu
 	}
 	if selected == nil {
 		if imageResolver == nil {
-			return fail(result, invalid("backup image dependency is required; direct clients can use WithBackupImageService"))
+			return fail(result, invalid("backup image dependency is required; direct clients can set BackupServerOpts.ImageService"))
 		}
 		selected, err = imageResolver(opctx)
 		if err = errors.Join(err, check(opctx)); err != nil {

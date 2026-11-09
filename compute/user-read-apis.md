@@ -101,7 +101,7 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ConsoleOutput`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputLength`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithConsoleOutputOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
@@ -166,6 +166,7 @@ import (
     "os"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/keypairs"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
@@ -214,7 +215,7 @@ func run(ctx context.Context) error {
         return fmt.Errorf("get keypair: %w", err)
     }
     output, err := service.Servers.ConsoleOutput(ctx, os.Args[1],
-        servers.WithConsoleOutputLength(50))
+        request.Custom(func(c *request.Config[servers.ConsoleOutputOpts]) error { v := 50; c.Options.Length = &v; return nil }))
     if err != nil {
         return fmt.Errorf("get console output: %w", err)
     }

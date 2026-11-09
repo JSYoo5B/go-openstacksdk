@@ -23,13 +23,6 @@ func WithFlavorByIDOptions(value FlavorByIDOpts) FlavorByIDOption {
 	return request.WithOptions(value)
 }
 
-func WithFlavorByIDExtraSpecs(value bool) FlavorByIDOption {
-	return func(config *request.Config[FlavorByIDOpts]) error {
-		config.Options.GetExtraSpecs = value
-		return nil
-	}
-}
-
 // GetFlavorByID owns cloud's default-false enrichment and strict, GET-only
 // identity policy. It reuses the existing typed lookup and native enrichment.
 func (s *Service) GetFlavorByID(ctx context.Context, id string, options ...FlavorByIDOption) (*Flavor, error) {

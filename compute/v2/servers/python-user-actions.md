@@ -69,6 +69,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
 )
@@ -95,9 +96,9 @@ func main() {
     case "restore":
         err = api.Restore(ctx, *id)
     case "lock":
-        err = api.LockWithOptions(ctx, *id, servers.WithLockedReason(*value))
+        err = api.LockWithOptions(ctx, *id, request.Custom(func(c *request.Config[servers.LockServerOpts]) error { v := *value; c.Options.LockedReason = &v; return nil }))
     case "unshelve-host":
-        err = api.UnshelveWithOptions(ctx, *id, servers.WithUnshelveHost(*value))
+        err = api.UnshelveWithOptions(ctx, *id, request.Custom(func(c *request.Config[servers.UnshelveServerOpts]) error { c.Options.Host = *value; return nil }))
     case "unshelve-unpin":
         err = api.UnshelveWithOptions(ctx, *id, servers.WithUnshelveUnpinnedAvailabilityZone())
     case "add-fixed":
@@ -118,13 +119,13 @@ func main() {
 
 ## Options and error evidence
 
-`WithLockedReason("")` includes the empty string; no option or a
-nil `LockServerOpts.LockedReason` sends `lock:null`. `WithUnshelveHost("")` omits host, as
+`LockServerOpts.LockedReason = ""` includes the empty string; no option or a
+nil `LockServerOpts.LockedReason` sends `lock:null`. `UnshelveServerOpts.Host = ""` omits host, as
 Python does. `WithUnshelveAvailabilityZone("")` includes the empty string,
 `WithUnshelveUnpinnedAvailabilityZone()` includes JSON null, and
 `WithUnshelveDefaultAvailabilityZone()` restores omission. Host-only requests
 nest host inside `unshelve`, and a null zone remains inside that object.
-`WithFloatingIPFixedAddress("")` includes the empty string while
+`FloatingIPServerOpts.FixedAddress = ""` includes the empty string while
 clearing `FloatingIPServerOpts.FixedAddress` through `request.Custom` restores
 omission. Later options win.
 

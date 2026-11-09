@@ -32,11 +32,11 @@ type FlavorListOpts struct {
 }
 
 // FlavorListOption is one option of ListRecords and AllRecords:
-// WithFlavorListOptions, WithFlavorListDetails, WithFlavorListExtraSpecs,
-// WithFlavorListFilter, WithFlavorListFilters, request.Query with a string or
-// []string value, request.Limit, request.Marker, request.MaxItems,
-// request.Paginated, request.Microversion, request.Header or request.Custom
-// over *request.Config[FlavorListOpts]. Other shared calls fail with
+// WithFlavorListOptions, WithFlavorListFilter, WithFlavorListFilters,
+// request.Query with a string or []string value, request.Limit, request.Marker,
+// request.MaxItems, request.Paginated, request.Microversion, request.Header or
+// request.Custom over *request.Config[FlavorListOpts] (for example to set
+// Details or GetExtraSpecs). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type FlavorListOption = request.ListCall
 
@@ -70,12 +70,6 @@ func copyFlavorListOptions(value FlavorListOpts) FlavorListOpts {
 func WithFlavorListOptions(value FlavorListOpts) FlavorListOption {
 	owned := copyFlavorListOptions(value)
 	return request.Custom(func(c *request.Config[FlavorListOpts]) error { c.Options = copyFlavorListOptions(owned); return nil })
-}
-func WithFlavorListDetails(value bool) FlavorListOption {
-	return request.Custom(func(c *request.Config[FlavorListOpts]) error { owned := value; c.Options.Details = &owned; return nil })
-}
-func WithFlavorListExtraSpecs(value bool) FlavorListOption {
-	return request.Custom(func(c *request.Config[FlavorListOpts]) error { c.Options.GetExtraSpecs = value; return nil })
 }
 
 const flavorRecordFiltersArgument = "flavor_record_filters"

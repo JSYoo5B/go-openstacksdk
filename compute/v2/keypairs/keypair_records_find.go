@@ -31,9 +31,9 @@ type KeypairFindOpts struct {
 }
 
 // KeypairFindOption is one option of FindKeypair: WithKeypairFindOptions,
-// WithKeypairFindUserID, request.IgnoreMissing, request.Microversion,
-// request.Header or request.Custom over *request.Config[KeypairFindOpts].
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.IgnoreMissing, request.Microversion, request.Header or request.Custom
+// over *request.Config[KeypairFindOpts] (for example to set UserID). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type KeypairFindOption = request.FindCall
 
 var keypairFindCalls = calls.Spec[request.Config[KeypairFindOpts]]{
@@ -61,9 +61,6 @@ func WithKeypairFindOptions(value KeypairFindOpts) KeypairFindOption {
 		config.Options = copyKeypairFindOptions(owned)
 		return nil
 	})
-}
-func WithKeypairFindUserID(value string) KeypairFindOption {
-	return request.Custom(func(config *request.Config[KeypairFindOpts]) error { config.Options.UserID = value; return nil })
 }
 
 func prepareKeypairFind(ctx context.Context, guard func(context.Context) error, options []KeypairFindOption) (request.Config[KeypairFindOpts], error) {

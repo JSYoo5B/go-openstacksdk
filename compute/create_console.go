@@ -31,14 +31,7 @@ type ConsoleOpts struct {
 type ConsoleOption = request.Option[ConsoleOpts]
 
 func WithConsoleProtocol(value string) ConsoleOption {
-	return WithConsoleProtocolValue(request.Present(value))
-}
-
-func WithConsoleProtocolValue(value request.Optional[string]) ConsoleOption {
-	return func(config *request.Config[ConsoleOpts]) error {
-		config.Options.Protocol = value
-		return nil
-	}
+	return func(c *request.Config[ConsoleOpts]) error { c.Options.Protocol = request.Present(value); return nil }
 }
 
 // CreateConsole selects the modern or legacy executor from the endpoint's
@@ -174,7 +167,10 @@ func (s *Service) CreateConsole(ctx context.Context, serverID, consoleType strin
 		protocol = request.Null[string]()
 	}
 	created, err := remoteconsoles.New(&client).CreateConsole(operationCtx, serverID,
-		remoteconsoles.WithConsoleCreateType(consoleType), remoteconsoles.WithConsoleCreateProtocolValue(protocol))
+		remoteconsoles.WithConsoleCreateType(consoleType), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = protocol
+			return nil
+		}))
 	if err != nil {
 		return fail(err)
 	}

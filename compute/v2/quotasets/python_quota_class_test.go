@@ -45,7 +45,7 @@ func TestNovaQuotaClassGetDefaultAndCustomNamesKeepLiteralRoutes(t *testing.T) {
 			client.Microversion = "2.96"
 			opts := []quotasets.QuotaClassGetOption{}
 			if name != "default" {
-				opts = append(opts, quotasets.WithQuotaClassName(name))
+				opts = append(opts, request.Custom(func(c *quotasets.QuotaClassGetOpts) error { v := name; c.Name = &v; return nil }))
 			}
 			row, err := quotasets.New(client).GetQuotaClassRecord(context.Background(), opts...)
 			if err != nil || row == nil || calls != 1 || row.StatusCode != 203 || row.Header.Get("X-Request-Id") != "quota-class-proof" || len(row.Discovery.Responses) != 0 {
@@ -256,7 +256,7 @@ func TestNovaQuotaClassPreflightAndCallbackGuardsPreventRequests(t *testing.T) {
 				})
 			}
 			if mode == "invalid name" {
-				option = quotasets.WithQuotaClassName("..")
+				option = request.Custom(func(c *quotasets.QuotaClassGetOpts) error { v := ".."; c.Name = &v; return nil })
 			}
 			if mode == "forbidden header" {
 				option = request.Headers(map[string]string{"X-Auth-Token": "foreign"})

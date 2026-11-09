@@ -260,11 +260,11 @@ type AttachmentListOpts struct {
 }
 
 // AttachmentListOption is one option of ListRecords: WithAttachmentListOpts,
-// WithAttachmentOffset, request.Query (a Source keyword argument sent as
-// JSON; unknown keys and wire-only Body aliases are ignored, matching
-// Resource.list's canonical attribute filters), request.Limit,
-// request.MaxItems, request.Paginated, request.Headers (replaces the headers)
-// or request.Custom over *AttachmentListOpts. Other shared calls fail with
+// request.Query (a Source keyword argument sent as JSON; unknown keys and
+// wire-only Body aliases are ignored, matching Resource.list's canonical
+// attribute filters), request.Limit, request.MaxItems, request.Paginated,
+// request.Headers (replaces the headers) or request.Custom over
+// *AttachmentListOpts (for example to set Offset). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type AttachmentListOption = request.ListCall
 
@@ -316,9 +316,6 @@ func copyAttachmentList(v AttachmentListOpts) AttachmentListOpts {
 func WithAttachmentListOpts(value AttachmentListOpts) AttachmentListOption {
 	owned := copyAttachmentList(value)
 	return request.Custom(func(v *AttachmentListOpts) error { *v = copyAttachmentList(owned); return nil })
-}
-func WithAttachmentOffset(value int) AttachmentListOption {
-	return request.Custom(func(v *AttachmentListOpts) error { x := value; v.Offset = &x; return nil })
 }
 
 func prepareAttachmentList(v AttachmentListOpts) (url.Values, map[string]json.RawMessage, rest.ListControl, error) {

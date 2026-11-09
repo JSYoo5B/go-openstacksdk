@@ -75,7 +75,7 @@ func TestComputeCloudGetFlavorByIDOwnsStrictDefaultsAndNativeEnrichment(t *testi
 			})
 			var options []compute.FlavorByIDOption
 			if tc.extra != nil {
-				options = append(options, compute.WithFlavorByIDExtraSpecs(*tc.extra))
+				options = append(options, func(c *request.Config[compute.FlavorByIDOpts]) error { c.Options.GetExtraSpecs = *tc.extra; return nil })
 			}
 			options = append(options, func(*request.Config[compute.FlavorByIDOpts]) error { callbacks.Add(1); return nil })
 			value, err := compute.New(client, compute.Dependencies{}).GetFlavorByID(context.Background(), "lookup", options...)

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.API.GetQuotaClassRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets.WithQuotaClassName`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
@@ -92,6 +92,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
 )
@@ -115,7 +116,7 @@ func main() {
     var row *quotasets.QuotaClassRecord
     switch *action {
     case "get":
-        row, err = api.GetQuotaClassRecord(ctx, quotasets.WithQuotaClassName(*name))
+        row, err = api.GetQuotaClassRecord(ctx, request.Custom(func(c *quotasets.QuotaClassGetOpts) error { v := *name; c.Name = &v; return nil }))
     case "update":
         var fields map[string]json.RawMessage
         if err := json.Unmarshal([]byte(*attrs), &fields); err != nil { log.Fatal(err) }

@@ -86,7 +86,7 @@ func TestFloatingIPCreateResponsePortOverridesSeed(t *testing.T) {
 				}
 				return 201, `{"floatingip":{"id":"new","port_id":` + port + `}}`
 			}
-			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), compute.WithFloatingIPCreatePort("port"))
+			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil })
 			var proof *resource.ResponseError
 			if err == nil || !result.Allocated || !errors.As(err, &proof) || proof.StatusCode != 201 || string(result.FloatingIP.Resource.Body["port_id"]) != port || string(result.FloatingIP.Wire.Body["port_id"]) != port || result.Cleanup != nil || len(state.events) != 2 {
 				t.Fatal(result, err, state)
@@ -107,7 +107,7 @@ func TestFloatingIPCreateDirectWait404DoesNotAllocateAgain(t *testing.T) {
 		}
 		return 404, `{"error":"missing member"}`
 	}
-	result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), compute.WithFloatingIPCreatePort("port"), compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateDirectGet(true))
+	result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true), func(c *compute.FloatingIPCreateOpts) error { c.DirectGet = true; return nil })
 	if err == nil || !result.Allocated || result.Backend != compute.FloatingIPNeutron || result.FallbackError != nil || result.Cleanup != nil || result.Compatibility != nil || len(result.Observations) != 1 || len(state.events) != 3 || state.events[2] != "GET /create-network/v2.0/floatingips/"+id {
 		t.Fatal(result, err, state)
 	}
@@ -157,7 +157,7 @@ func TestFloatingIPCreateParentDeadlineIsNotSDKWaitTimeout(t *testing.T) {
 		<-r.Context().Done()
 		return 200, `{"floatingips":[]}`
 	}
-	result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), compute.WithFloatingIPCreatePort("port"), compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateTimeout(20*time.Millisecond))
+	result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateTimeout(20*time.Millisecond))
 	var timeout *compute.FloatingIPCreateTimeoutError
 	if !errors.Is(err, context.DeadlineExceeded) || errors.As(err, &timeout) || !result.Allocated || result.Cleanup != nil || len(state.events) != 3 {
 		t.Fatal(result, err, state)

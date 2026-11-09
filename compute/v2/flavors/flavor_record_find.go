@@ -24,26 +24,28 @@ import (
 
 // FlavorFindOpts controls a member read and its detailed list fallback. Nil
 // IgnoreMissing defaults to true. GetExtraSpecs defaults to false and enriches
-// only a uniquely resolved flavor whose projected extra_specs is falsey.
-// Nil Microversion retains a selected version or discovers at most 2.61;
-// explicit empty requests a versionless read without changing the client.
+// only a uniquely resolved flavor whose projected extra_specs is falsey. Nil
+// Microversion retains a selected version or discovers at most 2.61; explicit
+// empty requests a versionless read without changing the client. Limit, Marker,
+// MaxItems and Paginated control the list fallback. They are
+// operation-specific: FindRecord does not accept the shared paging calls.
 type FlavorFindOpts struct {
 	GetExtraSpecs bool
 	IgnoreMissing *bool
 	Limit         int
 	Marker        string
-	MaxItems      int
-	Paginated     *bool
-	Microversion  *string
+	// MaxItems caps raw fallback rows before local Body filtering.
+	MaxItems     int
+	Paginated    *bool
+	Microversion *string
 }
 
 // FlavorFindOption is one option of FindRecord: WithFlavorFindOptions,
-// WithFlavorFindExtraSpecs, WithFlavorFindLimit, WithFlavorFindMarker,
-// WithFlavorFindMaxItems, WithFlavorFindPaginated, WithFlavorFindFilter,
-// WithFlavorFindFilters, request.IgnoreMissing, request.Query with a string
-// or []string value, request.Microversion, request.Header or request.Custom
-// over *request.Config[FlavorFindOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithFlavorFindFilter, WithFlavorFindFilters, request.IgnoreMissing,
+// request.Query with a string or []string value, request.Microversion,
+// request.Header or request.Custom over *request.Config[FlavorFindOpts] (for
+// example to set GetExtraSpecs, Limit, Marker, MaxItems or Paginated). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type FlavorFindOption = request.FindCall
 
 var flavorFindCalls = calls.Spec[request.Config[FlavorFindOpts]]{
@@ -75,31 +77,6 @@ func WithFlavorFindOptions(value FlavorFindOpts) FlavorFindOption {
 	owned := copyFlavorFindOptions(value)
 	return request.Custom(func(config *request.Config[FlavorFindOpts]) error {
 		config.Options = copyFlavorFindOptions(owned)
-		return nil
-	})
-}
-func WithFlavorFindExtraSpecs(value bool) FlavorFindOption {
-	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.GetExtraSpecs = value; return nil })
-}
-
-// WithFlavorFindLimit, WithFlavorFindMarker, WithFlavorFindMaxItems and
-// WithFlavorFindPaginated control the list fallback. They are
-// operation-specific: FindRecord does not accept the shared paging calls.
-func WithFlavorFindLimit(value int) FlavorFindOption {
-	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.Limit = value; return nil })
-}
-func WithFlavorFindMarker(value string) FlavorFindOption {
-	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.Marker = value; return nil })
-}
-
-// WithFlavorFindMaxItems caps raw fallback rows before local Body filtering.
-func WithFlavorFindMaxItems(value int) FlavorFindOption {
-	return request.Custom(func(config *request.Config[FlavorFindOpts]) error { config.Options.MaxItems = value; return nil })
-}
-func WithFlavorFindPaginated(value bool) FlavorFindOption {
-	return request.Custom(func(config *request.Config[FlavorFindOpts]) error {
-		owned := value
-		config.Options.Paginated = &owned
 		return nil
 	})
 }

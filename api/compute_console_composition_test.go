@@ -157,7 +157,10 @@ func TestComputeConsoleCompositionProtocolTypeAndLocationProjection(t *testing.T
 		{"default null protocol view", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `null`, nil, true, false},
 		{"explicit protocol preserved", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"custom","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `"custom"`, []compute.ConsoleOption{compute.WithConsoleProtocol("custom")}, true, false},
 		{"empty protocol seed survives derived request", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `""`, []compute.ConsoleOption{compute.WithConsoleProtocol("")}, true, false},
-		{"unset restores explicit null facade default", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `null`, []compute.ConsoleOption{compute.WithConsoleProtocol("discarded"), compute.WithConsoleProtocolValue(request.Optional[string]{})}, true, false},
+		{"unset restores explicit null facade default", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `null`, []compute.ConsoleOption{compute.WithConsoleProtocol("discarded"), func(c *request.Config[compute.ConsoleOpts]) error {
+			c.Options.Protocol = request.Optional[string]{}
+			return nil
+		}}, true, false},
 		{"unknown modern type server validated", "2.6", "2.100", "vendor", `{"remote_console":{"protocol":null,"type":"vendor"}}`, `{"remote_console":{"url":"actual"}}`, `null`, nil, true, false},
 		{"webmks selected below gate", "2.6", "2.100", "webmks", "", "", "", nil, true, true},
 		{"webmks advertised below gate", "2.100", "2.7", "webmks", "", "", "", nil, true, true},

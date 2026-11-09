@@ -93,7 +93,7 @@ func TestBackupServerDefaultLookupAndConcreteOverride(t *testing.T) {
 			})
 			var options []compute.BackupServerOption
 			if override {
-				options = append(options, compute.WithBackupImageService(f.image))
+				options = append(options, func(c *compute.BackupServerOpts) error { c.ImageService = f.image; return nil })
 			}
 			result, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, options...)
 			assertBackupStage(t, f, result, err)

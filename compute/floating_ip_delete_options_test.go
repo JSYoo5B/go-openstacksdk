@@ -14,11 +14,11 @@ func TestFloatingIPDeleteOptionsDefaultsRetriesAndBulkReplacement(t *testing.T) 
 	if err != nil || opts.Retries != 1 || opts.Timeout != 0 || opts.DirectGet {
 		t.Fatal(opts, err)
 	}
-	opts, err = PrepareFloatingIPDeleteOptions(context.Background(), WithFloatingIPDeleteRetries(-2))
+	opts, err = PrepareFloatingIPDeleteOptions(context.Background(), func(c *FloatingIPDeleteOpts) error { c.Retries = -2; return nil })
 	if err != nil || opts.Retries != -2 {
 		t.Fatal(opts, err)
 	}
-	opts, err = PrepareFloatingIPDeleteOptions(context.Background(), WithFloatingIPDeleteRetries(3), WithFloatingIPDeleteOptions(FloatingIPDeleteOpts{}))
+	opts, err = PrepareFloatingIPDeleteOptions(context.Background(), func(c *FloatingIPDeleteOpts) error { c.Retries = 3; return nil }, WithFloatingIPDeleteOptions(FloatingIPDeleteOpts{}))
 	if err != nil || opts.Retries != 0 {
 		t.Fatal(opts, err)
 	}
@@ -60,7 +60,7 @@ func TestFloatingIPDeleteOptionsOwnSourceAndLocation(t *testing.T) {
 	}
 }
 func TestFloatingIPDeleteOptionsPreflightAndCancellationCause(t *testing.T) {
-	for _, option := range []FloatingIPDeleteOption{nil, WithFloatingIPDeleteSource("bad"), WithFloatingIPDeleteTimeout(0), WithFloatingIPDeleteOptions(FloatingIPDeleteOpts{Timeout: -1})} {
+	for _, option := range []FloatingIPDeleteOption{nil, func(c *FloatingIPDeleteOpts) error { v := FloatingIPSource("bad"); c.Source = &v; return nil }, WithFloatingIPDeleteTimeout(0), WithFloatingIPDeleteOptions(FloatingIPDeleteOpts{Timeout: -1})} {
 		if _, err := PrepareFloatingIPDeleteOptions(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

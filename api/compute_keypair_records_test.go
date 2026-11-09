@@ -274,7 +274,7 @@ func TestComputeKeypairRecordsContinuationLogicalMarkersCapsAndLateErrors(t *tes
 				}
 				testcloud.JSON(w, 200, `{"keypairs":[`+rows+`]`+continuation+`}`)
 			})
-			options := []keypairs.KeypairListOption{keypairs.WithKeypairListUserID("owner"), keypairs.WithKeypairListFilter("type", "ssh")}
+			options := []keypairs.KeypairListOption{request.Custom(func(c *request.Config[keypairs.KeypairListOpts]) error { c.Options.UserID = "owner"; return nil }), keypairs.WithKeypairListFilter("type", "ssh")}
 			if mode == "initial limit fallback" {
 				options = append(options, request.Limit(5))
 			}
@@ -417,7 +417,7 @@ func TestComputeKeypairRecordsVersionPreflightAndAcceptedFaultBinding(t *testing
 			case "nil option":
 				opts = append(opts, nil)
 			case "query collision":
-				opts = append(opts, keypairs.WithKeypairListUserID("same"), keypairs.WithKeypairListFilter("user_id", "same"))
+				opts = append(opts, request.Custom(func(c *request.Config[keypairs.KeypairListOpts]) error { c.Options.UserID = "same"; return nil }), keypairs.WithKeypairListFilter("user_id", "same"))
 			case "base_path control":
 				opts = append(opts, request.Query("base_path", "/other"))
 			case "jmespath control":

@@ -40,21 +40,41 @@ func TestPythonUserActionsRoutesDefaultsAndOptionalValues(t *testing.T) {
 		{``, func() error { return api.ClearPassword(ctx, "s1") }},
 		{`{"restore":null}`, func() error { return api.Restore(ctx, "s1") }},
 		{`{"lock":null}`, func() error { return api.LockWithOptions(ctx, "s1") }},
-		{`{"lock":{"locked_reason":"because"}}`, func() error { return api.LockWithOptions(ctx, "s1", servers.WithLockedReason("because")) }},
-		{`{"lock":{"locked_reason":""}}`, func() error { return api.LockWithOptions(ctx, "s1", servers.WithLockedReason("")) }},
+		{`{"lock":{"locked_reason":"because"}}`, func() error {
+			return api.LockWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.LockServerOpts]) error {
+				v := "because"
+				c.Options.LockedReason = &v
+				return nil
+			}))
+		}},
+		{`{"lock":{"locked_reason":""}}`, func() error {
+			return api.LockWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.LockServerOpts]) error {
+				v := ""
+				c.Options.LockedReason = &v
+				return nil
+			}))
+		}},
 		{`{"lock":null}`, func() error {
-			return api.LockWithOptions(ctx, "s1", servers.WithLockedReason("because"), request.Custom(func(c *request.Config[servers.LockServerOpts]) error { c.Options.LockedReason = nil; return nil }))
+			return api.LockWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.LockServerOpts]) error {
+				v := "because"
+				c.Options.LockedReason = &v
+				return nil
+			}), request.Custom(func(c *request.Config[servers.LockServerOpts]) error { c.Options.LockedReason = nil; return nil }))
 		}},
 		{`{"unshelve":null}`, func() error { return api.UnshelveWithOptions(ctx, "s1") }},
-		{`{"unshelve":null}`, func() error { return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveHost("")) }},
-		{`{"unshelve":{"host":"host1"}}`, func() error { return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveHost("host1")) }},
+		{`{"unshelve":null}`, func() error {
+			return api.UnshelveWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.UnshelveServerOpts]) error { c.Options.Host = ""; return nil }))
+		}},
+		{`{"unshelve":{"host":"host1"}}`, func() error {
+			return api.UnshelveWithOptions(ctx, "s1", request.Custom(func(c *request.Config[servers.UnshelveServerOpts]) error { c.Options.Host = "host1"; return nil }))
+		}},
 		{`{"unshelve":{"availability_zone":"az1"}}`, func() error { return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveAvailabilityZone("az1")) }},
 		{`{"unshelve":{"availability_zone":""}}`, func() error { return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveAvailabilityZone("")) }},
 		{`{"unshelve":{"availability_zone":null}}`, func() error {
 			return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveUnpinnedAvailabilityZone())
 		}},
 		{`{"unshelve":{"availability_zone":null,"host":"host1"}}`, func() error {
-			return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveUnpinnedAvailabilityZone(), servers.WithUnshelveHost("host1"))
+			return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveUnpinnedAvailabilityZone(), request.Custom(func(c *request.Config[servers.UnshelveServerOpts]) error { c.Options.Host = "host1"; return nil }))
 		}},
 		{`{"unshelve":null}`, func() error {
 			return api.UnshelveWithOptions(ctx, "s1", servers.WithUnshelveUnpinnedAvailabilityZone(), servers.WithUnshelveDefaultAvailabilityZone())
@@ -90,13 +110,25 @@ func TestPythonUserActionsDirectIPsNeedNoInventory(t *testing.T) {
 		{`{"removeFixedIp":{"address":"10.0.0.1"}}`, func() error { return api.RemoveFixedIP(ctx, "s1", "10.0.0.1") }},
 		{`{"addFloatingIp":{"address":"203.0.113.1"}}`, func() error { return api.AddFloatingIP(ctx, "s1", "203.0.113.1") }},
 		{`{"addFloatingIp":{"address":"203.0.113.1","fixed_address":"10.0.0.1"}}`, func() error {
-			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", servers.WithFloatingIPFixedAddress("10.0.0.1"))
+			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", request.Custom(func(c *request.Config[servers.FloatingIPServerOpts]) error {
+				v := "10.0.0.1"
+				c.Options.FixedAddress = &v
+				return nil
+			}))
 		}},
 		{`{"addFloatingIp":{"address":"203.0.113.1","fixed_address":""}}`, func() error {
-			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", servers.WithFloatingIPFixedAddress(""))
+			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", request.Custom(func(c *request.Config[servers.FloatingIPServerOpts]) error {
+				v := ""
+				c.Options.FixedAddress = &v
+				return nil
+			}))
 		}},
 		{`{"addFloatingIp":{"address":"203.0.113.1"}}`, func() error {
-			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", servers.WithFloatingIPFixedAddress("10.0.0.1"), request.Custom(func(c *request.Config[servers.FloatingIPServerOpts]) error { c.Options.FixedAddress = nil; return nil }))
+			return api.AddFloatingIP(ctx, "s1", "203.0.113.1", request.Custom(func(c *request.Config[servers.FloatingIPServerOpts]) error {
+				v := "10.0.0.1"
+				c.Options.FixedAddress = &v
+				return nil
+			}), request.Custom(func(c *request.Config[servers.FloatingIPServerOpts]) error { c.Options.FixedAddress = nil; return nil }))
 		}},
 		{`{"removeFloatingIp":{"address":"203.0.113.1"}}`, func() error { return api.RemoveFloatingIP(ctx, "s1", "203.0.113.1") }},
 		{`{"addFixedIp":{"networkId":""}}`, func() error { return api.AddFixedIP(ctx, "s1", "") }},
@@ -122,10 +154,18 @@ func TestPythonUserActionsVersionBoundaries(t *testing.T) {
 		call          func(*servers.API) error
 	}{
 		{"lock reason before", "2.72", true, func(a *servers.API) error {
-			return a.LockWithOptions(context.Background(), "s1", servers.WithLockedReason(""))
+			return a.LockWithOptions(context.Background(), "s1", request.Custom(func(c *request.Config[servers.LockServerOpts]) error {
+				v := ""
+				c.Options.LockedReason = &v
+				return nil
+			}))
 		}},
 		{"lock reason supported", "2.73", false, func(a *servers.API) error {
-			return a.LockWithOptions(context.Background(), "s1", servers.WithLockedReason(""))
+			return a.LockWithOptions(context.Background(), "s1", request.Custom(func(c *request.Config[servers.LockServerOpts]) error {
+				v := ""
+				c.Options.LockedReason = &v
+				return nil
+			}))
 		}},
 		{"lock omitted default", "", false, func(a *servers.API) error { return a.LockWithOptions(context.Background(), "s1") }},
 		{"zone before", "2.76", true, func(a *servers.API) error {
@@ -135,10 +175,10 @@ func TestPythonUserActionsVersionBoundaries(t *testing.T) {
 			return a.UnshelveWithOptions(context.Background(), "s1", servers.WithUnshelveAvailabilityZone("az"))
 		}},
 		{"host before", "2.90", true, func(a *servers.API) error {
-			return a.UnshelveWithOptions(context.Background(), "s1", servers.WithUnshelveHost("host"))
+			return a.UnshelveWithOptions(context.Background(), "s1", request.Custom(func(c *request.Config[servers.UnshelveServerOpts]) error { c.Options.Host = "host"; return nil }))
 		}},
 		{"host supported", "2.91", false, func(a *servers.API) error {
-			return a.UnshelveWithOptions(context.Background(), "s1", servers.WithUnshelveHost("host"))
+			return a.UnshelveWithOptions(context.Background(), "s1", request.Custom(func(c *request.Config[servers.UnshelveServerOpts]) error { c.Options.Host = "host"; return nil }))
 		}},
 		{"null zone before", "2.90", true, func(a *servers.API) error {
 			return a.UnshelveWithOptions(context.Background(), "s1", servers.WithUnshelveUnpinnedAvailabilityZone())
