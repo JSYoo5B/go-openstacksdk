@@ -61,7 +61,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordFindDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/baremetal/v1/nodes.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 
 - Clean rejected GET falls back to detailed collection by default or basic collection explicitly, without a name query hint; complete search detects duplicates, late errors and missing/strict policy.
@@ -148,7 +149,7 @@ func main() {
         if value != nil && value.Resource != nil { output = value.Resource.Body }
     case "find":
         value, callErr := service.Nodes.FindRecord(ctx, identity,
-            request.Microversion("1.109"), nodes.WithRecordFindDetails(true),
+            request.Microversion("1.109"), request.Custom(func(c *nodes.RecordFindOpts) error { v := true; c.Details = &v; return nil }),
             request.IgnoreMissing(true))
         err = callErr
         if value != nil && value.Resource != nil { output = value.Resource.Body }

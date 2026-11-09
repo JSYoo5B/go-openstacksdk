@@ -142,18 +142,6 @@ func WithRecordSourceOpts(v RecordSourceOpts) RecordSourceOption {
 	owned := copySource(v)
 	return request.Custom(func(c *RecordSourceOpts) error { *c = copySource(owned); return nil })
 }
-func WithRecordSourceConsistencyGroupSnapshotID(v string) RecordSourceOption {
-	return request.Custom(func(c *RecordSourceOpts) error { x := v; c.ConsistencyGroupSnapshotID = &x; return nil })
-}
-func WithRecordSourceConsistencyGroupID(v string) RecordSourceOption {
-	return request.Custom(func(c *RecordSourceOpts) error { x := v; c.ConsistencyGroupID = &x; return nil })
-}
-func WithRecordSourceName(v string) RecordSourceOption {
-	return request.Custom(func(c *RecordSourceOpts) error { x := v; c.Name = &x; return nil })
-}
-func WithRecordSourceDescription(v string) RecordSourceOption {
-	return request.Custom(func(c *RecordSourceOpts) error { x := v; c.Description = &x; return nil })
-}
 
 // RecordDeleteOpts sends POST /{id}/delete with force:false by default.
 // PinnedSourceWire replays the known Source spelling rejected by stock Cinder.
@@ -165,10 +153,10 @@ type RecordDeleteOpts struct {
 }
 
 // RecordDeleteOption is one option of DeleteRecord: WithRecordDeleteOpts,
-// WithRecordDeleteForce, WithRecordDeletePinnedSourceWire, request.Custom
-// over *RecordDeleteOpts, request.Microversion or request.Headers (replaces
-// the headers). Other shared calls, including request.IgnoreMissing, fail
-// with resource.ErrInvalidOption before HTTP.
+// request.Custom over *RecordDeleteOpts (for example to set Force or
+// PinnedSourceWire), request.Microversion or request.Headers (replaces the
+// headers). Other shared calls, including request.IgnoreMissing, fail with
+// resource.ErrInvalidOption before HTTP.
 type RecordDeleteOption = request.DeleteCall
 
 func copyDelete(v RecordDeleteOpts) RecordDeleteOpts {
@@ -183,12 +171,6 @@ func copyDelete(v RecordDeleteOpts) RecordDeleteOpts {
 func WithRecordDeleteOpts(v RecordDeleteOpts) RecordDeleteOption {
 	owned := copyDelete(v)
 	return request.Custom(func(c *RecordDeleteOpts) error { *c = copyDelete(owned); return nil })
-}
-func WithRecordDeleteForce(v bool) RecordDeleteOption {
-	return request.Custom(func(c *RecordDeleteOpts) error { x := v; c.Force = &x; return nil })
-}
-func WithRecordDeletePinnedSourceWire(v bool) RecordDeleteOption {
-	return request.Custom(func(c *RecordDeleteOpts) error { c.PinnedSourceWire = v; return nil })
 }
 
 // RecordListOpts keeps details=True, declared server aliases, local Body filters
@@ -205,12 +187,12 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords: WithRecordListOpts,
-// WithRecordListDetails, request.Custom over *RecordListOpts, request.Query
-// (a declared server alias or Body filter as JSON; other keys are ignored,
-// SDK-owned controls fail), request.Limit, request.Marker, request.MaxItems,
-// request.Paginated, request.Microversion or request.Headers (replaces the
-// headers). Other shared calls fail with resource.ErrInvalidOption before
-// HTTP.
+// request.Custom over *RecordListOpts (for example to set Details),
+// request.Query (a declared server alias or Body filter as JSON; other keys are
+// ignored, SDK-owned controls fail), request.Limit, request.Marker,
+// request.MaxItems, request.Paginated, request.Microversion or request.Headers
+// (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type RecordListOption = request.ListCall
 
 func copyList(v RecordListOpts) RecordListOpts {
@@ -237,9 +219,6 @@ func copyList(v RecordListOpts) RecordListOpts {
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyList(v)
 	return request.Custom(func(c *RecordListOpts) error { *c = copyList(owned); return nil })
-}
-func WithRecordListDetails(v bool) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { x := v; c.Details = &x; return nil })
 }
 func recordServer(key string) bool {
 	switch key {

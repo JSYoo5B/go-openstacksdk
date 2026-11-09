@@ -26,7 +26,10 @@ func TestPythonBGPVPNCreateRecordSendsZeroLocalPref(t *testing.T) {
 	// create_bgpvpn(name="vpn", local_pref=0).
 	got, err := api.CreateRecord(ctx,
 		bgpvpns.WithCreateRecordOptions(bgpvpns.CreateRecordOpts{Name: request.Present("vpn")}),
-		bgpvpns.WithCreateRecordLocalPref(request.Present(0)))
+		request.Custom(func(c *request.Config[bgpvpns.CreateRecordOpts]) error {
+			c.Options.LocalPref = request.Present(0)
+			return nil
+		}))
 	if err != nil || got.StatusCode != 201 || got.BGPVPN == nil || got.BGPVPN.ID != "vpn-1" || got.BGPVPN.LocalPref == nil || *got.BGPVPN.LocalPref != 0 || string(got.Fields["networks"]) != `["n-1"]` {
 		t.Fatal(got, err)
 	}
@@ -79,7 +82,10 @@ func TestPythonBGPVPNCreateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 		t.Fatalf("%+v", *calls)
 	}
 	var operation *resource.OperationError
-	if _, err := api.CreateRecord(ctx, bgpvpns.WithCreateRecordLocalPref(request.Present(0))); !gophercloud.ResponseCodeIs(err, http.StatusBadRequest) || !errors.As(err, &operation) || operation.Resource != "bgpvpns" {
+	if _, err := api.CreateRecord(ctx, request.Custom(func(c *request.Config[bgpvpns.CreateRecordOpts]) error {
+		c.Options.LocalPref = request.Present(0)
+		return nil
+	})); !gophercloud.ResponseCodeIs(err, http.StatusBadRequest) || !errors.As(err, &operation) || operation.Resource != "bgpvpns" {
 		t.Fatal(err)
 	}
 	var nilAPI *bgpvpns.API

@@ -114,9 +114,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordListAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
@@ -218,7 +216,7 @@ func main() {
         if err != nil { log.Fatal(err) }
     case "list":
         for value, err := range api.ListRecords(ctx,
-            groupsnapshots.WithRecordListDetails(false),
+            request.Custom(func(c *groupsnapshots.RecordListOpts) error { v := false; c.Details = &v; return nil }),
             request.Query("status", "available"),
             request.Limit(10)) {
             if err != nil { log.Fatal(err) }

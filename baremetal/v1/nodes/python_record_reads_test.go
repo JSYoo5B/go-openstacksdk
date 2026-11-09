@@ -132,7 +132,7 @@ func TestPythonNodeFindFallbackDetailsDefaultsAndMissing(t *testing.T) {
 			})
 			options := []nodes.RecordFindOption{}
 			if mode == "basic" {
-				options = append(options, nodes.WithRecordFindDetails(false))
+				options = append(options, request.Custom(func(c *nodes.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 			}
 			if mode == "strict" {
 				options = append(options, request.IgnoreMissing(false))

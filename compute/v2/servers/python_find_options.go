@@ -20,9 +20,11 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-// RecordFindOpts owns Source find_server defaults. Query, Headers, Microversion,
-// Location and list caps are explicit Go extensions; the Python proxy exposes
-// only identity, IgnoreMissing, Details and AllProjects.
+// RecordFindOpts owns Source find_server defaults. Query, Headers,
+// Microversion, Location and list caps are explicit Go extensions; the Python
+// proxy exposes only identity, IgnoreMissing, Details and AllProjects.
+// Paginated, Limit, Marker and MaxItems control the list. They are
+// operation-specific: find operations do not accept the shared paging calls.
 type RecordFindOpts struct {
 	IgnoreMissing, Details, AllProjects, Paginated *bool
 	Query                                          map[string]json.RawMessage
@@ -36,10 +38,9 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord and ListCloudRecords:
-// WithRecordFindOpts, WithRecordFindDetails, WithRecordFindAllProjects,
-// WithRecordFindPaginated, WithRecordFindLimit, WithRecordFindMarker,
-// WithRecordFindMaxItems, request.Custom over *RecordFindOpts (for example to
-// set Location), request.IgnoreMissing, request.Query (a JSON keyword value),
+// WithRecordFindOpts, request.Custom over *RecordFindOpts (for example to set
+// Location, Details, AllProjects, Paginated, Limit, Marker or MaxItems),
+// request.IgnoreMissing, request.Query (a JSON keyword value),
 // request.Microversion (an inherited Resource.find convenience: the explicit
 // value applies to member GET; fallback uses the captured default) or
 // request.Headers (replaces the headers). Other shared calls fail with
@@ -92,28 +93,6 @@ func serverFindCopy(v RecordFindOpts) RecordFindOpts {
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := serverFindCopy(v)
 	return request.Custom(func(c *RecordFindOpts) error { *c = serverFindCopy(owned); return nil })
-}
-func WithRecordFindDetails(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
-}
-func WithRecordFindAllProjects(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.AllProjects = &x; return nil })
-}
-
-// WithRecordFindPaginated, WithRecordFindLimit, WithRecordFindMarker and
-// WithRecordFindMaxItems control the list. They are operation-specific: find
-// operations do not accept the shared paging calls.
-func WithRecordFindPaginated(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil })
-}
-func WithRecordFindLimit(v int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil })
-}
-func WithRecordFindMarker(v string) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.Marker = v; return nil })
-}
-func WithRecordFindMaxItems(v int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
 }
 
 func serverFindKeys(v RecordFindOpts) []string {

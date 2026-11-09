@@ -29,12 +29,11 @@ type UpdateRecordOpts struct {
 }
 
 // UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
-// WithUpdateRecordName, WithUpdateRecordAdvertiseFloatingIPHostRoutes,
-// WithUpdateRecordAdvertiseTenantNetworks, request.Field (another attribute
-// inside the bgp_speaker envelope; keys owned by UpdateRecordOpts and the URI
-// identity id are rejected), request.Header or request.Custom over
-// *request.Config[UpdateRecordOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.Field (another attribute inside the bgp_speaker envelope; keys owned
+// by UpdateRecordOpts and the URI identity id are rejected), request.Header or
+// request.Custom over *request.Config[UpdateRecordOpts] (for example to set
+// Name, AdvertiseFloatingIPHostRoutes or AdvertiseTenantNetworks). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type UpdateRecordOption = request.WriteCall
 
 var updateRecordOptionCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
@@ -44,21 +43,6 @@ var updateRecordOptionCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
 	return request.Custom(request.WithOptions(value))
-}
-func WithUpdateRecordName(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Name = value; return nil })
-}
-func WithUpdateRecordAdvertiseFloatingIPHostRoutes(value request.Optional[bool]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error {
-		config.Options.AdvertiseFloatingIPHostRoutes = value
-		return nil
-	})
-}
-func WithUpdateRecordAdvertiseTenantNetworks(value request.Optional[bool]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error {
-		config.Options.AdvertiseTenantNetworks = value
-		return nil
-	})
 }
 
 // BGPSpeakerRecord is the committed Python BgpSpeaker view. BGPSpeaker is the

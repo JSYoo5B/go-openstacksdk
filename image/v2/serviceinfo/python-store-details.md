@@ -31,7 +31,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - ListStores/AllStores default to basic GET info/stores with actual200 only. Local Details true chooses info/stores/detail and never becomes query; server403/404 and feature-unavailable remain errors with no basic fallback. Store embeds Metadata with actual per-page Header/status and raw canonical/unknown fields.
   Tests: `image/v2/serviceinfo/contracts_test.go:TestServiceInfoDefaultRoutesAndEvidence`, `image/v2/serviceinfo/core_test.go:TestServiceInfoCoreDiscoveryRoutesAndRawModels`.
@@ -115,7 +115,7 @@ func main() {
     client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: "image"}
     service := image.New(client)
     for row, err := range service.ServiceInfo.ListStoreRecords(context.Background(),
-        serviceinfo.WithStoreRecordListDetails(true),
+        request.Custom(func(c *serviceinfo.StoreRecordListOpts) error { c.Details = true; return nil }),
         request.Paginated(false),
         serviceinfo.WithStoreRecordListFilter("is_default", true),
     ) {

@@ -46,7 +46,7 @@ func TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects(t *testing.
 	if rows[0].StatusCode != 200 || rows[0].Wire == nil || string(rows[0].Resource.Body["status"]) != `"ACTIVE"` {
 		t.Fatalf("%+v", rows[0])
 	}
-	if _, err = cloud.Conn.ListServerRecords(context.Background(), sdk.WithCloudServerListOptions(servers.WithRecordFindAllProjects(true))); err != nil {
+	if _, err = cloud.Conn.ListServerRecords(context.Background(), sdk.WithCloudServerListOptions(request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil }))); err != nil {
 		t.Fatal(err)
 	}
 	calls := cloud.Calls()
@@ -59,7 +59,7 @@ func TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown(t *testin
 	cloud := r2CloudComputeNew(t)
 	cloud.JSON("GET "+r2CloudComputeBase+"/servers", 200, `{"servers":[{"id":"s1","name":"web-1"}]}`)
 	rows, err := cloud.Conn.ListServerRecords(context.Background(), sdk.WithCloudServerListOptions(
-		servers.WithRecordFindDetails(false), request.Query("status", "ACTIVE")))
+		request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.Details = &v; return nil }), request.Query("status", "ACTIVE")))
 	if err != nil || len(rows) != 1 {
 		t.Fatal(rows, err)
 	}

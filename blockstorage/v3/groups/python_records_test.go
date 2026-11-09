@@ -64,7 +64,7 @@ func TestPythonCinderGroupGetProjectionListVolumeAndOwnedProof(t *testing.T) {
 			api, calls := groupAPI(t, "3.90", func(*http.Request) *http.Response { return groupWire(200, body) })
 			options := []groups.RecordGetOption{}
 			if choice != "absent" {
-				options = append(options, groups.WithRecordGetListVolume(choice == "true"))
+				options = append(options, request.Custom(func(c *groups.RecordGetOpts) error { v := choice == "true"; c.ListVolume = &v; return nil }))
 			}
 			v, err := api.GetRecord(context.Background(), "literal/id %2F", options...)
 			if err != nil || calls.Len() != 1 || calls.Calls()[0].EscapedPath != groupBase+"/literal%2Fid%20%252F" || calls.Calls()[0].Body != "" || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.90" || len(v.Discovery) != 0 {
@@ -212,7 +212,7 @@ func TestPythonCinderGroupDeleteActionDefaultsStrictMissingAndStatuses(t *testin
 	if err := api.DeleteRecord(context.Background(), "id"); err != nil || calls.Len() != 1 {
 		t.Fatal(err, calls.Calls())
 	}
-	if err := api.DeleteRecord(context.Background(), "id", request.IgnoreMissing(false), groups.WithRecordDeleteVolumes(true)); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
+	if err := api.DeleteRecord(context.Background(), "id", request.IgnoreMissing(false), request.Custom(func(c *groups.RecordDeleteOpts) error { v := true; c.DeleteVolumes = &v; return nil })); !gophercloud.ResponseCodeIs(err, 404) || calls.Len() != 2 {
 		t.Fatal(err, calls.Calls())
 	}
 	groupJSON(t, calls.Calls()[1].Body, `{"delete":{"delete-volumes":true}}`)
@@ -293,7 +293,7 @@ func TestPythonCinderGroupListDetailsLinksMarkersOffsetsAndConsumerBreak(t *test
 				}
 				return reply
 			})
-			values, err := collectGroups(api.ListRecords(context.Background(), groups.WithRecordListDetails(false), request.Query("sort", "id:asc")))
+			values, err := collectGroups(api.ListRecords(context.Background(), request.Custom(func(c *groups.RecordListOpts) error { v := false; c.Details = &v; return nil }), request.Query("sort", "id:asc")))
 			if err != nil || len(values) != 2 || calls.Len() != 2 || calls.Calls()[0].Path != groupBase || calls.Calls()[1].Path != groupBase {
 				t.Fatal(values, err, calls.Calls())
 			}

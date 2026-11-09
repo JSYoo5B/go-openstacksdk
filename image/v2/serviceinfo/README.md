@@ -31,7 +31,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - ListStores/AllStores default to basic GET info/stores with actual200 only. Local Details true chooses info/stores/detail and never becomes query; server403/404 and feature-unavailable remain errors with no basic fallback. Store embeds Metadata with actual per-page Header/status and raw canonical/unknown fields.
   Tests: `image/v2/serviceinfo/contracts_test.go:TestServiceInfoDefaultRoutesAndEvidence`, `image/v2/serviceinfo/core_test.go:TestServiceInfoCoreDiscoveryRoutesAndRawModels`.

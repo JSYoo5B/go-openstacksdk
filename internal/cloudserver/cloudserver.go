@@ -336,7 +336,7 @@ func Get(ctx context.Context, deps Dependencies, nameOrID string, options []comp
 			return nil, wrap(err)
 		}
 		find := append([]servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { loc := location.Clone(); c.Location = &loc; return nil })}, cfg.List...)
-		find = append(find, servers.WithRecordFindDetails(true))
+		find = append(find, request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.Details = &v; return nil }))
 		record, err = service.Servers.FindRecord(ctx, nameOrID, find...)
 		if err != nil {
 			return nil, wrap(err)

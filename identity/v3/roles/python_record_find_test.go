@@ -95,7 +95,7 @@ func TestPythonRoleFindRecordHeadersAndListRouteAreStageSpecific(t *testing.T) {
 		}
 		return roleRecordWire(200, `{"roles":[{"id":"g","name":"demo","description":false,"domain_id":3,"x_extension":7}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "demo", request.Query("base_path", "/alternate-roles"), roles.WithRecordFindListBasePath("/list-roles"), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.role+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), request.Query("domain_id", "d"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("base_path", "/alternate-roles"), request.Custom(func(c *roles.RecordFindOpts) error { v := "/list-roles"; c.ListBasePath = &v; return nil }), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.role+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), request.Query("domain_id", "d"))
 	if err != nil || row == nil || calls != 2 {
 		t.Fatal(row, err, calls)
 	}
@@ -374,7 +374,7 @@ func TestPythonRoleFindRecordOptionLifecycleVersionsAndPreflight(t *testing.T) {
 			}
 			return roleRecordWire(200, `{"roles":[{"id":"r","name":"reader"}]}`)
 		})
-		row, err := api.FindRecord(context.Background(), "reader", request.Microversion("3.9"), request.Headers(map[string]string{"X-Owned": "yes"}), roles.WithRecordFindListBasePath("fallback-roles"))
+		row, err := api.FindRecord(context.Background(), "reader", request.Microversion("3.9"), request.Headers(map[string]string{"X-Owned": "yes"}), request.Custom(func(c *roles.RecordFindOpts) error { v := "fallback-roles"; c.ListBasePath = &v; return nil }))
 		if err != nil || row == nil || calls != 2 {
 			t.Fatal(row, err, calls)
 		}

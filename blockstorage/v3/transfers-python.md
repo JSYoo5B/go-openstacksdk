@@ -19,7 +19,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateName`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateNoSnapshots`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateExtension`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordCreateSuppressLegacySnapshots`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - CreateRecord discovers advertised3.55 support and selected default independently, uses /volume-transfers or /os-volume-transfer, caps an absent default at3.55 and preserves an explicit default including3.71.
   Tests: `blockstorage/v3/transfers/python_records_test.go:TestPythonTransferDiscoveryAndVersionRouting`.
@@ -37,7 +37,7 @@ Python/Go differences:
 - Each Record operation performs finite shared Cinder discovery rather than relying on a Python adapter discovery cache; accepted discovery evidence is separate from actual transfer response proof.
 - TransferRecord exposes owned declared Python-shaped Resource fields and original Wire/Envelope/headers/status rather than a mutable session-bound Python Resource; location is nullable null.
 - Library-owned option factories snapshot JSON/maps/slices; invalid route IDs, conflicting headers, changed service sources and unsafe continuation authority are rejected before another HTTP request.
-- WithRecordCreateExtension is an explicit Go extension for otherwise unknown Body keys. Default Source attrs ignore unknown keys. WithRecordCreateSuppressLegacySnapshots(true) intentionally fixes the pinned legacy no_snapshots cleanup defect.
+- WithRecordCreateExtension is an explicit Go extension for otherwise unknown Body keys. Default Source attrs ignore unknown keys. RecordCreateOpts.SuppressLegacySnapshots = true intentionally fixes the pinned legacy no_snapshots cleanup defect.
 
 ### `python:block_storage/v3/get_transfer`
 
@@ -78,8 +78,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
@@ -87,7 +86,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers.WithRecordListServerQuery`
 
-- ListRecords defaults to the discovered /detail route, while WithRecordListDetails(false) selects summary. Source all_projects and unknown kwargs are discarded; declared Body attrs filter locally.
+- ListRecords defaults to the discovered /detail route, while RecordListOpts.Details = false selects summary. Source all_projects and unknown kwargs are discarded; declared Body attrs filter locally.
   Tests: `blockstorage/v3/transfers/python_records_test.go:TestPythonTransferListDefaultsSummaryQueriesAndRawFilters`.
 - Only limit/marker are Source server queries; explicit Go server-query extensions can send all_tenants. Raw JSON fields, nested local filters and default Accept header are retained.
   Tests: `blockstorage/v3/transfers/python_records_test.go:TestPythonTransferListDefaultsSummaryQueriesAndRawFilters`.
@@ -213,6 +212,7 @@ import (
     "fmt"
     "log"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     openstack "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/transfers"
 )
@@ -227,12 +227,12 @@ func main() {
         transfers.WithRecordCreateVolumeID("v1"),
         transfers.WithRecordCreateName("handoff"),
         transfers.WithRecordCreateNoSnapshots(true),
-        transfers.WithRecordCreateSuppressLegacySnapshots(true),
+        request.Custom(func(c *transfers.RecordCreateOpts) error { c.SuppressLegacySnapshots = true; return nil }),
     )
     if err != nil { log.Fatal(err) }
     fmt.Println(string(created.Resource.Body["id"]))
     for candidate, err := range storage.Transfers.ListRecords(ctx,
-        transfers.WithRecordListDetails(false),
+        request.Custom(func(c *transfers.RecordListOpts) error { v := false; c.Details = &v; return nil }),
     ) {
         if err != nil { log.Fatal(err) }
         fmt.Println(string(candidate.Resource.Body["id"]), string(candidate.Resource.Body["name"]))

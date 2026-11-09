@@ -35,13 +35,13 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords, AllRecords and
-// ProxyListRecords: WithRecordListOpts, WithRecordListDetails,
-// WithRecordListJMESPath, request.Query (a Source keyword argument; the
-// value is sent as JSON), request.Limit, request.MaxItems and
-// request.Paginated (the limit, max_items and paginated keyword arguments),
-// request.Microversion, request.Headers (replaces the headers) or
-// request.Custom over *RecordListOpts. Other shared calls, including
-// request.Marker, fail with resource.ErrInvalidOption before HTTP.
+// ProxyListRecords: WithRecordListOpts, WithRecordListJMESPath, request.Query
+// (a Source keyword argument; the value is sent as JSON), request.Limit,
+// request.MaxItems and request.Paginated (the limit, max_items and paginated
+// keyword arguments), request.Microversion, request.Headers (replaces the
+// headers) or request.Custom over *RecordListOpts (for example to set Details).
+// Other shared calls, including request.Marker, fail with
+// resource.ErrInvalidOption before HTTP.
 type RecordListOption = request.ListCall
 
 func setRecordListQuery(c *RecordListOpts, key string, raw json.RawMessage, err error) error {
@@ -78,9 +78,6 @@ func copyListOpts(v RecordListOpts) RecordListOpts {
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	own := copyListOpts(v)
 	return request.Custom(func(c *RecordListOpts) error { *c = copyListOpts(own); return nil })
-}
-func WithRecordListDetails(v bool) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { c.Details = v; return nil })
 }
 
 // WithRecordListJMESPath sets the Proxy jmespath_filters keyword argument.

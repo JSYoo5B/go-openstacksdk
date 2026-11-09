@@ -22,12 +22,18 @@ func TestPythonBGPSpeakerUpdateRecordSendsOnlySuppliedFlags(t *testing.T) {
 		return pythonBGPSpeakerWire(status, reply)
 	})
 	// update_bgp_speaker("bs-1", name="edge") leaves both advertise flags alone.
-	got, err := api.UpdateRecord(ctx, "bs-1", speakers.WithUpdateRecordName(request.Present("edge")))
+	got, err := api.UpdateRecord(ctx, "bs-1", request.Custom(func(c *request.Config[speakers.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("edge")
+		return nil
+	}))
 	if err != nil || !got.Sent || got.StatusCode != 200 || got.BGPSpeaker == nil || got.BGPSpeaker.ID != "bs-1" || !got.BGPSpeaker.AdvertiseTenantNetworks || got.BGPSpeaker.LocalAS != 65000 || string(got.Fields["peers"]) != `["bp-1"]` {
 		t.Fatal(got, err)
 	}
 	// update_bgp_speaker("bs-1", advertise_tenant_networks=False).
-	if _, err := api.UpdateRecord(ctx, "bs-1", speakers.WithUpdateRecordAdvertiseTenantNetworks(request.Present(false))); err != nil {
+	if _, err := api.UpdateRecord(ctx, "bs-1", request.Custom(func(c *request.Config[speakers.UpdateRecordOpts]) error {
+		c.Options.AdvertiseTenantNetworks = request.Present(false)
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	// update_bgp_speaker("bs-1", name="", advertise_floating_ip_host_routes=False,
@@ -37,7 +43,10 @@ func TestPythonBGPSpeakerUpdateRecordSendsOnlySuppliedFlags(t *testing.T) {
 	status, reply = http.StatusAccepted, `{"id":"bs-1","name":"","advertise_floating_ip_host_routes":false}`
 	got, err = api.UpdateRecord(ctx, "bs-1",
 		speakers.WithUpdateRecordOptions(speakers.UpdateRecordOpts{Name: request.Present(""), AdvertiseTenantNetworks: request.Null[bool]()}),
-		speakers.WithUpdateRecordAdvertiseFloatingIPHostRoutes(request.Present(false)),
+		request.Custom(func(c *request.Config[speakers.UpdateRecordOpts]) error {
+			c.Options.AdvertiseFloatingIPHostRoutes = request.Present(false)
+			return nil
+		}),
 		request.Field("networks", []string{}), request.Header("X-Trace", "t"))
 	if err != nil || got.StatusCode != 202 || got.BGPSpeaker.Name != "" || got.BGPSpeaker.AdvertiseFloatingIPHostRoutes || len(got.Fields) != 3 {
 		t.Fatal(got, err)
@@ -71,18 +80,27 @@ func TestPythonBGPSpeakerUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T)
 			t.Fatal(err)
 		}
 	}
-	if _, err := api.UpdateRecord(ctx, "", speakers.WithUpdateRecordName(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.UpdateRecord(ctx, "", request.Custom(func(c *request.Config[speakers.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if len(*calls) != 0 {
 		t.Fatalf("%+v", *calls)
 	}
 	var operation *resource.OperationError
-	if _, err := api.UpdateRecord(ctx, "bs-1", speakers.WithUpdateRecordName(request.Present("x"))); !gophercloud.ResponseCodeIs(err, http.StatusBadRequest) || !errors.As(err, &operation) || operation.Resource != "speakers" {
+	if _, err := api.UpdateRecord(ctx, "bs-1", request.Custom(func(c *request.Config[speakers.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !gophercloud.ResponseCodeIs(err, http.StatusBadRequest) || !errors.As(err, &operation) || operation.Resource != "speakers" {
 		t.Fatal(err)
 	}
 	var nilAPI *speakers.API
-	if _, err := nilAPI.UpdateRecord(ctx, "bs-1", speakers.WithUpdateRecordName(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := nilAPI.UpdateRecord(ctx, "bs-1", request.Custom(func(c *request.Config[speakers.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }

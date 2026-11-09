@@ -32,7 +32,7 @@ func TestPythonConsistencyGroupSnapshotFindDefaultsCleanFallbackAndNoAutomaticNa
 				api.RawClient().MoreHeaders = map[string]string{"Accept": "application/source"}
 				options := []consistencygroupsnapshots.RecordFindOption{}
 				if !details {
-					options = append(options, consistencygroupsnapshots.WithRecordFindDetails(false))
+					options = append(options, request.Custom(func(c *consistencygroupsnapshots.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 				}
 				value, err := api.FindRecord(context.Background(), "literal /%雪", options...)
 				path := snapshotBase + "/detail"
@@ -431,7 +431,7 @@ func TestPythonConsistencyGroupSnapshotFindPagingControlsOffsetAndRawCap(t *test
 		})
 		opts := []consistencygroupsnapshots.RecordFindOption{request.Query("sort", "name:asc")}
 		if single {
-			opts = append(opts, consistencygroupsnapshots.WithRecordFindPaginated(false))
+			opts = append(opts, request.Custom(func(c *consistencygroupsnapshots.RecordFindOpts) error { v := false; c.Paginated = &v; return nil }))
 		}
 		value, err := api.FindRecord(context.Background(), "data", opts...)
 		count := 3
@@ -454,7 +454,7 @@ func TestPythonConsistencyGroupSnapshotFindPagingControlsOffsetAndRawCap(t *test
 		}
 		return snapshotWire(200, `{"cgsnapshots":[{"id":"first","name":"other"},{"id":"second","name":"data"}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "data", consistencygroupsnapshots.WithRecordFindMaxItems(1))
+	value, err := api.FindRecord(context.Background(), "data", request.Custom(func(c *consistencygroupsnapshots.RecordFindOpts) error { c.MaxItems = 1; return nil }))
 	if value != nil || err != nil || len(*calls) != 2 || !strings.Contains((*calls)[1].query, "limit=1") {
 		t.Fatal(value, err, *calls)
 	}

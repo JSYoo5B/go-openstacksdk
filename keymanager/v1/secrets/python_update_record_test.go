@@ -168,7 +168,7 @@ func TestPythonSecretUpdateRecordPreflightAndConstructorCollisions(t *testing.T)
 			case "bad-ref":
 				opts = append(opts, secrets.WithUpdateRecordAttribute("secret_ref", "invalid"))
 			case "bad-base":
-				opts = append(opts, secrets.WithUpdateRecordBasePath("../escape"))
+				opts = append(opts, request.Custom(func(c *secrets.UpdateRecordOpts) error { v := "../escape"; c.BasePath = &v; return nil }))
 			case "auth-header":
 				opts = append(opts, request.Headers(map[string]string{"Authorization": "foreign"}))
 			case "source":

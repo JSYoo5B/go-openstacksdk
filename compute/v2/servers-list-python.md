@@ -12,9 +12,9 @@ remain the Gophercloud-shaped alternative described in `docs/listing.md`.
 
 ## Routes and scope
 
-- The default is `GET /servers/detail`; `WithRecordFindDetails(false)` selects
+- The default is `GET /servers/detail`; `RecordFindOpts.Details = false` selects
   `GET /servers` (the Python `details=False` alternative).
-- `WithRecordFindAllProjects(true)` sends `all_tenants=True`; `false` or no
+- `RecordFindOpts.AllProjects = true` sends `all_tenants=True`; `false` or no
   option sends nothing. A raw `all_tenants` query is sent unchanged when no
   typed all-projects option is supplied; combining the typed option with a raw
   `all_tenants` key fails before HTTP (Python would let the typed value win).
@@ -65,14 +65,14 @@ name.
 - Continuation follows `servers_links`, an api-wg `links` value, a top-level
   `next` (including the exact relative `/v2.1/servers[/detail]` alias) or an
   HTTP `Link` header. Without a link, a caller `limit` (or the
-  `WithRecordFindMaxItems` hint) keeps requesting with the last received ID as
+  `RecordFindOpts.MaxItems` hint) keeps requesting with the last received ID as
   `marker` until an empty page.
-- `WithRecordFindMaxItems(n)` sends `limit=n` when no limit (or a zero limit)
+- `RecordFindOpts.MaxItems = n` sends `limit=n` when no limit (or a zero limit)
   is given and counts every received row, including rows rejected by a client
   filter. Like `Resource.list`, the cap is checked before each further row, so
   a cap reached exactly at a page boundary still requests the next page and
   reports its failure, but yields none of its rows.
-- `WithRecordFindPaginated(false)` reads exactly one page.
+- `RecordFindOpts.Paginated = false` reads exactly one page.
 - A continuation that repeats a previous page fails with the actual page
   receipt after the rows already yielded.
 

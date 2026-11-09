@@ -73,7 +73,7 @@ func TestPythonVolumeFindRecordFallbackCodesAndDetailsDefaults(t *testing.T) {
 				})
 				var options []volumes.RecordFindOption
 				if !details {
-					options = append(options, volumes.WithRecordFindDetails(false))
+					options = append(options, request.Custom(func(c *volumes.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 				}
 				value, err := api.FindRecord(context.Background(), "data", options...)
 				want := pythonVolumeBase
@@ -191,7 +191,7 @@ func TestPythonVolumeFindRecordAllProjectsIsFallbackOnlyAndFalseOmitted(t *testi
 		t.Run(mode, func(t *testing.T) {
 			var options []volumes.RecordFindOption
 			if mode != "default" {
-				options = append(options, volumes.WithRecordFindAllProjects(mode == "true"))
+				options = append(options, request.Custom(func(c *volumes.RecordFindOpts) error { v := mode == "true"; c.AllProjects = &v; return nil }))
 			}
 			api, calls := volumeFindAPI(t, func(req *http.Request) *http.Response {
 				if strings.HasSuffix(req.URL.Path, "/data") {
@@ -249,7 +249,7 @@ func TestPythonVolumeFindRecordQueryClassesOwnedOptsAndRawCap(t *testing.T) {
 	}
 	volumeFindField(t, value, "id", `"v1"`)
 	calls.Reset()
-	value, err = api.FindRecord(context.Background(), "data", request.Query("description", "two"), volumes.WithRecordFindMaxItems(1))
+	value, err = api.FindRecord(context.Background(), "data", request.Query("description", "two"), request.Custom(func(c *volumes.RecordFindOpts) error { c.MaxItems = 1; return nil }))
 	if err != nil || value != nil || calls.Len() != 2 || pythonVolumeCalls(calls)[1].query != "limit=1&name=data" {
 		t.Fatal(value, err, pythonVolumeCalls(calls))
 	}
@@ -305,13 +305,13 @@ func TestPythonVolumeFindRecordPagingShortMarkerAndHTTPLinkKeepScope(t *testing.
 				}
 				return response
 			})
-			options := []volumes.RecordFindOption{request.Query("limit", 2), volumes.WithRecordFindAllProjects(true)}
+			options := []volumes.RecordFindOption{request.Query("limit", 2), request.Custom(func(c *volumes.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })}
 			value, err := api.FindRecord(context.Background(), "data", options...)
 			if err != nil || value == nil || calls.Len() != 3 || pythonVolumeCalls(calls)[2].query != "all_tenants=True&limit=2&marker=v1&name=data" {
 				t.Fatal(value, err, pythonVolumeCalls(calls))
 			}
 			calls.Reset()
-			value, err = api.FindRecord(context.Background(), "data", append(options, volumes.WithRecordFindPaginated(false))...)
+			value, err = api.FindRecord(context.Background(), "data", append(options, request.Custom(func(c *volumes.RecordFindOpts) error { v := false; c.Paginated = &v; return nil }))...)
 			if err != nil || value == nil || calls.Len() != 2 {
 				t.Fatal(value, err, pythonVolumeCalls(calls))
 			}
@@ -454,10 +454,10 @@ func TestPythonVolumeFindRecordSelectionAndOptionFailures(t *testing.T) {
 		identity string
 		options  []volumes.RecordFindOption
 	}{
-		{"..", nil}, {"data", []volumes.RecordFindOption{nil}}, {"data", []volumes.RecordFindOption{volumes.WithRecordFindMaxItems(-1)}},
+		{"..", nil}, {"data", []volumes.RecordFindOption{nil}}, {"data", []volumes.RecordFindOption{request.Custom(func(c *volumes.RecordFindOpts) error { c.MaxItems = -1; return nil })}},
 		{"data", []volumes.RecordFindOption{request.Query("id", "collision")}},
-		{"data", []volumes.RecordFindOption{volumes.WithRecordFindAllProjects(false), request.Query("all_tenants", nil)}},
-		{"data", []volumes.RecordFindOption{request.Query("all_projects", true), volumes.WithRecordFindAllProjects(true)}},
+		{"data", []volumes.RecordFindOption{request.Custom(func(c *volumes.RecordFindOpts) error { v := false; c.AllProjects = &v; return nil }), request.Query("all_tenants", nil)}},
+		{"data", []volumes.RecordFindOption{request.Query("all_projects", true), request.Custom(func(c *volumes.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })}},
 		{"data", []volumes.RecordFindOption{request.Custom(func(c *volumes.RecordFindOpts) error {
 			loc := ownedLocation.Clone()
 			c.Location = &loc

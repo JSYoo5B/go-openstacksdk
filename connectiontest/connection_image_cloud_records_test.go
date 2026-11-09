@@ -54,7 +54,7 @@ func TestConnectionCloudImageRecordsShareSourceLocationAndLiveToken(t *testing.T
 	header := request.Header("X-Call", "cloud")
 	ctx := context.Background()
 
-	all, err := service.AllCloudImageRecords(ctx, header, image.WithImageRecordQueryShowAll(true))
+	all, err := service.AllCloudImageRecords(ctx, header, request.Custom(func(c *image.ImageRecordQueryOpts) error { v := true; c.ShowAll = &v; return nil }))
 	if err != nil {
 		t.Fatalf("unexpected error: %v", err)
 	}

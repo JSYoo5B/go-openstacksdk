@@ -25,9 +25,9 @@ type RecordGetOpts struct {
 }
 
 // RecordGetOption is one option of GetRecord: WithRecordGetOpts,
-// WithRecordGetSourceEnvelope, request.Microversion, request.Headers
-// (replaces the headers) or request.Custom over *RecordGetOpts. Other shared
-// calls fail with resource.ErrInvalidOption before HTTP.
+// request.Microversion, request.Headers (replaces the headers) or
+// request.Custom over *RecordGetOpts (for example to set SourceEnvelope). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type RecordGetOption = request.GetCall
 
 func copyGet(v RecordGetOpts) RecordGetOpts {
@@ -45,9 +45,6 @@ func copyGet(v RecordGetOpts) RecordGetOpts {
 func WithRecordGetOpts(v RecordGetOpts) RecordGetOption {
 	owned := copyGet(v)
 	return request.Custom(func(c *RecordGetOpts) error { *c = copyGet(owned); return nil })
-}
-func WithRecordGetSourceEnvelope(v bool) RecordGetOption {
-	return request.Custom(func(c *RecordGetOpts) error { x := v; c.SourceEnvelope = &x; return nil })
 }
 
 // RecordDeleteOpts defaults to ignoring only a clean native404.

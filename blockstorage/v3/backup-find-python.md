@@ -14,12 +14,10 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups.WithRecordFindPaginated`
 
 - Find(resource.ID) sends one GET without fallback and Find(resource.Name) lists backups/detail without a name query and matches locally.
   Tests: `blockstorage/v3/backups/python_parity_test.go:TestPythonBackupFindHasNoIDThenNameFallback`.
@@ -92,7 +90,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     backup, err := service.Backups.FindRecord(ctx, *identity,
         request.IgnoreMissing(false),
-        backups.WithRecordFindDetails(false),
+        request.Custom(func(c *backups.RecordFindOpts) error { v := false; c.Details = &v; return nil }),
     )
     if err != nil { log.Fatal(err) }
     body, err := json.MarshalIndent(backup.Resource.Body, "", "  ")

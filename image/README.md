@@ -358,11 +358,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStream`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChunkSize`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStorePreferences`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChecksumVerification`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHashFactory`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeaders`
 
@@ -552,7 +549,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo.WithStoreRecordListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - ListStores/AllStores default to basic GET info/stores with actual200 only. Local Details true chooses info/stores/detail and never becomes query; server403/404 and feature-unavailable remain errors with no basic fallback. Store embeds Metadata with actual per-page Header/status and raw canonical/unknown fields.
   Tests: `image/v2/serviceinfo/contracts_test.go:TestServiceInfoDefaultRoutesAndEvidence`, `image/v2/serviceinfo/core_test.go:TestServiceInfoCoreDiscoveryRoutesAndRawModels`.
@@ -1813,7 +1810,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSizeInference`
 
 - Legacy typed strict201/204 upload profile only: One fixed POST201 metadata creation followed by one PUT204 binary upload uses canonical response ID, defaults qcow2/bare/private, and performs no additional detail GET, queued status gate, checksum/import/Task/Swift/wait/cleanup.
@@ -1900,7 +1896,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllCloudImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
@@ -2111,8 +2107,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Missing or duplicate destinations, typed nil writers, invalid filenames, blank identities, nil options and invalid headers fail before HTTP.
   Tests: `image/image_record_cloud_download_test.go:TestCloudImageRecordDownloadStrictFindAndPreflight`.

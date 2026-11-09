@@ -24,9 +24,9 @@ statuses live in `api/sdk_reviews.json`.
 ## Listing and searching
 
 `servers.API.ListCloudRecords` streams `GET /servers/detail` (or `/servers`
-with `WithRecordFindDetails(false)`) as `ServerFindRecord` values that carry the
+with `RecordFindOpts.Details = false`) as `ServerFindRecord` values that carry the
 Source Resource view, the received row and the page receipt. `all_tenants=True`
-is sent only with `WithRecordFindAllProjects(true)`. Microversion negotiation,
+is sent only with `RecordFindOpts.AllProjects = true`. Microversion negotiation,
 header policy, paging and location projection are shared with `FindRecord`.
 The full Python `Proxy.servers` query mapping, client Body filters, paging
 fallbacks and per-call controls are described in

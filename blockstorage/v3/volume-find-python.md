@@ -22,13 +22,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.WithRecordFindPaginated`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -142,8 +138,8 @@ func main() {
     if err != nil { log.Fatal(err) }
     volume, err := service.Volumes.FindRecord(ctx, *identity,
         request.IgnoreMissing(false),
-        volumes.WithRecordFindDetails(false),
-        volumes.WithRecordFindAllProjects(true),
+        request.Custom(func(c *volumes.RecordFindOpts) error { v := false; c.Details = &v; return nil }),
+        request.Custom(func(c *volumes.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil }),
     )
     if err != nil { log.Fatal(err) }
     body, err := json.MarshalIndent(volume.Resource.Body, "", "  ")

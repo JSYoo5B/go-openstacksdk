@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.CreateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.WithCreateRecordLocalPref`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`

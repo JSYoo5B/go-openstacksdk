@@ -130,13 +130,12 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords: WithRecordListOpts,
-// WithRecordListDetails, WithRecordListAllProjects, request.Custom over
-// *RecordListOpts (for example to set Location), request.Query (a declared
-// filter, server query, paginated or max_items as JSON; other keys are
-// ignored), request.Limit, request.Marker, request.MaxItems,
-// request.Paginated, request.Microversion or request.Headers (replaces the
-// headers). Other shared calls fail with resource.ErrInvalidOption before
-// HTTP.
+// request.Custom over *RecordListOpts (for example to set Location, Details or
+// AllProjects), request.Query (a declared filter, server query, paginated or
+// max_items as JSON; other keys are ignored), request.Limit, request.Marker,
+// request.MaxItems, request.Paginated, request.Microversion or request.Headers
+// (replaces the headers). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type RecordListOption = request.ListCall
 
 var (
@@ -195,13 +194,6 @@ func copyList(v RecordListOpts) RecordListOpts {
 func WithRecordListOpts(v RecordListOpts) RecordListOption {
 	owned := copyList(v)
 	return request.Custom(func(c *RecordListOpts) error { *c = copyList(owned); return nil })
-}
-
-func WithRecordListDetails(v bool) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { x := v; c.Details = &x; return nil })
-}
-func WithRecordListAllProjects(v bool) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { x := v; c.AllProjects = &x; return nil })
 }
 
 var recordServerQueries = map[string]string{"limit": "limit", "marker": "marker", "offset": "offset", "sort_dir": "sort_dir", "sort_key": "sort_key", "sort": "sort", "all_projects": "all_tenants"}

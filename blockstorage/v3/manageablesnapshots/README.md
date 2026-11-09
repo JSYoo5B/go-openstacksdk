@@ -15,7 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The SDK defaults details to false and reads the underscore summary/detail route while extracting the literal hyphenated response collection; nullable Source descriptors cast reference dictionaries, safe_to_manage JSON truthiness and integer size, preserving physical page evidence and unknown wire fields.

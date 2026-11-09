@@ -24,22 +24,24 @@ import (
 type RecordFindOpts struct {
 	IgnoreMissing *bool
 	Details       *bool
-	AllProjects   *bool
-	Location      *resource.CloudLocation
-	Query         map[string]json.RawMessage
-	Headers       map[string]string
-	MaxItems      int
-	Paginated     *bool
+	// AllProjects changes only the fallback list. False omits the automatic
+	// field; true sends all_tenants=True as the pinned proxy does.
+	AllProjects *bool
+	Location    *resource.CloudLocation
+	Query       map[string]json.RawMessage
+	Headers     map[string]string
+	MaxItems    int
+	Paginated   *bool
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindDetails, WithRecordFindAllProjects, WithRecordFindMaxItems,
-// WithRecordFindPaginated, request.Custom over *RecordFindOpts (for example to
-// set Location), request.IgnoreMissing, request.Headers (replaces the headers)
-// or request.Query (a Resource.find keyword argument sent as JSON: member GET
-// sees ordinary Requests query values; the fallback list classifies declared
-// server filters and Body-local filters and drops unknown kwargs). Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Custom over *RecordFindOpts (for example to set Location, Details,
+// AllProjects, MaxItems or Paginated), request.IgnoreMissing, request.Headers
+// (replaces the headers) or request.Query (a Resource.find keyword argument
+// sent as JSON: member GET sees ordinary Requests query values; the fallback
+// list classifies declared server filters and Body-local filters and drops
+// unknown kwargs). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type RecordFindOption = request.FindCall
 
 var recordFindCalls = calls.Spec[RecordFindOpts]{
@@ -85,22 +87,6 @@ func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(value)
 	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
-}
-func WithRecordFindDetails(value bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := value; c.Details = &x; return nil })
-}
-
-// WithRecordFindAllProjects changes only the fallback list. False omits the
-// automatic field; true sends all_tenants=True as the pinned proxy does.
-func WithRecordFindAllProjects(value bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := value; c.AllProjects = &x; return nil })
-}
-
-func WithRecordFindMaxItems(value int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = value; return nil })
-}
-func WithRecordFindPaginated(value bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := value; c.Paginated = &x; return nil })
 }
 
 func findKey(key string) error {

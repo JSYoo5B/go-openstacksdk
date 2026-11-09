@@ -219,12 +219,12 @@ func TestPythonSecurityGroupFindRecordMarkerCapAndSinglePage(t *testing.T) {
 		}
 		return nativeSecGroupWire(200, `{"security_groups":{"id":"wanted","name":"wanted"}}`)
 	})
-	record, err := api.FindRecord(context.Background(), "wanted", groups.WithRecordFindLimit(5))
+	record, err := api.FindRecord(context.Background(), "wanted", request.Custom(func(c *groups.RecordFindOpts) error { v := 5; c.Limit = &v; return nil }))
 	if err != nil || record == nil || len(calls) != 3 || !strings.Contains(calls[2].query, "marker=wanted") || calls[0].query != "" {
 		t.Fatal(record, err, calls)
 	}
 	calls = nil
-	record, err = api.FindRecord(context.Background(), "wanted", groups.WithRecordFindLimit(5), groups.WithRecordFindPaginated(false))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Custom(func(c *groups.RecordFindOpts) error { v := 5; c.Limit = &v; return nil }), request.Custom(func(c *groups.RecordFindOpts) error { v := false; c.Paginated = &v; return nil }))
 	if err != nil || record == nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}
@@ -235,7 +235,7 @@ func TestPythonSecurityGroupFindRecordMarkerCapAndSinglePage(t *testing.T) {
 		}
 		return nativeSecGroupWire(200, `{"security_groups":[{"id":"skip","name":"wanted","created_at":false},{"id":"wanted","name":"wanted","created_at":1},{"id":"bad","name":"wanted","connection":null}],"next":"https://bad.example/security-groups"}`)
 	})
-	record, err = api.FindRecord(context.Background(), "wanted", request.Query("created_at", true), groups.WithRecordFindMaxItems(2), groups.WithRecordFindLimit(0))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Query("created_at", true), request.Custom(func(c *groups.RecordFindOpts) error { c.MaxItems = 2; return nil }), request.Custom(func(c *groups.RecordFindOpts) error { v := 0; c.Limit = &v; return nil }))
 	if err != nil || record == nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}
@@ -362,7 +362,7 @@ func TestPythonSecurityGroupFindRecordDictionaryTruthinessAndEquality(t *testing
 func TestPythonSecurityGroupFindRecordInvalidControlsAndDescriptorFailBeforeHTTP(t *testing.T) {
 	var calls []nativeSecGroupCall
 	api, _ := findAPI(t, &calls, func(*http.Request) *http.Response { return nativeSecGroupWire(200, `{}`) })
-	for _, options := range [][]groups.RecordFindOption{{nil}, {groups.WithRecordFindLimit(-1)}, {groups.WithRecordFindMaxItems(-1)}, {request.Query("id", "other")}, {request.Query("connection", nil)}, {request.Query("base_path", "/other")}, {request.Query("headers", map[string]any{})}, {request.Query("microversion", "3.4")}, {request.Query("revision_number", json.RawMessage(`"²"`))}, {request.Query("x_unknown", json.RawMessage(`invalid`))}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "network 3.4"})}} {
+	for _, options := range [][]groups.RecordFindOption{{nil}, {request.Custom(func(c *groups.RecordFindOpts) error { v := -1; c.Limit = &v; return nil })}, {request.Custom(func(c *groups.RecordFindOpts) error { c.MaxItems = -1; return nil })}, {request.Query("id", "other")}, {request.Query("connection", nil)}, {request.Query("base_path", "/other")}, {request.Query("headers", map[string]any{})}, {request.Query("microversion", "3.4")}, {request.Query("revision_number", json.RawMessage(`"²"`))}, {request.Query("x_unknown", json.RawMessage(`invalid`))}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "network 3.4"})}} {
 		_, err := api.FindRecord(context.Background(), "wanted", options...)
 		if err == nil || len(calls) != 0 {
 			t.Fatal(err, calls)

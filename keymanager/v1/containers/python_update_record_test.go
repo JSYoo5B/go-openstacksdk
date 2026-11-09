@@ -172,7 +172,7 @@ func TestPythonContainerUpdateRecordPreflightAndConstructorCollisions(t *testing
 			case "bad-ref":
 				opts = append(opts, containers.WithUpdateRecordAttribute("container_ref", "invalid"))
 			case "bad-base":
-				opts = append(opts, containers.WithUpdateRecordBasePath("../escape"))
+				opts = append(opts, request.Custom(func(c *containers.UpdateRecordOpts) error { v := "../escape"; c.BasePath = &v; return nil }))
 			case "auth-header":
 				opts = append(opts, request.Headers(map[string]string{"Authorization": "foreign"}))
 			case "source":

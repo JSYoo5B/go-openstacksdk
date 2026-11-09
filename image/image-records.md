@@ -241,7 +241,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllCloudImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
@@ -368,6 +368,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 

@@ -72,6 +72,7 @@ var recordFindProfile = neutronfind.Profile{
 // control the GET stage. Raw headers remains a GET query value and supplies
 // HTTP headers only if the lookup falls back to LIST.
 type RecordFindOpts struct {
+	// ListBasePath overrides only the clean-fallback LIST route.
 	ListBasePath  *string
 	IgnoreMissing *bool
 	Microversion  *string
@@ -80,13 +81,13 @@ type RecordFindOpts struct {
 	Headers       map[string]string
 }
 
-// RecordFindOption is one option of FindRecord: WithRecordFindOpts, WithRecordFindListBasePath,
-// request.Custom over *RecordFindOpts, request.Query (a Source keyword
-// argument; the value is sent as JSON), request.Headers (replaces the
-// headers), request.Microversion or request.IgnoreMissing. Other shared
-// calls, including request.Header, fail with resource.ErrInvalidOption
-// before HTTP. The fallback list route stays WithRecordFindListBasePath:
-// finds do not accept the shared BasePath call.
+// RecordFindOption is one option of FindRecord: WithRecordFindOpts,
+// request.Custom over *RecordFindOpts (for example to set ListBasePath),
+// request.Query (a Source keyword argument; the value is sent as JSON),
+// request.Headers (replaces the headers), request.Microversion or
+// request.IgnoreMissing. Other shared calls, including request.Header, fail
+// with resource.ErrInvalidOption before HTTP. The fallback list route stays
+// RecordFindOpts.ListBasePath: finds do not accept the shared BasePath call.
 type RecordFindOption = request.FindCall
 
 var recordFindCalls = keystonecalls.FindSpec(func(c *RecordFindOpts) keystonecalls.FindState {
@@ -153,9 +154,4 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 	}
 	result := &ProjectRecord{Resource: value.Resource, Wire: value.Wire, Envelope: value.Envelope, Header: value.Header, StatusCode: value.StatusCode, row: value.Row(), fromList: value.FromList()}
 	return result, wrap(err)
-}
-
-// WithRecordFindListBasePath overrides only the clean-fallback LIST route.
-func WithRecordFindListBasePath(v string) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.ListBasePath = &x; return nil })
 }

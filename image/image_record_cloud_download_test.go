@@ -60,7 +60,7 @@ func TestCloudImageRecordDownloadFindsThenDownloadsToRequiredOutput(t *testing.T
 		service := cloudImageService(t, &calls, cloudDownloadTransport(t, &calls, binary))
 		var output bytes.Buffer
 		// Stream is forwarded but the required destination takes precedence.
-		result, err := service.DownloadCloudImageRecord(context.Background(), ImageRecordCloudDownloadRequest{NameOrID: "ubuntu", Output: &output}, header, WithImageRecordCloudDownloadStream(true), WithImageRecordCloudDownloadChunkSize(1))
+		result, err := service.DownloadCloudImageRecord(context.Background(), ImageRecordCloudDownloadRequest{NameOrID: "ubuntu", Output: &output}, header, request.Custom(func(c *ImageRecordCloudDownloadOpts) error { c.Stream = true; return nil }), request.Custom(func(c *ImageRecordCloudDownloadOpts) error { v := 1; c.ChunkSize = &v; return nil }))
 		if err != nil || calls != 4 || output.String() != "abc" || result.Found == nil || imageRecordText(result.Found, "status") != "queued" {
 			t.Fatal(result, err, calls, output.String())
 		}

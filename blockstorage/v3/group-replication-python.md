@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationPinnedSourceWire`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Literal escaped group action POST, no GET/Find/delete fallback, complete Cinder JSON action request and actual ACK receipt only; no fabricated Group Resource/backend completion, unparsed accepted body including arbitrary JSON/invalidUTF8 and exact HTTP100..399 admission.
   Tests: `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationStockDefaultsLiteralRoutesAndAck`, `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationAllSourceAdmittedCodesIgnoreResponseJSON`, `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationRejectionsNeverIgnoreOrLookup`.
@@ -53,7 +53,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordReplicationPinnedSourceWire`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Literal escaped group action POST, no GET/Find/delete fallback, complete Cinder JSON action request and actual ACK receipt only; no fabricated Group Resource/backend completion, unparsed accepted body including arbitrary JSON/invalidUTF8 and exact HTTP100..399 admission.
   Tests: `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationStockDefaultsLiteralRoutesAndAck`, `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationAllSourceAdmittedCodesIgnoreResponseJSON`, `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationRejectionsNeverIgnoreOrLookup`.
@@ -88,11 +88,9 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.FailoverReplicationRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverAllowedAttachedVolume`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverSecondaryBackendID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFailoverPinnedSourceWire`
 
 - Literal escaped group action POST, no GET/Find/delete fallback, complete Cinder JSON action request and actual ACK receipt only; no fabricated Group Resource/backend completion, unparsed accepted body including arbitrary JSON/invalidUTF8 and exact HTTP100..399 admission.
   Tests: `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationStockDefaultsLiteralRoutesAndAck`, `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationAllSourceAdmittedCodesIgnoreResponseJSON`, `blockstorage/v3/groups/python_replication_contracts_test.go:TestPythonCinderGroupReplicationRejectionsNeverIgnoreOrLookup`.
@@ -169,6 +167,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
 )
@@ -195,16 +194,16 @@ func main() {
     switch *action {
     case "enable":
         value, err = service.Groups.EnableReplicationRecord(ctx, *id,
-            groups.WithRecordReplicationPinnedSourceWire(*sourceWire))
+            request.Custom(func(c *groups.RecordReplicationOpts) error { c.PinnedSourceWire = *sourceWire; return nil }))
     case "disable":
         value, err = service.Groups.DisableReplicationRecord(ctx, *id,
-            groups.WithRecordReplicationPinnedSourceWire(*sourceWire))
+            request.Custom(func(c *groups.RecordReplicationOpts) error { c.PinnedSourceWire = *sourceWire; return nil }))
     case "failover":
         options := []groups.RecordFailoverOption{
-            groups.WithRecordFailoverAllowedAttachedVolume(*allow),
-            groups.WithRecordFailoverPinnedSourceWire(*sourceWire),
+            request.Custom(func(c *groups.RecordFailoverOpts) error { v := *allow; c.AllowedAttachedVolume = &v; return nil }),
+            request.Custom(func(c *groups.RecordFailoverOpts) error { c.PinnedSourceWire = *sourceWire; return nil }),
         }
-        if backendPresent { options = append(options, groups.WithRecordFailoverSecondaryBackendID(*backend)) }
+        if backendPresent { options = append(options, request.Custom(func(c *groups.RecordFailoverOpts) error { v := *backend; c.SecondaryBackendID = &v; return nil })) }
         value, err = service.Groups.FailoverReplicationRecord(ctx, *id, options...)
     default:
         log.Fatal("unknown action")

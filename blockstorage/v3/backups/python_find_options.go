@@ -30,13 +30,12 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindDetails, WithRecordFindMaxItems, WithRecordFindPaginated,
-// request.Custom over *RecordFindOpts, request.IgnoreMissing, request.Headers
-// (replaces the headers) or request.Query (a Resource.find keyword argument
-// sent as JSON: member GET sees ordinary Requests query values; the fallback
-// list classifies declared server filters and Body-local filters and drops
-// unknown kwargs). Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// request.Custom over *RecordFindOpts (for example to set Details, MaxItems or
+// Paginated), request.IgnoreMissing, request.Headers (replaces the headers) or
+// request.Query (a Resource.find keyword argument sent as JSON: member GET sees
+// ordinary Requests query values; the fallback list classifies declared server
+// filters and Body-local filters and drops unknown kwargs). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type RecordFindOption = request.FindCall
 
 var recordFindCalls = calls.Spec[RecordFindOpts]{
@@ -74,15 +73,6 @@ func copyFindOpts(value RecordFindOpts) RecordFindOpts {
 func WithRecordFindOpts(value RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(value)
 	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
-}
-func WithRecordFindDetails(value bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := value; c.Details = &x; return nil })
-}
-func WithRecordFindMaxItems(value int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = value; return nil })
-}
-func WithRecordFindPaginated(value bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := value; c.Paginated = &x; return nil })
 }
 
 func findKey(key string) error {

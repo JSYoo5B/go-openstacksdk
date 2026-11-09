@@ -31,10 +31,9 @@ type RecordListOpts struct {
 
 // RecordListOption is one option of the operation: WithRecordListOpts,
 // WithRecordListHeaders, WithRecordListFilter, WithRecordListFilters,
-// WithRecordListVisibility, WithRecordListResourceTypes,
-// WithRecordListSortKey, WithRecordListSortDir, request.Header,
-// request.Limit, request.Marker, request.MaxItems, request.Paginated, or
-// request.Custom over *RecordListOpts. Other shared calls fail with
+// request.Header, request.Limit, request.Marker, request.MaxItems,
+// request.Paginated, or request.Custom over *RecordListOpts (for example to set
+// Visibility, ResourceTypes, SortKey or SortDir). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RecordListOption = request.ListCall
 
@@ -68,19 +67,6 @@ func WithRecordListFilter(field string, value any) RecordListOption {
 func WithRecordListFilters(values map[string]any) RecordListOption {
 	owned := resource.WithFilters(values)
 	return request.Custom(func(c *RecordListOpts) error { c.Filters = append(c.Filters, owned); return nil })
-}
-
-func WithRecordListVisibility(value string) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { c.Visibility = value; return nil })
-}
-func WithRecordListResourceTypes(value string) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { c.ResourceTypes = value; return nil })
-}
-func WithRecordListSortKey(value string) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { c.SortKey = value; return nil })
-}
-func WithRecordListSortDir(value string) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { c.SortDir = value; return nil })
 }
 
 func recordFilterDescriptor() *resource.FilterDescriptor {

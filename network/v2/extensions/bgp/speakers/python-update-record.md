@@ -14,9 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordName`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordAdvertiseFloatingIPHostRoutes`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/speakers.WithUpdateRecordAdvertiseTenantNetworks`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`

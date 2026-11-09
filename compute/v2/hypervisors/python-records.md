@@ -1,6 +1,6 @@
 # Hypervisor listing and lookup
 
-`ListRecords` follows `compute.hypervisors`: summary by default, `WithRecordDetails(true)` for detail, and the pre-2.53 hostname search route. `FindRecord` follows `find_hypervisor`: GET first, then detail listing after a clean 400/403/404. `WithRecordDetails(false)` changes only its fallback to summary. Every matching row counts, including duplicate IDs; missing defaults to nil and `request.IgnoreMissing(false)` makes it an error.
+`ListRecords` follows `compute.hypervisors`: summary by default, `RecordOptions.Details = true` for detail, and the pre-2.53 hostname search route. `FindRecord` follows `find_hypervisor`: GET first, then detail listing after a clean 400/403/404. `RecordOptions.Details = false` changes only its fallback to summary. Every matching row counts, including duplicate IDs; missing defaults to nil and `request.IgnoreMissing(false)` makes it an error.
 
 The library owns alias projection, dictionary/list descriptors, passive response IDs and literal ID comparison, pagination and observed response evidence. Nova discovery chooses a maximum of 2.88 when no version is selected. A hostname pattern separately checks advertised bounds and the selected version before choosing the legacy search route. Explicit selected versions remain explicit.
 
@@ -21,6 +21,7 @@ import (
     "os"
     "github.com/gophercloud/gophercloud/v2"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 func main() {
     provider := &gophercloud.ProviderClient{}

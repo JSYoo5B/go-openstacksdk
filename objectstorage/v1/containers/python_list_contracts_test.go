@@ -203,7 +203,7 @@ func TestPythonContainerListCountPagingUsesRawRowsAndRetainedMarker(t *testing.T
 		return response
 	})
 	var values []*containers.ContainerRecord
-	for value, err := range api.ListRecords(context.Background(), containers.WithRecordListPrefix("fixed"), request.Query("count", 1)) {
+	for value, err := range api.ListRecords(context.Background(), request.Custom(func(c *containers.RecordListOpts) error { v := "fixed"; c.Prefix = &v; return nil }), request.Query("count", 1)) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -282,7 +282,7 @@ func TestPythonContainerListAdvertisedContinuationAndAccountGuards(t *testing.T)
 				}
 				return response
 			})
-			values, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListPrefix("held")))
+			values, _, err := collectContainerList(api.ListRecords(context.Background(), request.Custom(func(c *containers.RecordListOpts) error { v := "held"; c.Prefix = &v; return nil })))
 			if err != nil || len(values) != 1 || len(*calls) != 2 || (*calls)[1].query.Get("prefix") != "held" {
 				t.Fatal(err, values, *calls)
 			}
@@ -296,7 +296,7 @@ func TestPythonContainerListAdvertisedContinuationAndAccountGuards(t *testing.T)
 				r.Header.Set("Link", link)
 				return r
 			})
-			values, receipt, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListPrefix("held"), request.Marker("first"), request.Limit(2)))
+			values, receipt, err := collectContainerList(api.ListRecords(context.Background(), request.Custom(func(c *containers.RecordListOpts) error { v := "held"; c.Prefix = &v; return nil }), request.Marker("first"), request.Limit(2)))
 			if err == nil || len(values) != 1 || len(*calls) != 1 {
 				t.Fatal(err, values, *calls)
 			}
@@ -330,7 +330,7 @@ func TestPythonContainerListRawCapsAndPageBoundsStopBeforeUnusedRows(t *testing.
 		r.Header.Set("X-Account-Container-Count", "900719925474099312345")
 		return r
 	})
-	values, receipt, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListMaxPages(1)))
+	values, receipt, err := collectContainerList(api.ListRecords(context.Background(), request.Custom(func(c *containers.RecordListOpts) error { c.MaxPages = 1; return nil })))
 	if err == nil || len(values) != 1 || len(*calls) != 1 {
 		t.Fatal(err, values, *calls)
 	}
@@ -515,7 +515,7 @@ func TestPythonContainerListRetryHeaderOwnershipAndActualReceipt(t *testing.T) {
 }
 func TestPythonContainerListPreflightCancellationAndRetainedOptionOwnership(t *testing.T) {
 	for _, option := range []containers.RecordListOption{
-		nil, request.Limit(-1), request.MaxItems(-1), containers.WithRecordListMaxPages(-1), containers.WithRecordListHeaders(map[string]string{"Authorization": "bad"}), containers.WithRecordListHeaders(map[string]string{"OpenStack-API-Version": "object-store 1.2"}), containers.WithRecordListPrefix("bad\xff"), request.Query("prefix", json.RawMessage("bad")), request.Query("paginated", false),
+		nil, request.Limit(-1), request.MaxItems(-1), request.Custom(func(c *containers.RecordListOpts) error { c.MaxPages = -1; return nil }), containers.WithRecordListHeaders(map[string]string{"Authorization": "bad"}), containers.WithRecordListHeaders(map[string]string{"OpenStack-API-Version": "object-store 1.2"}), request.Custom(func(c *containers.RecordListOpts) error { v := "bad\xff"; c.Prefix = &v; return nil }), request.Query("prefix", json.RawMessage("bad")), request.Query("paginated", false),
 	} {
 		api, calls := containerListAPI(t, func(*http.Request) *http.Response { t.Fatal("preflight sent HTTP"); return nil })
 		_, receipt, err := collectContainerList(api.ListRecords(context.Background(), option))
@@ -545,7 +545,7 @@ func TestPythonContainerListPreflightCancellationAndRetainedOptionOwnership(t *t
 		retained.Headers["X-Probe"] = "changed"
 		return containerMetadataResponse(200, `[{"name":"wanted"}]`)
 	})
-	values, _, err := collectContainerList(api.ListRecords(ctx, containers.WithRecordListPrefix("fixed"), request.Query("name", "wanted"), containers.WithRecordListHeaders(map[string]string{"X-Probe": "fixed"}), request.Custom(func(cfg *containers.RecordListOpts) error { retained = cfg; return nil })))
+	values, _, err := collectContainerList(api.ListRecords(ctx, request.Custom(func(c *containers.RecordListOpts) error { v := "fixed"; c.Prefix = &v; return nil }), request.Query("name", "wanted"), containers.WithRecordListHeaders(map[string]string{"X-Probe": "fixed"}), request.Custom(func(cfg *containers.RecordListOpts) error { retained = cfg; return nil })))
 	if err != nil || len(values) != 1 || (*calls)[0].query.Get("prefix") != "fixed" || (*calls)[0].header.Get("X-Probe") != "fixed" {
 		t.Fatal(err, values, *calls)
 	}
@@ -605,7 +605,7 @@ func TestPythonContainerListPublicFixtureWireAndSourceCapture(t *testing.T) {
 	client := cloud.Client("object-store", "/endpoint/")
 	client.ResourceBase = cloud.Server.URL + "/reverse/a%20b/v1/AUTH_owner/"
 	api := containers.New(client)
-	values, _, err := collectContainerList(api.ListRecords(context.Background(), containers.WithRecordListPrefix("a%2Fb space")))
+	values, _, err := collectContainerList(api.ListRecords(context.Background(), request.Custom(func(c *containers.RecordListOpts) error { v := "a%2Fb space"; c.Prefix = &v; return nil })))
 	if err != nil || len(values) != 2 || requests != 2 {
 		t.Fatal(err, values, requests)
 	}

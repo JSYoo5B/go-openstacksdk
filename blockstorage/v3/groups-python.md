@@ -62,7 +62,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.DeleteRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteVolumes`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordDeleteOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -86,7 +87,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.GetRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetListVolume`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordGetField`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
@@ -117,7 +119,8 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -179,7 +182,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
@@ -317,7 +320,7 @@ func main() {
         }
         return
     case "get":
-        value, err = api.GetRecord(ctx, *id, groups.WithRecordGetListVolume(true))
+        value, err = api.GetRecord(ctx, *id, request.Custom(func(c *groups.RecordGetOpts) error { v := true; c.ListVolume = &v; return nil }))
     case "create":
         value, err = api.CreateRecord(ctx,
             request.Field("group_type", *groupType),

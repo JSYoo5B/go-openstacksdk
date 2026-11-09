@@ -19,9 +19,18 @@ func TestPythonComputeServiceUpdateRecordSendsFalseAndEmptyValues(t *testing.T) 
 	api, calls := pythonComputeServiceAPI(t, "2.69", func(*http.Request) *http.Response { return pythonComputeServiceWire(status, reply) })
 	// update_service("svc-uuid", forced_down=False, status="", disabled_reason="")
 	got, err := api.UpdateRecord(ctx, "svc-uuid",
-		services.WithUpdateRecordForcedDown(request.Present(false)),
-		services.WithUpdateRecordStatus(request.Present("")),
-		services.WithUpdateRecordDisabledReason(request.Present("")))
+		request.Custom(func(c *request.Config[services.UpdateRecordOpts]) error {
+			c.Options.ForcedDown = request.Present(false)
+			return nil
+		}),
+		request.Custom(func(c *request.Config[services.UpdateRecordOpts]) error {
+			c.Options.Status = request.Present("")
+			return nil
+		}),
+		request.Custom(func(c *request.Config[services.UpdateRecordOpts]) error {
+			c.Options.DisabledReason = request.Present("")
+			return nil
+		}))
 	if err != nil || !got.Sent || got.StatusCode != 200 || got.Service == nil || got.Service.ID != "svc-uuid" || !got.Service.ForcedDown || string(got.Fields["zone"]) != `"nova"` {
 		t.Fatal(got, err)
 	}
@@ -63,13 +72,19 @@ func TestPythonComputeServiceUpdateRecordRejectsInputsVersionsAndErrorStatuses(t
 			t.Fatal(err)
 		}
 	}
-	if _, err := api.UpdateRecord(ctx, "", services.WithUpdateRecordStatus(request.Present("enabled"))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.UpdateRecord(ctx, "", request.Custom(func(c *request.Config[services.UpdateRecordOpts]) error {
+		c.Options.Status = request.Present("enabled")
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	// Python raises SDKException without a request below 2.53.
 	for _, version := range []string{"2.52", "", "latest"} {
 		old, oldCalls := pythonComputeServiceAPI(t, version, reply)
-		if _, err := old.UpdateRecord(ctx, "svc-uuid", services.WithUpdateRecordStatus(request.Present("enabled"))); !errors.Is(err, resource.ErrUnsupported) || oldCalls.Len() != 0 {
+		if _, err := old.UpdateRecord(ctx, "svc-uuid", request.Custom(func(c *request.Config[services.UpdateRecordOpts]) error {
+			c.Options.Status = request.Present("enabled")
+			return nil
+		})); !errors.Is(err, resource.ErrUnsupported) || oldCalls.Len() != 0 {
 			t.Fatal(version, err)
 		}
 	}
@@ -77,7 +92,10 @@ func TestPythonComputeServiceUpdateRecordRejectsInputsVersionsAndErrorStatuses(t
 		t.Fatalf("%+v", pythonComputeServiceCalls(calls))
 	}
 	var operation *resource.OperationError
-	if _, err := api.UpdateRecord(ctx, "svc-uuid", services.WithUpdateRecordStatus(request.Present("enabled"))); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "services" {
+	if _, err := api.UpdateRecord(ctx, "svc-uuid", request.Custom(func(c *request.Config[services.UpdateRecordOpts]) error {
+		c.Options.Status = request.Present("enabled")
+		return nil
+	})); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "services" {
 		t.Fatal(err)
 	}
 	var nilAPI *services.API

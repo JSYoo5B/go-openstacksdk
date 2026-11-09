@@ -26,8 +26,8 @@ import (
 
 // ListCloudRecords streams the Source Proxy.servers rows that cloud
 // list_servers/search_servers consume: GET /servers/detail by default
-// (WithRecordFindDetails(false) selects GET /servers), all_tenants=True only
-// when WithRecordFindAllProjects(true) is supplied, and the same Python-named
+// (RecordFindOpts.Details = false selects GET /servers), all_tenants=True only
+// when RecordFindOpts.AllProjects = true is supplied, and the same Python-named
 // query pushdown, local descriptor filters, paging, microversion negotiation,
 // header policy and location projection as FindRecord. Each yielded record
 // carries the Source Resource view, the received row and the page receipt.

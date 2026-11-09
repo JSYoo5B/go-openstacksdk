@@ -129,7 +129,7 @@ func TestPythonUserFindRecordOwnsOptionsAndNamesFallbackPath(t *testing.T) {
 		}
 		return recordUserWire(200, `{"users":[{"id":"alice","name":"explicit"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "alice", opt, sdk.WithRecordFindListBasePath(path), request.Query("name", "explicit"))
+	row, err := api.FindRecord(context.Background(), "alice", opt, request.Custom(func(c *sdk.RecordFindOpts) error { v := path; c.ListBasePath = &v; return nil }), request.Query("name", "explicit"))
 	if err != nil || row == nil || len(calls) != 2 {
 		t.Fatal(row, err, calls)
 	}

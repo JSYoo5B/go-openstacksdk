@@ -23,15 +23,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindPaginated`
 
 - Safe string identities use the original native getter when query is absent and the audited query getter otherwise; both retain native success codes. Default logical absence is ignored, Compatible falls back only after GET400/403/404, with explicit 404-only/GET-only and strict missing options.
   Tests: `api/find_identity_native_test.go:TestNativeFindIdentitySafeGETReturnsImmediatelyWithNativeGetter`, `api/find_identity_native_test.go:TestNativeFindIdentityFallbackPoliciesAndMissingDefaults`.
@@ -141,6 +135,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
     "github.com/JSYoo5B/go-openstacksdk/resource"
@@ -168,8 +163,8 @@ func main() {
     if err != nil { log.Fatal(err) }
     record, err := service.Servers.FindRecord(ctx, *identity,
         request.IgnoreMissing(!*strict),
-        servers.WithRecordFindDetails(!*basic),
-        servers.WithRecordFindAllProjects(*allProjects))
+        request.Custom(func(c *servers.RecordFindOpts) error { v := !*basic; c.Details = &v; return nil }),
+        request.Custom(func(c *servers.RecordFindOpts) error { v := *allProjects; c.AllProjects = &v; return nil }))
     if errors.Is(err, resource.ErrNotFound) { log.Fatal("server not found") }
     if errors.Is(err, resource.ErrAmbiguous) { log.Fatal("server name is ambiguous") }
     if err != nil { log.Fatal(err) }

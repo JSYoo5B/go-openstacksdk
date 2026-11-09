@@ -214,7 +214,7 @@ func TestPythonGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap(t *testing.
 		})
 		options := []groupsnapshots.RecordListOption{request.Query("all_projects", false), request.Query("sort_dir", []string{"asc", "desc"}), request.Query("sort", "name:asc"), request.Query("name", "data"), request.Query("description", map[string]any{"enabled": 1}), request.Query("unknown", snapshotMarshal(func() ([]byte, error) { return nil, errors.New("ignored query marshal error") }))}
 		if !details {
-			options = append(options, groupsnapshots.WithRecordListDetails(false))
+			options = append(options, request.Custom(func(c *groupsnapshots.RecordListOpts) error { v := false; c.Details = &v; return nil }))
 		}
 		sequence := api.ListRecords(context.Background(), options...)
 		if len(*calls) != 0 {
@@ -274,7 +274,7 @@ func TestPythonGroupSnapshotListPagingUsesRetainedScalarMarkerAndScope(t *testin
 		return snapshotWire(200, `{"group_snapshots":[{"id":9007199254740993,"name":"kept"}]}`)
 	})
 	var values []*groupsnapshots.GroupSnapshotRecord
-	for value, err := range api.ListRecords(context.Background(), request.Limit(2), groupsnapshots.WithRecordListAllProjects(true)) {
+	for value, err := range api.ListRecords(context.Background(), request.Limit(2), request.Custom(func(c *groupsnapshots.RecordListOpts) error { v := true; c.AllProjects = &v; return nil })) {
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -473,7 +473,7 @@ func TestPythonGroupSnapshotOptionsPreflightOwnershipAndNilAPI(t *testing.T) {
 			t.Fatal(id, err)
 		}
 	}
-	for _, opts := range [][]groupsnapshots.RecordListOption{{nil}, {request.MaxItems(-1)}, {groupsnapshots.WithRecordListAllProjects(false), request.Query("all_tenants", nil)}, {request.Headers(map[string]string{"X-Auth-Token": "caller"})}} {
+	for _, opts := range [][]groupsnapshots.RecordListOption{{nil}, {request.MaxItems(-1)}, {request.Custom(func(c *groupsnapshots.RecordListOpts) error { v := false; c.AllProjects = &v; return nil }), request.Query("all_tenants", nil)}, {request.Headers(map[string]string{"X-Auth-Token": "caller"})}} {
 		_, err := snapshotsCollect(api.ListRecords(context.Background(), opts...))
 		if !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -669,7 +669,7 @@ func TestPythonGroupSnapshotListAdvertisedOffsetAndCursorScope(t *testing.T) {
 				return nil
 			}
 		})
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), groupsnapshots.WithRecordListAllProjects(false), request.Query("offset", 0), request.Query("sort", "name:asc"), request.Query("status", "available")))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Custom(func(c *groupsnapshots.RecordListOpts) error { v := false; c.AllProjects = &v; return nil }), request.Query("offset", 0), request.Query("sort", "name:asc"), request.Query("status", "available")))
 		if err != nil || len(values) != 2 || len(*calls) != 3 {
 			t.Fatal(values, err, *calls)
 		}
@@ -696,7 +696,7 @@ func TestPythonGroupSnapshotListAdvertisedOffsetAndCursorScope(t *testing.T) {
 			t.Fatal(r.URL)
 			return nil
 		})
-		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Marker("start"), groupsnapshots.WithRecordListAllProjects(true)))
+		values, err := snapshotsCollect(api.ListRecords(context.Background(), request.Limit(2), request.Marker("start"), request.Custom(func(c *groupsnapshots.RecordListOpts) error { v := true; c.AllProjects = &v; return nil })))
 		if err != nil || len(values) != 2 || len(*calls) != 3 {
 			t.Fatal(values, err, *calls)
 		}

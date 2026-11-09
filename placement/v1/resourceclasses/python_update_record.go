@@ -28,18 +28,15 @@ type UpdateRecordOpts struct {
 }
 
 // UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
-// WithUpdateRecordName, request.Header or request.Custom over
-// *request.Config[UpdateRecordOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.Header or request.Custom over *request.Config[UpdateRecordOpts] (for
+// example to set Name). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type UpdateRecordOption = request.WriteCall
 
 var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{Header: calls.ConfigHeader[UpdateRecordOpts]}
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
 	return request.Custom(request.WithOptions(value))
-}
-func WithUpdateRecordName(value string) UpdateRecordOption {
-	return request.Custom(func(c *request.Config[UpdateRecordOpts]) error { c.Options.Name = request.Present(value); return nil })
 }
 
 // ResourceClassRecord is the committed Python ResourceClass view.

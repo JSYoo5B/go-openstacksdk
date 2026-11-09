@@ -66,7 +66,7 @@ func TestPythonSnapshotManageResponseMissingIDAndOptionsOwned(t *testing.T) {
 	option := snapshots.WithManageRecordOpts(snapshots.ManageRecordOpts{Metadata: metadata, Headers: headers})
 	metadata[5] = '9'
 	headers["X-Test"] = "changed"
-	row, err := api.ManageRecord(context.Background(), "", json.RawMessage(`null`), option, snapshots.WithManageRecordName(""))
+	row, err := api.ManageRecord(context.Background(), "", json.RawMessage(`null`), option, request.Custom(func(c *snapshots.ManageRecordOpts) error { v := ""; c.Name = &v; return nil }))
 	if err != nil || row == nil || calls.Len() != 2 {
 		t.Fatal(row, err, pythonSnapshotCalls(calls))
 	}

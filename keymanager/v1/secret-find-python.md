@@ -11,7 +11,7 @@ This guide compares openstacksdk commit
 | `find_secret(name_or_id)` | `Secrets.FindRecord(ctx, nameOrID)` |
 | `ignore_missing=False` | `request.IgnoreMissing(false)` |
 | Generic Resource catch policy | SDK default clean HTTP400/403/404 fallback |
-| Explicit Go fallback policy | `secrets.WithFindRecordFallback(resource.FindFallbackNotFoundOnly)` or `FindFallbackNever` |
+| Explicit Go fallback policy | `secrets.FindRecordOpts.Fallback = resource.FindFallbackNotFoundOnly` or `FindFallbackNever` |
 | `secret.to_dict()` | `json.MarshalIndent(result.Resource, "", "  ")` |
 | `secret.payload` text/bytes | `result.Payload.Text` / `result.Payload.Body` for a fetched payload |
 

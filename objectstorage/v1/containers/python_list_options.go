@@ -106,15 +106,6 @@ func WithRecordListHeaders(value map[string]string) RecordListOption {
 		return nil
 	})
 }
-func WithRecordListPrefix(value string) RecordListOption {
-	return request.Custom(func(cfg *RecordListOpts) error { owned := value; cfg.Prefix = &owned; return nil })
-}
-func WithRecordListFormat(value string) RecordListOption {
-	return request.Custom(func(cfg *RecordListOpts) error { owned := value; cfg.Format = &owned; return nil })
-}
-func WithRecordListMaxPages(value int) RecordListOption {
-	return request.Custom(func(cfg *RecordListOpts) error { cfg.MaxPages = value; return nil })
-}
 
 func listRecordServerKey(key string) bool {
 	return key == "prefix" || key == "format" || key == "limit" || key == "marker"

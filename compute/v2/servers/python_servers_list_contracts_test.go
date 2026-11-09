@@ -55,11 +55,11 @@ func TestPythonServersListDetailsAndAllProjectsAlternatives(t *testing.T) {
 		query   string
 	}{
 		{"default details", nil, serverFindDetail, ""},
-		{"details true", []servers.RecordFindOption{servers.WithRecordFindDetails(true)}, serverFindDetail, ""},
-		{"details false", []servers.RecordFindOption{servers.WithRecordFindDetails(false)}, serverFindBase, ""},
-		{"all projects", []servers.RecordFindOption{servers.WithRecordFindAllProjects(true)}, serverFindDetail, "all_tenants=True"},
-		{"all projects false", []servers.RecordFindOption{servers.WithRecordFindAllProjects(false)}, serverFindDetail, ""},
-		{"summary all projects", []servers.RecordFindOption{servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true)}, serverFindBase, "all_tenants=True"},
+		{"details true", []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.Details = &v; return nil })}, serverFindDetail, ""},
+		{"details false", []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.Details = &v; return nil })}, serverFindBase, ""},
+		{"all projects", []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })}, serverFindDetail, "all_tenants=True"},
+		{"all projects false", []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.AllProjects = &v; return nil })}, serverFindDetail, ""},
+		{"summary all projects", []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.Details = &v; return nil }), request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })}, serverFindBase, "all_tenants=True"},
 		{"raw all_tenants", []servers.RecordFindOption{request.Query("all_tenants", 1)}, serverFindDetail, "all_tenants=1"},
 	} {
 		calls, headers = nil, nil
@@ -74,8 +74,8 @@ func TestPythonServersListDetailsAndAllProjectsAlternatives(t *testing.T) {
 	}
 	calls = nil
 	for _, conflict := range [][]servers.RecordFindOption{
-		{servers.WithRecordFindAllProjects(true), request.Query("all_tenants", true)},
-		{servers.WithRecordFindAllProjects(false), request.Query("all_tenants", true)},
+		{request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil }), request.Query("all_tenants", true)},
+		{request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.AllProjects = &v; return nil }), request.Query("all_tenants", true)},
 	} {
 		if _, err := serverListCollect(t, api, conflict...); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -174,8 +174,8 @@ func TestPythonServersListClientBodyFiltersAndRawCap(t *testing.T) {
 		{"combined", []servers.RecordFindOption{request.Query("host_status", "UP"), request.Query("metadata", map[string]any{"role": "web"})}, "a,d"},
 		// Resource.list counts every received row toward max_items before
 		// the client filter, so the third row ends the stream unmatched.
-		{"raw cap before filter", []servers.RecordFindOption{request.Query("host_status", "DOWN"), servers.WithRecordFindMaxItems(1)}, ""},
-		{"raw cap counts skipped rows", []servers.RecordFindOption{request.Query("host_status", "UP"), servers.WithRecordFindMaxItems(3)}, "a,c"},
+		{"raw cap before filter", []servers.RecordFindOption{request.Query("host_status", "DOWN"), request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = 1; return nil })}, ""},
+		{"raw cap counts skipped rows", []servers.RecordFindOption{request.Query("host_status", "UP"), request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = 3; return nil })}, "a,c"},
 	} {
 		calls = nil
 		rows, err := serverListCollect(t, api, item.options...)
@@ -188,7 +188,7 @@ func TestPythonServersListClientBodyFiltersAndRawCap(t *testing.T) {
 		}
 	}
 	calls = nil
-	if _, err := serverListCollect(t, api, request.Query("metadata", map[string]any{"role": "web"}), servers.WithRecordFindMaxItems(2)); err != nil || calls[0].query != "limit=2" {
+	if _, err := serverListCollect(t, api, request.Query("metadata", map[string]any{"role": "web"}), request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = 2; return nil })); err != nil || calls[0].query != "limit=2" {
 		t.Fatal(err, calls)
 	}
 }
@@ -237,19 +237,19 @@ func TestPythonServersListNextLinkAndMarkerFallbackPaging(t *testing.T) {
 			case "marker":
 				// No continuation link: a caller limit keeps requesting with the
 				// last received ID until an empty page.
-				options, requests = []servers.RecordFindOption{servers.WithRecordFindLimit(2)}, 3
+				options, requests = []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := 2; c.Limit = &v; return nil })}, 3
 			case "maxitems":
 				// max_items without a limit sends it as the wire limit hint; the
 				// marker fallback still requests the empty page after the cap.
-				options, want, requests = []servers.RecordFindOption{servers.WithRecordFindMaxItems(3)}, "s1,s2,s3", 3
+				options, want, requests = []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = 3; return nil })}, "s1,s2,s3", 3
 			case "boundary":
 				// The cap is checked before each further row, so a cap reached at a
 				// page boundary still requests the next page and discards its row.
-				options, want = []servers.RecordFindOption{servers.WithRecordFindMaxItems(2)}, "s1,s2"
+				options, want = []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = 2; return nil })}, "s1,s2"
 			case "boundaryfail":
-				options = []servers.RecordFindOption{servers.WithRecordFindMaxItems(2)}
+				options = []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = 2; return nil })}
 			case "single":
-				options, want, requests = []servers.RecordFindOption{servers.WithRecordFindPaginated(false)}, "s1,s2", 1
+				options, want, requests = []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.Paginated = &v; return nil })}, "s1,s2", 1
 			case "empty":
 				want, requests = "", 1
 			case "plain":
@@ -319,8 +319,8 @@ func TestPythonServersListPerCallMicroversionHeadersAndControls(t *testing.T) {
 		{request.Query("all_projects", true)},
 		{request.Query("jmespath_filters", "[?status=='ACTIVE']")},
 		{servers.WithRecordFindOpts(servers.RecordFindOpts{Query: map[string]json.RawMessage{"id": json.RawMessage("{")}})},
-		{servers.WithRecordFindMaxItems(-1)},
-		{servers.WithRecordFindLimit(-1)},
+		{request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = -1; return nil })},
+		{request.Custom(func(c *servers.RecordFindOpts) error { v := -1; c.Limit = &v; return nil })},
 		{nil},
 	} {
 		if _, err := serverListCollect(t, api, invalid...); !errors.Is(err, resource.ErrInvalidOption) {

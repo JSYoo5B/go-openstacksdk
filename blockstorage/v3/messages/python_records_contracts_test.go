@@ -88,7 +88,7 @@ func TestPythonCinderMessageGetStrictSourceEnvelopeAndSeedShapes(t *testing.T) {
 		valid, strict bool
 	}{{`{"message":{"id":"wire","user_message":"text"}}`, true, true}, {`{"messages":{}}`, true, false}, {"", true, false}, {"{bad", true, false}, {`null`, false, false}, {`[]`, false, false}, {`{"messages":null,"message":{"id":"wire"}}`, false, false}, {string([]byte{'{', '"', 'k', '"', ':', '"', 0xff, '"', '}'}), false, false}} {
 		api, calls := messageAPI(t, "3.3", func(*http.Request) *http.Response { return messageWire(200, item.body) })
-		v, err := api.GetRecord(context.Background(), "seed", messages.WithRecordGetSourceEnvelope(item.strict))
+		v, err := api.GetRecord(context.Background(), "seed", request.Custom(func(c *messages.RecordGetOpts) error { v := item.strict; c.SourceEnvelope = &v; return nil }))
 		if v == nil || (err == nil) != item.valid || calls.Len() != 1 || v.StatusCode != 200 || string(v.Envelope) != item.body {
 			t.Fatal(item, v, err, messageCalls(calls))
 		}

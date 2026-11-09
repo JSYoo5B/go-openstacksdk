@@ -457,7 +457,7 @@ func TestPythonProjectFindRecordsListBasePathOnlyAfterFallbackAndVersionPhase(t 
 			if direct {
 				path = "https://unused.invalid/"
 			}
-			row, err := api.FindRecord(context.Background(), "demo", projects.WithRecordFindListBasePath(path), request.Microversion("3.2"))
+			row, err := api.FindRecord(context.Background(), "demo", request.Custom(func(c *projects.RecordFindOpts) error { v := path; c.ListBasePath = &v; return nil }), request.Microversion("3.2"))
 			if err != nil || row == nil || row.StatusCode != 199 || api.RawClient().Microversion != "3.1" {
 				t.Fatal(row, err, paths, versions)
 			}

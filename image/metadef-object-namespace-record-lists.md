@@ -94,10 +94,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilter`
 - `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListVisibility`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListResourceTypes`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListSortKey`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadefobjects.WithRecordListSortDir`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Zero-HTTP InNamespace validates required literal parent and captures original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent/child names are nonempty UTF8<=80runes, route-breaking/control/dot syntax rejected, colon/Unicode/space preserved and escaped once. No Ref/find/parent GET or response-driven routing. Each request copies latest ordinary source headers and uses live original auth; scope/source/context rechecked before callbacks, after accepted body and consumed rows.
   Tests: `image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreFixedScopeAndCRUD`, `image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreCompletePreflight`, `image/v2/metadefobjects/core_test.go:TestMetadefObjectsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadefobjects/options_test.go:TestMetadefObjectsOptionsValidationAndDefaults`, `image/v2/metadefobjects/contracts_test.go:TestMetadefObjectsOwnedPreparationAndSource`, `connectiontest/connection_image_metadef_objects_test.go:TestConnectionImageMetadefObjectsShareClientAndFixedScope`.

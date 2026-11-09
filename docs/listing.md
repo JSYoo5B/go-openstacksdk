@@ -18,14 +18,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindLimit`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMarker`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindMaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
@@ -155,11 +149,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListPrefix`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListFormat`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxPages`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The container Collection preserves native Swift marker pagination, prefix/explicit-limit query and typed count/byte fields while applying controls before local exact-name filtering.
@@ -218,9 +210,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The fixed-container listing preserves escaped opaque container names, marker query, object metadata and delimiter subdirectory rows without HEAD; subdirectory rows count toward the raw cap.

@@ -27,8 +27,10 @@ import (
 
 // UpdateRecordOpts describes an owned, newly seeded Secret commit. Attributes
 // are Source Body names or wire aliases; unknown ordinary attrs are discarded.
-// Headers/Microversion are explicit Go transport controls. BasePath is a literal
-// path within the selected service; Python printf URI templates are not enabled.
+// Headers/Microversion are explicit Go transport controls. BasePath is a
+// literal path within the selected service; Python printf URI templates are not
+// enabled. BasePath is operation-specific: the shared BasePath call is not
+// accepted by write operations.
 type UpdateRecordOpts struct {
 	Attributes             map[string]json.RawMessage
 	Headers                map[string]string
@@ -37,8 +39,8 @@ type UpdateRecordOpts struct {
 }
 
 // UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOpts,
-// WithUpdateRecordAttribute, WithUpdateRecordBasePath, request.Custom over
-// *UpdateRecordOpts, request.Headers (replaces the headers) or
+// WithUpdateRecordAttribute, request.Custom over *UpdateRecordOpts (for example
+// to set BasePath), request.Headers (replaces the headers) or
 // request.Microversion. Other shared calls fail with resource.ErrInvalidOption
 // before HTTP.
 type UpdateRecordOption = request.WriteCall
@@ -85,13 +87,6 @@ func WithUpdateRecordAttribute(key string, value any) UpdateRecordOption {
 		c.Attributes[key] = bytes.Clone(owned)
 		return nil
 	})
-}
-
-// WithUpdateRecordBasePath sets the literal service-relative path of the PUT.
-// It is operation-specific: the shared BasePath call is not accepted by write
-// operations.
-func WithUpdateRecordBasePath(value string) UpdateRecordOption {
-	return request.Custom(func(c *UpdateRecordOpts) error { x := value; c.BasePath = &x; return nil })
 }
 
 // UpdatedSecretRecord keeps request seed/body separate from an actual PUT

@@ -26,10 +26,10 @@ type ManageRecordOpts struct {
 }
 
 // ManageRecordOption is one option of ManageRecord: WithManageRecordOpts,
-// WithManageRecordName, WithManageRecordDescription, WithManageRecordMetadata,
-// request.Headers (replaces the headers) or request.Custom over
-// *ManageRecordOpts. Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// WithManageRecordMetadata, request.Headers (replaces the headers) or
+// request.Custom over *ManageRecordOpts (for example to set Name or
+// Description). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type ManageRecordOption = request.WriteCall
 
 func copyManageOpts(v ManageRecordOpts) ManageRecordOpts {
@@ -48,12 +48,6 @@ func copyManageOpts(v ManageRecordOpts) ManageRecordOpts {
 func WithManageRecordOpts(v ManageRecordOpts) ManageRecordOption {
 	own := copyManageOpts(v)
 	return request.Custom(func(c *ManageRecordOpts) error { *c = copyManageOpts(own); return nil })
-}
-func WithManageRecordName(v string) ManageRecordOption {
-	return request.Custom(func(c *ManageRecordOpts) error { x := v; c.Name = &x; return nil })
-}
-func WithManageRecordDescription(v string) ManageRecordOption {
-	return request.Custom(func(c *ManageRecordOpts) error { x := v; c.Description = &x; return nil })
 }
 func WithManageRecordMetadata(v json.RawMessage) ManageRecordOption {
 	own := bytes.Clone(v)

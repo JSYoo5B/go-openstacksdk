@@ -66,7 +66,7 @@ func TestPythonServerFindRecordDirectDefaultsAliasesAndWire(t *testing.T) {
 		r.Header.Set("If-Match", "actual")
 		return r
 	})
-	v, err := api.FindRecord(context.Background(), "folder/name%", servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true), request.Query("x_raw", map[string]any{"false": false, "zero": 0}), request.Query("name", "seed"), request.Headers(map[string]string{"X-Trace": "owned"}))
+	v, err := api.FindRecord(context.Background(), "folder/name%", request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.Details = &v; return nil }), request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil }), request.Query("x_raw", map[string]any{"false": false, "zero": 0}), request.Query("name", "seed"), request.Headers(map[string]string{"X-Trace": "owned"}))
 	if err != nil || len(calls) != 1 || calls[0].method != "GET" || calls[0].body != "" || escaped != serverFindBase+"/folder%2Fname%25" || header.Get("OpenStack-API-Version") != "compute 2.96" || header.Get("X-OpenStack-Nova-API-Version") != "2.96" || header.Get("X-Trace") != "owned" || header.Get("X-Auth-Token") != "test-token" {
 		t.Fatal(v, err, calls, header, escaped)
 	}
@@ -208,7 +208,7 @@ func TestPythonServerFindRecordFallbackStatusMissingAndAuthority(t *testing.T) {
 	}
 	calls = nil
 	api, _ = serverFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeServerWire(403, `{"forbidden":"actual"}`) })
-	v, err = api.FindRecord(context.Background(), "wanted", servers.WithRecordFindAllProjects(true))
+	v, err = api.FindRecord(context.Background(), "wanted", request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil }))
 	if v != nil || !gophercloud.ResponseCodeIs(err, 403) || len(calls) != 2 {
 		t.Fatal(v, err, calls)
 	}
@@ -228,7 +228,7 @@ func TestPythonServerFindRecordDetailsScopeQueryPriorityAndOrderedSeed(t *testin
 		return nativeServerWire(200, `{"servers":[{"id":"wanted","name":"wanted","fault":{"enabled":1,"extra":false}}]}`)
 	})
 	api.RawClient().MoreHeaders["Accept"] = "member-custom"
-	v, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindDetails(false), servers.WithRecordFindAllProjects(true), request.Query("changes-since", "wire"), request.Query("changes_since", nil), request.Query("name", nil), request.Query("any_tags", []any{"one", nil, "two"}), request.Query("fault", map[string]any{"enabled": true}), request.Query("x_extra", false))
+	v, err := api.FindRecord(context.Background(), "wanted", request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.Details = &v; return nil }), request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil }), request.Query("changes-since", "wire"), request.Query("changes_since", nil), request.Query("name", nil), request.Query("any_tags", []any{"one", nil, "two"}), request.Query("fault", map[string]any{"enabled": true}), request.Query("x_extra", false))
 	if err != nil || v == nil || len(calls) != 2 || !reflect.DeepEqual(accept, []string{"member-custom", "application/json"}) {
 		t.Fatal(v, err, calls, accept)
 	}
@@ -398,7 +398,7 @@ func TestPythonServerFindRecordDiscoveryTerminalProofAndSourceGuard(t *testing.T
 func TestPythonServerFindRecordInvalidControlsBeforeHTTP(t *testing.T) {
 	var calls []nativeServerCall
 	api, _ := serverFindAPI(t, &calls, func(*http.Request) *http.Response { return nativeServerWire(200, `{}`) })
-	options := [][]servers.RecordFindOption{{nil}, {servers.WithRecordFindLimit(-1)}, {servers.WithRecordFindMaxItems(-1)}, {request.Query("progress", "²")}, {request.Query("x", json.RawMessage(`bad`))}, {servers.WithRecordFindAllProjects(false), request.Query("all_tenants", nil)}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "compute 2.5"})}, {request.Headers(map[string]string{"X-OpenStack-Volume-API-Version": "3.5"})}}
+	options := [][]servers.RecordFindOption{{nil}, {request.Custom(func(c *servers.RecordFindOpts) error { v := -1; c.Limit = &v; return nil })}, {request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = -1; return nil })}, {request.Query("progress", "²")}, {request.Query("x", json.RawMessage(`bad`))}, {request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.AllProjects = &v; return nil }), request.Query("all_tenants", nil)}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {request.Headers(map[string]string{"OpenStack-API-Version": "compute 2.5"})}, {request.Headers(map[string]string{"X-OpenStack-Volume-API-Version": "3.5"})}}
 	for _, key := range []string{"ignore_missing", "name_or_id", "session", "cls", "id", "self", "connection", "_synchronized", "details", "all_projects", "base_path", "list_base_path", "resource_type", "requires_id", "resource_response_key", "skip_cache", "error_message", "headers", "microversion", "paginated", "max_items", "location", "interface_ip"} {
 		options = append(options, []servers.RecordFindOption{request.Query(key, nil)})
 	}
@@ -665,12 +665,12 @@ func TestPythonServerFindRecordMarkerCapAndSinglePage(t *testing.T) {
 		}
 		return nativeServerWire(200, `{"servers":{"id":"wanted","name":"wanted"}}`)
 	})
-	record, err := api.FindRecord(context.Background(), "wanted", servers.WithRecordFindLimit(5))
+	record, err := api.FindRecord(context.Background(), "wanted", request.Custom(func(c *servers.RecordFindOpts) error { v := 5; c.Limit = &v; return nil }))
 	if err != nil || record == nil || len(calls) != 3 || !strings.Contains(calls[2].query, "marker=wanted") || calls[0].query != "" {
 		t.Fatal(record, err, calls)
 	}
 	calls = nil
-	record, err = api.FindRecord(context.Background(), "wanted", servers.WithRecordFindLimit(5), servers.WithRecordFindPaginated(false))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Custom(func(c *servers.RecordFindOpts) error { v := 5; c.Limit = &v; return nil }), request.Custom(func(c *servers.RecordFindOpts) error { v := false; c.Paginated = &v; return nil }))
 	if err != nil || record == nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}
@@ -681,7 +681,7 @@ func TestPythonServerFindRecordMarkerCapAndSinglePage(t *testing.T) {
 		}
 		return nativeServerWire(200, `{"servers":[{"id":"skip","name":"wanted","fault":false},{"id":"wanted","name":"wanted","fault":1},{"id":"bad","name":"wanted","connection":null}],"next":"https://bad.example/servers/detail"}`)
 	})
-	record, err = api.FindRecord(context.Background(), "wanted", request.Query("fault", true), servers.WithRecordFindMaxItems(2), servers.WithRecordFindLimit(0))
+	record, err = api.FindRecord(context.Background(), "wanted", request.Query("fault", true), request.Custom(func(c *servers.RecordFindOpts) error { c.MaxItems = 2; return nil }), request.Custom(func(c *servers.RecordFindOpts) error { v := 0; c.Limit = &v; return nil }))
 	if err != nil || record == nil || len(calls) != 2 {
 		t.Fatal(record, err, calls)
 	}

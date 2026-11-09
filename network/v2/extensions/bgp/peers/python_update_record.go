@@ -27,11 +27,11 @@ type UpdateRecordOpts struct {
 }
 
 // UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
-// WithUpdateRecordName, WithUpdateRecordPassword, request.Field (another
-// attribute inside the bgp_peer envelope; keys owned by UpdateRecordOpts and
-// the URI identity id are rejected), request.Header or request.Custom over
-// *request.Config[UpdateRecordOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.Field (another attribute inside the bgp_peer envelope; keys owned by
+// UpdateRecordOpts and the URI identity id are rejected), request.Header or
+// request.Custom over *request.Config[UpdateRecordOpts] (for example to set
+// Name or Password). Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type UpdateRecordOption = request.WriteCall
 
 var updateRecordOptionCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
@@ -41,12 +41,6 @@ var updateRecordOptionCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
 	return request.Custom(request.WithOptions(value))
-}
-func WithUpdateRecordName(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Name = value; return nil })
-}
-func WithUpdateRecordPassword(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Password = value; return nil })
 }
 
 // BGPPeerRecord is the committed Python BgpPeer view. BGPPeer is the native

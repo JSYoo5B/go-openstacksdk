@@ -66,7 +66,7 @@ func TestPythonUserFindRecordFetchControlsHeadersAreStageSpecific(t *testing.T) 
 		}
 		return recordUserWire(200, `{"users":[{"id":"u","name":"alice"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "alice", request.Query("base_path", "/alternate-users"), sdk.WithRecordFindListBasePath("/list-users"), request.Query("headers", map[string]string{"X-Raw": "raw"}), request.Headers(map[string]string{"X-Raw": "typed", "X-Typed": "kept"}), request.Query("requires_id", true), request.Query("skip_cache", true), request.Query("error_message", "custom"), request.Query("resource_response_key", "selected"))
+	row, err := api.FindRecord(context.Background(), "alice", request.Query("base_path", "/alternate-users"), request.Custom(func(c *sdk.RecordFindOpts) error { v := "/list-users"; c.ListBasePath = &v; return nil }), request.Query("headers", map[string]string{"X-Raw": "raw"}), request.Headers(map[string]string{"X-Raw": "typed", "X-Typed": "kept"}), request.Query("requires_id", true), request.Query("skip_cache", true), request.Query("error_message", "custom"), request.Query("resource_response_key", "selected"))
 	if err != nil || row == nil || len(calls) != 2 {
 		t.Fatal(row, err, calls)
 	}

@@ -29,7 +29,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadAttributes`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordUploadSizeInference`
 
 - Legacy typed strict201/204 upload profile only: One fixed POST201 metadata creation followed by one PUT204 binary upload uses canonical response ID, defaults qcow2/bare/private, and performs no additional detail GET, queued status gate, checksum/import/Task/Swift/wait/cleanup.
@@ -150,6 +149,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -176,7 +176,7 @@ func main() {
         image.WithImageRecordUploadDiskFormat(*disk),
         image.WithImageRecordUploadSizeInference(*inferSize),
     }
-    if sizePresent { options = append(options, image.WithImageRecordUploadSize(*size)) }
+    if sizePresent { options = append(options, request.Custom(func(c *image.ImageRecordUploadOpts) error { v := *size; c.Size = &v; return nil })) }
     ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
     defer cancel()
     if err := run(ctx, *cloud, *filename, *name, *visibility, *viaService, options); err != nil {

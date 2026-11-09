@@ -24,7 +24,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageSize`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordStageSizeInference`
 
 - Legacy native/ref strict200/204 stage profile only: StageImage performs a fresh explicit-ID metadata GET before streaming, while StageKnownImage snapshots only supplied native ID/status before option callbacks and skips that initial GET. Both require exact queued status before PUT and leave the supplied model unchanged.

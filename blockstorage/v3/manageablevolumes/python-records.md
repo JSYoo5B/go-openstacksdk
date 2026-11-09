@@ -15,7 +15,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The SDK defaults details to false and reads the underscore summary/detail route while extracting the literal hyphenated response collection; nullable Source descriptors cast reference dictionaries, safe_to_manage JSON truthiness and integer size, preserving physical page evidence and unknown wire fields.
@@ -38,7 +39,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.AllRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots.WithRecordListOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
 - The SDK defaults details to false and reads the underscore summary/detail route while extracting the literal hyphenated response collection; nullable Source descriptors cast reference dictionaries, safe_to_manage JSON truthiness and integer size, preserving physical page evidence and unknown wire fields.
@@ -75,6 +77,7 @@ import (
     "encoding/json"
     "fmt"
     "log"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablevolumes"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/manageablesnapshots"
@@ -87,7 +90,7 @@ func main() {
     service, err := conn.BlockStorageV3(ctx)
     if err != nil { log.Fatal(err) }
     for row, err := range service.ManageableVolumes.ListRecords(ctx,
-        manageablevolumes.WithRecordListDetails(false),
+        request.Custom(func(c *manageablevolumes.RecordListOpts) error { c.Details = false; return nil }),
         request.Query("host", "host@backend"),
         request.Limit(20), request.MaxItems(20)) {
         if err != nil { log.Fatal(err) }
@@ -96,7 +99,7 @@ func main() {
         fmt.Println(string(data))
     }
     for row, err := range service.ManageableSnapshots.ListRecords(ctx,
-        manageablesnapshots.WithRecordListDetails(true),
+        request.Custom(func(c *manageablesnapshots.RecordListOpts) error { c.Details = true; return nil }),
         request.Query("host", "host@backend"),
         request.MaxItems(20)) {
         if err != nil { log.Fatal(err) }

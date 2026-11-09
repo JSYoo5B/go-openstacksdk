@@ -20,11 +20,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStream`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChunkSize`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStorePreferences`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChecksumVerification`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHashFactory`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeaders`
 
@@ -129,8 +126,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Missing or duplicate destinations, typed nil writers, invalid filenames, blank identities, nil options and invalid headers fail before HTTP.
   Tests: `image/image_record_cloud_download_test.go:TestCloudImageRecordDownloadStrictFindAndPreflight`.
@@ -199,6 +195,7 @@ import (
 
     "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/image"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 type preferences []string
@@ -231,9 +228,9 @@ func main() {
         image.WithImageRecordDownloadOpts(image.ImageRecordDownloadOpts{
             Headers: map[string]string{"X-Request-Source": "image-record-download-example"},
         }),
-        image.WithImageRecordDownloadStream(*mode == "stream"),
-        image.WithImageRecordDownloadChunkSize(*chunk),
-        image.WithImageRecordDownloadChecksumVerification(*verify),
+        request.Custom(func(c *image.ImageRecordDownloadOpts) error { c.Stream = *mode == "stream"; return nil }),
+        request.Custom(func(c *image.ImageRecordDownloadOpts) error { v := *chunk; c.ChunkSize = &v; return nil }),
+        request.Custom(func(c *image.ImageRecordDownloadOpts) error { v := *verify; c.VerifyChecksum = &v; return nil }),
         image.WithImageRecordDownloadStorePreferences(stores...),
     }
     ctx, cancel := context.WithTimeout(context.Background(), *timeout)

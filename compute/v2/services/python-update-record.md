@@ -34,9 +34,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordStatus`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordDisabledReason`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/services.WithUpdateRecordForcedDown`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`

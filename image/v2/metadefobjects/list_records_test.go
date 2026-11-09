@@ -266,12 +266,12 @@ func TestMetadefObjectRecordsCompletePreflight(t *testing.T) {
 		{"accept header", []RecordListOption{request.Header("Accept", "text/plain")}},
 		{"header aliases", []RecordListOption{WithRecordListHeaders(map[string]string{"X-Duplicate": "one", "x-duplicate": "two"})}},
 		{"header newline", []RecordListOption{request.Header("X-Option", "bad\nvalue")}},
-		{"visibility control", []RecordListOption{WithRecordListVisibility("pub\nlic")}},
-		{"resource types control", []RecordListOption{WithRecordListResourceTypes("bad\x7f")}},
-		{"sort key UTF8", []RecordListOption{WithRecordListSortKey("bad\xff")}},
-		{"sort dir control", []RecordListOption{WithRecordListSortDir("bad\rdir")}},
+		{"visibility control", []RecordListOption{request.Custom(func(c *RecordListOpts) error { c.Visibility = "pub\nlic"; return nil })}},
+		{"resource types control", []RecordListOption{request.Custom(func(c *RecordListOpts) error { c.ResourceTypes = "bad\x7f"; return nil })}},
+		{"sort key UTF8", []RecordListOption{request.Custom(func(c *RecordListOpts) error { c.SortKey = "bad\xff"; return nil })}},
+		{"sort dir control", []RecordListOption{request.Custom(func(c *RecordListOpts) error { c.SortDir = "bad\rdir"; return nil })}},
 		{"semantic query control", []RecordListOption{WithRecordListFilter("visibility", "bad\nvalue")}},
-		{"typed semantic query collision", []RecordListOption{WithRecordListVisibility("public"), WithRecordListFilter("visibility", "public")}},
+		{"typed semantic query collision", []RecordListOption{request.Custom(func(c *RecordListOpts) error { c.Visibility = "public"; return nil }), WithRecordListFilter("visibility", "public")}},
 	} {
 		t.Run("namespace/"+check.name, func(t *testing.T) {
 			calls := 0
@@ -935,7 +935,7 @@ func TestMetadefObjectRecordsQueryExtensionsAndFixedContinuation(t *testing.T) {
 				return objectCoreJSON(req, 299, `{"objects":[{"name":"second"}]}`), nil
 			})
 			scope := objectCoreScope(t, client, objectRecordParent)
-			options := []RecordListOption{WithRecordListVisibility("public"), WithRecordListResourceTypes("OS::Compute::Server"), WithRecordListSortKey("created_at"), WithRecordListSortDir("desc")}
+			options := []RecordListOption{request.Custom(func(c *RecordListOpts) error { c.Visibility = "public"; return nil }), request.Custom(func(c *RecordListOpts) error { c.ResourceTypes = "OS::Compute::Server"; return nil }), request.Custom(func(c *RecordListOpts) error { c.SortKey = "created_at"; return nil }), request.Custom(func(c *RecordListOpts) error { c.SortDir = "desc"; return nil })}
 			if semantic {
 				options = []RecordListOption{WithRecordListFilters(map[string]any{"visibility": "public", "resource_types": "OS::Compute::Server", "sort_key": "created_at", "sort_dir": "desc"})}
 			}

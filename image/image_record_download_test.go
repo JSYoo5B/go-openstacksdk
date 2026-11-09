@@ -78,20 +78,20 @@ func TestImageRecordDownloadAllOutputModesAlwaysFetchBeforeBinaryAndOutputWinsSt
 				response.Header.Set("Location", "https://foreign.test/decoy")
 				return response, nil
 			})
-			request := ImageRecordDownloadRequest{ID: "initial"}
+			downloadRequest := ImageRecordDownloadRequest{ID: "initial"}
 			writer := &downloadCoreWriter{}
 			filename := filepath.Join(t.TempDir(), "image.bin")
 			switch mode {
 			case "writer", "writer and stream":
-				request.Output = writer
+				downloadRequest.Output = writer
 			case "file", "file and stream":
-				request.Filename = filename
+				downloadRequest.Filename = filename
 			}
-			options := []ImageRecordDownloadOption{WithImageRecordDownloadChunkSize(2)}
+			options := []ImageRecordDownloadOption{request.Custom(func(c *ImageRecordDownloadOpts) error { v := 2; c.ChunkSize = &v; return nil })}
 			if strings.Contains(mode, "stream") {
-				options = append(options, WithImageRecordDownloadStream(true))
+				options = append(options, request.Custom(func(c *ImageRecordDownloadOpts) error { c.Stream = true; return nil }))
 			}
-			got, err := New(client).DownloadImageRecord(context.Background(), request, options...)
+			got, err := New(client).DownloadImageRecord(context.Background(), downloadRequest, options...)
 			if err != nil || got == nil || got.Record == nil || got.Metadata == nil || got.Downloaded == nil || calls != 2 || metadataBody.closes != 1 || got.Metadata.StatusCode != 203 || got.Record.StatusCode != 203 || got.Downloaded.StatusCode != 299 || string(got.Record.Resource.Body["id"]) != `"fetched"` || string(got.Record.Resource.Body["status"]) != `"saving"` || len(got.Record.Resource.Body) != 65 {
 				t.Fatal(got, err, calls, metadataBody.closes)
 			}
@@ -510,9 +510,9 @@ func TestImageRecordDownloadCustomPrimaryFactoryRunsOnceAfterBinaryAndKeepsFallb
 				}
 				return md5.New(), nil
 			}
-			options := []ImageRecordDownloadOption{WithImageRecordDownloadHashFactory(factory)}
+			options := []ImageRecordDownloadOption{request.Custom(func(c *ImageRecordDownloadOpts) error { c.HashFactory = factory; return nil })}
 			if mode == "verification disabled" {
-				options = append(options, WithImageRecordDownloadChecksumVerification(false))
+				options = append(options, request.Custom(func(c *ImageRecordDownloadOpts) error { v := false; c.VerifyChecksum = &v; return nil }))
 			}
 			got, err := New(client).DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed"}, options...)
 			if got == nil || got.Record == nil || got.Metadata == nil || got.Downloaded == nil || calls != 2 || body.closes != 1 {
@@ -567,7 +567,7 @@ func TestImageRecordDownloadSHAKESelectsStreamButConsumedModeRequiresDigestLengt
 					}
 					return taskCoreHTTP(req, 200, body), nil
 				})
-				got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadStream(stream))
+				got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error { c.Stream = stream; return nil }))
 				if got == nil || got.Checksum == nil || got.Downloaded == nil || calls != 2 || got.Checksum.Algorithm != algorithm || got.Checksum.Actual != "" || got.Checksum.Verified {
 					t.Fatal(got, err, calls)
 				}
@@ -610,7 +610,7 @@ func TestImageRecordDownloadStreamMD5CompatibilityKeepsActualHeaderAndRawExpecte
 				actualHeader = response.Header
 				return response, nil
 			})
-			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadStream(true))
+			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error { c.Stream = true; return nil }))
 			if err != nil || got == nil || got.Downloaded == nil || got.Downloaded.Stream == nil || got.Checksum == nil || calls != 2 || body.closes != 0 || rawReader.Len() != 3 || got.Checksum.Complete || got.Checksum.Verified || string(got.Downloaded.ContentMD5) != expected || got.Downloaded.Header.Get("Content-MD5") != "actual header decoy" {
 				t.Fatal(got, err, calls, body.closes, rawReader.Len())
 			}
@@ -656,9 +656,9 @@ func TestImageRecordDownloadPreflightRejectsAmbiguousSelectorsAndUnsafeLocalInpu
 		{"filename UTF8", ImageRecordDownloadRequest{ID: "fixed", Filename: string([]byte{255})}, nil},
 		{"descriptor overflow", ImageRecordDownloadRequest{Resource: imageRecordDownloadResource(t, `{"id":"fixed","size":1e9999}`)}, nil},
 		{"boolstr descriptor", ImageRecordDownloadRequest{Resource: imageRecordDownloadResource(t, `{"id":"fixed","is_hw_vif_multiqueue_enabled":"invalid"}`)}, nil},
-		{"zero chunk", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadChunkSize(0)},
-		{"negative chunk", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadChunkSize(-1)},
-		{"large chunk", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadChunkSize(64*1024*1024 + 1)},
+		{"zero chunk", ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error { v := 0; c.ChunkSize = &v; return nil })},
+		{"negative chunk", ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error { v := -1; c.ChunkSize = &v; return nil })},
+		{"large chunk", ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error { v := 64*1024*1024 + 1; c.ChunkSize = &v; return nil })},
 		{"preferences UTF8", ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadStorePreferences(string([]byte{255}))},
 		{"owned auth header", ImageRecordDownloadRequest{ID: "fixed"}, request.Header("X-Auth-Token", "spoof")},
 		{"owned media header", ImageRecordDownloadRequest{ID: "fixed"}, request.Header("Accept", "spoof")},
@@ -884,7 +884,7 @@ func TestImageRecordDownloadMemoryWriterFaultsRetainPartialProgressAndCompletedC
 				}
 				return taskCoreHTTP(req, 200, body), nil
 			})
-			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed", Output: output}, WithImageRecordDownloadChunkSize(64))
+			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed", Output: output}, request.Custom(func(c *ImageRecordDownloadOpts) error { v := 64; c.ChunkSize = &v; return nil }))
 			if got == nil || got.Downloaded == nil || got.Record == nil || got.Metadata == nil || got.BytesWritten != expectedBytes || got.Checksum == nil || got.Checksum.Complete != complete || got.Checksum.Verified != complete || err == nil || !errors.Is(err, closeCause) || calls != 2 || body.closes != 1 {
 				t.Fatal(got, err, calls, body.closes)
 			}
@@ -981,7 +981,7 @@ func TestImageRecordDownloadOwnedOutputPathOpensAfterHashSelectionAndLeavesParti
 				}
 				return md5.New(), nil
 			}
-			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed", Filename: filename}, WithImageRecordDownloadHashFactory(factory), WithImageRecordDownloadChunkSize(64))
+			got, err := New(client).DownloadImageRecord(context.Background(), ImageRecordDownloadRequest{ID: "fixed", Filename: filename}, request.Custom(func(c *ImageRecordDownloadOpts) error { c.HashFactory = factory; return nil }), request.Custom(func(c *ImageRecordDownloadOpts) error { v := 64; c.ChunkSize = &v; return nil }))
 			if got == nil || got.Record == nil || got.Metadata == nil || got.Downloaded == nil || got.Downloaded.Body != nil || got.Downloaded.Stream != nil || calls != 2 || body.closes != 1 {
 				t.Fatal(got, err, calls, body.closes)
 			}
@@ -1161,7 +1161,7 @@ func TestImageRecordDownloadOptionMergeReplacementReuseAndStickyCallbackGuards(t
 				return taskCoreJSON(req, 200, "abc"), nil
 			})
 			service := New(client)
-			opts := []ImageRecordDownloadOption{WithImageRecordDownloadStream(true), WithImageRecordDownloadChunkSize(2), WithImageRecordDownloadStorePreferences("before", "before"), request.Header("X-Discarded", "old")}
+			opts := []ImageRecordDownloadOption{request.Custom(func(c *ImageRecordDownloadOpts) error { c.Stream = true; return nil }), request.Custom(func(c *ImageRecordDownloadOpts) error { v := 2; c.ChunkSize = &v; return nil }), WithImageRecordDownloadStorePreferences("before", "before"), request.Header("X-Discarded", "old")}
 			switch mode {
 			case "header merge", "reusable helpers":
 				opts = append(opts, WithImageRecordDownloadHeaders(map[string]string{"X-Final": "new"}))
@@ -1413,7 +1413,7 @@ func TestImageRecordDownloadDeferredStreamReadAndClosePreserveCausesWithoutInven
 			if mode == "cancel during Close" {
 				body = &imageRecordCloseBody{taskCoreBody: inner, after: func() { cancel(marker) }}
 			}
-			got, err := New(client).DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadStream(true))
+			got, err := New(client).DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error { c.Stream = true; return nil }))
 			if err != nil || got == nil || got.Downloaded == nil || got.Downloaded.Stream == nil || calls != 2 || inner.closes != 0 || raw.read {
 				t.Fatal(got, err, calls, inner.closes, raw.read)
 			}
@@ -1522,7 +1522,7 @@ func TestImageRecordDownloadBorrowedWriterCallbacksKeepStickyGuardsAndPartialCou
 				}
 				return n, nil
 			})
-			got, err := service.DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed", Output: writer}, WithImageRecordDownloadChunkSize(2))
+			got, err := service.DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed", Output: writer}, request.Custom(func(c *ImageRecordDownloadOpts) error { v := 2; c.ChunkSize = &v; return nil }))
 			if got == nil || got.Record == nil || got.Metadata == nil || got.Downloaded == nil || got.BytesWritten != 2 || output.String() != "ab" || got.Checksum == nil || got.Checksum.Complete || got.Checksum.Actual != "" || writes != 1 || calls != 2 || inner.closes != 1 {
 				t.Fatal(got, err, output.String(), writes, calls, inner.closes)
 			}
@@ -1558,7 +1558,7 @@ func TestImageRecordDownloadDeferredBodyKeepsCapturedContextAndHTTPTimeoutAlive(
 			if mode == "HTTP timeout" {
 				client.HTTPClient.Timeout = 80 * time.Millisecond
 			}
-			got, err := New(client).DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadStream(true))
+			got, err := New(client).DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error { c.Stream = true; return nil }))
 			if err != nil || got == nil || got.Downloaded.Stream == nil {
 				t.Fatal(got, err)
 			}
@@ -1665,7 +1665,10 @@ func TestImageRecordDownloadCustomHashWriteAndSumCannotHideFaultsOrChangeComplet
 				}
 				return digest.Sum(p)
 			}
-			got, err := New(client).DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed"}, WithImageRecordDownloadHashFactory(func(string) (hash.Hash, error) { return custom, nil }))
+			got, err := New(client).DownloadImageRecord(ctx, ImageRecordDownloadRequest{ID: "fixed"}, request.Custom(func(c *ImageRecordDownloadOpts) error {
+				c.HashFactory = func(string) (hash.Hash, error) { return custom, nil }
+				return nil
+			}))
 			if got == nil || got.Record == nil || got.Metadata == nil || got.Downloaded == nil || string(got.Downloaded.Body) != "abc" || got.BytesWritten != 3 || got.Checksum == nil || got.Checksum.Complete || got.Checksum.Verified || got.Checksum.Actual != "" || calls != 2 || inner.closes != 1 || writes != 1 {
 				t.Fatal(got, err, calls, inner.closes, writes, sums)
 			}

@@ -14,7 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.AllCloudImageRecords`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryFilterDeleted`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryShowAll`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordQueryHeaders`
@@ -225,8 +225,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadChunkSize`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordCloudDownloadStream`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Missing or duplicate destinations, typed nil writers, invalid filenames, blank identities, nil options and invalid headers fail before HTTP.
   Tests: `image/image_record_cloud_download_test.go:TestCloudImageRecordDownloadStrictFindAndPreflight`.
@@ -358,6 +357,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/image"
 )
@@ -410,7 +410,7 @@ func run(ctx context.Context, cloud, pattern string, showAll bool, identity, id 
     if err != nil {
         return err
     }
-    all, err := service.AllCloudImageRecords(ctx, image.WithImageRecordQueryShowAll(showAll))
+    all, err := service.AllCloudImageRecords(ctx, request.Custom(func(c *image.ImageRecordQueryOpts) error { v := showAll; c.ShowAll = &v; return nil }))
     if printErr := printQuery("list_images", all); printErr != nil {
         return errors.Join(err, printErr)
     }

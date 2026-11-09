@@ -213,7 +213,7 @@ func TestR2IronicCPortRecordGetFindListFollowSource(t *testing.T) {
 	if err != nil || string(found.Resource.Body["id"]) != `"p2"` || detail.all()[0].RawQuery != "" {
 		t.Fatalf("fallback is the detailed list without a name hint: %v %+v", err, detail.all())
 	}
-	if gone, err := api.FindRecord(ctx, "by-name", ports.WithRecordFindDetails(false)); err != nil || gone != nil || len(basic.all()) != 1 {
+	if gone, err := api.FindRecord(ctx, "by-name", request.Custom(func(c *ports.RecordFindOpts) error { v := false; c.Details = &v; return nil })); err != nil || gone != nil || len(basic.all()) != 1 {
 		t.Fatalf("basic fallback: %v %v", gone, err)
 	}
 	rows, err := api.AllRecords(ctx, request.Query("node_id", "n"), request.Query("address", "aa"), request.Query("sort_key", "name"), request.Query("fields", []string{"id", "extra"}))

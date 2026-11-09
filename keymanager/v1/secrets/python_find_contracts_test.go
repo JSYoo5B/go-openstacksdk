@@ -243,9 +243,9 @@ func TestPythonSecretFindRecordMissingStrictHTTPAndFallbackPolicies(t *testing.T
 		{"list403 never missing", 404, 403, nil, true, 2},
 		{"401 never fallback", 401, 200, nil, true, 1},
 		{"503 never fallback", 503, 200, nil, true, 1},
-		{"notfoundonly403", 403, 200, []secrets.FindRecordOption{secrets.WithFindRecordFallback(resource.FindFallbackNotFoundOnly)}, true, 1},
-		{"never clean404", 404, 200, []secrets.FindRecordOption{secrets.WithFindRecordFallback(resource.FindFallbackNever)}, false, 1},
-		{"never strict404", 404, 200, []secrets.FindRecordOption{secrets.WithFindRecordFallback(resource.FindFallbackNever), request.IgnoreMissing(false)}, true, 1},
+		{"notfoundonly403", 403, 200, []secrets.FindRecordOption{request.Custom(func(c *secrets.FindRecordOpts) error { c.Fallback = resource.FindFallbackNotFoundOnly; return nil })}, true, 1},
+		{"never clean404", 404, 200, []secrets.FindRecordOption{request.Custom(func(c *secrets.FindRecordOpts) error { c.Fallback = resource.FindFallbackNever; return nil })}, false, 1},
+		{"never strict404", 404, 200, []secrets.FindRecordOption{request.Custom(func(c *secrets.FindRecordOpts) error { c.Fallback = resource.FindFallbackNever; return nil }), request.IgnoreMissing(false)}, true, 1},
 	} {
 		t.Run(tc.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -365,9 +365,9 @@ func TestPythonSecretFindRecordOptionsCaptureAndPreflight(t *testing.T) {
 		canceled       bool
 	}{
 		{"nil option", "s1", nil, false},
-		{"invalid fallback", "s1", secrets.WithFindRecordFallback(resource.FindFallbackPolicy(99)), false},
+		{"invalid fallback", "s1", request.Custom(func(c *secrets.FindRecordOpts) error { c.Fallback = resource.FindFallbackPolicy(99); return nil }), false},
 		{"bad identity", "\x00", request.IgnoreMissing(true), false},
-		{"unsafe never", "name with space", secrets.WithFindRecordFallback(resource.FindFallbackNever), false},
+		{"unsafe never", "name with space", request.Custom(func(c *secrets.FindRecordOpts) error { c.Fallback = resource.FindFallbackNever; return nil }), false},
 		{"source replaced", "s1", request.Custom(func(*secrets.FindRecordOpts) error { client.ResourceBase = cloud.Server.URL + "/changed/"; return nil }), false},
 		{"callback error", "s1", request.Custom(func(*secrets.FindRecordOpts) error { return resource.ErrUnsupported }), false},
 		{"canceled callback", "s1", request.IgnoreMissing(true), true},

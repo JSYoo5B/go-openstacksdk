@@ -14,8 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordOptions`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordName`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers.WithUpdateRecordPassword`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`

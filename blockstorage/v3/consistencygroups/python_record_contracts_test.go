@@ -164,15 +164,27 @@ func TestPythonCinderConsistencyGroupCreateFromSourceNullDefaultsAndLiteralRefer
 		want := `{"consistencygroup-from-src":{"cgsnapshot_id":null,"source_cgid":null,"name":null,"description":null}}`
 		switch variant {
 		case "empty_id":
-			options = append(options, consistencygroups.WithRecordSourceConsistencyGroupID(""))
+			options = append(options, request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := ""; c.ConsistencyGroupID = &v; return nil }))
 		case "group":
-			options = append(options, consistencygroups.WithRecordSourceConsistencyGroupID("literal/id"), consistencygroups.WithRecordSourceName(""))
+			options = append(options, request.Custom(func(c *consistencygroups.RecordSourceOpts) error {
+				v := "literal/id"
+				c.ConsistencyGroupID = &v
+				return nil
+			}), request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := ""; c.Name = &v; return nil }))
 			want = `{"consistencygroup-from-src":{"cgsnapshot_id":null,"source_cgid":"literal/id","name":"","description":null}}`
 		case "snapshot":
-			options = append(options, consistencygroups.WithRecordSourceConsistencyGroupSnapshotID("snapshot/%"), consistencygroups.WithRecordSourceDescription(""))
+			options = append(options, request.Custom(func(c *consistencygroups.RecordSourceOpts) error {
+				v := "snapshot/%"
+				c.ConsistencyGroupSnapshotID = &v
+				return nil
+			}), request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := ""; c.Description = &v; return nil }))
 			want = `{"consistencygroup-from-src":{"cgsnapshot_id":"snapshot/%","source_cgid":null,"name":null,"description":""}}`
 		case "both":
-			options = append(options, consistencygroups.WithRecordSourceConsistencyGroupSnapshotID("snapshot"), consistencygroups.WithRecordSourceConsistencyGroupID("group"))
+			options = append(options, request.Custom(func(c *consistencygroups.RecordSourceOpts) error {
+				v := "snapshot"
+				c.ConsistencyGroupSnapshotID = &v
+				return nil
+			}), request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := "group"; c.ConsistencyGroupID = &v; return nil }))
 			want = `{"consistencygroup-from-src":{"cgsnapshot_id":"snapshot","source_cgid":"group","name":null,"description":null}}`
 		}
 		accepted := variant == "group" || variant == "snapshot"
@@ -247,11 +259,11 @@ func TestPythonCinderConsistencyGroupDeleteCorrectedBodyReplayAndStrictMissing(t
 		var options []consistencygroups.RecordDeleteOption
 		want := `{"consistencygroup":{"force":false}}`
 		if choice == "force" {
-			options = append(options, consistencygroups.WithRecordDeleteForce(true))
+			options = append(options, request.Custom(func(c *consistencygroups.RecordDeleteOpts) error { v := true; c.Force = &v; return nil }))
 			want = `{"consistencygroup":{"force":true}}`
 		}
 		if choice == "source" {
-			options = append(options, consistencygroups.WithRecordDeletePinnedSourceWire(true))
+			options = append(options, request.Custom(func(c *consistencygroups.RecordDeleteOpts) error { c.PinnedSourceWire = true; return nil }))
 			want = `{"consistency_group":{"force":false}}`
 		}
 		err := api.DeleteRecord(context.Background(), "literal/id %2F", options...)
@@ -298,7 +310,7 @@ func TestPythonCinderConsistencyGroupListStockSingularLinksOffsetsMarkersAndBrea
 		}
 		return cgWire(200, `{"consistencygroups":[{"id":"first","name":"target"}],"consistencygroup_links":[{"rel":"next","href":"?offset=2&limit=2"}]}`)
 	})
-	values, err := collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), request.Limit(2), request.Query("sort", "name:asc"), request.Query("name", "target")))
+	values, err := collectCG(api.ListRecords(context.Background(), request.Custom(func(c *consistencygroups.RecordListOpts) error { v := false; c.Details = &v; return nil }), request.Limit(2), request.Query("sort", "name:asc"), request.Query("name", "target")))
 	if err != nil || len(values) != 2 || calls.Len() != 3 || cgCalls(calls)[0].path != cgBase || cgCalls(calls)[1].query != "limit=2&offset=2&sort=name%3Aasc" || cgCalls(calls)[2].query != "limit=2&marker=second&sort=name%3Aasc" {
 		t.Fatal(values, err, cgCalls(calls))
 	}
@@ -454,7 +466,7 @@ func TestPythonCinderConsistencyGroupPreflightControlsAndJoinedOptionCauses(t *t
 			return e
 		},
 		func(a *consistencygroups.API) error {
-			_, e := a.CreateFromSourceRecord(context.Background(), consistencygroups.WithRecordSourceName(string([]byte{0xff})))
+			_, e := a.CreateFromSourceRecord(context.Background(), request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := string([]byte{0xff}); c.Name = &v; return nil }))
 			return e
 		},
 		func(a *consistencygroups.API) error { e := a.DeleteRecord(context.Background(), "id", nil); return e },
@@ -786,7 +798,7 @@ func TestPythonCinderConsistencyGroupListReservedControlsFailBeforeHTTP(t *testi
 	api, calls = cgAPI(t, "", func(*http.Request) *http.Response {
 		return cgWire(200, `{"consistencygroups":[{"id":"id"}],"next":"?marker=second"}`)
 	})
-	values, err = collectCG(api.ListRecords(context.Background(), consistencygroups.WithRecordListDetails(false), request.Paginated(false), request.MaxItems(1)))
+	values, err = collectCG(api.ListRecords(context.Background(), request.Custom(func(c *consistencygroups.RecordListOpts) error { v := false; c.Details = &v; return nil }), request.Paginated(false), request.MaxItems(1)))
 	if err != nil || len(values) != 1 || calls.Len() != 1 || cgCalls(calls)[0].path != cgBase || cgCalls(calls)[0].query != "limit=1" {
 		t.Fatal("typed controls remain owned functional options", values, err, cgCalls(calls))
 	}

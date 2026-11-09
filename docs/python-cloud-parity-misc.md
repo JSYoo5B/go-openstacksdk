@@ -13,9 +13,10 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListPrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListOpts`
 
-- ListRecords sends GET on the account root with Accept application/json, adds prefix only when WithRecordListPrefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.
+- ListRecords sends GET on the account root with Accept application/json, adds prefix only when RecordListOpts.Prefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.
   Tests: `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudListContainersPrefixAndCountPaging`.
 
 Python/Go differences:
@@ -38,7 +39,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers`
 
-- ListRecords sends GET on the account root with Accept application/json, adds prefix only when WithRecordListPrefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.
+- ListRecords sends GET on the account root with Accept application/json, adds prefix only when RecordListOpts.Prefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.
   Tests: `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudListContainersPrefixAndCountPaging`.
 - SDK collects the complete account ListRecords sequence before applying Source name/id exact-or-fnmatch identification and cloud ordered/nested mapping filters. Filters never become server prefix/query controls; duplicate rows and Source aliases remain visible.
   Tests: `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchCollectsEveryPageBeforeIdentifierAndMapping`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchNameUsesFnmatchAndDeclaredAliases`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchFalseyAndLoadedMappingFilters`.
@@ -308,9 +309,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned Object MRO projection owns six Body, 28 Header, updated_at aka and null SDK location; ordered canonical/wire aliases, alternate name ID, untyped RawMessage metadata, container URI from call, unknowns and subdir retained in Wire, actual page receipt cloned independently. No object HEAD or synthetic metadata observation.

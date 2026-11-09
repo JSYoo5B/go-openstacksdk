@@ -15,12 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindAllProjects`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindLimit`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMarker`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots.WithRecordFindMaxItems`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
@@ -98,8 +93,8 @@ func main() {
     service, err := conn.BlockStorageV3(ctx)
     if err != nil { log.Fatal(err) }
     value, err := service.Snapshots.FindRecord(ctx, *identity,
-        snapshots.WithRecordFindDetails(*details),
-        snapshots.WithRecordFindAllProjects(*allProjects),
+        request.Custom(func(c *snapshots.RecordFindOpts) error { v := *details; c.Details = &v; return nil }),
+        request.Custom(func(c *snapshots.RecordFindOpts) error { v := *allProjects; c.AllProjects = &v; return nil }),
         request.IgnoreMissing(!*strict))
     if err != nil { log.Fatal(err) }
     if value == nil { fmt.Println("null"); return }

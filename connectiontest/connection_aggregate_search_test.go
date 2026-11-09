@@ -8,6 +8,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -60,7 +61,7 @@ func TestR2CloudComputeSearchAggregatesFiltersLocally(t *testing.T) {
 
 func TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP(t *testing.T) {
 	cloud := r2CloudComputeNew(t)
-	_, err := cloud.Conn.SearchAggregates(context.Background(), "", sdk.WithCloudServerListOptions(servers.WithRecordFindAllProjects(true)))
+	_, err := cloud.Conn.SearchAggregates(context.Background(), "", sdk.WithCloudServerListOptions(request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })))
 	if !errors.Is(err, resource.ErrInvalidOption) || len(cloud.Calls()) != 0 {
 		t.Fatal(err, cloud.Calls())
 	}

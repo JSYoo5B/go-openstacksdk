@@ -29,7 +29,7 @@ func TestPythonManageableVolumesListDefaultsDetailsAndViews(t *testing.T) {
 				testcloud.JSON(w, 202, `{"manageable-volumes":[{"id":"one","reference":7,"safe_to_manage":"False","size":"٢","x_extension":true,"cinder_id":null}]}`)
 			})
 			a := api.New(cloud.Client("block-storage", "/v3/project/"))
-			rows, err := a.AllRecords(context.Background(), api.WithRecordListDetails(detail), request.Query("cluster", "c"), request.Query("unknown", 1))
+			rows, err := a.AllRecords(context.Background(), request.Custom(func(c *api.RecordListOpts) error { c.Details = detail; return nil }), request.Query("cluster", "c"), request.Query("unknown", 1))
 			if err != nil || len(rows) != 1 || calls != 1 {
 				t.Fatal(rows, err, calls)
 			}

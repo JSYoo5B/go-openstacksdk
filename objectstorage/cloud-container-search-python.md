@@ -20,7 +20,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithContainerSearchExpression`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchContainers`
 
-- ListRecords sends GET on the account root with Accept application/json, adds prefix only when WithRecordListPrefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.
+- ListRecords sends GET on the account root with Accept application/json, adds prefix only when RecordListOpts.Prefix is given, and follows the X-Account-Container-Count marker continuation with the prefix kept until an empty page.
   Tests: `objectstorage/v1/containers/python_parity_test.go:TestPythonContainerCloudListContainersPrefixAndCountPaging`.
 - SDK collects the complete account ListRecords sequence before applying Source name/id exact-or-fnmatch identification and cloud ordered/nested mapping filters. Filters never become server prefix/query controls; duplicate rows and Source aliases remain visible.
   Tests: `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchCollectsEveryPageBeforeIdentifierAndMapping`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchNameUsesFnmatchAndDeclaredAliases`, `objectstorage/cloud_container_search_test.go:TestSwiftCloudContainerSearchFalseyAndLoadedMappingFilters`.

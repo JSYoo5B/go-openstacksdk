@@ -147,7 +147,7 @@ func TestPythonTransferCreateRawSnapshotsExtensionsAndResponseViews(t *testing.T
 		t.Fatal("proxy installs attrs before cleanup params", *legacyCalls)
 	}
 	*legacyCalls = nil
-	v, err = legacy.CreateRecord(context.Background(), transfers.WithRecordCreateNoSnapshots(true), transfers.WithRecordCreateSuppressLegacySnapshots(true))
+	v, err = legacy.CreateRecord(context.Background(), transfers.WithRecordCreateNoSnapshots(true), request.Custom(func(c *transfers.RecordCreateOpts) error { c.SuppressLegacySnapshots = true; return nil }))
 	if err != nil || (*legacyCalls)[1].body != `{"transfer":{}}` {
 		t.Fatal(v, err, *legacyCalls)
 	}
@@ -161,7 +161,7 @@ func TestPythonTransferListDefaultsSummaryQueriesAndRawFilters(t *testing.T) {
 				api, _, calls := recordTransferFixture(t, selected, "3.71", "3.0", func(*http.Request) (*http.Response, error) {
 					return pythonTransferWire(200, `{"transfers":[{"id":"a","name":"ci","links":{"owner":"p1","count":9007199254740993}},{"id":"b","name":"other"}]}`), nil
 				})
-				ids, err := recordTransferIDs(t, api, transfers.WithRecordListDetails(details), transfers.WithRecordListAllProjects(true), request.Query("name", "ci"), request.Query("links", map[string]any{"owner": "p1"}), request.Query("unknown", make(chan int)), request.Query("all_tenants", true))
+				ids, err := recordTransferIDs(t, api, request.Custom(func(c *transfers.RecordListOpts) error { v := details; c.Details = &v; return nil }), request.Custom(func(c *transfers.RecordListOpts) error { c.AllProjects = true; return nil }), request.Query("name", "ci"), request.Query("links", map[string]any{"owner": "p1"}), request.Query("unknown", make(chan int)), request.Query("all_tenants", true))
 				path := "/cinder/v3/project/volume-transfers"
 				if selected == "3.0" {
 					path = "/cinder/v3/project/os-volume-transfer"
@@ -209,7 +209,7 @@ func TestPythonTransferListLazinessCapsAndContinuation(t *testing.T) {
 			}
 			return pythonTransferWire(200, `{"transfers":[{"id":"a"}]}`), nil
 		})
-		ids, err := recordTransferIDs(t, api, request.Limit(2), transfers.WithRecordListDetails(false))
+		ids, err := recordTransferIDs(t, api, request.Limit(2), request.Custom(func(c *transfers.RecordListOpts) error { v := false; c.Details = &v; return nil }))
 		if err != nil || !reflect.DeepEqual(ids, []string{"a"}) || len(*calls) != 3 || (*calls)[2].query != "limit=2&marker=a" {
 			t.Fatal(ids, err, *calls)
 		}

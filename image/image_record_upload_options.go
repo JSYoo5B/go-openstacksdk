@@ -101,9 +101,6 @@ func WithImageRecordUploadHeaders(values map[string]string) ImageRecordUploadOpt
 	snapshot := copyImageRecordHeaders(values)
 	return request.Custom(func(config *ImageRecordUploadOpts) error { return mergeImageRecordHeaders(&config.Headers, snapshot) })
 }
-func WithImageRecordUploadSize(value int64) ImageRecordUploadOption {
-	return request.Custom(func(config *ImageRecordUploadOpts) error { owned := value; config.Size = &owned; return nil })
-}
 
 func WithImageRecordUploadSizeInference(enabled bool) ImageRecordUploadOption {
 	return request.Custom(func(config *ImageRecordUploadOpts) error { config.DisableSizeInference = !enabled; return nil })

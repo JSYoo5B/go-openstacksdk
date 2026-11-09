@@ -36,16 +36,19 @@ type RecordOptions struct {
 	Headers       map[string]string
 	Microversion  *string
 	IgnoreMissing *bool
-	Details       *bool
-	ListBasePath  *string
-	order         []string
+	// Details chooses summary/detail lists; FindRecord defaults to detail.
+	Details *bool
+	// ListBasePath selects the list route. It is operation-specific: these
+	// reads do not accept the shared BasePath call.
+	ListBasePath *string
+	order        []string
 }
 
-// RecordOption is one option of ListRecords, AllRecords, ProxyListRecords and FindRecord: WithRecordOptions,
-// WithRecordDetails, WithRecordListBasePath, request.Custom over *RecordOptions,
-// request.Query (a Source keyword argument; the value is sent as JSON),
-// request.Headers (replaces the headers), request.Microversion or
-// request.IgnoreMissing. Other shared calls fail with
+// RecordOption is one option of ListRecords, AllRecords, ProxyListRecords and
+// FindRecord: WithRecordOptions, request.Custom over *RecordOptions (for
+// example to set Details or ListBasePath), request.Query (a Source keyword
+// argument; the value is sent as JSON), request.Headers (replaces the headers),
+// request.Microversion or request.IgnoreMissing. Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RecordOption = request.FindCall
 
@@ -80,12 +83,6 @@ func cloneRecordOptions(v RecordOptions) RecordOptions {
 func WithRecordOptions(v RecordOptions) RecordOption {
 	owned := cloneRecordOptions(v)
 	return request.Custom(func(v *RecordOptions) error { *v = cloneRecordOptions(owned); return nil })
-}
-
-// WithRecordListBasePath selects the list route. It is operation-specific:
-// these reads do not accept the shared BasePath call.
-func WithRecordListBasePath(v string) RecordOption {
-	return request.Custom(func(o *RecordOptions) error { o.ListBasePath = &v; return nil })
 }
 
 var readProfile = neutronfind.Profile{ServiceRole: "compute", Kind: "hypervisors", Path: "os-hypervisors", Singular: "hypervisor", Plural: "hypervisors", IDKey: "id", NameKey: "name", VersionedPath: "/v2.1/os-hypervisors", SourceFindPolicy: true, SourceStatusPolicy: true, SourceLinkPolicy: true, PythonLoadedEquality: true, StopFaultRetryCallbacks: true, Body: []neutronfind.Descriptor{{Name: "cpu_info", Wire: "cpu_info", Missing: "null"}, {Name: "host_ip", Wire: "host_ip", Missing: "null"}, {Name: "hypervisor_type", Wire: "hypervisor_type", Missing: "null"}, {Name: "hypervisor_version", Wire: "hypervisor_version", Missing: "null"}, {Name: "name", Wire: "hypervisor_hostname", Missing: "null"}, {Name: "service_details", Wire: "service", Missing: "null", Kind: neutronfind.Dictionary}, {Name: "servers", Wire: "servers", Missing: "null", Kind: neutronfind.List, ListItemKind: neutronfind.Dictionary}, {Name: "state", Wire: "state", Missing: "null"}, {Name: "status", Wire: "status", Missing: "null"}, {Name: "uptime", Wire: "uptime", Missing: "null"}, {Name: "current_workload", Wire: "current_workload", Missing: "null"}, {Name: "disk_available", Wire: "disk_available_least", Missing: "null"}, {Name: "local_disk_used", Wire: "local_gb_used", Missing: "null"}, {Name: "local_disk_size", Wire: "local_gb", Missing: "null"}, {Name: "local_disk_free", Wire: "free_disk_gb", Missing: "null"}, {Name: "memory_used", Wire: "memory_mb_used", Missing: "null"}, {Name: "memory_size", Wire: "memory_mb", Missing: "null"}, {Name: "memory_free", Wire: "free_ram_mb", Missing: "null"}, {Name: "running_vms", Wire: "running_vms", Missing: "null"}, {Name: "vcpus_used", Wire: "vcpus_used", Missing: "null"}, {Name: "vcpus", Wire: "vcpus", Missing: "null"}, {Name: "id", Wire: "id", Missing: "null"}}, Query: []neutronfind.QueryPair{{Name: "limit", Wire: "limit"}, {Name: "marker", Wire: "marker"}, {Name: "hypervisor_hostname_pattern", Wire: "hypervisor_hostname_pattern"}, {Name: "with_servers", Wire: "with_servers"}}}
@@ -177,10 +174,6 @@ func recordWrap(ctx context.Context, op string, err error) error {
 	return request.Wrap(op, "hypervisors", cloudread.ContextError(ctx, err))
 }
 
-// WithRecordDetails chooses summary/detail lists; FindRecord defaults to detail.
-func WithRecordDetails(v bool) RecordOption {
-	return request.Custom(func(o *RecordOptions) error { o.Details = &v; return nil })
-}
 func (p *preparedRecord) listPolicy(ctx context.Context) (neutronfind.Options, error) {
 	policy := p.policy()
 	if p.options.Details != nil && *p.options.Details {

@@ -59,7 +59,7 @@ func TestPythonCinderConsistencyGroupFindRecordCleanFallbackHasNoServerNameQuery
 				})
 				options := []consistencygroups.RecordFindOption{}
 				if !details {
-					options = append(options, consistencygroups.WithRecordFindDetails(false))
+					options = append(options, request.Custom(func(c *consistencygroups.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 				}
 				value, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || value == nil || calls.Len() != 3 || value.StatusCode != 202 || cgCalls(calls)[0].query != "" || cgCalls(calls)[1].query != "" || cgCalls(calls)[2].query != "offset=2" {

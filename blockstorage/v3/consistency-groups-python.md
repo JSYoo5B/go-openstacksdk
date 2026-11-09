@@ -270,7 +270,7 @@ func main() {
     var value *consistencygroups.ConsistencyGroupRecord
     switch *action {
     case "list":
-        for row, err := range api.ListRecords(ctx, consistencygroups.WithRecordListDetails(!*summary)) {
+        for row, err := range api.ListRecords(ctx, request.Custom(func(c *consistencygroups.RecordListOpts) error { v := !*summary; c.Details = &v; return nil })) {
             if err != nil { log.Fatal(err) }
             show(row)
         }
@@ -280,21 +280,21 @@ func main() {
     case "find":
         value, err = api.FindRecord(ctx, *id,
             request.IgnoreMissing(!*strict),
-            consistencygroups.WithRecordFindDetails(!*summary))
+            request.Custom(func(c *consistencygroups.RecordFindOpts) error { v := !*summary; c.Details = &v; return nil }))
     case "create":
         value, err = api.CreateRecord(ctx,
             request.Field("volume_types", *volumeTypes),
             request.Field("name", *name))
     case "clone":
         value, err = api.CreateFromSourceRecord(ctx,
-            consistencygroups.WithRecordSourceConsistencyGroupID(*sourceGroup),
-            consistencygroups.WithRecordSourceConsistencyGroupSnapshotID(*sourceSnapshot),
-            consistencygroups.WithRecordSourceName(*name))
+            request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := *sourceGroup; c.ConsistencyGroupID = &v; return nil }),
+            request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := *sourceSnapshot; c.ConsistencyGroupSnapshotID = &v; return nil }),
+            request.Custom(func(c *consistencygroups.RecordSourceOpts) error { v := *name; c.Name = &v; return nil }))
     case "update":
         value, err = api.UpdateRecord(ctx, *id, request.Field("name", *name))
     case "delete":
-        err = api.DeleteRecord(ctx, *id, consistencygroups.WithRecordDeleteForce(*force),
-            consistencygroups.WithRecordDeletePinnedSourceWire(*sourceWire))
+        err = api.DeleteRecord(ctx, *id, request.Custom(func(c *consistencygroups.RecordDeleteOpts) error { v := *force; c.Force = &v; return nil }),
+            request.Custom(func(c *consistencygroups.RecordDeleteOpts) error { c.PinnedSourceWire = *sourceWire; return nil }))
         if err != nil { log.Fatal(err) }
         return
     default:

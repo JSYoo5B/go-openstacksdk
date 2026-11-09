@@ -33,10 +33,10 @@ type CreateRecordOpts struct {
 }
 
 // CreateRecordOption is one option of CreateRecord: WithCreateRecordOptions,
-// WithCreateRecordLocalPref, request.Field (another attribute inside the
-// bgpvpn envelope; keys owned by CreateRecordOpts are rejected),
-// request.Header or request.Custom over *request.Config[CreateRecordOpts].
-// Other shared calls fail with resource.ErrInvalidOption before HTTP.
+// request.Field (another attribute inside the bgpvpn envelope; keys owned by
+// CreateRecordOpts are rejected), request.Header or request.Custom over
+// *request.Config[CreateRecordOpts] (for example to set LocalPref). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type CreateRecordOption = request.WriteCall
 
 var createRecordOptionCalls = calls.Spec[request.Config[CreateRecordOpts]]{
@@ -46,9 +46,6 @@ var createRecordOptionCalls = calls.Spec[request.Config[CreateRecordOpts]]{
 
 func WithCreateRecordOptions(value CreateRecordOpts) CreateRecordOption {
 	return request.Custom(request.WithOptions(value))
-}
-func WithCreateRecordLocalPref(value request.Optional[int]) CreateRecordOption {
-	return request.Custom(func(config *request.Config[CreateRecordOpts]) error { config.Options.LocalPref = value; return nil })
 }
 
 // BGPVPNRecord is the created Python BgpVpn view. BGPVPN is the native typed

@@ -249,7 +249,7 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindDetails, request.Custom over *RecordFindOpts,
+// request.Custom over *RecordFindOpts (for example to set Details),
 // request.IgnoreMissing, request.Header (adds one header), request.Headers
 // (replaces the headers) or request.Microversion. Other shared calls and a nil
 // option fail with resource.ErrInvalidOption before HTTP.
@@ -285,9 +285,6 @@ func copyNodeFind(v RecordFindOpts) RecordFindOpts {
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyNodeFind(v)
 	return request.Custom(func(c *RecordFindOpts) error { *c = copyNodeFind(owned); return nil })
-}
-func WithRecordFindDetails(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
 }
 func (a *API) FindRecord(ctx context.Context, identity string, options ...RecordFindOption) (*NodeRecord, error) {
 	wrap := func(err error) error { return request.Wrap("FindRecord", "nodes", cloudread.ContextError(ctx, err)) }

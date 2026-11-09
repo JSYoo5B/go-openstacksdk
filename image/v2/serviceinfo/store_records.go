@@ -12,7 +12,7 @@ import (
 )
 
 // ListStoreRecords lazily lists declared Store resources from /info/stores or
-// /info/stores/detail when WithStoreRecordListDetails(true) is selected.
+// /info/stores/detail when StoreRecordListOpts.Details = true is selected.
 // Local filters use canonical Body names, default values are owned by the SDK,
 // and pagination follows inherited Resource behavior through shared guards.
 func (a *API) ListStoreRecords(ctx context.Context, options ...StoreRecordListOption) iter.Seq2[*StoreRecord, error] {

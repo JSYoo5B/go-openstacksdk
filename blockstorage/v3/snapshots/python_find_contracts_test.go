@@ -29,7 +29,7 @@ func TestPythonSnapshotFindRecordDirectGetAndOwnedDescriptors(t *testing.T) {
 	api, calls := pythonSnapshotAPI(t, "3.80", func(*http.Request) *http.Response {
 		return pythonSnapshotWire(200, `{"snapshot":{"name":false,"size":"١٢","force":"TrUe","is_forced":"FALSE","project_id":"first","os-extended-snapshot-attributes:project_id":"last","metadata":42,"created_at":"literal","unknown":9007199254740993}}`)
 	})
-	v, err := api.FindRecord(context.Background(), "selected", snapshots.WithRecordFindDetails(false), snapshots.WithRecordFindAllProjects(true))
+	v, err := api.FindRecord(context.Background(), "selected", request.Custom(func(c *snapshots.RecordFindOpts) error { v := false; c.Details = &v; return nil }), request.Custom(func(c *snapshots.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil }))
 	if err != nil || calls.Len() != 1 || pythonSnapshotCalls(calls)[0].method != http.MethodGet || pythonSnapshotCalls(calls)[0].path != pythonSnapshotBase+"/selected" || pythonSnapshotCalls(calls)[0].query != "" || pythonSnapshotCalls(calls)[0].body != "" || pythonSnapshotCalls(calls)[0].version != "volume 3.80" {
 		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
@@ -61,9 +61,9 @@ func TestPythonSnapshotFindRecordDefaultFallbackRoutesAndAllProjects(t *testing.
 						}
 						return pythonSnapshotWire(200, `{"snapshots":[{"id":"snap","name":"daily","size":true,"metadata":{"k":9007199254740993}}]}`)
 					})
-					opts := []snapshots.RecordFindOption{snapshots.WithRecordFindAllProjects(all)}
+					opts := []snapshots.RecordFindOption{request.Custom(func(c *snapshots.RecordFindOpts) error { v := all; c.AllProjects = &v; return nil })}
 					if !detail {
-						opts = append(opts, snapshots.WithRecordFindDetails(false))
+						opts = append(opts, request.Custom(func(c *snapshots.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 					}
 					v, err := api.FindRecord(context.Background(), "daily", opts...)
 					if err != nil || v == nil || calls.Len() != 2 || pythonSnapshotCalls(calls)[0].path != pythonSnapshotBase+"/daily" || pythonSnapshotCalls(calls)[0].query != "" || pythonSnapshotCalls(calls)[1].path != path {
@@ -151,7 +151,7 @@ func TestPythonSnapshotFindRecordQueryAliasesFiltersAndRawRowCap(t *testing.T) {
 		}
 		return pythonSnapshotWire(200, `{"snapshots":[{"id":"a","name":"daily","metadata":{"enabled":false}},{"id":"b","name":"daily","metadata":{"enabled":1,"extra":false}},{"id":"c","name":"daily","metadata":{"enabled":true}}],"next":"https://bad.example/snapshots"}`)
 	})
-	v, err := api.FindRecord(context.Background(), "daily", opts, snapshots.WithRecordFindMaxItems(2), snapshots.WithRecordFindLimit(0))
+	v, err := api.FindRecord(context.Background(), "daily", opts, request.Custom(func(c *snapshots.RecordFindOpts) error { c.MaxItems = 2; return nil }), request.Custom(func(c *snapshots.RecordFindOpts) error { v := 0; c.Limit = &v; return nil }))
 	if err != nil || v == nil || calls.Len() != 2 {
 		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
@@ -161,7 +161,7 @@ func TestPythonSnapshotFindRecordQueryAliasesFiltersAndRawRowCap(t *testing.T) {
 		t.Fatal(q, pythonSnapshotCalls(calls))
 	}
 	calls.Reset()
-	v, err = api.FindRecord(context.Background(), "daily", opts, snapshots.WithRecordFindAllProjects(false), snapshots.WithRecordFindMaxItems(2))
+	v, err = api.FindRecord(context.Background(), "daily", opts, request.Custom(func(c *snapshots.RecordFindOpts) error { v := false; c.AllProjects = &v; return nil }), request.Custom(func(c *snapshots.RecordFindOpts) error { c.MaxItems = 2; return nil }))
 	if err != nil || v == nil {
 		t.Fatal(v, err)
 	}
@@ -210,12 +210,12 @@ func TestPythonSnapshotFindRecordSinglePageMarkerFallbackAndOffsetPaging(t *test
 		}
 		return pythonSnapshotWire(200, `{"snapshots":{"id":"a","name":"daily"}}`)
 	})
-	v, err := api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindLimit(5))
+	v, err := api.FindRecord(context.Background(), "daily", request.Custom(func(c *snapshots.RecordFindOpts) error { v := 5; c.Limit = &v; return nil }))
 	if err != nil || v == nil || calls.Len() != 3 || !strings.Contains(pythonSnapshotCalls(calls)[2].query, "marker=a") {
 		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
 	calls.Reset()
-	v, err = api.FindRecord(context.Background(), "daily", snapshots.WithRecordFindLimit(5), snapshots.WithRecordFindPaginated(false))
+	v, err = api.FindRecord(context.Background(), "daily", request.Custom(func(c *snapshots.RecordFindOpts) error { v := 5; c.Limit = &v; return nil }), request.Custom(func(c *snapshots.RecordFindOpts) error { v := false; c.Paginated = &v; return nil }))
 	if err != nil || v == nil || calls.Len() != 2 {
 		t.Fatal(v, err, pythonSnapshotCalls(calls))
 	}
@@ -341,7 +341,7 @@ func TestPythonSnapshotFindRecordDiscoveryAndProtocolHeaderProtection(t *testing
 
 func TestPythonSnapshotFindRecordPreflightCancellationAndRetainedOptions(t *testing.T) {
 	api, calls := pythonSnapshotAPI(t, "3.65", func(*http.Request) *http.Response { return pythonSnapshotWire(200, `{"snapshot":{"id":"a"}}`) })
-	for _, opts := range [][]snapshots.RecordFindOption{{nil}, {snapshots.WithRecordFindLimit(-1)}, {snapshots.WithRecordFindMaxItems(-1)}, {request.Query("id", "different")}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {snapshots.WithRecordFindOpts(snapshots.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}} {
+	for _, opts := range [][]snapshots.RecordFindOption{{nil}, {request.Custom(func(c *snapshots.RecordFindOpts) error { v := -1; c.Limit = &v; return nil })}, {request.Custom(func(c *snapshots.RecordFindOpts) error { c.MaxItems = -1; return nil })}, {request.Query("id", "different")}, {request.Headers(map[string]string{"X-Auth-Token": "bad"})}, {snapshots.WithRecordFindOpts(snapshots.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}} {
 		_, err := api.FindRecord(context.Background(), "daily", opts...)
 		if err == nil || calls.Len() != 0 {
 			t.Fatal(err, pythonSnapshotCalls(calls))

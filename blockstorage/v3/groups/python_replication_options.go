@@ -17,11 +17,10 @@ type RecordReplicationOpts struct {
 }
 
 // RecordReplicationOption is one option of EnableReplicationRecord and
-// DisableReplicationRecord: WithRecordReplicationOpts,
-// WithRecordReplicationPinnedSourceWire, request.Custom over
-// *RecordReplicationOpts, request.Microversion or request.Headers (replaces
-// the headers). Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// DisableReplicationRecord: WithRecordReplicationOpts, request.Custom over
+// *RecordReplicationOpts (for example to set PinnedSourceWire),
+// request.Microversion or request.Headers (replaces the headers). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type RecordReplicationOption = request.WriteCall
 
 // RecordFailoverOpts defaults to false/null parameters and the stock action
@@ -90,19 +89,7 @@ func WithRecordReplicationOpts(v RecordReplicationOpts) RecordReplicationOption 
 	owned := copyReplication(v)
 	return request.Custom(func(c *RecordReplicationOpts) error { *c = copyReplication(owned); return nil })
 }
-func WithRecordReplicationPinnedSourceWire(v bool) RecordReplicationOption {
-	return request.Custom(func(c *RecordReplicationOpts) error { c.PinnedSourceWire = v; return nil })
-}
 func WithRecordFailoverOpts(v RecordFailoverOpts) RecordFailoverOption {
 	owned := copyFailover(v)
 	return request.Custom(func(c *RecordFailoverOpts) error { *c = copyFailover(owned); return nil })
-}
-func WithRecordFailoverAllowedAttachedVolume(v bool) RecordFailoverOption {
-	return request.Custom(func(c *RecordFailoverOpts) error { x := v; c.AllowedAttachedVolume = &x; return nil })
-}
-func WithRecordFailoverSecondaryBackendID(v string) RecordFailoverOption {
-	return request.Custom(func(c *RecordFailoverOpts) error { x := v; c.SecondaryBackendID = &x; return nil })
-}
-func WithRecordFailoverPinnedSourceWire(v bool) RecordFailoverOption {
-	return request.Custom(func(c *RecordFailoverOpts) error { c.PinnedSourceWire = v; return nil })
 }

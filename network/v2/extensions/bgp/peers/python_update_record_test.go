@@ -22,7 +22,10 @@ func TestPythonBGPPeerUpdateRecordSendsEmptyName(t *testing.T) {
 		return pythonBGPPeerWire(status, reply)
 	})
 	// update_bgp_peer("bp-1", name="") sends the empty name.
-	got, err := api.UpdateRecord(ctx, "bp-1", peers.WithUpdateRecordName(request.Present("")))
+	got, err := api.UpdateRecord(ctx, "bp-1", request.Custom(func(c *request.Config[peers.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("")
+		return nil
+	}))
 	if err != nil || !got.Sent || got.StatusCode != 200 || got.BGPPeer == nil || got.BGPPeer.ID != "bp-1" || got.BGPPeer.RemoteAS != 64512 || string(got.Fields["peer_ip"]) != `"192.0.2.10"` {
 		t.Fatal(got, err)
 	}
@@ -42,7 +45,10 @@ func TestPythonBGPPeerUpdateRecordSendsEmptyName(t *testing.T) {
 	}
 	// An empty or non-JSON accepted body leaves only the status and headers.
 	status, reply = http.StatusNoContent, ``
-	if got, err := api.UpdateRecord(ctx, "bp-1", peers.WithUpdateRecordPassword(request.Present("pw"))); err != nil || !got.Sent || got.StatusCode != 204 || got.BGPPeer != nil || got.Fields != nil {
+	if got, err := api.UpdateRecord(ctx, "bp-1", request.Custom(func(c *request.Config[peers.UpdateRecordOpts]) error {
+		c.Options.Password = request.Present("pw")
+		return nil
+	})); err != nil || !got.Sent || got.StatusCode != 204 || got.BGPPeer != nil || got.Fields != nil {
 		t.Fatal(got, err)
 	}
 	want := []pythonBGPPeerCall{
@@ -72,7 +78,10 @@ func TestPythonBGPPeerUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 		}
 	}
 	for _, id := range []string{"", " ", ".."} {
-		if _, err := api.UpdateRecord(ctx, id, peers.WithUpdateRecordName(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
+		if _, err := api.UpdateRecord(ctx, id, request.Custom(func(c *request.Config[peers.UpdateRecordOpts]) error {
+			c.Options.Name = request.Present("x")
+			return nil
+		})); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(id, err)
 		}
 	}
@@ -80,11 +89,17 @@ func TestPythonBGPPeerUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 		t.Fatalf("%+v", *calls)
 	}
 	var operation *resource.OperationError
-	if _, err := api.UpdateRecord(ctx, "bp-1", peers.WithUpdateRecordName(request.Present("x"))); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "peers" {
+	if _, err := api.UpdateRecord(ctx, "bp-1", request.Custom(func(c *request.Config[peers.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "peers" {
 		t.Fatal(err)
 	}
 	var nilAPI *peers.API
-	if _, err := nilAPI.UpdateRecord(ctx, "bp-1", peers.WithUpdateRecordName(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := nilAPI.UpdateRecord(ctx, "bp-1", request.Custom(func(c *request.Config[peers.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }

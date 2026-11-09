@@ -34,10 +34,6 @@ func WithImageRecordStageOpts(value ImageRecordStageOpts) ImageRecordStageOption
 	return request.Custom(func(config *ImageRecordStageOpts) error { *config = copyImageRecordStageOpts(snapshot); return nil })
 }
 
-func WithImageRecordStageSize(value int64) ImageRecordStageOption {
-	return request.Custom(func(config *ImageRecordStageOpts) error { owned := value; config.Size = &owned; return nil })
-}
-
 func WithImageRecordStageSizeInference(enabled bool) ImageRecordStageOption {
 	return request.Custom(func(config *ImageRecordStageOpts) error { config.DisableSizeInference = !enabled; return nil })
 }

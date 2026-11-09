@@ -35,16 +35,18 @@ type RecordOptions struct {
 	Microversion  *string
 	IgnoreMissing *bool
 	Details       *bool
-	ListBasePath  *string
-	order         []string
+	// ListBasePath selects the list route. It is operation-specific: these
+	// reads do not accept the shared BasePath call.
+	ListBasePath *string
+	order        []string
 }
 
 // RecordOption is one option of the record reads: WithRecordOptions,
-// WithRecordListBasePath, request.Custom over *RecordOptions,
+// request.Custom over *RecordOptions (for example to set ListBasePath),
 // request.Query (a Source keyword argument; the value is sent as JSON),
 // request.Headers (replaces the headers), request.Microversion or
-// request.IgnoreMissing. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.IgnoreMissing. Other shared calls fail with resource.ErrInvalidOption
+// before HTTP.
 type RecordOption = request.FindCall
 
 var recordCalls = calls.Spec[RecordOptions]{
@@ -78,12 +80,6 @@ func cloneRecordOptions(v RecordOptions) RecordOptions {
 func WithRecordOptions(v RecordOptions) RecordOption {
 	owned := cloneRecordOptions(v)
 	return request.Custom(func(v *RecordOptions) error { *v = cloneRecordOptions(owned); return nil })
-}
-
-// WithRecordListBasePath selects the list route. It is operation-specific:
-// these reads do not accept the shared BasePath call.
-func WithRecordListBasePath(v string) RecordOption {
-	return request.Custom(func(o *RecordOptions) error { o.ListBasePath = &v; return nil })
 }
 
 var readProfile = neutronfind.Profile{ServiceRole: "compute", Kind: "services", Path: "os-services", Singular: "service", Plural: "services", IDKey: "id", NameKey: "name", VersionedPath: "/v2.1/os-services", SourceFindPolicy: true, SourceStatusPolicy: true, SourceLinkPolicy: true, PythonLoadedEquality: true, StopFaultRetryCallbacks: true, Body: []neutronfind.Descriptor{{Name: "availability_zone", Wire: "zone", Missing: "null"}, {Name: "binary", Wire: "binary", Missing: "null"}, {Name: "disabled_reason", Wire: "disabled_reason", Missing: "null"}, {Name: "is_forced_down", Wire: "forced_down", Missing: "null", Kind: neutronfind.Boolean}, {Name: "host", Wire: "host", Missing: "null"}, {Name: "name", Wire: "name", Missing: "null", Alias: "binary"}, {Name: "state", Wire: "state", Missing: "null"}, {Name: "status", Wire: "status", Missing: "null"}, {Name: "updated_at", Wire: "updated_at", Missing: "null"}, {Name: "id", Wire: "id", Missing: "null"}}, Query: []neutronfind.QueryPair{{Name: "limit", Wire: "limit"}, {Name: "marker", Wire: "marker"}}}

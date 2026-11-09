@@ -48,11 +48,11 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages.WithRecordGetSourceEnvelope`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - GetRecord makes one bodyless/query-free GET /messages/{literal escaped id} with no list fallback and no missing suppression. Actual accepted partial responses preserve ID seeds only in Source view; explicit null/nonstring IDs override them. Blank/malformed JSON keeps seeds, valid wrong shapes or badUTF8 return actual ACK errors.
   Tests: `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageGetSourceStockEnvelopesAndStringDescriptors`, `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageGetStrictSourceEnvelopeAndSeedShapes`.
-- Pinned Message.resource_key is plural messages even for member GET; stock Cinder documentation returns singular message. Default Go decoder supports Source messages, flat objects and actual stock message with Source-key presence precedence. WithRecordGetSourceEnvelope(true) reproduces pinned Source seed-only behavior for a stock message wrapper without losing literal Wire/envelope evidence.
+- Pinned Message.resource_key is plural messages even for member GET; stock Cinder documentation returns singular message. Default Go decoder supports Source messages, flat objects and actual stock message with Source-key presence precedence. RecordGetOpts.SourceEnvelope = true reproduces pinned Source seed-only behavior for a stock message wrapper without losing literal Wire/envelope evidence.
   Tests: `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageGetSourceStockEnvelopesAndStringDescriptors`, `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageGetStrictSourceEnvelopeAndSeedShapes`.
 - MessageRecord.Resource exposes inherited id/name, eight Source type=str Body descriptors and nullable location; absent/explicitnull are preserved, bool/large integer/container string conversions use shared PythonString. Unknown keys/original types/links are retained separately in Wire, and Resource/Wire/wholeEnvelope/Header own independent copies.
   Tests: `blockstorage/v3/messages/python_records_contracts_test.go:TestPythonCinderMessageGetSourceStockEnvelopesAndStringDescriptors`.
@@ -65,7 +65,7 @@ Go API:
 
 Python/Go differences:
 
-- Default GetRecord intentionally fixes the pinned Source plural-key/stock singular-key mismatch by accepting actual Cinder message envelope. Strict WithRecordGetSourceEnvelope(true) provides the exact pinned Source interpretation. This improvement is explicit and fixture-proven; Source and stock are not silently claimed identical.
+- Default GetRecord intentionally fixes the pinned Source plural-key/stock singular-key mismatch by accepting actual Cinder message envelope. Strict RecordGetOpts.SourceEnvelope = true provides the exact pinned Source interpretation. This improvement is explicit and fixture-proven; Source and stock are not silently claimed identical.
 - Go owns literal validated UTF8 IDs and independent record/receipt/raw JSON/options; Python accepts mutable Message/Resource/Munch values. Location is an owned null without Python Connection synthesis. Resource/session/subclass/dirty-state/cache/legacy JMESPath and general adapter behavior remain global SDK-R1/C1/S1, not newly promoted named-operation coverage.
 - Stock UserMessages require3.3 while pinned Message has no max microversion; the SDK retains absent/default/per-operation selection rather than silently negotiating a new version. Examples select3.37 and actual unsupported-version HTTP errors remain visible, except a clean DELETE404 still follows the named proxy default ignore_missing policy.
 - Source/member success200..399 is retained; strict UTF8 and fixed operation origin/path/filter/protocol guards are explicit Go protections. PythonString uses the existing audited shared JSON-domain representation including exact integer values and bounded float/Unicode/runtime spelling differences. Authenticated stock Cinder RBAC/deployment integration is separate from local fixtures.
@@ -157,6 +157,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/messages"
     "github.com/JSYoo5B/go-openstacksdk/resource"

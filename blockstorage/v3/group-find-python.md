@@ -15,7 +15,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups.WithRecordFindDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 
@@ -116,7 +116,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     value, err := service.Groups.FindRecord(ctx, *identity,
         request.IgnoreMissing(!*strict),
-        groups.WithRecordFindDetails(!*summary))
+        request.Custom(func(c *groups.RecordFindOpts) error { v := !*summary; c.Details = &v; return nil }))
     if err != nil { log.Fatal(err) }
     if value == nil { fmt.Println("null"); return }
     raw, err := json.MarshalIndent(value.Resource, "", "  ")

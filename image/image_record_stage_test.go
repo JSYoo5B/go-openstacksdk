@@ -118,7 +118,7 @@ func TestImageRecordStageFixedRoutesAndOpaqueAcceptedReceipts(t *testing.T) {
 				return response, nil
 			}
 			reader := &imageUploadCoreReader{reader: strings.NewReader("current bytes")}
-			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, WithImageRecordStageSize(0), request.Header("X-Ordinary", "yes"))
+			got, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, request.Custom(func(c *ImageRecordStageOpts) error { v := int64(0); c.Size = &v; return nil }), request.Header("X-Ordinary", "yes"))
 			if got == nil || got.Record == nil || got.Staged == nil || got.Metadata == nil || err != nil || calls != 3 || redirects != 0 || callbacks != 0 || ack.closes != 1 || reader.closes.Load() != 0 || reader.seeks.Load() != 0 {
 				t.Fatal(got, err, calls, redirects, callbacks, reader, ack.closes)
 			}
@@ -363,11 +363,11 @@ func TestImageRecordStageNilDataAndBorrowedFallbackPreserveCurrentCursor(t *test
 		}
 		return taskCoreJSON(req, 204, "ack"), nil
 	}
-	first, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, WithImageRecordStageSize(-1))
+	first, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: seed, Data: reader}, request.Custom(func(c *ImageRecordStageOpts) error { v := int64(-1); c.Size = &v; return nil }))
 	if err != nil || first == nil || first.Record.data != reader || seed.data != nil {
 		t.Fatal(first, err, seed.data)
 	}
-	second, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: first.Record}, WithImageRecordStageSize(0))
+	second, err := service.StageImageRecord(context.Background(), ImageRecordStageRequest{Record: first.Record}, request.Custom(func(c *ImageRecordStageOpts) error { v := int64(0); c.Size = &v; return nil }))
 	if err != nil || second == nil || second.Record.data != reader || reader.seeks.Load() != 0 || reader.closes.Load() != 0 {
 		t.Fatal(second, err, reader)
 	}
@@ -398,11 +398,11 @@ func TestImageRecordStageSizePolicyUsesTotalLengthWithoutChangingCursor(t *testi
 				wantSize = ""
 				infer = false
 			case "explicit zero":
-				options = []ImageRecordStageOption{WithImageRecordStageSize(0)}
+				options = []ImageRecordStageOption{request.Custom(func(c *ImageRecordStageOpts) error { v := int64(0); c.Size = &v; return nil })}
 				wantSize = "0"
 				infer = false
 			case "explicit negative":
-				options = []ImageRecordStageOption{WithImageRecordStageSize(-7)}
+				options = []ImageRecordStageOption{request.Custom(func(c *ImageRecordStageOpts) error { v := int64(-7); c.Size = &v; return nil })}
 				wantSize = "-7"
 				infer = false
 			case "inference off":
@@ -410,15 +410,15 @@ func TestImageRecordStageSizePolicyUsesTotalLengthWithoutChangingCursor(t *testi
 				wantSize = ""
 				infer = false
 			case "without size restores inference":
-				options = []ImageRecordStageOption{WithImageRecordStageSize(99), request.Custom(func(c *ImageRecordStageOpts) error { c.Size = nil; return nil })}
+				options = []ImageRecordStageOption{request.Custom(func(c *ImageRecordStageOpts) error { v := int64(99); c.Size = &v; return nil }), request.Custom(func(c *ImageRecordStageOpts) error { c.Size = nil; return nil })}
 			case "explicit overrides disabled":
-				options = []ImageRecordStageOption{WithImageRecordStageSizeInference(false), WithImageRecordStageSize(0)}
+				options = []ImageRecordStageOption{WithImageRecordStageSizeInference(false), request.Custom(func(c *ImageRecordStageOpts) error { v := int64(0); c.Size = &v; return nil })}
 				wantSize = "0"
 				infer = false
 			case "inference enabled again":
 				options = []ImageRecordStageOption{WithImageRecordStageSizeInference(false), WithImageRecordStageSizeInference(true)}
 			case "full options replace":
-				options = []ImageRecordStageOption{WithImageRecordStageSize(-9), WithImageRecordStageSizeInference(false), WithImageRecordStageOpts(ImageRecordStageOpts{})}
+				options = []ImageRecordStageOption{request.Custom(func(c *ImageRecordStageOpts) error { v := int64(-9); c.Size = &v; return nil }), WithImageRecordStageSizeInference(false), WithImageRecordStageOpts(ImageRecordStageOpts{})}
 			}
 			handler = func(req *http.Request) (*http.Response, error) {
 				if calls == 2 {

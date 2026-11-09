@@ -30,11 +30,19 @@ func TestPythonFirewallPolicyInsertRuleRecordSendsNullPositions(t *testing.T) {
 	options := policies.InsertRuleRecordOpts{InsertAfter: &after}
 	option := policies.WithInsertRuleRecordOptions(options)
 	after = "changed"
-	if got, err := api.InsertRuleRecord(ctx, "fp-1", "r3", option, policies.WithInsertRuleRecordBefore("")); err != nil || got.StatusCode != 202 {
+	if got, err := api.InsertRuleRecord(ctx, "fp-1", "r3", option, request.Custom(func(c *request.Config[policies.InsertRuleRecordOpts]) error {
+		v := ""
+		c.Options.InsertBefore = &v
+		return nil
+	})); err != nil || got.StatusCode != 202 {
 		t.Fatal(got, err)
 	}
 	// insert_rule_into_policy(policy, rule, insert_before="r2")
-	if _, err := api.InsertRuleRecord(ctx, "fp-1", "r3", policies.WithInsertRuleRecordBefore("r2"), request.Header("X-Trace", "t")); err != nil {
+	if _, err := api.InsertRuleRecord(ctx, "fp-1", "r3", request.Custom(func(c *request.Config[policies.InsertRuleRecordOpts]) error {
+		v := "r2"
+		c.Options.InsertBefore = &v
+		return nil
+	}), request.Header("X-Trace", "t")); err != nil {
 		t.Fatal(err)
 	}
 	pythonFWPolicyExpect(t, recorder.snapshot(), []pythonFWPolicyCall{

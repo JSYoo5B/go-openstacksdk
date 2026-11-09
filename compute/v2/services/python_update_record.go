@@ -29,11 +29,10 @@ type UpdateRecordOpts struct {
 }
 
 // UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
-// WithUpdateRecordStatus, WithUpdateRecordDisabledReason,
-// WithUpdateRecordForcedDown, request.Field (another attribute of the
-// unwrapped body; keys owned by UpdateRecordOpts and the URI identity id are
-// rejected), request.Header or request.Custom over
-// *request.Config[UpdateRecordOpts]. Other shared calls fail with
+// request.Field (another attribute of the unwrapped body; keys owned by
+// UpdateRecordOpts and the URI identity id are rejected), request.Header or
+// request.Custom over *request.Config[UpdateRecordOpts] (for example to set
+// Status, DisabledReason or ForcedDown). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type UpdateRecordOption = request.WriteCall
 
@@ -44,18 +43,6 @@ var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
 	return request.Custom(request.WithOptions(value))
-}
-func WithUpdateRecordStatus(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Status = value; return nil })
-}
-func WithUpdateRecordDisabledReason(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error {
-		config.Options.DisabledReason = value
-		return nil
-	})
-}
-func WithUpdateRecordForcedDown(value request.Optional[bool]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.ForcedDown = value; return nil })
 }
 
 // ServiceRecord is the committed Python Service view. Service is the native

@@ -26,7 +26,7 @@ func TestHypervisorRecordsSummaryDetailAndDeclaredProjection(t *testing.T) {
 				}
 				return pythonHypervisorWire(203, `{"hypervisors":[{"id":7,"hypervisor_hostname":"node","service":false,"servers":[1,{"uuid":"vm"}],"free_ram_mb":"raw","x_unknown":true}]}`)
 			})
-			seq := api.ListRecords(context.Background(), hypervisors.WithRecordDetails(detail), request.Query("with_servers", true))
+			seq := api.ListRecords(context.Background(), request.Custom(func(c *hypervisors.RecordOptions) error { v := detail; c.Details = &v; return nil }), request.Query("with_servers", true))
 			if calls.Len() != 0 {
 				t.Fatal(pythonHypervisorCalls(calls))
 			}
@@ -64,7 +64,7 @@ func TestHypervisorRecordsLegacyHostnameSearchOwnsPatternAndVersion(t *testing.T
 				return pythonHypervisorWire(200, `{"hypervisors":[]}`)
 			})
 			api.RawClient().Endpoint = api.RawClient().ResourceBase
-			rows, err := api.AllRecords(context.Background(), hypervisors.WithRecordDetails(true), request.Query("hypervisor_hostname_pattern", "node/name"))
+			rows, err := api.AllRecords(context.Background(), request.Custom(func(c *hypervisors.RecordOptions) error { v := true; c.Details = &v; return nil }), request.Query("hypervisor_hostname_pattern", "node/name"))
 			if err != nil || len(rows) != 0 {
 				t.Fatal(rows, err)
 			}
@@ -89,7 +89,7 @@ func TestHypervisorFindRecordsGETThenConfiguredFallbackPreservesPassiveID(t *tes
 				}
 				return pythonHypervisorWire(200, `{"hypervisors":[{"id":7,"hypervisor_hostname":"node"}]}`)
 			})
-			row, err := api.FindRecord(context.Background(), "node", hypervisors.WithRecordDetails(detail))
+			row, err := api.FindRecord(context.Background(), "node", request.Custom(func(c *hypervisors.RecordOptions) error { v := detail; c.Details = &v; return nil }))
 			if err != nil || row == nil || calls.Len() != 2 || string(row.Resource.Body["id"]) != "7" {
 				t.Fatal(row, err, pythonHypervisorCalls(calls))
 			}

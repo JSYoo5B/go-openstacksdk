@@ -77,7 +77,7 @@ func TestPythonProjectFindRecordFetchControlsHeadersAndListRouteAreStageSpecific
 		}
 		return projectRecordWire(200, `{"projects":[{"id":"p","name":"demo","enabled":0,"options":7,"tags":"blue"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "demo", request.Query("base_path", "/alternate-projects"), projects.WithRecordFindListBasePath("/list-projects"), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.project+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), request.Query("domain_id", "d"))
+	row, err := api.FindRecord(context.Background(), "demo", request.Query("base_path", "/alternate-projects"), request.Custom(func(c *projects.RecordFindOpts) error { v := "/list-projects"; c.ListBasePath = &v; return nil }), request.Query("headers", json.RawMessage(`{"Accept":"application/vnd.project+json","X-Raw":"raw"}`)), request.Headers(map[string]string{"x-raw": "typed", "X-Typed": "kept"}), request.Query("domain_id", "d"))
 	if err != nil || row == nil || calls != 2 {
 		t.Fatal(row, err, calls)
 	}

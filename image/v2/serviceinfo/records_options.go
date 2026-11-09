@@ -33,6 +33,8 @@ type ImportRecordOption = request.GetCall
 // means true and zero MaxItems is unlimited. Caps count raw consumed rows before
 // local canonical Body filters. Details selects the fixed detail discovery route.
 type StoreRecordListOpts struct {
+	// Details selects Source stores(details=True)'s fixed detail route. It
+	// changes no query key, schema, role gate or native typed API behavior.
 	Details   bool
 	Headers   map[string]string
 	Limit     *int
@@ -43,12 +45,11 @@ type StoreRecordListOpts struct {
 }
 
 // StoreRecordListOption is one option of ListStoreRecords:
-// WithStoreRecordListOpts, WithStoreRecordListHeaders (validates and merges
-// the map), WithStoreRecordListDetails, WithStoreRecordListFilter,
-// WithStoreRecordListFilters, request.Header, request.Limit, request.Marker,
-// request.MaxItems, request.Paginated or request.Custom over
-// *StoreRecordListOpts. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithStoreRecordListOpts, WithStoreRecordListHeaders (validates and merges the
+// map), WithStoreRecordListFilter, WithStoreRecordListFilters, request.Header,
+// request.Limit, request.Marker, request.MaxItems, request.Paginated or
+// request.Custom over *StoreRecordListOpts (for example to set Details). Other
+// shared calls fail with resource.ErrInvalidOption before HTTP.
 type StoreRecordListOption = request.ListCall
 
 func copyRecordHeaders(value map[string]string) map[string]string {

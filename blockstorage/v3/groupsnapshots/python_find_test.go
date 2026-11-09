@@ -32,7 +32,7 @@ func TestPythonGroupSnapshotFindDefaultsCleanFallbackAndNoAutomaticNameFilter(t 
 				api.RawClient().MoreHeaders = map[string]string{"Accept": "application/source"}
 				options := []groupsnapshots.RecordFindOption{}
 				if !details {
-					options = append(options, groupsnapshots.WithRecordFindDetails(false))
+					options = append(options, request.Custom(func(c *groupsnapshots.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 				}
 				value, err := api.FindRecord(context.Background(), "literal /%雪", options...)
 				path := snapshotBase + "/detail"
@@ -438,7 +438,7 @@ func TestPythonGroupSnapshotFindPagingControlsOffsetAndRawCap(t *testing.T) {
 		})
 		opts := []groupsnapshots.RecordFindOption{request.Query("sort", "name:asc")}
 		if single {
-			opts = append(opts, groupsnapshots.WithRecordFindPaginated(false))
+			opts = append(opts, request.Custom(func(c *groupsnapshots.RecordFindOpts) error { v := false; c.Paginated = &v; return nil }))
 		}
 		value, err := api.FindRecord(context.Background(), "data", opts...)
 		count := 3
@@ -461,7 +461,7 @@ func TestPythonGroupSnapshotFindPagingControlsOffsetAndRawCap(t *testing.T) {
 		}
 		return snapshotWire(200, `{"group_snapshots":[{"id":"first","name":"other"},{"id":"second","name":"data"}]}`)
 	})
-	value, err := api.FindRecord(context.Background(), "data", groupsnapshots.WithRecordFindMaxItems(1))
+	value, err := api.FindRecord(context.Background(), "data", request.Custom(func(c *groupsnapshots.RecordFindOpts) error { c.MaxItems = 1; return nil }))
 	if value != nil || err != nil || len(*calls) != 2 || !strings.Contains((*calls)[1].query, "limit=1") {
 		t.Fatal(value, err, *calls)
 	}

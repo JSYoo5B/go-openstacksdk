@@ -21,7 +21,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListQuery`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListControl`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListJMESPath`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.API.ProxyListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters.WithRecordListProxyJMESValue`
@@ -96,6 +96,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters"
     "github.com/JSYoo5B/go-openstacksdk/resource"
@@ -117,7 +118,7 @@ func main() {
     if err != nil { log.Fatal(err) }
     filters := resourcefilters.New(service.RawClient())
     options := []resourcefilters.RecordListOption{
-        resourcefilters.WithRecordListControl(resource.ListControl{SinglePage: *single}),
+        request.Custom(func(c *resourcefilters.RecordListOpts) error { c.Control = resource.ListControl{SinglePage: *single}; return nil }),
         resourcefilters.WithRecordListJMESPath(*expression),
     }
     if *resourceName != "" {

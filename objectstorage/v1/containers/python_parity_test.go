@@ -9,6 +9,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -64,7 +65,7 @@ func TestPythonContainerCloudListContainersPrefixAndCountPaging(t *testing.T) {
 			})
 			var options []containers.RecordListOption
 			if tc.prefix != "" {
-				options = append(options, containers.WithRecordListPrefix(tc.prefix))
+				options = append(options, request.Custom(func(c *containers.RecordListOpts) error { v := tc.prefix; c.Prefix = &v; return nil }))
 			}
 			var names []string
 			for record, err := range api.ListRecords(context.Background(), options...) {

@@ -20,6 +20,7 @@ import (
     "os"
     "github.com/gophercloud/gophercloud/v2"
     "github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 func main() {
     provider := &gophercloud.ProviderClient{}
@@ -32,6 +33,6 @@ func main() {
 }
 ```
 
-Go accepts explicit string identities and finite JSON options rather than Python Resource instances and arbitrary object equality. `WithRecordListBasePath` selects a service-relative list path; route validation rejects external origins and traversal. This mapping leaves shared Resource/session/live-cloud parity contracts open.
+Go accepts explicit string identities and finite JSON options rather than Python Resource instances and arbitrary object equality. `RecordOptions.ListBasePath` selects a service-relative list path; route validation rejects external origins and traversal. This mapping leaves shared Resource/session/live-cloud parity contracts open.
 
 A failure while preparing version discovery returns an error before a resource record exists. `Discovery` evidence is attached to successful resource records; this binding does not return a discovery-only receipt when preparation fails. The error retains the underlying failure, and this boundary is not live-cloud validation.

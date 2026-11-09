@@ -487,11 +487,11 @@ func TestImageRecordUploadInfersTotalSizeAfterPOSTAndRestoresBorrowedCursor(t *t
 				size = ""
 				infer = false
 			case "explicit zero":
-				options = append(options, WithImageRecordUploadSize(0))
+				options = append(options, request.Custom(func(c *ImageRecordUploadOpts) error { v := int64(0); c.Size = &v; return nil }))
 				size = "0"
 				infer = false
 			case "explicit negative":
-				options = append(options, WithImageRecordUploadSize(-7))
+				options = append(options, request.Custom(func(c *ImageRecordUploadOpts) error { v := int64(-7); c.Size = &v; return nil }))
 				size = "-7"
 				infer = false
 			case "inference off":
@@ -499,17 +499,17 @@ func TestImageRecordUploadInfersTotalSizeAfterPOSTAndRestoresBorrowedCursor(t *t
 				size = ""
 				infer = false
 			case "without restores inference":
-				options = append(options, WithImageRecordUploadSize(99), request.Custom(func(c *ImageRecordUploadOpts) error { c.Size = nil; return nil }))
+				options = append(options, request.Custom(func(c *ImageRecordUploadOpts) error { v := int64(99); c.Size = &v; return nil }), request.Custom(func(c *ImageRecordUploadOpts) error { c.Size = nil; return nil }))
 			case "explicit overrides disabled":
-				options = append(options, WithImageRecordUploadSizeInference(false), WithImageRecordUploadSize(0))
+				options = append(options, WithImageRecordUploadSizeInference(false), request.Custom(func(c *ImageRecordUploadOpts) error { v := int64(0); c.Size = &v; return nil }))
 				size = "0"
 				infer = false
 			case "inference enabled again":
 				options = append(options, WithImageRecordUploadSizeInference(false), WithImageRecordUploadSizeInference(true))
 			case "full options replace":
-				options = append(options, WithImageRecordUploadSize(-9), WithImageRecordUploadSizeInference(false), WithImageRecordUploadOpts(ImageRecordUploadOpts{ContainerFormat: json.RawMessage(`"bare"`), DiskFormat: json.RawMessage(`"qcow2"`)}))
+				options = append(options, request.Custom(func(c *ImageRecordUploadOpts) error { v := int64(-9); c.Size = &v; return nil }), WithImageRecordUploadSizeInference(false), WithImageRecordUploadOpts(ImageRecordUploadOpts{ContainerFormat: json.RawMessage(`"bare"`), DiskFormat: json.RawMessage(`"qcow2"`)}))
 			case "without preserves disabled":
-				options = append(options, WithImageRecordUploadSize(99), WithImageRecordUploadSizeInference(false), request.Custom(func(c *ImageRecordUploadOpts) error { c.Size = nil; return nil }))
+				options = append(options, request.Custom(func(c *ImageRecordUploadOpts) error { v := int64(99); c.Size = &v; return nil }), WithImageRecordUploadSizeInference(false), request.Custom(func(c *ImageRecordUploadOpts) error { c.Size = nil; return nil }))
 				size = ""
 				infer = false
 			}
@@ -853,7 +853,7 @@ func TestImageRecordUploadAcceptedPhysicalFailuresKeepActualPhaseReceipts(t *tes
 					return err
 				}
 				reader := &imageUploadCoreReader{reader: strings.NewReader("borrowed")}
-				options := append(imageRecordUploadFormats(), WithImageRecordUploadSize(0))
+				options := append(imageRecordUploadFormats(), request.Custom(func(c *ImageRecordUploadOpts) error { v := int64(0); c.Size = &v; return nil }))
 				got, err := New(client).UploadImageRecord(ctx, ImageRecordUploadRequest{Data: reader, Attributes: map[string]any{"id": "seed", "name": "submitted"}}, options...)
 				if got == nil || got.Record == nil || got.Metadata == nil || err == nil || retries != 0 || body.closes != 1 || reader.closes.Load() != 0 || reader.seeks.Load() != 0 {
 					t.Fatal(got, err, calls, retries, body.closes, reader)

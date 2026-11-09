@@ -59,7 +59,7 @@ func TestPythonCinderGroupFindRecordCleanFallbackHasNoServerNameQuery(t *testing
 				})
 				options := []groups.RecordFindOption{}
 				if !details {
-					options = append(options, groups.WithRecordFindDetails(false))
+					options = append(options, request.Custom(func(c *groups.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 				}
 				value, err := api.FindRecord(context.Background(), "target", options...)
 				if err != nil || value == nil || calls.Len() != 3 || value.StatusCode != 202 || calls.Calls()[0].RawQuery != "" || calls.Calls()[1].RawQuery != "" || calls.Calls()[2].RawQuery != "offset=2" {

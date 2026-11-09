@@ -20,6 +20,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudconfig"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudfilter"
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudserver"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"gopkg.in/yaml.v2"
 )
@@ -133,7 +134,7 @@ func listCloud(ctx context.Context, deps Dependencies, index int, opts Opts) ([]
 	// all_projects=all_projects), which is Proxy.servers(all_projects=...)
 	// over GET /servers/detail followed by _expand_server for every row.
 	cfg := compute.CloudServerReadOpts{
-		List:     []servers.RecordFindOption{servers.WithRecordFindAllProjects(opts.AllProjects)},
+		List:     []servers.RecordFindOption{request.Custom(func(c *servers.RecordFindOpts) error { v := opts.AllProjects; c.AllProjects = &v; return nil })},
 		Bare:     opts.Expansion == ExpandNone,
 		Detailed: opts.Expansion == ExpandHostvars,
 	}

@@ -18,7 +18,10 @@ func TestPythonFlavorUpdateRecordSendsNullAndEmptyDescription(t *testing.T) {
 	status, reply := http.StatusOK, `{"flavor":`+pythonFlavorRow+`}`
 	api, calls := pythonFlavorAPI(t, func(*http.Request) *http.Response { return pythonFlavorWire(status, reply) })
 	// update_flavor("f1", description=None) clears the description in Nova.
-	got, err := api.UpdateRecord(ctx, "f1", flavors.WithUpdateRecordDescription(request.Null[string]()))
+	got, err := api.UpdateRecord(ctx, "f1", request.Custom(func(c *request.Config[flavors.UpdateRecordOpts]) error {
+		c.Options.Description = request.Null[string]()
+		return nil
+	}))
 	if err != nil || !got.Sent || got.StatusCode != 200 || got.Flavor == nil || got.Flavor.ID != "f1" || got.Flavor.Ephemeral != 5 || string(got.Fields["description"]) != `"d"` {
 		t.Fatal(got, err)
 	}
@@ -33,7 +36,10 @@ func TestPythonFlavorUpdateRecordSendsNullAndEmptyDescription(t *testing.T) {
 	}
 	// update_flavor("f1", description="new") on an empty 200 body.
 	status, reply = http.StatusOK, ``
-	if got, err = api.UpdateRecord(ctx, "f1", flavors.WithUpdateRecordDescription(request.Present("new"))); err != nil || !got.Sent || got.Flavor != nil || got.Fields != nil {
+	if got, err = api.UpdateRecord(ctx, "f1", request.Custom(func(c *request.Config[flavors.UpdateRecordOpts]) error {
+		c.Options.Description = request.Present("new")
+		return nil
+	})); err != nil || !got.Sent || got.Flavor != nil || got.Fields != nil {
 		t.Fatal(got, err)
 	}
 	// update_flavor("f1") has nothing dirty, so Python sends no request.
@@ -65,18 +71,27 @@ func TestPythonFlavorUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if _, err := api.UpdateRecord(ctx, " ", flavors.WithUpdateRecordDescription(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := api.UpdateRecord(ctx, " ", request.Custom(func(c *request.Config[flavors.UpdateRecordOpts]) error {
+		c.Options.Description = request.Present("x")
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 	if calls.Len() != 0 {
 		t.Fatalf("%+v", pythonFlavorCalls(calls))
 	}
 	var operation *resource.OperationError
-	if _, err := api.UpdateRecord(ctx, "f1", flavors.WithUpdateRecordDescription(request.Present("x"))); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "flavors" {
+	if _, err := api.UpdateRecord(ctx, "f1", request.Custom(func(c *request.Config[flavors.UpdateRecordOpts]) error {
+		c.Options.Description = request.Present("x")
+		return nil
+	})); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "flavors" {
 		t.Fatal(err)
 	}
 	var nilAPI *flavors.API
-	if _, err := nilAPI.UpdateRecord(ctx, "f1", flavors.WithUpdateRecordDescription(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := nilAPI.UpdateRecord(ctx, "f1", request.Custom(func(c *request.Config[flavors.UpdateRecordOpts]) error {
+		c.Options.Description = request.Present("x")
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }

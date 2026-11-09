@@ -25,11 +25,11 @@ type RecordListOpts struct {
 
 // RecordListOption is one option of ListRecords, AllRecords, ListResult and
 // ProxyListRecords: WithRecordListOptions, WithRecordListQuery (replaces the
-// whole kwargs map), WithRecordListResource, WithRecordListControl,
-// WithRecordListJMESPath, WithRecordListProxyJMESValue, request.Headers
-// (replaces the headers), request.Microversion or request.Custom over
-// *RecordListOpts. Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// whole kwargs map), WithRecordListResource, WithRecordListJMESPath,
+// WithRecordListProxyJMESValue, request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RecordListOpts (for example to
+// set Control). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type RecordListOption = request.GetCall
 
 var recordListCalls = calls.Spec[RecordListOpts]{
@@ -109,9 +109,6 @@ func WithRecordListQuery(value map[string]any) RecordListOption {
 }
 func WithRecordListResource(value string) RecordListOption {
 	return request.Custom(func(c *RecordListOpts) error { c.Query["resource"] = value; return nil })
-}
-func WithRecordListControl(value resource.ListControl) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { c.Control = value; return nil })
 }
 
 // WithRecordListJMESPath selects the Proxy expression. ProxyListRecords keeps

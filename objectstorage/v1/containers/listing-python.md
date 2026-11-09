@@ -23,11 +23,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListPrefix`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListFormat`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers.WithRecordListMaxPages`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The container Collection preserves native Swift marker pagination, prefix/explicit-limit query and typed count/byte fields while applying controls before local exact-name filtering.
@@ -123,7 +121,7 @@ func main() {
     swift, err := conn.ObjectStorageV1(ctx)
     if err != nil { log.Fatal(err) }
     options := []containers.RecordListOption{
-        containers.WithRecordListPrefix(*prefix),
+        request.Custom(func(c *containers.RecordListOpts) error { v := *prefix; c.Prefix = &v; return nil }),
         request.Limit(*pageSize),
         request.MaxItems(*maxItems),
     }

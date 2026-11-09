@@ -53,8 +53,8 @@ func TestCloudImageRecordListDeletedFilterShowAllAndLocation(t *testing.T) {
 	}{
 		{"default filters lowered deleted status", nil, url.Values{}, []string{"u1", "u2", "c1"}},
 		{"explicit filter_deleted false keeps every row", []ImageRecordQueryOption{WithImageRecordQueryFilterDeleted(false)}, url.Values{}, []string{"u1", "gone", "u2", "c1"}},
-		{"show_all overrides filter_deleted and selects all members", []ImageRecordQueryOption{WithImageRecordQueryFilterDeleted(true), WithImageRecordQueryShowAll(true)}, url.Values{"member_status": {"all"}}, []string{"u1", "gone", "u2", "c1"}},
-		{"explicit show_all false keeps default query", []ImageRecordQueryOption{WithImageRecordQueryShowAll(false)}, url.Values{}, []string{"u1", "u2", "c1"}},
+		{"show_all overrides filter_deleted and selects all members", []ImageRecordQueryOption{WithImageRecordQueryFilterDeleted(true), request.Custom(func(c *ImageRecordQueryOpts) error { v := true; c.ShowAll = &v; return nil })}, url.Values{"member_status": {"all"}}, []string{"u1", "gone", "u2", "c1"}},
+		{"explicit show_all false keeps default query", []ImageRecordQueryOption{request.Custom(func(c *ImageRecordQueryOpts) error { v := false; c.ShowAll = &v; return nil })}, url.Values{}, []string{"u1", "u2", "c1"}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			calls := 0
@@ -192,7 +192,7 @@ func TestCloudImageRecordArgumentsFailBeforeHTTP(t *testing.T) {
 	})
 	ctx := context.Background()
 	filters := []ImageRecordQueryOption{WithImageRecordQueryFilters(json.RawMessage(`null`))}
-	listControls := []ImageRecordQueryOption{WithImageRecordQueryShowAll(false)}
+	listControls := []ImageRecordQueryOption{request.Custom(func(c *ImageRecordQueryOpts) error { v := false; c.ShowAll = &v; return nil })}
 	deleted := []ImageRecordQueryOption{WithImageRecordQueryFilterDeleted(true)}
 	invalidJSON := []ImageRecordQueryOption{WithImageRecordQueryFilters(json.RawMessage(`{`))}
 	checks := []struct {
@@ -500,7 +500,7 @@ func TestCloudImageRecordExcludeArgumentsFailBeforeHTTP(t *testing.T) {
 			return err
 		},
 		"name rejects show_all": func() error {
-			_, err := service.GetImageRecordName(ctx, "", "", WithImageRecordQueryShowAll(true))
+			_, err := service.GetImageRecordName(ctx, "", "", request.Custom(func(c *ImageRecordQueryOpts) error { v := true; c.ShowAll = &v; return nil }))
 			return err
 		},
 		"id rejects filter_deleted": func() error {

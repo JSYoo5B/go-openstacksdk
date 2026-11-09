@@ -20,11 +20,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/image.Service.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.DownloadImageRecord`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStream`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChunkSize`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadStorePreferences`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadChecksumVerification`
-- `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHashFactory`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/image.WithImageRecordDownloadHeaders`
 

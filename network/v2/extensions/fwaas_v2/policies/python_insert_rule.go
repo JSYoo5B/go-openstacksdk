@@ -26,10 +26,10 @@ type InsertRuleRecordOpts struct {
 }
 
 // InsertRuleRecordOption is one option of InsertRuleRecord:
-// WithInsertRuleRecordOptions, WithInsertRuleRecordAfter,
-// WithInsertRuleRecordBefore, request.Header or request.Custom over
-// *request.Config[InsertRuleRecordOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// WithInsertRuleRecordOptions, request.Header or request.Custom over
+// *request.Config[InsertRuleRecordOpts] (for example to set InsertAfter or
+// InsertBefore). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type InsertRuleRecordOption = request.WriteCall
 
 var insertRuleRecordOptionCalls = calls.Spec[request.Config[InsertRuleRecordOpts]]{
@@ -42,12 +42,6 @@ func WithInsertRuleRecordOptions(value InsertRuleRecordOpts) InsertRuleRecordOpt
 		c.Options = cloneInsertRuleRecordOpts(value)
 		return nil
 	})
-}
-func WithInsertRuleRecordAfter(ruleID string) InsertRuleRecordOption {
-	return request.Custom(func(c *request.Config[InsertRuleRecordOpts]) error { c.Options.InsertAfter = &ruleID; return nil })
-}
-func WithInsertRuleRecordBefore(ruleID string) InsertRuleRecordOption {
-	return request.Custom(func(c *request.Config[InsertRuleRecordOpts]) error { c.Options.InsertBefore = &ruleID; return nil })
 }
 
 func cloneInsertRuleRecordOpts(v InsertRuleRecordOpts) InsertRuleRecordOpts {

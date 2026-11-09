@@ -15,9 +15,9 @@ type FindRecordOpts struct {
 }
 
 // FindRecordOption is one option of FindRecord: WithFindRecordOptions,
-// WithFindRecordFallback, request.IgnoreMissing or request.Custom over
-// *FindRecordOpts. Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// request.IgnoreMissing or request.Custom over *FindRecordOpts (for example to
+// set Fallback). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type FindRecordOption = request.FindCall
 
 var findRecordCalls = calls.Spec[FindRecordOpts]{
@@ -36,12 +36,6 @@ func WithFindRecordOptions(value FindRecordOpts) FindRecordOption {
 	snapshot := ownFindRecordOptions(value)
 	return request.Custom(func(options *FindRecordOpts) error {
 		*options = ownFindRecordOptions(snapshot)
-		return nil
-	})
-}
-func WithFindRecordFallback(value resource.FindFallbackPolicy) FindRecordOption {
-	return request.Custom(func(options *FindRecordOpts) error {
-		options.Fallback = value
 		return nil
 	})
 }

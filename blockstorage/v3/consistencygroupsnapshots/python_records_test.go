@@ -220,7 +220,7 @@ func TestPythonConsistencyGroupSnapshotListSourceQueriesDetailsFiltersAndRawCap(
 		})
 		options := []consistencygroupsnapshots.RecordListOption{request.Query("all_projects", snapshotMarshal(func() ([]byte, error) { return nil, errors.New("unmapped all_projects marshal error") })), request.Query("sort_dir", []string{"asc", "desc"}), request.Query("sort", "name:asc"), request.Query("name", "data"), request.Query("description", map[string]any{"enabled": 1}), request.Query("unknown", snapshotMarshal(func() ([]byte, error) { return nil, errors.New("ignored query marshal error") }))}
 		if !details {
-			options = append(options, consistencygroupsnapshots.WithRecordListDetails(false))
+			options = append(options, request.Custom(func(c *consistencygroupsnapshots.RecordListOpts) error { v := false; c.Details = &v; return nil }))
 		}
 		sequence := api.ListRecords(context.Background(), options...)
 		if len(*calls) != 0 {

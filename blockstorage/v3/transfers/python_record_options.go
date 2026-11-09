@@ -29,18 +29,21 @@ func copyRecordRead(v RecordReadOpts) RecordReadOpts { v.Headers = maps.Clone(v.
 // RecordCreateOpts preserves absent versus explicit JSON values. Extensions are
 // an explicit Go escape hatch; ordinary Fields retain Source declared-attribute policy.
 type RecordCreateOpts struct {
-	Headers                 map[string]string
-	Fields                  map[string]json.RawMessage
-	Extensions              map[string]json.RawMessage
+	Headers    map[string]string
+	Fields     map[string]json.RawMessage
+	Extensions map[string]json.RawMessage
+	// SuppressLegacySnapshots opts into omitting no_snapshots when 3.55 is
+	// unavailable. The default preserves the pinned proxy's actual body: its
+	// cleanup only examines params, although proxy attrs live on the Resource.
 	SuppressLegacySnapshots bool
 }
 
 // RecordCreateOption is one option of CreateRecord: WithRecordCreateOpts,
 // WithRecordCreateVolumeID, WithRecordCreateName, WithRecordCreateNoSnapshots,
-// WithRecordCreateExtension, WithRecordCreateSuppressLegacySnapshots,
-// request.Field (a declared Source attribute; unknown keys are discarded with
-// any marshal error), request.Headers (replaces the headers) or
-// request.Custom over *RecordCreateOpts. Other shared calls fail with
+// WithRecordCreateExtension, request.Field (a declared Source attribute;
+// unknown keys are discarded with any marshal error), request.Headers (replaces
+// the headers) or request.Custom over *RecordCreateOpts (for example to set
+// SuppressLegacySnapshots). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type RecordCreateOption = request.WriteCall
 
@@ -102,13 +105,6 @@ func WithRecordCreateExtension(key string, value any) RecordCreateOption {
 		c.Extensions[key] = bytes.Clone(owned)
 		return nil
 	})
-}
-
-// WithRecordCreateSuppressLegacySnapshots opts into omitting no_snapshots when
-// 3.55 is unavailable. The default preserves the pinned proxy's actual body:
-// its cleanup only examines params, although proxy attrs live on the Resource.
-func WithRecordCreateSuppressLegacySnapshots(value bool) RecordCreateOption {
-	return request.Custom(func(c *RecordCreateOpts) error { c.SuppressLegacySnapshots = value; return nil })
 }
 
 type RecordDeleteOpts struct {
@@ -191,13 +187,12 @@ type RecordListOpts struct {
 }
 
 // RecordListOption is one option of ListRecords: WithRecordListOpts,
-// WithRecordListDetails, WithRecordListAllProjects,
 // WithRecordListServerQuery, request.Query (a declared attribute, limit or
 // marker; the value is sent as JSON and other keys are discarded),
 // request.Limit, request.Marker, request.MaxItems, request.Paginated,
-// request.Headers (replaces the headers) or request.Custom over
-// *RecordListOpts. Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// request.Headers (replaces the headers) or request.Custom over *RecordListOpts
+// (for example to set Details or AllProjects). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type RecordListOption = request.ListCall
 
 func copyRecordList(v RecordListOpts) RecordListOpts {
@@ -228,12 +223,6 @@ func recordQueryCopy(values url.Values) url.Values {
 func WithRecordListOpts(value RecordListOpts) RecordListOption {
 	owned := copyRecordList(value)
 	return request.Custom(func(c *RecordListOpts) error { *c = copyRecordList(owned); return nil })
-}
-func WithRecordListDetails(value bool) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { x := value; c.Details = &x; return nil })
-}
-func WithRecordListAllProjects(value bool) RecordListOption {
-	return request.Custom(func(c *RecordListOpts) error { c.AllProjects = value; return nil })
 }
 
 // WithRecordListServerQuery is an explicit Go extension for an otherwise

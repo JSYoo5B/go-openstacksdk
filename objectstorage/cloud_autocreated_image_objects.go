@@ -121,7 +121,7 @@ func (c *Cloud) DeleteAutocreatedImageObjects(ctx context.Context, options ...Au
 	api := objects.New(selected)
 	var list []objects.RecordListOption
 	if cfg.SegmentPrefix != nil {
-		list = append(list, objects.WithRecordListPrefix(*cfg.SegmentPrefix))
+		list = append(list, request.Custom(func(c *objects.RecordListOpts) error { v := *cfg.SegmentPrefix; c.Prefix = &v; return nil }))
 	}
 	for row, listErr := range api.ListRecords(ctx, container, list...) {
 		result.LastPage = copyObjectSearchRecord(row)

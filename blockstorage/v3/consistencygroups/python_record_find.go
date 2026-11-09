@@ -124,10 +124,9 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindDetails, request.Custom over *RecordFindOpts,
-// request.IgnoreMissing, request.Microversion or request.Headers (replaces
-// the headers). Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// request.Custom over *RecordFindOpts (for example to set Details),
+// request.IgnoreMissing, request.Microversion or request.Headers (replaces the
+// headers). Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type RecordFindOption = request.FindCall
 
 var findCalls = calls.Spec[RecordFindOpts]{
@@ -158,7 +157,4 @@ func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(v)
 	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
-}
-func WithRecordFindDetails(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
 }

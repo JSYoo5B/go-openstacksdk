@@ -63,7 +63,7 @@ func TestPythonBackupFindRecordFallbackCodesAndDetailsDefaults(t *testing.T) {
 				})
 				var options []backups.RecordFindOption
 				if !details {
-					options = append(options, backups.WithRecordFindDetails(false))
+					options = append(options, request.Custom(func(c *backups.RecordFindOpts) error { v := false; c.Details = &v; return nil }))
 				}
 				value, err := api.FindRecord(context.Background(), "nightly", options...)
 				want := pythonBackupBase
@@ -197,7 +197,7 @@ func TestPythonBackupFindRecordQueryClassesOwnedOptsAndRawCap(t *testing.T) {
 		t.Fatal(get, list)
 	}
 	calls.Reset()
-	value, err = api.FindRecord(context.Background(), "nightly", request.Query("container", "two"), backups.WithRecordFindMaxItems(1))
+	value, err = api.FindRecord(context.Background(), "nightly", request.Query("container", "two"), request.Custom(func(c *backups.RecordFindOpts) error { c.MaxItems = 1; return nil }))
 	if err != nil || value != nil || calls.Len() != 2 || pythonBackupCalls(calls)[1].query != "limit=1&name=nightly" {
 		t.Fatal(value, err, pythonBackupCalls(calls))
 	}
@@ -239,7 +239,7 @@ func TestPythonBackupFindRecordPagingShortMarkersAndOffset(t *testing.T) {
 				t.Fatal(pythonBackupCalls(calls))
 			}
 			calls.Reset()
-			value, err = api.FindRecord(context.Background(), "nightly", append(options, backups.WithRecordFindPaginated(false))...)
+			value, err = api.FindRecord(context.Background(), "nightly", append(options, request.Custom(func(c *backups.RecordFindOpts) error { v := false; c.Paginated = &v; return nil }))...)
 			if err != nil || value == nil || calls.Len() != 2 {
 				t.Fatal(value, err, pythonBackupCalls(calls))
 			}
@@ -329,7 +329,7 @@ func TestPythonBackupFindRecordSelectionAndOptionFailures(t *testing.T) {
 		identity string
 		options  []backups.RecordFindOption
 	}{
-		{"..", nil}, {"nightly", []backups.RecordFindOption{nil}}, {"nightly", []backups.RecordFindOption{backups.WithRecordFindMaxItems(-1)}},
+		{"..", nil}, {"nightly", []backups.RecordFindOption{nil}}, {"nightly", []backups.RecordFindOption{request.Custom(func(c *backups.RecordFindOpts) error { c.MaxItems = -1; return nil })}},
 		{"nightly", []backups.RecordFindOption{request.Query("id", "collision")}},
 		{"nightly", []backups.RecordFindOption{backups.WithRecordFindOpts(backups.RecordFindOpts{Query: map[string]json.RawMessage{"metadata": json.RawMessage(`{bad`)}})}},
 	}

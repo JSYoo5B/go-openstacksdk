@@ -79,7 +79,7 @@ func TestComputeServiceFindRecordOwnedOptionsAndFallbackPath(t *testing.T) {
 		}
 		return pythonComputeServiceWire(200, `{"services":[{"id":"a","binary":"nova-compute"}]}`)
 	})
-	row, err := api.FindRecord(context.Background(), "nova-compute", option, services.WithRecordListBasePath("alternative-services"))
+	row, err := api.FindRecord(context.Background(), "nova-compute", option, request.Custom(func(c *services.RecordOptions) error { v := "alternative-services"; c.ListBasePath = &v; return nil }))
 	if err != nil || row == nil || calls.Len() != 1 {
 		t.Fatal(row, err, pythonComputeServiceCalls(calls))
 	}

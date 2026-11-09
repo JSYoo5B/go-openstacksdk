@@ -27,11 +27,10 @@ type RecordCreateOpts struct {
 }
 
 // RecordCreateOption is one option of CreateRecord: WithRecordCreateOpts,
-// WithRecordCreateModeSupported, request.Field (a declared attribute or wire
-// name; aliases follow caller order and unknown keys are ignored),
-// request.Headers (replaces the headers) or request.Custom over
-// *RecordCreateOpts. Other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// request.Field (a declared attribute or wire name; aliases follow caller order
+// and unknown keys are ignored), request.Headers (replaces the headers) or
+// request.Custom over *RecordCreateOpts (for example to set ModeSupported).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type RecordCreateOption = request.WriteCall
 
 func pythonAttachmentCopyCreate(v RecordCreateOpts) RecordCreateOpts {
@@ -46,9 +45,6 @@ func pythonAttachmentCopyCreate(v RecordCreateOpts) RecordCreateOpts {
 func WithRecordCreateOpts(v RecordCreateOpts) RecordCreateOption {
 	owned := pythonAttachmentCopyCreate(v)
 	return request.Custom(func(c *RecordCreateOpts) error { *c = pythonAttachmentCopyCreate(owned); return nil })
-}
-func WithRecordCreateModeSupported(v bool) RecordCreateOption {
-	return request.Custom(func(c *RecordCreateOpts) error { x := v; c.ModeSupported = &x; return nil })
 }
 
 // RecordListOpts splits known server parameters from declared local filters.

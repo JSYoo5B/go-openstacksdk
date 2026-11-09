@@ -21,7 +21,7 @@ func TestPythonStoreRecordsDetailsSelectsFixedRouteAndSchema(t *testing.T) {
 		return infoRecordJSON(r, 203, body), nil
 	})
 	api := New(client)
-	rows, err := api.AllStoreRecords(context.Background(), WithStoreRecordListDetails(true), request.Limit(0), WithStoreRecordListFilter("is_default", true))
+	rows, err := api.AllStoreRecords(context.Background(), request.Custom(func(c *StoreRecordListOpts) error { c.Details = true; return nil }), request.Limit(0), WithStoreRecordListFilter("is_default", true))
 	if err != nil || len(rows) != 1 || calls != 1 {
 		t.Fatal(rows, err, calls)
 	}
@@ -51,7 +51,7 @@ func TestPythonStoreRecordsDetailsBasicSelectionAndReusableOptions(t *testing.T)
 			t.Fatal(rows, err)
 		}
 	}
-	if _, err := api.AllStoreRecords(context.Background(), option, WithStoreRecordListDetails(false)); err != nil {
+	if _, err := api.AllStoreRecords(context.Background(), option, request.Custom(func(c *StoreRecordListOpts) error { c.Details = false; return nil })); err != nil {
 		t.Fatal(err)
 	}
 	if paths[0] != "/reverse/glance/v2/info/stores/detail" || paths[1] != paths[0] || paths[2] != "/reverse/glance/v2/info/stores" {
@@ -69,12 +69,12 @@ func TestPythonStoreRecordsDetailsPagingPartialAndCaps(t *testing.T) {
 		return infoRecordJSON(r, 200, `{"stores":[{"id":"first","default":false}],"next":"/v2/info/stores/detail?marker=next"}`), nil
 	})
 	api := New(client)
-	rows, err := api.AllStoreRecords(context.Background(), WithStoreRecordListDetails(true))
+	rows, err := api.AllStoreRecords(context.Background(), request.Custom(func(c *StoreRecordListOpts) error { c.Details = true; return nil }))
 	var proof *resource.ResponseError
 	if len(rows) != 2 || !errors.As(err, &proof) || string(proof.Body) != bad || proof.StatusCode != 202 || calls != 2 {
 		t.Fatal(rows, err, proof, calls)
 	}
-	rows, err = api.AllStoreRecords(context.Background(), WithStoreRecordListDetails(true), request.MaxItems(1), WithStoreRecordListFilter("is_default", true))
+	rows, err = api.AllStoreRecords(context.Background(), request.Custom(func(c *StoreRecordListOpts) error { c.Details = true; return nil }), request.MaxItems(1), WithStoreRecordListFilter("is_default", true))
 	if err != nil || len(rows) != 0 || calls != 3 {
 		t.Fatal(rows, err, calls)
 	}
@@ -85,7 +85,7 @@ func TestPythonStoreRecordsDetailsHasNoLocalRoleGateAndOwnsFailures(t *testing.T
 		calls++
 		return infoRecordJSON(r, 403, `{"forbidden":"policy"}`), nil
 	})
-	if _, err := New(client).AllStoreRecords(context.Background(), WithStoreRecordListDetails(true)); err == nil {
+	if _, err := New(client).AllStoreRecords(context.Background(), request.Custom(func(c *StoreRecordListOpts) error { c.Details = true; return nil })); err == nil {
 		t.Fatal("server denial ignored")
 	}
 	if calls != 1 {
@@ -94,7 +94,7 @@ func TestPythonStoreRecordsDetailsHasNoLocalRoleGateAndOwnsFailures(t *testing.T
 	ctx, cancel := context.WithCancelCause(context.Background())
 	cause := errors.New("stop")
 	cancel(cause)
-	if _, err := New(client).AllStoreRecords(ctx, WithStoreRecordListDetails(true)); !errors.Is(err, cause) {
+	if _, err := New(client).AllStoreRecords(ctx, request.Custom(func(c *StoreRecordListOpts) error { c.Details = true; return nil })); !errors.Is(err, cause) {
 		t.Fatal(err)
 	}
 	if calls != 1 {

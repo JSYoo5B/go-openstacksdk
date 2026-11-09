@@ -20,6 +20,7 @@ import (
 // control the GET stage; raw headers stays a GET query value and supplies HTTP
 // headers only if the lookup falls back to LIST.
 type RecordFindOpts struct {
+	// ListBasePath overrides only the clean-fallback LIST route.
 	ListBasePath  *string
 	IgnoreMissing *bool
 	Microversion  *string
@@ -30,12 +31,12 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindListBasePath, request.Custom over *RecordFindOpts (for example
-// to set Location), request.Query (a Source keyword argument; the value is
-// sent as JSON), request.Headers (replaces the headers), request.Microversion
-// or request.IgnoreMissing. Other shared calls, including request.Header, fail
+// request.Custom over *RecordFindOpts (for example to set Location or
+// ListBasePath), request.Query (a Source keyword argument; the value is sent as
+// JSON), request.Headers (replaces the headers), request.Microversion or
+// request.IgnoreMissing. Other shared calls, including request.Header, fail
 // with resource.ErrInvalidOption before HTTP. The fallback list route stays
-// WithRecordFindListBasePath: finds do not accept the shared BasePath call.
+// RecordFindOpts.ListBasePath: finds do not accept the shared BasePath call.
 type RecordFindOption = request.FindCall
 
 var recordFindCalls = keystonecalls.FindSpec(func(c *RecordFindOpts) keystonecalls.FindState {
@@ -114,9 +115,4 @@ func (a *API) FindRecord(ctx context.Context, identity string, options ...Record
 		result.Resource = nil
 	}
 	return result, wrap(projectErr)
-}
-
-// WithRecordFindListBasePath overrides only the clean-fallback LIST route.
-func WithRecordFindListBasePath(v string) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.ListBasePath = &x; return nil })
 }

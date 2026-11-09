@@ -18,7 +18,10 @@ func TestPythonAggregateUpdateRecordSendsNullAndEmptyValues(t *testing.T) {
 	status, reply := http.StatusOK, `{"aggregate":`+pythonAggregateRow+`}`
 	api, calls := pythonAggregateAPI(t, func(*http.Request) *http.Response { return pythonAggregateWire(status, reply) })
 	// update_aggregate(7, availability_zone=None) removes the zone in Nova.
-	got, err := api.UpdateRecord(ctx, 7, aggregates.WithUpdateRecordAvailabilityZone(request.Null[string]()))
+	got, err := api.UpdateRecord(ctx, 7, request.Custom(func(c *request.Config[aggregates.UpdateRecordOpts]) error {
+		c.Options.AvailabilityZone = request.Null[string]()
+		return nil
+	}))
 	if err != nil || !got.Sent || got.StatusCode != 200 || got.Aggregate == nil || got.Aggregate.ID != 7 || got.Aggregate.UUID != "agg-uuid" || string(got.Fields["name"]) != `"rack1"` {
 		t.Fatal(got, err)
 	}
@@ -63,11 +66,17 @@ func TestPythonAggregateUpdateRecordRejectsInputsAndErrorStatuses(t *testing.T) 
 		t.Fatalf("%+v", pythonAggregateCalls(calls))
 	}
 	var operation *resource.OperationError
-	if _, err := api.UpdateRecord(ctx, 7, aggregates.WithUpdateRecordName(request.Present("x"))); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "aggregates" {
+	if _, err := api.UpdateRecord(ctx, 7, request.Custom(func(c *request.Config[aggregates.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Resource != "aggregates" {
 		t.Fatal(err)
 	}
 	var nilAPI *aggregates.API
-	if _, err := nilAPI.UpdateRecord(ctx, 7, aggregates.WithUpdateRecordName(request.Present("x"))); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := nilAPI.UpdateRecord(ctx, 7, request.Custom(func(c *request.Config[aggregates.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }

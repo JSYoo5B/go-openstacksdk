@@ -257,10 +257,11 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.ListRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordDetails`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors.WithRecordOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 
-- list_hypervisors(filters) is compute.hypervisors(details=True, **filters): WithRecordDetails(true) sends the detail route with caller filters as query keys.
+- list_hypervisors(filters) is compute.hypervisors(details=True, **filters): RecordOptions.Details = true sends the detail route with caller filters as query keys.
   Tests: `compute/v2/hypervisors/python_records_test.go:TestHypervisorRecordsSummaryDetailAndDeclaredProjection`.
 - With hypervisor_hostname_pattern below microversion 2.53 the escaped os-hypervisors/{pattern}/search route replaces the detail route and from 2.53 the pattern stays a query key; the SDK-owned record API supplies the route that Gophercloud has no binding for.
   Tests: `compute/v2/hypervisors/python_records_test.go:TestHypervisorRecordsLegacyHostnameSearchOwnsPatternAndVersion`.
@@ -268,7 +269,7 @@ Go API:
 Python/Go differences:
 
 - Python returns a list of mutable Resources; Go returns an iterator or slice of immutable records. Unknown filter keys are discarded by the declared profile.
-- Callers must pass WithRecordDetails(true); the Go default is the summary listing like the bare proxy.
+- Callers must pass RecordOptions.Details = true; the Go default is the summary listing like the bare proxy.
 - Python negotiates min(Hypervisor _max_microversion 2.88, server maximum) per request; Go uses the selected microversion or its own discovery.
 
 ### `python:cloud/_compute/ComputeCloudMixin/create_server_group`
@@ -574,8 +575,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListServerRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListServers`
@@ -605,8 +606,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.List`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchServerRecords`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindDetails`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindAllProjects`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
+- `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerFilters`

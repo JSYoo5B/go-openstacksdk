@@ -28,9 +28,8 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindDetails, WithRecordFindAllProjects, WithRecordFindPaginated,
-// WithRecordFindLimit, WithRecordFindMarker, WithRecordFindMaxItems,
-// request.Custom over *RecordFindOpts, request.IgnoreMissing, request.Headers
+// request.Custom over *RecordFindOpts (for example to set Details, AllProjects,
+// Paginated, Limit, Marker or MaxItems), request.IgnoreMissing, request.Headers
 // (replaces the headers) or request.Query (a declared server filter or Body
 // attribute sent as JSON; other keys are discarded with their marshal error).
 // Other shared calls fail with resource.ErrInvalidOption before HTTP.
@@ -72,24 +71,6 @@ func copyFindOpts(v RecordFindOpts) RecordFindOpts {
 func WithRecordFindOpts(v RecordFindOpts) RecordFindOption {
 	owned := copyFindOpts(v)
 	return request.Custom(func(c *RecordFindOpts) error { *c = copyFindOpts(owned); return nil })
-}
-func WithRecordFindDetails(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Details = &x; return nil })
-}
-func WithRecordFindAllProjects(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.AllProjects = &x; return nil })
-}
-func WithRecordFindPaginated(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil })
-}
-func WithRecordFindLimit(v int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil })
-}
-func WithRecordFindMarker(v string) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.Marker = v; return nil })
-}
-func WithRecordFindMaxItems(v int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
 }
 func findQueryWire(key string) (string, bool) {
 	switch key {

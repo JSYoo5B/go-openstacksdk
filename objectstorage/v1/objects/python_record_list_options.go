@@ -116,12 +116,6 @@ func WithRecordListHeaders(value map[string]string) RecordListOption {
 		return nil
 	})
 }
-func WithRecordListPrefix(value string) RecordListOption {
-	return request.Custom(func(cfg *RecordListOpts) error { owned := value; cfg.Prefix = &owned; return nil })
-}
-func WithRecordListMaxPages(value int) RecordListOption {
-	return request.Custom(func(cfg *RecordListOpts) error { cfg.MaxPages = value; return nil })
-}
 
 // objectListQueryMapping is Object._query_mapping (client name to server name),
 // including the default limit/marker pagination parameters.

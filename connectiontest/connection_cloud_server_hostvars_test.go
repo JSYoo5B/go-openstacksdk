@@ -322,7 +322,7 @@ func TestCloudServerListAndSearchServersExpandEveryRow(t *testing.T) {
 	if listed[0].Interfaces.PublicIPv4 != "8.8.8.8" || listed[0].Record == nil {
 		t.Fatalf("%+v", listed[0])
 	}
-	bare, err := cloud.Conn.ListServers(ctx, sdk.WithCloudServerBare(true), sdk.WithCloudServerListOptions(servers.WithRecordFindAllProjects(true)))
+	bare, err := cloud.Conn.ListServers(ctx, sdk.WithCloudServerBare(true), sdk.WithCloudServerListOptions(request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })))
 	if err != nil || len(bare) != 2 || bare[0].Interfaces != nil {
 		t.Fatalf("%+v %v", bare, err)
 	}

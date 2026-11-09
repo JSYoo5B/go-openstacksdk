@@ -27,11 +27,11 @@ type UpdateRecordOpts struct {
 }
 
 // UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
-// WithUpdateRecordDescription, request.Field (another attribute inside the
-// flavor envelope; the typed description key and the URI identity id are
-// rejected), request.Header or request.Custom over
-// *request.Config[UpdateRecordOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.Field (another attribute inside the flavor envelope; the typed
+// description key and the URI identity id are rejected), request.Header or
+// request.Custom over *request.Config[UpdateRecordOpts] (for example to set
+// Description). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type UpdateRecordOption = request.WriteCall
 
 var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
@@ -41,9 +41,6 @@ var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
 	return request.Custom(request.WithOptions(value))
-}
-func WithUpdateRecordDescription(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Description = value; return nil })
 }
 
 // FlavorUpdateRecord is the committed Python Flavor view. Flavor is the

@@ -18,7 +18,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordListDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 - `github.com/JSYoo5B/go-openstacksdk/request.Limit`
 - `github.com/JSYoo5B/go-openstacksdk/request.Marker`
@@ -143,12 +142,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/consistencygroupsnapshots.WithRecordFindMaxItems`
 
 - Pinned named default ignore_missing=True/details=True, clean member400403404 only fallback, no automatic name server/local query, full exact ID-or-name uniqueness scan. Default nil only after complete successful list; strict logical missing, duplicate and late HTTP/row/link/physical errors never return a candidate success or suppressed member receipt.
   Tests: `blockstorage/v3/consistencygroupsnapshots/python_find_test.go:TestPythonConsistencyGroupSnapshotFindDefaultsCleanFallbackAndNoAutomaticNameFilter`, `blockstorage/v3/consistencygroupsnapshots/python_find_test.go:TestPythonConsistencyGroupSnapshotFindDirectSuccessUntypedIDAndSeed`, `blockstorage/v3/consistencygroupsnapshots/python_find_test.go:TestPythonConsistencyGroupSnapshotFindCompletePagesDuplicateAndLateFailure`, `blockstorage/v3/consistencygroupsnapshots/python_find_test.go:TestPythonConsistencyGroupSnapshotFindDefaultMissingStrictAndListRejection`, `blockstorage/v3/consistencygroupsnapshots/python_find_test.go:TestPythonConsistencyGroupSnapshotFindLatePhysicalListFailureKeepsActualPage`.
@@ -319,13 +315,13 @@ func main() {
     case "find":
         show(api.FindRecord(ctx, *identity,
             request.IgnoreMissing(!*strict),
-            consistencygroupsnapshots.WithRecordFindDetails(!*summary)))
+            request.Custom(func(c *consistencygroupsnapshots.RecordFindOpts) error { v := !*summary; c.Details = &v; return nil })))
     case "list":
         var query map[string]json.RawMessage
         if err := json.Unmarshal([]byte(*queryJSON), &query); err != nil { log.Fatal(err) }
         for value, err := range api.ListRecords(ctx,
             consistencygroupsnapshots.WithRecordListOpts(consistencygroupsnapshots.RecordListOpts{Query: query}),
-            consistencygroupsnapshots.WithRecordListDetails(!*summary)) {
+            request.Custom(func(c *consistencygroupsnapshots.RecordListOpts) error { v := !*summary; c.Details = &v; return nil })) {
             show(value, err)
         }
     case "create":

@@ -234,13 +234,12 @@ type RecordFindOpts struct {
 }
 
 // RecordFindOption is one option of FindRecord: WithRecordFindOpts,
-// WithRecordFindLimit, WithRecordFindMarker, WithRecordFindMaxItems,
-// WithRecordFindPaginated, request.IgnoreMissing, request.Query (one Python
-// kwarg as JSON; its marshal error is returned when applied), request.Headers
-// (replaces the headers), request.Microversion or request.Custom over
-// *RecordFindOpts. The paging options stay package options because the find
-// category has no paging calls. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// request.IgnoreMissing, request.Query (one Python kwarg as JSON; its marshal
+// error is returned when applied), request.Headers (replaces the headers),
+// request.Microversion or request.Custom over *RecordFindOpts (for example to
+// set Limit, Marker, MaxItems or Paginated). The paging options stay package
+// options because the find category has no paging calls. Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type RecordFindOption = request.FindCall
 
 func poolFindList(v RecordFindOpts) RecordListOpts {
@@ -284,18 +283,6 @@ func withRecordFindHeaders(v map[string]string) func(*RecordFindOpts) error {
 }
 func withRecordFindMicroversion(v string) func(*RecordFindOpts) error {
 	return func(c *RecordFindOpts) error { x := v; c.Microversion = &x; return nil }
-}
-func WithRecordFindLimit(v int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Limit = &x; return nil })
-}
-func WithRecordFindMarker(v string) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.Marker = v; return nil })
-}
-func WithRecordFindMaxItems(v int) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { c.MaxItems = v; return nil })
-}
-func WithRecordFindPaginated(v bool) RecordFindOption {
-	return request.Custom(func(c *RecordFindOpts) error { x := v; c.Paginated = &x; return nil })
 }
 
 var poolRecordQueryAliases = map[string]string{"is_shared": "shared", "any_tags": "tags-any", "not_tags": "not-tags", "not_any_tags": "not-tags-any"}

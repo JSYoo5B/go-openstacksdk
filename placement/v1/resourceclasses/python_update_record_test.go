@@ -21,7 +21,10 @@ func TestPythonResourceClassUpdateRecordRenames(t *testing.T) {
 	api.RawClient().Microversion = "1.39"
 	api.RawClient().MoreHeaders = map[string]string{"OpenStack-API-Version": "placement 1.39"}
 	// update_resource_class("CUSTOM_OLD", name="CUSTOM_NEW")
-	got, err := api.UpdateRecord(ctx, "CUSTOM_OLD", resourceclasses.WithUpdateRecordName("CUSTOM_NEW"))
+	got, err := api.UpdateRecord(ctx, "CUSTOM_OLD", request.Custom(func(c *request.Config[resourceclasses.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("CUSTOM_NEW")
+		return nil
+	}))
 	if err != nil || got.StatusCode != 200 || got.ResourceClass == nil || got.ResourceClass.Name != "CUSTOM_NEW" || len(got.ResourceClass.Links) != 1 || string(got.Fields["name"]) != `"CUSTOM_NEW"` {
 		t.Fatal(got, err)
 	}
@@ -61,7 +64,10 @@ func TestPythonResourceClassUpdateRecordRejections(t *testing.T) {
 	var recorder pythonRCRecorder
 	api := pythonRCAPI(t, &recorder, func(*http.Request) *http.Response { return pythonRCWire(status, reply) })
 	var operation *resource.OperationError
-	if _, err := api.UpdateRecord(ctx, "CUSTOM_OLD", resourceclasses.WithUpdateRecordName("CUSTOM_TAKEN")); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Operation != "UpdateRecord" || operation.Resource != "resourceclasses" {
+	if _, err := api.UpdateRecord(ctx, "CUSTOM_OLD", request.Custom(func(c *request.Config[resourceclasses.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("CUSTOM_TAKEN")
+		return nil
+	})); !gophercloud.ResponseCodeIs(err, http.StatusConflict) || !errors.As(err, &operation) || operation.Operation != "UpdateRecord" || operation.Resource != "resourceclasses" {
 		t.Fatal(err)
 	}
 	status, reply = http.StatusOK, `["not","an","object"]`

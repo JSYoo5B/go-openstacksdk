@@ -48,7 +48,10 @@ func pyCloudComputeAggregateConnection(t *testing.T, deleteStatus int) (*sdk.Con
 
 func TestPyCloudComputeUpdateAggregateFindsThenSendsOnlySuppliedNull(t *testing.T) {
 	c, log := pyCloudComputeAggregateConnection(t, 200)
-	record, err := c.UpdateAggregate(context.Background(), "web", aggregates.WithUpdateRecordAvailabilityZone(request.Null[string]()))
+	record, err := c.UpdateAggregate(context.Background(), "web", request.Custom(func(c *request.Config[aggregates.UpdateRecordOpts]) error {
+		c.Options.AvailabilityZone = request.Null[string]()
+		return nil
+	}))
 	if err != nil || record.Aggregate == nil || record.Aggregate.ID != 7 || !record.Sent {
 		t.Fatalf("update: %+v %v", record, err)
 	}
@@ -60,7 +63,10 @@ func TestPyCloudComputeUpdateAggregateFindsThenSendsOnlySuppliedNull(t *testing.
 
 func TestPyCloudComputeUpdateAggregateMissingSendsNoPut(t *testing.T) {
 	c, log := pyCloudComputeAggregateConnection(t, 200)
-	if _, err := c.UpdateAggregate(context.Background(), "ghost", aggregates.WithUpdateRecordName(request.Present("x"))); !errors.Is(err, resource.ErrNotFound) {
+	if _, err := c.UpdateAggregate(context.Background(), "ghost", request.Custom(func(c *request.Config[aggregates.UpdateRecordOpts]) error {
+		c.Options.Name = request.Present("x")
+		return nil
+	})); !errors.Is(err, resource.ErrNotFound) {
 		t.Fatalf("missing: %v", err)
 	}
 	if strings.Contains(log.String(), "PUT") {

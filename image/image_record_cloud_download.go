@@ -59,16 +59,6 @@ func WithImageRecordCloudDownloadHeaders(values map[string]string) ImageRecordCl
 		return mergeImageRecordHeaders(&config.Headers, owned)
 	})
 }
-func WithImageRecordCloudDownloadChunkSize(value int) ImageRecordCloudDownloadOption {
-	return request.Custom(func(config *ImageRecordCloudDownloadOpts) error {
-		owned := value
-		config.ChunkSize = &owned
-		return nil
-	})
-}
-func WithImageRecordCloudDownloadStream(value bool) ImageRecordCloudDownloadOption {
-	return request.Custom(func(config *ImageRecordCloudDownloadOpts) error { config.Stream = value; return nil })
-}
 
 func prepareImageRecordCloudDownload(ctx context.Context, check func(context.Context) error, options []ImageRecordCloudDownloadOption) (ImageRecordCloudDownloadOpts, error) {
 	value := copyImageRecordCloudDownload(ImageRecordCloudDownloadOpts{})

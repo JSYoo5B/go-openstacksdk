@@ -27,11 +27,11 @@ type UpdateRecordOpts struct {
 }
 
 // UpdateRecordOption is one option of UpdateRecord: WithUpdateRecordOptions,
-// WithUpdateRecordName, WithUpdateRecordAvailabilityZone, request.Field
-// (another attribute inside the aggregate envelope; keys owned by
+// request.Field (another attribute inside the aggregate envelope; keys owned by
 // UpdateRecordOpts and the URI identity id are rejected), request.Header or
-// request.Custom over *request.Config[UpdateRecordOpts]. Other shared calls
-// fail with resource.ErrInvalidOption before HTTP.
+// request.Custom over *request.Config[UpdateRecordOpts] (for example to set
+// Name or AvailabilityZone). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type UpdateRecordOption = request.WriteCall
 
 var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
@@ -41,15 +41,6 @@ var updateRecordCalls = calls.Spec[request.Config[UpdateRecordOpts]]{
 
 func WithUpdateRecordOptions(value UpdateRecordOpts) UpdateRecordOption {
 	return request.Custom(request.WithOptions(value))
-}
-func WithUpdateRecordName(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error { config.Options.Name = value; return nil })
-}
-func WithUpdateRecordAvailabilityZone(value request.Optional[string]) UpdateRecordOption {
-	return request.Custom(func(config *request.Config[UpdateRecordOpts]) error {
-		config.Options.AvailabilityZone = value
-		return nil
-	})
 }
 
 // AggregateRecord is the committed Python Aggregate view. Aggregate is the

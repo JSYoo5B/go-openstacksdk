@@ -136,11 +136,11 @@ func TestPythonAttachmentRecordCreateInstanceTruthinessAndModeVersions(t *testin
 			t.Fatal("Source selected-default support", version, pythonAttachmentCalls(calls))
 		}
 		calls.Reset()
-		if value, err := api.CreateRecord(context.Background(), "vol", request.Field("mode", false), attachments.WithRecordCreateModeSupported(true)); err != nil || calls.Len() != 1 || strings.Contains(pythonAttachmentCalls(calls)[0].body, `"mode"`) || len(value.Discovery) != 0 {
+		if value, err := api.CreateRecord(context.Background(), "vol", request.Field("mode", false), request.Custom(func(c *attachments.RecordCreateOpts) error { v := true; c.ModeSupported = &v; return nil })); err != nil || calls.Len() != 1 || strings.Contains(pythonAttachmentCalls(calls)[0].body, `"mode"`) || len(value.Discovery) != 0 {
 			t.Fatal(value, err, pythonAttachmentCalls(calls))
 		}
 		calls.Reset()
-		if value, err := api.CreateRecord(context.Background(), "vol", request.Field("mode", false), attachments.WithRecordCreateModeSupported(false)); err != nil || calls.Len() != 1 || !strings.Contains(pythonAttachmentCalls(calls)[0].body, `"mode":false`) || len(value.Discovery) != 0 {
+		if value, err := api.CreateRecord(context.Background(), "vol", request.Field("mode", false), request.Custom(func(c *attachments.RecordCreateOpts) error { v := false; c.ModeSupported = &v; return nil })); err != nil || calls.Len() != 1 || !strings.Contains(pythonAttachmentCalls(calls)[0].body, `"mode":false`) || len(value.Discovery) != 0 {
 			t.Fatal(value, err, pythonAttachmentCalls(calls))
 		}
 	}

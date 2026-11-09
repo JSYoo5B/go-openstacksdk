@@ -17,12 +17,9 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindDetails`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots.WithRecordFindMaxItems`
 
 - Pinned named default ignore_missing=True/details=True; one escaped literal member GET, clean400/403/404 fallback, no automatic server/local name query, exact ID-or-name scan, default nil only after complete successful list; strict logical absence has no suppressed native GET cause.
   Tests: `blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindDefaultsCleanFallbackAndNoAutomaticNameFilter`, `blockstorage/v3/groupsnapshots/python_find_test.go:TestPythonGroupSnapshotFindDefaultMissingStrictAndListRejection`.
@@ -103,7 +100,7 @@ func main() {
     api := groupsnapshots.New(cinder.RawClient())
     value, err := api.FindRecord(ctx, *identity,
         request.IgnoreMissing(!*strict),
-        groupsnapshots.WithRecordFindDetails(!*summary))
+        request.Custom(func(c *groupsnapshots.RecordFindOpts) error { v := !*summary; c.Details = &v; return nil }))
     if err != nil {
         if value != nil {
             fmt.Printf("actual_http=%d actual_body=%q discovery=%d\n", value.StatusCode, value.Envelope, len(value.Discovery))

@@ -215,7 +215,10 @@ func TestPythonCinderResourceFiltersLocalCapStopsBeforeInvalidRowsAndNext(t *tes
 		}
 		filterJSON(w, 200, `{"resource_filters":[{"resource":"volume","filters":[false]},null],"next":{"malformed":true}}`)
 	})
-	rows, err := api.AllRecords(context.Background(), resourcefilters.WithRecordListQuery(map[string]any{"filters": []any{true}}), resourcefilters.WithRecordListControl(resource.ListControl{MaxItems: 1}))
+	rows, err := api.AllRecords(context.Background(), resourcefilters.WithRecordListQuery(map[string]any{"filters": []any{true}}), request.Custom(func(c *resourcefilters.RecordListOpts) error {
+		c.Control = resource.ListControl{MaxItems: 1}
+		return nil
+	}))
 	if err != nil || len(rows) != 0 || len(*calls) != 1 {
 		t.Fatal(rows, err, *calls)
 	}
@@ -287,7 +290,10 @@ func TestPythonCinderResourceFiltersPaginationPreservesFiltersAndBlocksForeignOr
 			filterJSON(w, 200, `{"resource_filters":[{"resource":"volume"}],"resource_filters_links":[{"rel":"next","href":"?marker=after"}]}`)
 		}
 	})
-	rows, err := api.AllRecords(context.Background(), resourcefilters.WithRecordListControl(resource.ListControl{SinglePage: true}))
+	rows, err := api.AllRecords(context.Background(), request.Custom(func(c *resourcefilters.RecordListOpts) error {
+		c.Control = resource.ListControl{SinglePage: true}
+		return nil
+	}))
 	if err != nil || len(rows) != 1 || len(*calls) != 1 {
 		t.Fatal(rows, err, *calls)
 	}
@@ -337,7 +343,10 @@ func TestPythonCinderResourceFiltersControlsBeforeMarshalerAndOptionSnapshots(t 
 	if err != nil || len(*calls) != 1 || api.RawClient().MoreHeaders != nil {
 		t.Fatal(err, *calls)
 	}
-	for _, option := range []resourcefilters.RecordListOption{nil, request.Microversion("bad"), request.Headers(map[string]string{"Authorization": "forged"}), resourcefilters.WithRecordListControl(resource.ListControl{MaxItems: -1})} {
+	for _, option := range []resourcefilters.RecordListOption{nil, request.Microversion("bad"), request.Headers(map[string]string{"Authorization": "forged"}), request.Custom(func(c *resourcefilters.RecordListOpts) error {
+		c.Control = resource.ListControl{MaxItems: -1}
+		return nil
+	})} {
 		api, calls := filterFixture(t, "3.33", func(http.ResponseWriter, *http.Request) { t.Fatal("HTTP") })
 		_, err := api.AllRecords(context.Background(), option)
 		if !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {

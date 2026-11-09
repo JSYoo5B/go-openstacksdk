@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments.WithRecordCreateModeSupported`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - CreateRecord posts the Source attachment envelope to summary /attachments, with mandatory volume_id renamed to volume_uuid. Omitted instance creates a reservation without instance_uuid; truthy instance renames to instance_uuid while explicit JSON falsey instances retain the original instance key. Unknown Source kwargs are ignored and known fields preserve omission/null/false/zero/empty/large JSON values.
   Tests: `blockstorage/v3/attachments/python_records_contracts_test.go:TestPythonAttachmentRecordCreateReservationAndOwnedPartialEvidence`, `blockstorage/v3/attachments/python_records_contracts_test.go:TestPythonAttachmentRecordCreateInstanceTruthinessAndModeVersions`.
@@ -100,6 +100,7 @@ import (
     "log"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/attachments"
 )

@@ -63,9 +63,6 @@ func WithImageRecordQueryHeaders(values map[string]string) ImageRecordQueryOptio
 func WithImageRecordQueryFilterDeleted(value bool) ImageRecordQueryOption {
 	return request.Custom(func(config *ImageRecordQueryOpts) error { owned := value; config.FilterDeleted = &owned; return nil })
 }
-func WithImageRecordQueryShowAll(value bool) ImageRecordQueryOption {
-	return request.Custom(func(config *ImageRecordQueryOpts) error { owned := value; config.ShowAll = &owned; return nil })
-}
 
 // WithImageRecordQueryFilters owns raw JSON. Nil clears the option; explicit
 // null remains present. Search preserves dictionary order and expressions.

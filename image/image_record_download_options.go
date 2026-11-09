@@ -46,28 +46,12 @@ func WithImageRecordDownloadOpts(value ImageRecordDownloadOpts) ImageRecordDownl
 		return nil
 	})
 }
-func WithImageRecordDownloadStream(value bool) ImageRecordDownloadOption {
-	return request.Custom(func(config *ImageRecordDownloadOpts) error { config.Stream = value; return nil })
-}
-func WithImageRecordDownloadChunkSize(value int) ImageRecordDownloadOption {
-	return request.Custom(func(config *ImageRecordDownloadOpts) error { owned := value; config.ChunkSize = &owned; return nil })
-}
 func WithImageRecordDownloadStorePreferences(values ...string) ImageRecordDownloadOption {
 	snapshot := slices.Clone(values)
 	return request.Custom(func(config *ImageRecordDownloadOpts) error {
 		config.StorePreferences = slices.Clone(snapshot)
 		return nil
 	})
-}
-func WithImageRecordDownloadChecksumVerification(value bool) ImageRecordDownloadOption {
-	return request.Custom(func(config *ImageRecordDownloadOpts) error {
-		owned := value
-		config.VerifyChecksum = &owned
-		return nil
-	})
-}
-func WithImageRecordDownloadHashFactory(value ImageRecordDownloadHashFactory) ImageRecordDownloadOption {
-	return request.Custom(func(config *ImageRecordDownloadOpts) error { config.HashFactory = value; return nil })
 }
 func WithImageRecordDownloadHeaders(values map[string]string) ImageRecordDownloadOption {
 	snapshot := copyImageRecordHeaders(values)

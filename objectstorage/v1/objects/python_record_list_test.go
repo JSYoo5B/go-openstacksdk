@@ -132,7 +132,7 @@ func TestPythonObjectListRecordsQueryMappingHeadersAndLocalFilters(t *testing.T)
 		names   []string
 	}{
 		{"server mapping and ignored unknown keys", []objects.RecordListOption{
-			objects.WithRecordListPrefix("logs/"),
+			request.Custom(func(c *objects.RecordListOpts) error { v := "logs/"; c.Prefix = &v; return nil }),
 			request.Query("multipart-manifest", "put"),
 			request.Query("multipart_manifest", "get"),
 			request.Query("symlink", "get"),
@@ -215,7 +215,7 @@ func TestPythonObjectListRecordsCountAndMarkerContinuation(t *testing.T) {
 		{"count header follows last name", "3", nil, []string{"format=json", "format=json&marker=b"}},
 		{"count equal to consumed rows stops", "2", nil, []string{"format=json"}},
 		{"truthy limit fallback until empty page", "", []objects.RecordListOption{request.Limit(2)}, []string{"format=json&limit=2", "format=json&limit=2&marker=b", "format=json&limit=2&marker=c"}},
-		{"prefix is kept on continuation", "3", []objects.RecordListOption{objects.WithRecordListPrefix("p")}, []string{"format=json&prefix=p", "format=json&marker=b&prefix=p"}},
+		{"prefix is kept on continuation", "3", []objects.RecordListOption{request.Custom(func(c *objects.RecordListOpts) error { v := "p"; c.Prefix = &v; return nil })}, []string{"format=json&prefix=p", "format=json&marker=b&prefix=p"}},
 		{"falsey limit is sent once and not restored", "3", []objects.RecordListOption{request.Limit(0)}, []string{"format=json&limit=0", "format=json&marker=b"}},
 	} {
 		t.Run(tc.label, func(t *testing.T) {
@@ -333,7 +333,7 @@ func TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound(t *testing.T) {
 	})
 	t.Run("page bound fails with the last page receipt", func(t *testing.T) {
 		api, calls := pythonObjectAPI(t, reply)
-		result := pythonObjectListCollect(api, "box", objects.WithRecordListMaxPages(1))
+		result := pythonObjectListCollect(api, "box", request.Custom(func(c *objects.RecordListOpts) error { c.MaxPages = 1; return nil }))
 		last := result.records[len(result.records)-1]
 		var response *resource.ResponseError
 		if !errors.Is(result.err, resource.ErrInvalidOption) || !errors.As(result.err, &response) || response.StatusCode != 200 || last.StatusCode != 200 || last.Container != "box" || len(calls()) != 1 {
@@ -342,7 +342,7 @@ func TestPythonObjectListRecordsMaxItemsSinglePageAndPageBound(t *testing.T) {
 	})
 	t.Run("negative controls fail before HTTP", func(t *testing.T) {
 		api, calls := pythonObjectAPI(t, reply)
-		for _, option := range []objects.RecordListOption{request.MaxItems(-1), objects.WithRecordListMaxPages(-1), request.Limit(-1), nil} {
+		for _, option := range []objects.RecordListOption{request.MaxItems(-1), request.Custom(func(c *objects.RecordListOpts) error { c.MaxPages = -1; return nil }), request.Limit(-1), nil} {
 			result := pythonObjectListCollect(api, "box", option)
 			if !errors.Is(result.err, resource.ErrInvalidOption) || result.records[0] != nil {
 				t.Fatal(result)
@@ -446,7 +446,7 @@ func TestPythonObjectCloudListObjectsPrefixAndCountPaging(t *testing.T) {
 			})
 			var options []objects.RecordListOption
 			if tc.prefix != "" {
-				options = append(options, objects.WithRecordListPrefix(tc.prefix))
+				options = append(options, request.Custom(func(c *objects.RecordListOpts) error { v := tc.prefix; c.Prefix = &v; return nil }))
 			}
 			result := pythonObjectListCollect(api, "box", options...)
 			if result.err != nil || !pythonObjectListEqual(pythonObjectListNames(t, result.records), []string{`"alpha"`, `"beta"`}) {
@@ -699,7 +699,7 @@ func TestPythonObjectListRecordsCleanRetriesPreserveRouteHeadersAndLiveToken(t *
 			case "backoff":
 				client.ProviderClient.RetryBackoffFunc = func(context.Context, *gophercloud.ErrUnexpectedResponseCode, error, uint) error { renew(); return nil }
 			}
-			result := pythonObjectListCollect(objects.New(client), "box", objects.WithRecordListPrefix("owned"), request.Microversion("1.2"), objects.WithRecordListHeaders(map[string]string{"Accept": "custom/json", "If-Match": "owned"}))
+			result := pythonObjectListCollect(objects.New(client), "box", request.Custom(func(c *objects.RecordListOpts) error { v := "owned"; c.Prefix = &v; return nil }), request.Microversion("1.2"), objects.WithRecordListHeaders(map[string]string{"Accept": "custom/json", "If-Match": "owned"}))
 			if result.err != nil || requests != 2 || hooks != 1 || len(result.records) != 1 || string(result.records[0].Resource.Body["name"]) != `"result"` {
 				t.Fatal(result.err, requests, hooks, result.records)
 			}

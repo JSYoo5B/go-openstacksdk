@@ -15,6 +15,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/image"
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -179,7 +180,7 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 	}
 	uploaded.Record.Resource.Body["id"] = json.RawMessage(`"public decoy"`)
 	uploaded.Record.Wire.Body["id"] = json.RawMessage(`"wire decoy"`)
-	downloaded, err := conn.DownloadImageRecord(context.Background(), image.ImageRecordDownloadRequest{Record: uploaded.Record}, image.WithImageRecordDownloadStorePreferences("fast", "fast", " a,b "), image.WithImageRecordDownloadChunkSize(2))
+	downloaded, err := conn.DownloadImageRecord(context.Background(), image.ImageRecordDownloadRequest{Record: uploaded.Record}, image.WithImageRecordDownloadStorePreferences("fast", "fast", " a,b "), request.Custom(func(c *image.ImageRecordDownloadOpts) error { v := 2; c.ChunkSize = &v; return nil }))
 	if err != nil || downloaded == nil || downloaded.Record == nil || downloaded.Metadata == nil || downloaded.Downloaded == nil || downloaded.Metadata.StatusCode != 203 || downloaded.Downloaded.StatusCode != 206 || string(downloaded.Downloaded.Body) != "abc" || downloaded.BytesWritten != 3 || downloaded.Checksum == nil || !downloaded.Checksum.Verified || calls != 4 || reader.Len() != 4 || string(downloaded.Record.Resource.Body["id"]) != `"retarget /한글:%?"` || downloaded.Record.Header.Get("X-Proof") != "phase-2" || downloaded.Downloaded.Header.Get("X-Proof") != "phase-3" {
 		t.Fatal(downloaded, err, calls, reader.Len())
 	}
@@ -214,7 +215,7 @@ func TestConnectionOwnedImageDownloadSharesSourceAndRetainsBorrowedDataThroughIm
 	if staged == nil || staged.Record == nil || calls != 8 || reader.Len() != 0 || string(staged.Record.Resource.Body["name"]) != `"staged"` {
 		t.Fatal(staged, calls, reader.Len())
 	}
-	streamed, err := conn.DownloadImageRecord(context.Background(), image.ImageRecordDownloadRequest{Record: staged.Record}, image.WithImageRecordDownloadStorePreferences("fast", "fast", " a,b "), image.WithImageRecordDownloadStream(true))
+	streamed, err := conn.DownloadImageRecord(context.Background(), image.ImageRecordDownloadRequest{Record: staged.Record}, image.WithImageRecordDownloadStorePreferences("fast", "fast", " a,b "), request.Custom(func(c *image.ImageRecordDownloadOpts) error { c.Stream = true; return nil }))
 	if err != nil || streamed == nil || streamed.Downloaded.Stream == nil || calls != 10 || streamed.Checksum == nil || streamed.Checksum.Complete || streamed.BytesWritten != 0 || string(streamed.Downloaded.ContentMD5) != `"`+checksum+`"` || streamed.Downloaded.Header.Get("Content-MD5") != "binary decoy" || streamed.Downloaded.CompatibilityHeader.Get("Content-MD5") != checksum {
 		t.Fatal(streamed, err, calls)
 	}

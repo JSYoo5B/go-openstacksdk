@@ -18,7 +18,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers.WithUpdateRecordBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Scalar ID/no recognized attrs performs no PUT/GET and keeps seed without HTTP receipt; id itself is not dirty.
   Tests: `keymanager/v1/containers/python_update_record_test.go:TestPythonContainerUpdateRecordNoopSeedHasNoReceiptOrPUT`.
@@ -53,7 +53,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - String-ID Order commit removes id from dirty state; unknown-only/no attributes makes no HTTP or receipt, while known null/false attributes send one unwrapped PUT. Alias option and response member order use the last canonical value; meta request JSON stays raw and descriptor view is projected separately.
   Tests: `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordNoop`, `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordDirtyAliasesAndOwnedReceipt`, `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordAliasPriority`.
@@ -82,7 +82,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets.WithUpdateRecordBasePath`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - secrets.API.Update sends PUT secrets/{id} with the raw payload as body and UpdateOpts.ContentType as the Content-Type header, accepts only 204 and turns 200 into an error.
   Tests: `keymanager/v1/secrets/python_parity_test.go:TestPythonSecretUpdateSendsRawPayload`.

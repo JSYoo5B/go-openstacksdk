@@ -67,12 +67,12 @@ func TestPythonCinderGroupReplicationPinnedSourceWireKeepsSchemaRejection(t *tes
 			want := `{"enable_replication":null}`
 			switch action {
 			case "enable":
-				result, err = api.EnableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationPinnedSourceWire(true))
+				result, err = api.EnableReplicationRecord(context.Background(), "id", request.Custom(func(c *groups.RecordReplicationOpts) error { c.PinnedSourceWire = true; return nil }))
 			case "disable":
-				result, err = api.DisableReplicationRecord(context.Background(), "id", groups.WithRecordReplicationPinnedSourceWire(true))
+				result, err = api.DisableReplicationRecord(context.Background(), "id", request.Custom(func(c *groups.RecordReplicationOpts) error { c.PinnedSourceWire = true; return nil }))
 				want = `{"disable_replication":null}`
 			case "failover":
-				result, err = api.FailoverReplicationRecord(context.Background(), "id", groups.WithRecordFailoverPinnedSourceWire(true))
+				result, err = api.FailoverReplicationRecord(context.Background(), "id", request.Custom(func(c *groups.RecordFailoverOpts) error { c.PinnedSourceWire = true; return nil }))
 				want = `{"modify_body_for_action":{"allow_attached_volume":false,"secondary_backend_id":null}}`
 			}
 			var native gophercloud.ErrUnexpectedResponseCode
@@ -91,13 +91,13 @@ func TestPythonCinderGroupReplicationFailoverFalseNullEmptyAndOptsReset(t *testi
 		want := `{"failover_replication":{"allow_attached_volume":false,"secondary_backend_id":null}}`
 		switch variant {
 		case "explicitfalse_empty":
-			options = append(options, groups.WithRecordFailoverAllowedAttachedVolume(false), groups.WithRecordFailoverSecondaryBackendID(""))
+			options = append(options, request.Custom(func(c *groups.RecordFailoverOpts) error { v := false; c.AllowedAttachedVolume = &v; return nil }), request.Custom(func(c *groups.RecordFailoverOpts) error { v := ""; c.SecondaryBackendID = &v; return nil }))
 			want = `{"failover_replication":{"allow_attached_volume":false,"secondary_backend_id":""}}`
 		case "true_backend":
-			options = append(options, groups.WithRecordFailoverAllowedAttachedVolume(true), groups.WithRecordFailoverSecondaryBackendID("backend/% snow"))
+			options = append(options, request.Custom(func(c *groups.RecordFailoverOpts) error { v := true; c.AllowedAttachedVolume = &v; return nil }), request.Custom(func(c *groups.RecordFailoverOpts) error { v := "backend/% snow"; c.SecondaryBackendID = &v; return nil }))
 			want = `{"failover_replication":{"allow_attached_volume":true,"secondary_backend_id":"backend/% snow"}}`
 		case "resetnull":
-			options = append(options, groups.WithRecordFailoverSecondaryBackendID("old"), groups.WithRecordFailoverOpts(groups.RecordFailoverOpts{}))
+			options = append(options, request.Custom(func(c *groups.RecordFailoverOpts) error { v := "old"; c.SecondaryBackendID = &v; return nil }), groups.WithRecordFailoverOpts(groups.RecordFailoverOpts{}))
 		}
 		value, err := api.FailoverReplicationRecord(context.Background(), "id", options...)
 		if err != nil || value == nil || value.Reference != "id" || value.StatusCode != 202 || string(value.Envelope) != "opaque-ack" || calls.Len() != 1 || calls.Calls()[0].Header.Get("OpenStack-API-Version") != "volume 3.90" {
@@ -372,7 +372,11 @@ func TestPythonCinderGroupReplicationPreflightOptionsAndOriginalCauses(t *testin
 			return e
 		},
 		func(api *groups.API) error {
-			_, e := api.FailoverReplicationRecord(context.Background(), "id", groups.WithRecordFailoverSecondaryBackendID(string([]byte{0xff})))
+			_, e := api.FailoverReplicationRecord(context.Background(), "id", request.Custom(func(c *groups.RecordFailoverOpts) error {
+				v := string([]byte{0xff})
+				c.SecondaryBackendID = &v
+				return nil
+			}))
 			return e
 		},
 	} {
@@ -459,7 +463,7 @@ func TestPythonCinderGroupReplicationFaulty401StopsCallbacksAndClean401RenewsTok
 	})
 	renewals := 0
 	api.RawClient().ReauthFunc = func(context.Context) error { renewals++; api.RawClient().SetToken("renewed"); return nil }
-	value, err := api.FailoverReplicationRecord(context.Background(), "id", groups.WithRecordFailoverSecondaryBackendID("backend"))
+	value, err := api.FailoverReplicationRecord(context.Background(), "id", request.Custom(func(c *groups.RecordFailoverOpts) error { v := "backend"; c.SecondaryBackendID = &v; return nil }))
 	if err != nil || value == nil || value.StatusCode != 202 || calls.Len() != 2 || renewals != 1 || calls.Calls()[1].Header.Get("X-Auth-Token") != "renewed" {
 		t.Fatal(value, err, calls.Calls(), renewals)
 	}

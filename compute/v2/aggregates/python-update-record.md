@@ -14,8 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordName`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/aggregates.WithUpdateRecordAvailabilityZone`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/request.Null`

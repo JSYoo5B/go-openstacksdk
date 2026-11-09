@@ -21,9 +21,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - The fixed-container listing preserves escaped opaque container names, marker query, object metadata and delimiter subdirectory rows without HEAD; subdirectory rows count toward the raw cap.
@@ -68,9 +67,8 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListHeaders`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListPrefix`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithRecordListMaxPages`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
 - Pinned Object MRO projection owns six Body, 28 Header, updated_at aka and null SDK location; ordered canonical/wire aliases, alternate name ID, untyped RawMessage metadata, container URI from call, unknowns and subdir retained in Wire, actual page receipt cloned independently. No object HEAD or synthetic metadata observation.
@@ -133,6 +131,7 @@ import (
     "os"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects"
     "github.com/JSYoo5B/go-openstacksdk/resource"
@@ -144,7 +143,7 @@ func run(ctx context.Context, cloud, container string, prefix *string) error {
     swift, err := conn.ObjectStorageV1(ctx)
     if err != nil { return err }
     var options []objects.RecordListOption
-    if prefix != nil { options = append(options, objects.WithRecordListPrefix(*prefix)) }
+    if prefix != nil { options = append(options, request.Custom(func(c *objects.RecordListOpts) error { v := *prefix; c.Prefix = &v; return nil })) }
     rows := make([]*resource.RawResource, 0)
     for record, err := range swift.Objects.ListRecords(ctx, container, options...) {
         if err != nil {
