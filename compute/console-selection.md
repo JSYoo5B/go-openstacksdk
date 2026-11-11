@@ -13,7 +13,6 @@ Status: `go_mapping`.
 Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.CreateConsole`
-- `github.com/JSYoo5B/go-openstacksdk/compute.WithConsoleProtocol`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - CreateConsole first reads the captured endpoint version path without body/query/microversion headers, preserving the selected live token, source header and reverse-proxy prefix. Nova row eligibility requires a permitted status and usable self-link; missing ID/status, unknown or experimental status (even with malformed ID), or no self-link is excluded without following the link. Catalog v2.1 selects an exact eligible v2.1 API row rather than v2.0; flat/version/versions/versions.values documents use the common engine. Clean404/405 allows only the finite root attempt and valid accepted201/300 discovery is parsed.
@@ -60,6 +59,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/compute"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -89,7 +89,7 @@ func run(ctx context.Context, serverID, kind, protocol string) error {
     var options []compute.ConsoleOption
     flag.Visit(func(f *flag.Flag) {
         if f.Name == "protocol" {
-            options = append(options, compute.WithConsoleProtocol(protocol))
+            options = append(options, compute.ConsoleOption(func(c *request.Config[compute.ConsoleOpts]) error { c.Options.Protocol = request.Present(protocol); return nil }))
         }
     })
     console, err := service.CreateConsole(ctx, serverID, kind, options...)

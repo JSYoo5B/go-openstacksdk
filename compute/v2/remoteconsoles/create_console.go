@@ -32,7 +32,6 @@ type ConsoleCreateOpts struct {
 }
 
 // ConsoleCreateOption is one option of CreateConsole: WithConsoleCreateOptions,
-// WithConsoleCreateProtocol, WithConsoleCreateType, WithConsoleCreateURL,
 // request.Field, request.Header or request.Custom over
 // *request.Config[ConsoleCreateOpts] (for example to set Protocol, Type or
 // URL). Other shared calls fail with resource.ErrInvalidOption before HTTP.
@@ -45,18 +44,6 @@ var consoleCreateCalls = calls.Spec[request.Config[ConsoleCreateOpts]]{
 
 func WithConsoleCreateOptions(value ConsoleCreateOpts) ConsoleCreateOption {
 	return request.Custom(func(config *request.Config[ConsoleCreateOpts]) error { config.Options = value; return nil })
-}
-func WithConsoleCreateProtocol(value string) ConsoleCreateOption {
-	return request.Custom(func(c *request.Config[ConsoleCreateOpts]) error {
-		c.Options.Protocol = request.Present(value)
-		return nil
-	})
-}
-func WithConsoleCreateType(value string) ConsoleCreateOption {
-	return request.Custom(func(c *request.Config[ConsoleCreateOpts]) error { c.Options.Type = request.Present(value); return nil })
-}
-func WithConsoleCreateURL(value string) ConsoleCreateOption {
-	return request.Custom(func(c *request.Config[ConsoleCreateOpts]) error { c.Options.URL = request.Present(value); return nil })
 }
 
 // ConsoleRecord separates seeded attributes from the actual selected response

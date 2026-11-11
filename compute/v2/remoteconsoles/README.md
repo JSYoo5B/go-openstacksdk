@@ -14,10 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.API.CreateConsole`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateProtocol`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateType`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURL`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 

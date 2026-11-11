@@ -30,10 +30,6 @@ type ConsoleOpts struct {
 
 type ConsoleOption = request.Option[ConsoleOpts]
 
-func WithConsoleProtocol(value string) ConsoleOption {
-	return func(c *request.Config[ConsoleOpts]) error { c.Options.Protocol = request.Present(value); return nil }
-}
-
 // CreateConsole selects the modern or legacy executor from the endpoint's
 // advertised range and the selected version, before making a console request.
 // A failed console request is never retried through the other API. Returned
@@ -167,7 +163,8 @@ func (s *Service) CreateConsole(ctx context.Context, serverID, consoleType strin
 		protocol = request.Null[string]()
 	}
 	created, err := remoteconsoles.New(&client).CreateConsole(operationCtx, serverID,
-		remoteconsoles.WithConsoleCreateType(consoleType), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+		request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present(consoleType)
 			c.Options.Protocol = protocol
 			return nil
 		}))

@@ -27,34 +27,70 @@ func TestComputeRemoteConsoleRequestDefaultsDerivationAndSeedOwnership(t *testin
 		options                         []remoteconsoles.ConsoleCreateOption
 	}{
 		{"empty defaults", `{"remote_console":{}}`, `null`, `null`, `null`, nil},
-		{"null protocol", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc"), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+		{"null protocol", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("novnc")
+			return nil
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 			c.Options.Protocol = request.Null[string]()
 			return nil
 		})}},
-		{"empty protocol seed", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `""`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc"), remoteconsoles.WithConsoleCreateProtocol("")}},
-		{"unknown type", `{"remote_console":{"protocol":null,"type":"vendor-console"}}`, `null`, `"vendor-console"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("vendor-console")}},
-		{"explicit protocol preserved", `{"remote_console":{"protocol":"inconsistent","type":"novnc"}}`, `"inconsistent"`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateProtocol("inconsistent"), remoteconsoles.WithConsoleCreateType("novnc")}},
+		{"empty protocol seed", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `""`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("novnc")
+			return nil
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = request.Present("")
+			return nil
+		})}},
+		{"unknown type", `{"remote_console":{"protocol":null,"type":"vendor-console"}}`, `null`, `"vendor-console"`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("vendor-console")
+			return nil
+		})}},
+		{"explicit protocol preserved", `{"remote_console":{"protocol":"inconsistent","type":"novnc"}}`, `"inconsistent"`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = request.Present("inconsistent")
+			return nil
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("novnc")
+			return nil
+		})}},
 		{"null type no derivation", `{"remote_console":{"protocol":"","type":null}}`, `""`, `null`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 			c.Options.Type = request.Null[string]()
 			return nil
-		}), remoteconsoles.WithConsoleCreateProtocol("")}},
-		{"empty type no derivation", `{"remote_console":{"type":""}}`, `null`, `""`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("")}},
-		{"URL body attribute", `{"remote_console":{"url":"passive://seed"}}`, `null`, `null`, `"passive://seed"`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateURL("passive://seed")}},
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = request.Present("")
+			return nil
+		})}},
+		{"empty type no derivation", `{"remote_console":{"type":""}}`, `null`, `""`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("")
+			return nil
+		})}},
+		{"URL body attribute", `{"remote_console":{"url":"passive://seed"}}`, `null`, `null`, `"passive://seed"`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.URL = request.Present("passive://seed")
+			return nil
+		})}},
 		{"null URL", `{"remote_console":{"url":null}}`, `null`, `null`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 			c.Options.URL = request.Null[string]()
 			return nil
 		})}},
-		{"unset restores omission", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateProtocol("discarded"), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+		{"unset restores omission", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `null`, `"novnc"`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = request.Present("discarded")
+			return nil
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 			c.Options.Protocol = request.Optional[string]{}
 			return nil
-		}), remoteconsoles.WithConsoleCreateType("novnc")}},
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("novnc")
+			return nil
+		})}},
 	}
 	for kind, protocol := range map[string]string{"novnc": "vnc", "xvpvnc": "vnc", "spice-html5": "spice", "spice-direct": "spice", "rdp-html5": "rdp", "serial": "serial", "webmks": "mks"} {
 		tests = append(tests, struct {
 			name, body, protocol, kind, url string
 			options                         []remoteconsoles.ConsoleCreateOption
 		}{
-			"derive " + kind, `{"remote_console":{"protocol":"` + protocol + `","type":"` + kind + `"}}`, `null`, `"` + kind + `"`, `null`, []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType(kind)},
+			"derive " + kind, `{"remote_console":{"protocol":"` + protocol + `","type":"` + kind + `"}}`, `null`, `"` + kind + `"`, `null`, []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+				c.Options.Type = request.Present(kind)
+				return nil
+			})},
 		})
 	}
 	for _, tc := range tests {
@@ -145,19 +181,64 @@ func TestComputeRemoteConsoleWinningTypeSelectedVersionGates(t *testing.T) {
 		options       []remoteconsoles.ConsoleCreateOption
 		allowed       bool
 	}{
-		{"webmks unselected", "", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks")}, false},
-		{"webmks below", "2.7", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks")}, false},
-		{"webmks boundary", "2.8", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks")}, true},
-		{"spice-direct below explicit protocol", "2.98", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct"), remoteconsoles.WithConsoleCreateProtocol("literal")}, false},
-		{"spice-direct boundary", "2.99", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct")}, true},
-		{"numeric 2.100", "2.100", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct")}, true},
-		{"finite major latest", "2.latest", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct")}, true},
-		{"symbolic latest cannot prove gate", "latest", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks")}, false},
-		{"malformed selected gate", "2.invalid", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks")}, false},
-		{"no local 2.6 prerequisite", "2.5", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("novnc")}, true},
-		{"winning type only", "2.5", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks"), remoteconsoles.WithConsoleCreateType("novnc")}, true},
-		{"bulk clears earlier gate", "2.7", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("webmks"), remoteconsoles.WithConsoleCreateOptions(remoteconsoles.ConsoleCreateOpts{})}, true},
-		{"null clears earlier gate", "", []remoteconsoles.ConsoleCreateOption{remoteconsoles.WithConsoleCreateType("spice-direct"), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+		{"webmks unselected", "", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("webmks")
+			return nil
+		})}, false},
+		{"webmks below", "2.7", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("webmks")
+			return nil
+		})}, false},
+		{"webmks boundary", "2.8", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("webmks")
+			return nil
+		})}, true},
+		{"spice-direct below explicit protocol", "2.98", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("spice-direct")
+			return nil
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Protocol = request.Present("literal")
+			return nil
+		})}, false},
+		{"spice-direct boundary", "2.99", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("spice-direct")
+			return nil
+		})}, true},
+		{"numeric 2.100", "2.100", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("spice-direct")
+			return nil
+		})}, true},
+		{"finite major latest", "2.latest", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("spice-direct")
+			return nil
+		})}, true},
+		{"symbolic latest cannot prove gate", "latest", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("webmks")
+			return nil
+		})}, false},
+		{"malformed selected gate", "2.invalid", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("webmks")
+			return nil
+		})}, false},
+		{"no local 2.6 prerequisite", "2.5", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("novnc")
+			return nil
+		})}, true},
+		{"winning type only", "2.5", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("webmks")
+			return nil
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("novnc")
+			return nil
+		})}, true},
+		{"bulk clears earlier gate", "2.7", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("webmks")
+			return nil
+		}), remoteconsoles.WithConsoleCreateOptions(remoteconsoles.ConsoleCreateOpts{})}, true},
+		{"null clears earlier gate", "", []remoteconsoles.ConsoleCreateOption{request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+			c.Options.Type = request.Present("spice-direct")
+			return nil
+		}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
 			c.Options.Type = request.Null[string]()
 			return nil
 		})}, true},
@@ -242,7 +323,16 @@ func TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility(t *tes
 				retries.Add(1)
 				return err
 			}
-			value, err := remoteconsoles.New(flavorIdentityClient(cloud)).CreateConsole(context.Background(), "server-id", remoteconsoles.WithConsoleCreateProtocol("chosen"), remoteconsoles.WithConsoleCreateType("novnc"), remoteconsoles.WithConsoleCreateURL("seed"))
+			value, err := remoteconsoles.New(flavorIdentityClient(cloud)).CreateConsole(context.Background(), "server-id", request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+				c.Options.Protocol = request.Present("chosen")
+				return nil
+			}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+				c.Options.Type = request.Present("novnc")
+				return nil
+			}), request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+				c.Options.URL = request.Present("seed")
+				return nil
+			}))
 			if calls.Load() != 1 || (err != nil) != tc.failure {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -433,7 +523,10 @@ func TestComputeRemoteConsoleResponseEvidenceSourceAndNativeCompatibility(t *tes
 				retries.Add(1)
 				return err
 			}
-			value, err := remoteconsoles.New(client).CreateConsole(context.Background(), "server-id", remoteconsoles.WithConsoleCreateType("novnc"))
+			value, err := remoteconsoles.New(client).CreateConsole(context.Background(), "server-id", request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error {
+				c.Options.Type = request.Present("novnc")
+				return nil
+			}))
 			var proof *resource.ResponseError
 			if value == nil || value.Resource != nil || value.StatusCode != 201 || string(value.Envelope) != body || value.Header.Get("X-Console-Proof") != mode || !errors.As(err, &proof) || proof.StatusCode != 201 || string(proof.Body) != body || proof.Header.Get("X-Console-Proof") != mode || calls.Load() != 1 || retries.Load() != 0 {
 				t.Fatal("accepted failure lost partial receipt/replayed", value, err, proof, calls.Load(), retries.Load())

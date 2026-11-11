@@ -155,9 +155,18 @@ func TestComputeConsoleCompositionProtocolTypeAndLocationProjection(t *testing.T
 		modern, unsupported                                            bool
 	}{
 		{"default null protocol view", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `null`, nil, true, false},
-		{"explicit protocol preserved", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"custom","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `"custom"`, []compute.ConsoleOption{compute.WithConsoleProtocol("custom")}, true, false},
-		{"empty protocol seed survives derived request", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `""`, []compute.ConsoleOption{compute.WithConsoleProtocol("")}, true, false},
-		{"unset restores explicit null facade default", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `null`, []compute.ConsoleOption{compute.WithConsoleProtocol("discarded"), func(c *request.Config[compute.ConsoleOpts]) error {
+		{"explicit protocol preserved", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"custom","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `"custom"`, []compute.ConsoleOption{compute.ConsoleOption(func(c *request.Config[compute.ConsoleOpts]) error {
+			c.Options.Protocol = request.Present("custom")
+			return nil
+		})}, true, false},
+		{"empty protocol seed survives derived request", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `""`, []compute.ConsoleOption{compute.ConsoleOption(func(c *request.Config[compute.ConsoleOpts]) error {
+			c.Options.Protocol = request.Present("")
+			return nil
+		})}, true, false},
+		{"unset restores explicit null facade default", "2.6", "2.100", "novnc", `{"remote_console":{"protocol":"vnc","type":"novnc"}}`, `{"remote_console":{"url":"actual"}}`, `null`, []compute.ConsoleOption{compute.ConsoleOption(func(c *request.Config[compute.ConsoleOpts]) error {
+			c.Options.Protocol = request.Present("discarded")
+			return nil
+		}), func(c *request.Config[compute.ConsoleOpts]) error {
 			c.Options.Protocol = request.Optional[string]{}
 			return nil
 		}}, true, false},
@@ -167,7 +176,10 @@ func TestComputeConsoleCompositionProtocolTypeAndLocationProjection(t *testing.T
 		{"webmks supported boundary", "2.8", "2.8", "webmks", `{"remote_console":{"protocol":"mks","type":"webmks"}}`, `{"remote_console":{"url":"actual"}}`, `null`, nil, true, false},
 		{"spice-direct advertised below gate", "2.100", "2.98", "spice-direct", "", "", "", nil, true, true},
 		{"spice-direct supported boundary", "", "2.110", "spice-direct", `{"remote_console":{"protocol":"spice","type":"spice-direct"}}`, `{"remote_console":{"url":"actual"}}`, `null`, nil, true, false},
-		{"legacy ignores protocol", "2.5", "2.100", "serial", `{"os-getSerialConsole":{"type":"serial"}}`, `{"console":[null,17,{"vendor":9007199254740993}]}`, "", []compute.ConsoleOption{compute.WithConsoleProtocol("ignored")}, false, false},
+		{"legacy ignores protocol", "2.5", "2.100", "serial", `{"os-getSerialConsole":{"type":"serial"}}`, `{"console":[null,17,{"vendor":9007199254740993}]}`, "", []compute.ConsoleOption{compute.ConsoleOption(func(c *request.Config[compute.ConsoleOpts]) error {
+			c.Options.Protocol = request.Present("ignored")
+			return nil
+		})}, false, false},
 		{"legacy spice-direct has no modern gate", "2.5", "2.100", "spice-direct", `{"os-getSPICEConsole":{"type":"spice-direct"}}`, `{"console":null}`, "", nil, false, false},
 	} {
 		t.Run(tc.name, func(t *testing.T) {

@@ -14,10 +14,7 @@ Go API:
 
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.API.CreateConsole`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateProtocol`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateType`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/remoteconsoles.WithConsoleCreateURL`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 
@@ -162,7 +159,7 @@ func run(ctx context.Context, serverID, keyName, ownerID string, strict bool) er
         return err
     }
     console, err := service.RemoteConsoles.CreateConsole(ctx, serverID,
-        remoteconsoles.WithConsoleCreateType("novnc"))
+        request.Custom(func(c *request.Config[remoteconsoles.ConsoleCreateOpts]) error { c.Options.Type = request.Present("novnc"); return nil }))
     if console != nil {
         data, printErr := json.MarshalIndent(map[string]any{
             "resource": console.Resource,
