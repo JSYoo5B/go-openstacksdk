@@ -107,7 +107,7 @@ func TestInventoryExpandFalseBareAndPrivate(t *testing.T) {
 	if err != nil || bare.Hosts[0].Interfaces != nil || bare.Hosts[0].Hostvars != nil || len(log.snapshot()) != before+1 {
 		t.Fatalf("%+v %v %v", bare, err, log.snapshot()[before:])
 	}
-	private, err := inventory.SearchHosts(ctx, "web-1", sdk.WithInventoryExpand(false), sdk.WithInventoryPrivate(true),
+	private, err := inventory.SearchHosts(ctx, "web-1", sdk.WithInventoryExpand(false), func(c *sdk.InventoryOpts) error { c.Private = true; return nil },
 		sdk.WithInventoryFilters(json.RawMessage(`{"interface_ip":"10.0.0.7","access_ipv4":"10.0.0.7","public_v4":"8.8.4.4"}`)))
 	if err != nil || len(private.Hosts) != 1 {
 		t.Fatalf("%+v %v", private, err)

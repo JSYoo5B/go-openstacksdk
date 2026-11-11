@@ -241,7 +241,11 @@ func TestManilaAccessListControlsRecheckSourceAfterOptionsAndLookup(t *testing.T
 				if bindErr != nil {
 					t.Fatal(bindErr)
 				}
-				err = scope.Deny(context.Background(), "rule-id", shareaccessrules.WithUnrestrict(false))
+				err = scope.Deny(context.Background(), "rule-id", request.Custom(func(c *request.Config[shareaccessrules.DenyOpts]) error {
+					v := false
+					c.Options.Unrestrict = &v
+					return nil
+				}))
 			}
 			if !errors.Is(err, resource.ErrUnsupported) || calls.Load() != 1 {
 				t.Fatalf("post-lookup guard err=%v calls=%d", err, calls.Load())

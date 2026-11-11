@@ -8,7 +8,7 @@ patch-based update, listing, find, microversions).
 service, _ := conn.BareMetalV1(ctx)
 api := service.InspectionRulesAPI()
 created, err := api.Create(ctx, inspectionrules.CreateOpts{Conditions: c, Actions: a})
-for value, err := range api.List(ctx, inspectionrules.WithListDetail(true)) { _, _ = value, err }
+for value, err := range api.List(ctx, request.Custom(func(c *request.Config[inspectionrules.ListOpts]) error { c.Options.Detail = true; return nil })) { _, _ = value, err }
 deleted, err := api.Delete(ctx, created.UUID)
 ```
 

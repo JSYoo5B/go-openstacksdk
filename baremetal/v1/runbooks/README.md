@@ -8,7 +8,7 @@ patch-based update, listing, find, microversions).
 service, _ := conn.BareMetalV1(ctx)
 api := service.RunbooksAPI()
 created, err := api.Create(ctx, runbooks.CreateOpts{Name: "CUSTOM_X", Steps: steps})
-for value, err := range api.List(ctx, runbooks.WithListDetail(true)) { _, _ = value, err }
+for value, err := range api.List(ctx, request.Custom(func(c *request.Config[runbooks.ListOpts]) error { c.Options.Detail = true; return nil })) { _, _ = value, err }
 deleted, err := api.Delete(ctx, created.UUID)
 ```
 

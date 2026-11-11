@@ -129,11 +129,27 @@ func TestShareAccessScopeResolvesParentOnceAndPreservesModernResponse(t *testing
 	option := shareaccessrules.WithMetadata(metadata)
 	metadata["owner"] = "changed"
 	value, err = scope.Allow(ctx, shareaccessrules.AllowOpts{AccessType: "ip", AccessTo: "192.0.2.0/24"}, option,
-		shareaccessrules.WithAccessLevel("rw"), shareaccessrules.WithAccessLevel("ro"), shareaccessrules.WithLockVisibility(false), shareaccessrules.WithLockDeletion(true), shareaccessrules.WithLockReason("maintenance"), request.Field("vendor:enabled", false), request.Header("X-Vendor", "allow"))
+		request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error { c.Options.AccessLevel = "rw"; return nil }), request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error { c.Options.AccessLevel = "ro"; return nil }), request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error {
+			v := false
+			c.Options.LockVisibility = &v
+			return nil
+		}), request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error {
+			v := true
+			c.Options.LockDeletion = &v
+			return nil
+		}), request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error {
+			v := "maintenance"
+			c.Options.LockReason = &v
+			return nil
+		}), request.Field("vendor:enabled", false), request.Header("X-Vendor", "allow"))
 	if err != nil || value.ID != "rule-id" || value.ParentShareID != "share-id" || value.Header.Get("X-Request-Id") != "allow-request" {
 		t.Fatalf("allow=%+v err=%v", value, err)
 	}
-	if err := scope.Deny(ctx, "rule-id", shareaccessrules.WithUnrestrict(false), shareaccessrules.WithDenyField("vendor:enabled", false), request.Header("X-Vendor", "deny")); err != nil {
+	if err := scope.Deny(ctx, "rule-id", request.Custom(func(c *request.Config[shareaccessrules.DenyOpts]) error {
+		v := false
+		c.Options.Unrestrict = &v
+		return nil
+	}), shareaccessrules.WithDenyField("vendor:enabled", false), request.Header("X-Vendor", "deny")); err != nil {
 		t.Fatal(err)
 	}
 	if lookups.Load() != 1 || lists.Load() != 2 || actions.Load() != 2 || client.Microversion != "2.82" || client.Endpoint != cloud.Server.URL+shareAccessBase+"/" {
@@ -311,12 +327,28 @@ func TestShareAccessScopeChecksSelectedMicroversionIncludingExplicitFalse(t *tes
 		t.Fatal(err)
 	}
 	valid := shareaccessrules.AllowOpts{AccessType: "ip", AccessTo: "192.0.2.1"}
-	for _, option := range []shareaccessrules.AllowOption{shareaccessrules.WithLockVisibility(false), shareaccessrules.WithLockDeletion(false), shareaccessrules.WithLockReason("")} {
+	for _, option := range []shareaccessrules.AllowOption{request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error {
+		v := false
+		c.Options.LockVisibility = &v
+		return nil
+	}), request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error {
+		v := false
+		c.Options.LockDeletion = &v
+		return nil
+	}), request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error {
+		v := ""
+		c.Options.LockReason = &v
+		return nil
+	})} {
 		if _, err := scope.Allow(ctx, valid, option); !errors.Is(err, resource.ErrUnsupported) {
 			t.Fatal(err)
 		}
 	}
-	if err := scope.Deny(ctx, "rule-id", shareaccessrules.WithUnrestrict(false)); !errors.Is(err, resource.ErrUnsupported) {
+	if err := scope.Deny(ctx, "rule-id", request.Custom(func(c *request.Config[shareaccessrules.DenyOpts]) error {
+		v := false
+		c.Options.Unrestrict = &v
+		return nil
+	})); !errors.Is(err, resource.ErrUnsupported) {
 		t.Fatal(err)
 	}
 	if calls.Load() != 0 {
@@ -333,7 +365,11 @@ func TestShareAccessScopeChecksSelectedMicroversionIncludingExplicitFalse(t *tes
 			t.Fatalf("version=%s err=%v", version, err)
 		}
 		if version == "2.100" {
-			if _, err := scope.Allow(ctx, valid, shareaccessrules.WithLockVisibility(false)); err != nil || client.Microversion != version {
+			if _, err := scope.Allow(ctx, valid, request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error {
+				v := false
+				c.Options.LockVisibility = &v
+				return nil
+			})); err != nil || client.Microversion != version {
 				t.Fatal(err)
 			}
 		}

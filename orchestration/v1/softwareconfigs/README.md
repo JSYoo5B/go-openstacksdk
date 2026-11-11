@@ -8,7 +8,7 @@ SDK-owned. It corresponds to the pinned openstacksdk `create_software_config`,
 service, _ := conn.OrchestrationV1(ctx)
 api := service.SoftwareConfigs() // or softwareconfigs.New(client)
 config, err := api.Create(ctx, softwareconfigs.CreateOpts{Name: request.Present("boot")},
-    softwareconfigs.WithCreateGroup("script"),
+    request.Custom(func(c *request.Config[softwareconfigs.CreateOpts]) error { c.Options.Group = request.Present("script"); return nil }),
     softwareconfigs.WithCreateConfig("#!/bin/sh\necho hi\n"))
 got, err := api.Get(ctx, config.ID)
 for item, err := range api.List(ctx, request.Limit(50)) { ... }

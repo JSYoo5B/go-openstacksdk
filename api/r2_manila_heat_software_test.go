@@ -214,14 +214,29 @@ func TestR2ManilaHeatSoftwareDeploymentCreateAndUpdateSendOnlyChosenMembers(t *t
 		testcloud.JSON(w, 200, `{"software_deployment":{"id":"`+r2ManilaHeatDeploymentID+`","status":"COMPLETE","status_reason":null,"output_values":{},"updated_time":"t1"}}`)
 	})
 	api := softwaredeployments.New(cloud.Client("orchestration", "/heat/v1"))
-	created, err := api.Create(context.Background(), softwaredeployments.CreateOpts{}, softwaredeployments.WithCreateConfigID("cfg"), softwaredeployments.WithCreateServerID("srv"),
-		softwaredeployments.WithCreateAction("CREATE"), softwaredeployments.WithCreateStatus("IN_PROGRESS"),
+	created, err := api.Create(context.Background(), softwaredeployments.CreateOpts{}, request.Custom(func(c *request.Config[softwaredeployments.CreateOpts]) error {
+		c.Options.ConfigID = request.Present("cfg")
+		return nil
+	}), request.Custom(func(c *request.Config[softwaredeployments.CreateOpts]) error {
+		c.Options.ServerID = request.Present("srv")
+		return nil
+	}),
+		request.Custom(func(c *request.Config[softwaredeployments.CreateOpts]) error {
+			c.Options.Action = request.Present("CREATE")
+			return nil
+		}), request.Custom(func(c *request.Config[softwaredeployments.CreateOpts]) error {
+			c.Options.Status = request.Present("IN_PROGRESS")
+			return nil
+		}),
 		softwaredeployments.WithCreateInputValues(map[string]any{"n": json.Number("9007199254740993")}))
 	if err != nil || created.ID != r2ManilaHeatDeploymentID || string(created.InputValues) != `{"n":9007199254740993}` || string(created.Body["output_values"]) != "null" || created.UpdatedTime != "" || created.StackUserProjectID != "p" {
 		t.Fatalf("created=%+v err=%v", created, err)
 	}
 	updated, err := api.Update(context.Background(), created.ID, softwaredeployments.UpdateOpts{StatusReason: request.Null[string]()},
-		softwaredeployments.WithUpdateStatus("COMPLETE"), softwaredeployments.WithUpdateOutputValues(map[string]any{}))
+		request.Custom(func(c *request.Config[softwaredeployments.UpdateOpts]) error {
+			c.Options.Status = request.Present("COMPLETE")
+			return nil
+		}), softwaredeployments.WithUpdateOutputValues(map[string]any{}))
 	if err != nil || updated.Status != "COMPLETE" || string(updated.Body["status_reason"]) != "null" || updated.UpdatedTime != "t1" || puts.Load() != 1 || posts.Load() != 1 {
 		t.Fatalf("updated=%+v err=%v", updated, err)
 	}
@@ -241,8 +256,14 @@ func TestR2ManilaHeatSoftwareDeploymentUpdateRejectsEmptyAndProtectedBeforeHTTP(
 		{r2ManilaHeatDeploymentID, nil},
 		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{request.Field("id", "x")}},
 		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{request.Field("updated_time", "x")}},
-		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{softwaredeployments.WithUpdateStatus("a"), request.Field("status", "b")}},
-		{"a/b", []softwaredeployments.UpdateOption{softwaredeployments.WithUpdateStatus("a")}},
+		{r2ManilaHeatDeploymentID, []softwaredeployments.UpdateOption{request.Custom(func(c *request.Config[softwaredeployments.UpdateOpts]) error {
+			c.Options.Status = request.Present("a")
+			return nil
+		}), request.Field("status", "b")}},
+		{"a/b", []softwaredeployments.UpdateOption{request.Custom(func(c *request.Config[softwaredeployments.UpdateOpts]) error {
+			c.Options.Status = request.Present("a")
+			return nil
+		})}},
 	}
 	for i, c := range cases {
 		if _, err := api.Update(ctx, c.id, softwaredeployments.UpdateOpts{}, c.options...); !errors.Is(err, resource.ErrInvalidOption) {
@@ -251,7 +272,10 @@ func TestR2ManilaHeatSoftwareDeploymentUpdateRejectsEmptyAndProtectedBeforeHTTP(
 	}
 	cancelled, cancel := context.WithCancel(ctx)
 	cancel()
-	if _, err := api.Update(cancelled, r2ManilaHeatDeploymentID, softwaredeployments.UpdateOpts{}, softwaredeployments.WithUpdateStatus("a")); !errors.Is(err, context.Canceled) || requests.Load() != 0 {
+	if _, err := api.Update(cancelled, r2ManilaHeatDeploymentID, softwaredeployments.UpdateOpts{}, request.Custom(func(c *request.Config[softwaredeployments.UpdateOpts]) error {
+		c.Options.Status = request.Present("a")
+		return nil
+	})); !errors.Is(err, context.Canceled) || requests.Load() != 0 {
 		t.Fatalf("err=%v requests=%d", err, requests.Load())
 	}
 }
@@ -264,7 +288,10 @@ func TestR2ManilaHeatSoftwareDeploymentUpdateFailureIsNotReplayed(t *testing.T) 
 		requests.Add(1)
 		testcloud.JSON(w, 500, `{"error":"boom"}`)
 	})
-	_, err := softwaredeployments.New(cloud.Client("orchestration", "/heat/v1")).Update(context.Background(), r2ManilaHeatDeploymentID, softwaredeployments.UpdateOpts{}, softwaredeployments.WithUpdateStatus("a"))
+	_, err := softwaredeployments.New(cloud.Client("orchestration", "/heat/v1")).Update(context.Background(), r2ManilaHeatDeploymentID, softwaredeployments.UpdateOpts{}, request.Custom(func(c *request.Config[softwaredeployments.UpdateOpts]) error {
+		c.Options.Status = request.Present("a")
+		return nil
+	}))
 	if err == nil || requests.Load() != 1 {
 		t.Fatalf("err=%v requests=%d", err, requests.Load())
 	}
@@ -287,11 +314,19 @@ func TestR2ManilaHeatSoftwareDeploymentGetDeleteListServerFilter(t *testing.T) {
 	})
 	cloud.Mux.HandleFunc("/heat/v1/software_deployments/gone", func(w http.ResponseWriter, r *http.Request) { testcloud.JSON(w, 404, `{}`) })
 	api := softwaredeployments.New(cloud.Client("orchestration", "/heat/v1"))
-	rows, err := api.All(context.Background(), softwaredeployments.WithListServerID("srv"))
+	rows, err := api.All(context.Background(), request.Custom(func(c *request.Config[softwaredeployments.ListOpts]) error {
+		v := "srv"
+		c.Options.ServerID = &v
+		return nil
+	}))
 	if err != nil || len(rows) != 1 || len(queries) != 1 || queries[0] != "server_id=srv" {
 		t.Fatalf("rows=%v err=%v queries=%v", rows, err, queries)
 	}
-	for _, option := range []softwaredeployments.ListOption{softwaredeployments.WithListServerID(""), request.Query("server_id", "x")} {
+	for _, option := range []softwaredeployments.ListOption{request.Custom(func(c *request.Config[softwaredeployments.ListOpts]) error {
+		v := ""
+		c.Options.ServerID = &v
+		return nil
+	}), request.Query("server_id", "x")} {
 		if _, err := api.All(context.Background(), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
 		}

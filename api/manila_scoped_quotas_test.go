@@ -11,6 +11,7 @@ import (
 	"testing"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets"
 	"github.com/gophercloud/gophercloud/v2"
@@ -88,7 +89,7 @@ func TestManilaScopedQuotaIDsFixEveryOperationAndResponseTarget(t *testing.T) {
 				t.Fatalf("detail=%+v err=%v", usage, err)
 			}
 			zero := int64(0)
-			value, err = update(context.Background(), quotasets.UpdateOpts{Shares: &zero}, quotasets.WithUpdateForce(false))
+			value, err = update(context.Background(), quotasets.UpdateOpts{Shares: &zero}, request.Custom(func(c *request.Config[quotasets.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }))
 			if err != nil || *value.Shares != 0 || selector == "user_id" && value.UserID != id || selector == "share_type" && value.ShareTypeID != id {
 				t.Fatalf("updated=%+v err=%v", value, err)
 			}

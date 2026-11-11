@@ -524,14 +524,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerByID`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetServer`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk.CloudServerResultView`
 
 - FindRecord reproduces the find_server(details=True) lookup that get_server performs before expansion.
   Tests: `compute/v2/python_parity_test.go:TestPythonCloudServerLookupHelpers`.
 - The deprecated filters branch maps to SearchServerRecords (local filters over a complete list, bare, one match required by the caller); expansion of found servers shares GetServerByID's tested ExpandServerInterfaces path.
   Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
-- GetServer finds with FindRecord forcing details=True (a 404 identity falls back to the detailed list; a missing server is nil), then applies the interface expansion by default, the hostvars with WithCloudServerDetailed and none with WithCloudServerBare. With deprecated filters it lists bare, selects locally, expands the single match, returns nil for none, AmbiguousError for several and rejects a JMESPath value.
+- GetServer finds with FindRecord forcing details=True (a 404 identity falls back to the detailed list; a missing server is nil), then applies the interface expansion by default, the hostvars with CloudServerReadOpts.Detailed and none with CloudServerReadOpts.Bare. With deprecated filters it lists bare, selects locally, expands the single match, returns nil for none, AmbiguousError for several and rejects a JMESPath value.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands`.
 
 Python/Go differences:
@@ -551,13 +551,12 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute.Service.ExpandServerInterfaces`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.GetServerByID`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ExpandServerInterfaces`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerAddressOptions`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
 
 - GetServerByID returns nil for a 404, a server expanded with ExpandServerInterfaces by default, skips expansion with the bare option and returns other failures.
   Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound`.
-- GetServerByID rejects WithCloudServerDetailed before HTTP because get_server_by_id only adds interfaces.
+- GetServerByID rejects CloudServerReadOpts.Detailed before HTTP because get_server_by_id only adds interfaces.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerGetServerFindsWithDetailsAndExpands`.
 
 Python/Go differences:
@@ -581,12 +580,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerListOptions`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.ListServers`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
 
 - ListServerRecords streams GET servers/detail (or servers without details), sends all_tenants=True only for the all-projects option, pushes explicit query and applies no local filter.
   Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeListServerRecordsUsesDetailPathAndAllProjects`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeListServerRecordsWithoutDetailsAndQueryPushdown`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeServerReadsHonorCancellationBeforeHTTP`.
-- ListServers applies the default bare=False expansion to every row in order (interfaces by default, hostvars with WithCloudServerDetailed, none with WithCloudServerBare), forwards all_tenants=True only for the all-projects option and keeps the Source record of each row.
+- ListServers applies the default bare=False expansion to every row in order (interfaces by default, hostvars with CloudServerReadOpts.Detailed, none with CloudServerReadOpts.Bare), forwards all_tenants=True only for the all-projects option and keeps the Source record of each row.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerListAndSearchServersExpandEveryRow`.
 - Rows come from servers.API.ListCloudRecords, whose Proxy.servers query mapping, client Body filters, paging fallbacks and per-call controls are covered by its own fixtures.
   Tests: `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListEveryTypedFilterTransposes`, `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListClientBodyFiltersAndRawCap`, `compute/v2/servers/python_servers_list_contracts_test.go:TestPythonServersListNextLinkAndMarkerFallbackPaging`.
@@ -615,8 +612,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerExpression`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.SearchServers`
 - `github.com/JSYoo5B/go-openstacksdk.CloudServerResultView`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
 
 - SearchServerRecords lists every server then applies exact/glob name-or-ID plus ordered dictionary or JMESPath filters locally, returns expression output without records, keeps consumed rows on a page failure and rejects invalid filters before HTTP.
   Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsFiltersLocally`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsExpressionAndInvalidFilters`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeSearchServerRecordsKeepsConsumedRowsOnPageFailure`.
@@ -642,14 +637,13 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.Update`
 - `github.com/JSYoo5B/go-openstacksdk.Connection.UpdateServer`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerBare`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDetailed`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - The find and PUT parts match the proxy calls update_server delegates to.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerGetUpdateDeleteMatchProxyRequests`.
 - UpdateServer finds strictly, sends one PUT with only the supplied name/description (explicit null description), sends nothing for no attributes, rejects empty/null names before HTTP and returns ErrNotFound for a missing server without PUT.
   Tests: `connectiontest/connection_server_records_test.go:TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes`, `connectiontest/connection_server_records_test.go:TestR2CloudComputeUpdateServerRejectsBadInputBeforeHTTPAndMissingServer`.
-- UpdateServer expands the PUT response with interfaces by default and with hostvars that describe the updated server under WithCloudServerDetailed.
+- UpdateServer expands the PUT response with interfaces by default and with hostvars that describe the updated server under CloudServerReadOpts.Detailed.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion`.
 
 Python/Go differences:
@@ -670,16 +664,14 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWaitOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerAdminPassword`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionBare`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForServer`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerActionDetailed`
 
 - The rebuild action matches the proxy rebuild_server request.
   Tests: `compute/v2/servers/python_parity_test.go:TestPythonServerRebuildSendsPassedKeysAndReturnsServer`.
 - RebuildServer sends imageRef and a nonempty adminPass, rejects an empty image before HTTP, waits for ACTIVE with ERROR failure, restores the returned or supplied admin password on the waited server and never replays the rebuild on a failed wait.
   Tests: `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerSendsImageAndPasswordAndRejectsEmptyImage`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer`, `connectiontest/connection_server_lifecycle_test.go:TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay`.
-- Without bare the rebuild action response is expanded with interfaces, or with hostvars under WithCloudServerActionDetailed, keeping the returned admin password; each call sends the rebuild once.
+- Without bare the rebuild action response is expanded with interfaces, or with hostvars under CloudServerActionOpts.Detailed, keeping the returned admin password; each call sends the rebuild once.
   Tests: `connectiontest/connection_cloud_server_hostvars_test.go:TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion`.
 
 Python/Go differences:
@@ -703,8 +695,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWait`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerWaitOptions`
 - `github.com/JSYoo5B/go-openstacksdk/resource.WithTimeout`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPs`
-- `github.com/JSYoo5B/go-openstacksdk.WithCloudServerDeleteIPRetry`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk.WithCloudServerFloatingIPOptions`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.WaitForDelete`
 - `github.com/JSYoo5B/go-openstacksdk.WithServerAddressPolicy`

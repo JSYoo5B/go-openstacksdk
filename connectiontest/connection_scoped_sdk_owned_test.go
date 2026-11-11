@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers"
 	"github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -156,19 +157,31 @@ func TestConnectionSDKOwnedSubscriptionAndConsumerScopes(t *testing.T) {
 		t.Fatal(deletedConsumer, err)
 	}
 	cloud.Provider.SetToken("subscription-token")
-	createdSubscription, err := queueScope.Create(ctx, subscriptions.CreateOpts{Subscriber: "https://subscriber.test/events"}, subscriptions.WithCreateProjectID("request-project"))
+	createdSubscription, err := queueScope.Create(ctx, subscriptions.CreateOpts{Subscriber: "https://subscriber.test/events"}, request.Custom(func(c *request.Config[subscriptions.CreateOpts]) error {
+		c.Options.ProjectID = "request-project"
+		return nil
+	}))
 	if err != nil || createdSubscription == nil || createdSubscription.ID != "sub-one" || createdSubscription.StatusCode != 201 || createdSubscription.Header.Get("Location") != "/reverse/zaqar/v2/queues/jobs/subscriptions" {
 		t.Fatal(createdSubscription, err)
 	}
-	fetched, err := queueScope.Get(ctx, "sub-one", subscriptions.WithGetProjectID("request-project"))
+	fetched, err := queueScope.Get(ctx, "sub-one", request.Custom(func(c *request.Config[subscriptions.GetOpts]) error {
+		c.Options.ProjectID = "request-project"
+		return nil
+	}))
 	if err != nil || fetched == nil || string(fetched.Body["ttl"]) != "null" {
 		t.Fatal(fetched, err)
 	}
-	listed, err := queueScope.All(ctx, subscriptions.WithListProjectID("request-project"))
+	listed, err := queueScope.All(ctx, request.Custom(func(c *request.Config[subscriptions.ListOpts]) error {
+		c.Options.ProjectID = "request-project"
+		return nil
+	}))
 	if err != nil || len(listed) != 1 || string(listed[0].Body["ttl"]) != "9007199254740993" {
 		t.Fatal(listed, err)
 	}
-	if err := queueScope.Delete(ctx, "sub-one", subscriptions.WithDeleteProjectID("request-project")); err != nil {
+	if err := queueScope.Delete(ctx, "sub-one", request.Custom(func(c *request.Config[subscriptions.DeleteOpts]) error {
+		c.Options.ProjectID = "request-project"
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 9 || lookups.Load() != 2 || msgClient.MoreHeaders["Client-ID"] != clientID || msgClient.MoreHeaders["X-PROJECT-ID"] != "configured-project" {

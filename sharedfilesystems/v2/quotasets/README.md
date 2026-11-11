@@ -39,6 +39,7 @@ import (
     "context"
 
     "github.com/gophercloud/gophercloud/v2"
+    "github.com/JSYoo5B/go-openstacksdk/request"
     "github.com/JSYoo5B/go-openstacksdk/resource"
     "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets"
 )
@@ -55,7 +56,7 @@ func manageQuota(ctx context.Context, client *gophercloud.ServiceClient) error {
     _ = quota.Shares // *int64; nil is omitted or null, distinguished by quota.Body
     zero := int64(0)
     _, err = scope.Update(ctx, quotasets.UpdateOpts{Shares: &zero},
-        quotasets.WithUpdateForce(false))
+        request.Custom(func(c *request.Config[quotasets.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }))
     return err
 }
 ```

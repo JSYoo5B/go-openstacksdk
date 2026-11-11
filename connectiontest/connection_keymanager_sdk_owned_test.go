@@ -12,6 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/internal/testcloud"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas"
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores"
+	"github.com/JSYoo5B/go-openstacksdk/request"
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
@@ -126,7 +127,10 @@ func TestConnectionKeyManagerSDKOwnedSharedClientAndFixedProject(t *testing.T) {
 		t.Fatal(configured, err)
 	}
 	cloud.Provider.SetToken("replace-token")
-	accepted, err := project.Update(context.Background(), quotas.UpdateOpts{}, quotas.WithUpdateSecrets(0))
+	accepted, err := project.Update(context.Background(), quotas.UpdateOpts{}, request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+		c.Options.Secrets = request.Present(int64(0))
+		return nil
+	}))
 	if err != nil || accepted == nil || accepted.StatusCode != 204 || len(accepted.Body) != 0 || accepted.Header.Get("X-Request-ID") != "barbican-response" {
 		t.Fatal(accepted, err)
 	}

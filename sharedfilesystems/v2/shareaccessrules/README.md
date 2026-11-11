@@ -60,6 +60,7 @@ import (
     "fmt"
     "time"
 
+    "github.com/JSYoo5B/go-openstacksdk/request"
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/resource"
     "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules"
@@ -79,7 +80,7 @@ func main() {
     created, err := rules.Allow(ctx, shareaccessrules.AllowOpts{
         AccessType: "ip",
         AccessTo: "192.0.2.0/24",
-    }, shareaccessrules.WithAccessLevel("ro"),
+    }, request.Custom(func(c *request.Config[shareaccessrules.AllowOpts]) error { c.Options.AccessLevel = "ro"; return nil }),
        shareaccessrules.WithMetadata(map[string]string{"owner": "ops"}))
     if err != nil {
         // The action may have succeeded before response decoding failed.

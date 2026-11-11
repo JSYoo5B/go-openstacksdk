@@ -36,11 +36,11 @@ type UpdateOpts struct {
 	Extra               map[string]any `json:"-"`
 }
 
-// UpdateOption is one option of Update: WithQuotaOptions, WithUpdateForce, request.Field (an
+// UpdateOption is one option of Update: WithQuotaOptions, request.Field (an
 // extension captured as JSON; declared limits, scope selectors and
 // response-only metadata are protected) or request.Custom over
-// *request.Config[UpdateOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// *request.Config[UpdateOpts] (for example to set Force). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type UpdateOption = request.WriteCall
 
 // WithQuotaOptions snapshots pointers and nested Extra values when constructed.
@@ -56,14 +56,6 @@ func WithQuotaOptions(value UpdateOpts) UpdateOption {
 			return err
 		}
 		config.Options = copy
-		return nil
-	})
-}
-
-func WithUpdateForce(force bool) UpdateOption {
-	return request.Custom(func(config *request.Config[UpdateOpts]) error {
-		copy := force
-		config.Options.Force = &copy
 		return nil
 	})
 }

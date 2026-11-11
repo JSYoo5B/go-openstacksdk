@@ -88,12 +88,12 @@ type ListOpts struct {
 	SinglePage bool
 }
 
-// ListOption is one option of List: WithListDetail, WithListFields,
-// request.Limit, request.Marker, request.MaxItems, request.Paginated,
-// request.Query with a string or []string value (a server-side filter or sort
-// such as sort_key; it cannot replace detail, fields, limit or marker),
-// request.Header or request.Custom over *request.Config[ListOpts]. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List: WithListFields, request.Limit,
+// request.Marker, request.MaxItems, request.Paginated, request.Query with a
+// string or []string value (a server-side filter or sort such as sort_key; it
+// cannot replace detail, fields, limit or marker), request.Header or
+// request.Custom over *request.Config[ListOpts] (for example to set Detail).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = calls.Spec[request.Config[ListOpts]]{
@@ -107,9 +107,6 @@ var listCalls = calls.Spec[request.Config[ListOpts]]{
 	},
 }
 
-func WithListDetail(detail bool) ListOption {
-	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options.Detail = detail; return nil })
-}
 func WithListFields(fields ...string) ListOption {
 	owned := append([]string(nil), fields...)
 	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options.Fields = owned; return nil })

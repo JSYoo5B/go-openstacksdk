@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.API.CurrentProject`
 - `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.ProjectQuotaScope.ForResource`
 - `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.ResourceQuotaScope.Create`
-- `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithHardLimit`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithQuotaCreateOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 
@@ -45,7 +45,7 @@ func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) 
     scope, err := project.ForResource(quotas.Cluster)
     if err != nil { return err }
 
-    quota, err := scope.Create(ctx, quotas.WithHardLimit(0),
+    quota, err := scope.Create(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }),
         request.Field("vendor", map[string]string{"tier": "small"}))
     if err != nil { return err }
     fmt.Println(quota.RequestProjectID, quota.RequestResource,
@@ -54,7 +54,7 @@ func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) 
     if err != nil { return err }
     fmt.Println(current.HardLimit)
 
-    updated, err := scope.Update(ctx, quotas.WithHardLimit(2))
+    updated, err := scope.Update(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 2; c.Options.HardLimit = &v; return nil }))
     if err != nil { return err }
     fmt.Println(updated.StatusCode)
 
@@ -68,12 +68,13 @@ import (
     "context"
     "fmt"
     "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func listQuotas(ctx context.Context, api *quotas.API) error {
     for quota, err := range api.List(ctx,
         quotas.WithListOptions(quotas.ListOpts{Limit: 100}),
-        quotas.WithListAllTenants(true),
+        request.Custom(func(c *request.Config[quotas.ListOpts]) error { v := true; c.Options.AllTenants = &v; return nil }),
     ) {
         if err != nil { return err }
         fmt.Println(quota.ID, quota.ProjectID, quota.Resource, quota.HardLimit)

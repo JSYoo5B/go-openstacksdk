@@ -32,7 +32,7 @@ func TestCloudDeleteServerFloatingSourceNoneSkipsFloatingCleanup(t *testing.T) {
 	cloud.JSON("GET /network/v2.0/floatingips", 500, `{}`)
 	cloud.JSON("GET "+r2CloudComputeBase+"/os-floating-ips", 500, `{}`)
 	cloud.JSON("DELETE "+r2CloudComputeBase+"/servers/s1", 204, ``)
-	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerDeleteIPs(true))
+	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", func(c *sdk.CloudServerActionOpts) error { c.DeleteIPs = true; return nil })
 	if err != nil || !ok {
 		t.Fatal(ok, err)
 	}
@@ -69,7 +69,7 @@ func TestCloudDeleteServerFloatingLookupNotFoundContinues(t *testing.T) {
 		w.WriteHeader(204)
 	})
 	cloud.JSON("DELETE "+r2CloudComputeBase+"/servers/s1", 204, ``)
-	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerDeleteIPs(true))
+	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", func(c *sdk.CloudServerActionOpts) error { c.DeleteIPs = true; return nil })
 	if err != nil || !ok {
 		t.Fatal(ok, err, cloud.Calls())
 	}
@@ -133,7 +133,7 @@ func TestCloudDeleteServerNovaFloatingSourceDeletesThroughNova(t *testing.T) {
 		w.WriteHeader(202)
 	})
 	cloud.JSON("DELETE "+r2CloudComputeBase+"/servers/s1", 204, ``)
-	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerDeleteIPs(true))
+	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", func(c *sdk.CloudServerActionOpts) error { c.DeleteIPs = true; return nil })
 	if err != nil || !ok {
 		t.Fatal(ok, err, cloud.Calls())
 	}

@@ -72,11 +72,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.API.InProject`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.Update`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateSecrets`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateOrders`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateContainers`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateConsumers`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.WithUpdateCAs`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/quotas.ProjectScope.GetRecord`
@@ -228,7 +224,7 @@ func Configure(ctx context.Context, client *gophercloud.ServiceClient, projectID
 
     accepted, err := project.Update(ctx, quotas.UpdateOpts{
         Secrets: request.Present[int64](100),
-    }, quotas.WithUpdateOrders(0), quotas.WithUpdateContainers(-1),
+    }, request.Custom(func(c *request.Config[quotas.UpdateOpts]) error { c.Options.Orders = request.Present(int64(0)); return nil }), request.Custom(func(c *request.Config[quotas.UpdateOpts]) error { c.Options.Containers = request.Present(int64(-1)); return nil }),
         request.Header("X-Request-ID", "quota-change"))
     if err != nil { return err }
     fmt.Println(accepted.StatusCode, accepted.Header.Get("X-Request-ID"))

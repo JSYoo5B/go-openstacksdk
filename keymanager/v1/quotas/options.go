@@ -30,10 +30,10 @@ type DeleteOpts struct {
 // resource.ErrInvalidOption before HTTP.
 type GetOption = request.GetCall
 
-// UpdateOption is one option of Update: WithUpdateOptions, WithUpdateSecrets,
-// WithUpdateOrders, WithUpdateContainers, WithUpdateConsumers, WithUpdateCAs,
-// request.Header or request.Custom over *request.Config[UpdateOpts]. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// UpdateOption is one option of Update: WithUpdateOptions, request.Header or
+// request.Custom over *request.Config[UpdateOpts] (for example to set Secrets,
+// Orders, Containers, Consumers or CAs). Other shared calls fail with
+// resource.ErrInvalidOption before HTTP.
 type UpdateOption = request.WriteCall
 
 // DeleteOption is one option of Delete: WithDeleteOptions,
@@ -68,18 +68,3 @@ func snapshot[T any](opts T) request.Option[T] {
 
 func WithUpdateOptions(opts UpdateOpts) UpdateOption { return request.Custom(snapshot(opts)) }
 func WithDeleteOptions(opts DeleteOpts) DeleteOption { return request.Custom(snapshot(opts)) }
-func WithUpdateSecrets(value int64) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Secrets = request.Present(value); return nil })
-}
-func WithUpdateOrders(value int64) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Orders = request.Present(value); return nil })
-}
-func WithUpdateContainers(value int64) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Containers = request.Present(value); return nil })
-}
-func WithUpdateConsumers(value int64) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Consumers = request.Present(value); return nil })
-}
-func WithUpdateCAs(value int64) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.CAs = request.Present(value); return nil })
-}

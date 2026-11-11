@@ -14,7 +14,7 @@ These additions complement the strict typed APIs.
   fallback (`GET /shares` or `/share-transfers`, summary view, `name=<identity>`
   unless a `name` query is supplied) after 400, 403 or 404, exact ID-or-name
   match, `resource.ErrAmbiguous` for two matches, `nil, nil` when missing unless
-  `request.IgnoreMissing(false)`. `WithFindAllProjects` maps to `all_tenants`
+  `request.IgnoreMissing(false)`. `FindOpts.AllProjects` maps to `all_tenants`
   on the fallback only. Other GET errors are returned. Differences: identities
   that are not single path segments skip the GET; Python extra `**query` also
   goes to the GET as URI parameters.

@@ -189,7 +189,7 @@ func TestManilaProjectQuotaUpdateSnapshotsPointersAndNestedExtensionsExactly(t *
 	other["mode"] = "new"
 	scope := newManilaQuotaScope(t, cloud, "2.80")
 	for range 2 {
-		value, err := scope.Update(context.Background(), quotasets.UpdateOpts{}, option, quotasets.WithUpdateForce(false), field)
+		value, err := scope.Update(context.Background(), quotasets.UpdateOpts{}, option, request.Custom(func(c *request.Config[quotasets.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }), field)
 		if err != nil || *value.Shares != 9007199254740993 {
 			t.Fatalf("value=%+v err=%v", value, err)
 		}

@@ -112,12 +112,6 @@ func WithListOptions(value ListOpts) ListOption {
 	owned := copyList(value)
 	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options = copyList(owned); return nil })
 }
-func WithCreateSubscriber(value string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.Subscriber = value; return nil })
-}
-func WithCreateTTL(value int64) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.TTL = request.Present(value); return nil })
-}
 func WithCreateDeliveryOptions(value any) CreateOption {
 	encoded, err := json.Marshal(value)
 	return request.Custom(func(c *request.Config[CreateOpts]) error {
@@ -127,28 +121,4 @@ func WithCreateDeliveryOptions(value any) CreateOption {
 		c.Options.Options = append(json.RawMessage(nil), encoded...)
 		return nil
 	})
-}
-func WithCreateClientID(value string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.ClientID = value; return nil })
-}
-func WithCreateProjectID(value string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.ProjectID = value; return nil })
-}
-func WithGetClientID(value string) GetOption {
-	return request.Custom(func(c *request.Config[GetOpts]) error { c.Options.ClientID = value; return nil })
-}
-func WithGetProjectID(value string) GetOption {
-	return request.Custom(func(c *request.Config[GetOpts]) error { c.Options.ProjectID = value; return nil })
-}
-func WithDeleteClientID(value string) DeleteOption {
-	return request.Custom(func(c *request.Config[DeleteOpts]) error { c.Options.ClientID = value; return nil })
-}
-func WithDeleteProjectID(value string) DeleteOption {
-	return request.Custom(func(c *request.Config[DeleteOpts]) error { c.Options.ProjectID = value; return nil })
-}
-func WithListClientID(value string) ListOption {
-	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options.ClientID = value; return nil })
-}
-func WithListProjectID(value string) ListOption {
-	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options.ProjectID = value; return nil })
 }

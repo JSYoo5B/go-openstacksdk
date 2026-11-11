@@ -17,10 +17,10 @@ type FetchOpts struct {
 	ContentType *string
 }
 
-// FetchOption is one option of Fetch: WithFetchOptions, WithFetchPayload,
-// WithFetchContentType, request.Header or request.Custom over
-// *request.Config[FetchOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// FetchOption is one option of Fetch: WithFetchOptions, request.Header or
+// request.Custom over *request.Config[FetchOpts] (for example to set Payload or
+// ContentType). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type FetchOption = request.GetCall
 
 var fetchCalls = calls.Spec[request.Config[FetchOpts]]{Header: calls.ConfigHeader[FetchOpts]}
@@ -41,20 +41,6 @@ func WithFetchOptions(value FetchOpts) FetchOption {
 	owned := copyFetchOptions(value)
 	return request.Custom(func(config *request.Config[FetchOpts]) error {
 		config.Options = copyFetchOptions(owned)
-		return nil
-	})
-}
-func WithFetchPayload(value bool) FetchOption {
-	return request.Custom(func(config *request.Config[FetchOpts]) error {
-		owned := value
-		config.Options.Payload = &owned
-		return nil
-	})
-}
-func WithFetchContentType(value string) FetchOption {
-	return request.Custom(func(config *request.Config[FetchOpts]) error {
-		owned := value
-		config.Options.ContentType = &owned
 		return nil
 	})
 }

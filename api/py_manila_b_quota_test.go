@@ -29,7 +29,7 @@ func TestPyManilaBUpdateQuotaSetPutsOnlySuppliedLimits(t *testing.T) {
 	if err != nil || updated.Shares == nil || *updated.Shares != 5 || updated.ProjectID != "proj-1" {
 		t.Fatalf("updated=%+v error=%v", updated, err)
 	}
-	if _, err := scope.Update(ctx, quotasets.UpdateOpts{Shares: &five}, quotasets.WithUpdateForce(no), request.Field("vendor_limit", 3)); err != nil {
+	if _, err := scope.Update(ctx, quotasets.UpdateOpts{Shares: &five}, request.Custom(func(c *request.Config[quotasets.UpdateOpts]) error { v := no; c.Options.Force = &v; return nil }), request.Field("vendor_limit", 3)); err != nil {
 		t.Fatal(err)
 	}
 	cloud.expect(

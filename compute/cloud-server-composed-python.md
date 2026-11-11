@@ -44,7 +44,7 @@ expansion.
 ## Typed getters and actions
 
 `GetServerByID` returns `(nil, nil)` for a 404, otherwise the server expanded
-through `ExpandServerInterfaces` unless `WithCloudServerBare(true)` is set (a Go
+through `ExpandServerInterfaces` unless `CloudServerReadOpts.Bare = true` is set (a Go
 extension; Python always expands here). An expansion failure is returned beside
 the retained server.
 
@@ -66,7 +66,7 @@ beside the error.
 `DeleteServer` finds the server like `find_server` with its defaults (GET by
 identity, then the detail list filtered by `name` only). It returns
 `(false, nil)` for a missing server or a 404 DELETE and sends a single DELETE
-otherwise. `WithCloudServerDeleteIPs` looks up and deletes each floating address
+otherwise. `CloudServerActionOpts.DeleteIPs` looks up and deletes each floating address
 (rows tagged `OS-EXT-IPS:type == floating`, in order) through `GetFloatingIP`
 and `DeleteFloatingIP` with the configured retry (default 1) before the server
 DELETE, using the Neutron or Nova (`os-floating-ips`) backend the Connection
@@ -94,9 +94,9 @@ Python's `bare=False` default passes every returned server through
 `CloudServerResult` whose `Interfaces` holds the `ExpandServerInterfaces` view
 and whose `Hostvars` holds the detailed expansion:
 
-- `WithCloudServerBare(true)` (or `WithCloudServerActionBare(true)` for
+- `CloudServerReadOpts.Bare = true` (or `CloudServerActionOpts.Bare = true` for
   `RebuildServer`) skips both expansions.
-- `WithCloudServerDetailed(true)` (`WithCloudServerActionDetailed(true)` for
+- `CloudServerReadOpts.Detailed = true` (`CloudServerActionOpts.Detailed = true` for
   `RebuildServer`) builds hostvars for `GetServer`, `ListServers`,
   `SearchServers`, `UpdateServer` and `RebuildServer`. `GetServerByID` rejects
   it before HTTP because `get_server_by_id` only adds interfaces.

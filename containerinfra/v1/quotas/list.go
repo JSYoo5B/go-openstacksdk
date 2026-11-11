@@ -30,13 +30,12 @@ type ListOpts struct {
 	AllTenants *bool
 }
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListAllTenants, request.Query with a string or []string value (a
-// deployment query extension the server validates; typed core parameters
-// cannot be overwritten) or request.Custom over *request.Config[ListOpts].
-// The page limit and marker are ListOpts members; request.Limit,
-// request.Marker and other shared calls fail with resource.ErrInvalidOption
-// before HTTP.
+// ListOption is one option of List and All: WithListOptions, request.Query with
+// a string or []string value (a deployment query extension the server
+// validates; typed core parameters cannot be overwritten) or request.Custom
+// over *request.Config[ListOpts] (for example to set AllTenants). The page
+// limit and marker are ListOpts members; request.Limit, request.Marker and
+// other shared calls fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var listCalls = calls.Spec[request.Config[ListOpts]]{Query: calls.ConfigQuery[ListOpts]}
@@ -45,14 +44,6 @@ func WithListOptions(value ListOpts) ListOption {
 	value = cloneListOptions(value)
 	return request.Custom(func(config *request.Config[ListOpts]) error {
 		config.Options = cloneListOptions(value)
-		return nil
-	})
-}
-
-func WithListAllTenants(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		copy := value
-		config.Options.AllTenants = &copy
 		return nil
 	})
 }

@@ -63,7 +63,7 @@ func TestMagnumQuotaScopedCreatePreservesFixedIdentityExactJSONAndMetadata(t *te
 	extension := map[string]string{"tier": "requested"}
 	option := request.Field("vendor", extension)
 	extension["tier"] = "caller-change"
-	value, err := scope.Create(context.Background(), quotas.WithHardLimit(0), option)
+	value, err := scope.Create(context.Background(), request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), option)
 	if err != nil || value == nil || value.RequestProjectID != "project-fixed" || value.RequestResource != quotas.Cluster || value.ProjectID != "wire-project" || value.ID != "9007199254740993" || value.HardLimit != 0 || value.Resource != "Cluster" || value.CreatedAt.IsZero() || !value.UpdatedAt.IsZero() || value.StatusCode != 201 || value.Header.Get("X-Openstack-Request-Id") != "quota-created" || string(value.Body["optional"]) != "null" || string(value.Body["vendor"]) != `{"big":9007199254740993}` || calls.Load() != 1 {
 		t.Fatalf("value=%+v error=%v", value, err)
 	}
@@ -85,7 +85,7 @@ func TestMagnumQuotaNilScopesRemainSafeToInspectAndRejectCreate(t *testing.T) {
 	if _, err := project.ForResource(quotas.Cluster); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := scope.Create(context.Background(), quotas.WithHardLimit(1)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := scope.Create(context.Background(), request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil })); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }
@@ -160,7 +160,7 @@ func TestMagnumQuotaScopeUsesSeparateIdentityAndRecordedAuth(t *testing.T) {
 		t.Fatal(err)
 	}
 	for range 2 {
-		if _, err := scope.Create(context.Background(), quotas.WithHardLimit(0)); err != nil {
+		if _, err := scope.Create(context.Background(), request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil })); err != nil {
 			t.Fatal(err)
 		}
 	}
@@ -192,14 +192,14 @@ func TestMagnumQuotaCreatePreflightAndCancellation(t *testing.T) {
 		nil,
 		{nil},
 		{quotas.WithQuotaCreateOptions(quotas.QuotaCreateOpts{})},
-		{quotas.WithHardLimit(1), request.Field("hard_limit", 2)},
-		{quotas.WithHardLimit(1), request.Field("project_id", "changed")},
-		{quotas.WithHardLimit(1), request.Field("resource", "changed")},
-		{quotas.WithHardLimit(1), request.Field("id", 2)},
-		{quotas.WithHardLimit(1), request.Field("vendor", make(chan bool))},
-		{quotas.WithHardLimit(1), request.Custom(request.WithQuery[quotas.QuotaCreateOpts]("all_tenants", "true"))},
-		{quotas.WithHardLimit(1), request.Custom(request.WithHeader[quotas.QuotaCreateOpts]("X-Vendor", "value"))},
-		{quotas.WithHardLimit(1), request.Custom(request.WithArgument[quotas.QuotaCreateOpts]("unsupported", true))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Field("hard_limit", 2)},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Field("project_id", "changed")},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Field("resource", "changed")},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Field("id", 2)},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Field("vendor", make(chan bool))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Custom(request.WithQuery[quotas.QuotaCreateOpts]("all_tenants", "true"))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Custom(request.WithHeader[quotas.QuotaCreateOpts]("X-Vendor", "value"))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Custom(request.WithArgument[quotas.QuotaCreateOpts]("unsupported", true))},
 	} {
 		if value, err := scope.Create(context.Background(), options...); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal(value, err, calls.Load())
@@ -225,7 +225,7 @@ func TestMagnumQuotaCreatePreflightAndCancellation(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	cancel()
-	if _, err := scope.Create(ctx, quotas.WithHardLimit(0)); !errors.Is(err, context.Canceled) || calls.Load() != 0 {
+	if _, err := scope.Create(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil })); !errors.Is(err, context.Canceled) || calls.Load() != 0 {
 		t.Fatal(err)
 	}
 }
@@ -238,7 +238,7 @@ func TestMagnumQuotaCreateHTTPFailuresAndSuccessPolicy(t *testing.T) {
 				w.Header().Set("X-Openstack-Request-Id", "quota-policy")
 				testcloud.JSON(w, status, magnumQuotaBody)
 			})
-			value, err := newMagnumQuotaScope(t, cloud).Create(context.Background(), quotas.WithHardLimit(0))
+			value, err := newMagnumQuotaScope(t, cloud).Create(context.Background(), request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }))
 			if status == 201 {
 				if err != nil || value.StatusCode != status {
 					t.Fatal(value, err)
@@ -261,7 +261,7 @@ func TestMagnumQuotaCreateDecodeFailuresRetainSuccessfulEvidence(t *testing.T) {
 				w.Header().Set("X-Openstack-Request-Id", "quota-malformed")
 				testcloud.JSON(w, 201, body)
 			})
-			value, err := newMagnumQuotaScope(t, cloud).Create(context.Background(), quotas.WithHardLimit(0))
+			value, err := newMagnumQuotaScope(t, cloud).Create(context.Background(), request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }))
 			var decode *quotas.QuotaResponseError
 			if value != nil || !errors.As(err, &decode) || decode.StatusCode != 201 || string(decode.Body) != body || decode.Header.Get("X-Openstack-Request-Id") != "quota-malformed" {
 				t.Fatal(value, decode, err)
@@ -277,7 +277,7 @@ func TestMagnumQuotaCreateRejectsScopeChangingRedirectAndPreservesCanceledCause(
 		http.Redirect(w, r, "/elsewhere", http.StatusTemporaryRedirect)
 	})
 	cloud.Mux.HandleFunc("/elsewhere", func(w http.ResponseWriter, r *http.Request) { escaped.Add(1); testcloud.JSON(w, 201, magnumQuotaBody) })
-	if _, err := newMagnumQuotaScope(t, cloud).Create(context.Background(), quotas.WithHardLimit(0)); !errors.Is(err, resource.ErrInvalidOption) || escaped.Load() != 0 {
+	if _, err := newMagnumQuotaScope(t, cloud).Create(context.Background(), request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil })); !errors.Is(err, resource.ErrInvalidOption) || escaped.Load() != 0 {
 		t.Fatal(err, escaped.Load())
 	}
 	blocked := testcloud.New(t)
@@ -293,7 +293,10 @@ func TestMagnumQuotaCreateRejectsScopeChangingRedirectAndPreservesCanceledCause(
 	})
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
-	go func() { _, err := newMagnumQuotaScope(t, blocked).Create(ctx, quotas.WithHardLimit(0)); done <- err }()
+	go func() {
+		_, err := newMagnumQuotaScope(t, blocked).Create(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }))
+		done <- err
+	}()
 	select {
 	case <-started:
 	case <-time.After(time.Second):

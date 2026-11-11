@@ -136,7 +136,13 @@ func TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity(t *testin
 	extras := map[string]json.RawMessage{"n": json.RawMessage("9007199254740993")}
 	field := request.Field("vendor", extras)
 	extras["n"][0] = '1'
-	reusable := []subscriptions.CreateOption{snapshot, subscriptions.WithCreateTTL(60), subscriptions.WithCreateTTL(9007199254740993), field, request.Header("x-trace", "first"), request.Header("X-Trace", "last")}
+	reusable := []subscriptions.CreateOption{snapshot, request.Custom(func(c *request.Config[subscriptions.CreateOpts]) error {
+		c.Options.TTL = request.Present(int64(60))
+		return nil
+	}), request.Custom(func(c *request.Config[subscriptions.CreateOpts]) error {
+		c.Options.TTL = request.Present(int64(9007199254740993))
+		return nil
+	}), field, request.Header("x-trace", "first"), request.Header("X-Trace", "last")}
 	var group sync.WaitGroup
 	for range 4 {
 		group.Add(1)
@@ -336,7 +342,7 @@ func TestMessagingSubscriptionsInvalidOptionsAndMissingClientIdentity(t *testing
 			cfg.Headers["x-trace"] = "second"
 			return nil
 		}),
-		nil, subscriptions.WithCreateSubscriber(""), subscriptions.WithCreateDeliveryOptions(nil), subscriptions.WithCreateDeliveryOptions([]string{}), request.Field("subscriber", "other"), request.Field("TTL", 3), request.Field("age", 2), request.Field("queue_name", "other"), request.Header("Client-ID", "other"), request.Header("X-PROJECT-ID", "other"), request.Header("X-Auth-Token", "other"), request.Header("bad?header", "x"), request.Header("X-Test", "bad\x00"), request.Custom(request.WithQuery[subscriptions.CreateOpts]("x", "y")), request.Custom(request.WithArgument[subscriptions.CreateOpts]("x", "y")),
+		nil, request.Custom(func(c *request.Config[subscriptions.CreateOpts]) error { c.Options.Subscriber = ""; return nil }), subscriptions.WithCreateDeliveryOptions(nil), subscriptions.WithCreateDeliveryOptions([]string{}), request.Field("subscriber", "other"), request.Field("TTL", 3), request.Field("age", 2), request.Field("queue_name", "other"), request.Header("Client-ID", "other"), request.Header("X-PROJECT-ID", "other"), request.Header("X-Auth-Token", "other"), request.Header("bad?header", "x"), request.Header("X-Test", "bad\x00"), request.Custom(request.WithQuery[subscriptions.CreateOpts]("x", "y")), request.Custom(request.WithArgument[subscriptions.CreateOpts]("x", "y")),
 	} {
 		if _, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "mailto:example@example.test"}, option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Fatal(err)
@@ -405,16 +411,40 @@ func TestMessagingSubscriptionsTypedRequestIdentityAllOperations(t *testing.T) {
 			w.WriteHeader(204)
 		}
 	})
-	if _, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "http://example.invalid"}, subscriptions.WithCreateClientID("explicit-client"), subscriptions.WithCreateProjectID("explicit-project")); err != nil {
+	if _, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "http://example.invalid"}, request.Custom(func(c *request.Config[subscriptions.CreateOpts]) error {
+		c.Options.ClientID = "explicit-client"
+		return nil
+	}), request.Custom(func(c *request.Config[subscriptions.CreateOpts]) error {
+		c.Options.ProjectID = "explicit-project"
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := scope.Get(context.Background(), "id", subscriptions.WithGetClientID("explicit-client"), subscriptions.WithGetProjectID("explicit-project")); err != nil {
+	if _, err := scope.Get(context.Background(), "id", request.Custom(func(c *request.Config[subscriptions.GetOpts]) error {
+		c.Options.ClientID = "explicit-client"
+		return nil
+	}), request.Custom(func(c *request.Config[subscriptions.GetOpts]) error {
+		c.Options.ProjectID = "explicit-project"
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := scope.All(context.Background(), subscriptions.WithListClientID("explicit-client"), subscriptions.WithListProjectID("explicit-project")); err != nil {
+	if _, err := scope.All(context.Background(), request.Custom(func(c *request.Config[subscriptions.ListOpts]) error {
+		c.Options.ClientID = "explicit-client"
+		return nil
+	}), request.Custom(func(c *request.Config[subscriptions.ListOpts]) error {
+		c.Options.ProjectID = "explicit-project"
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
-	if err := scope.Delete(context.Background(), "id", subscriptions.WithDeleteClientID("explicit-client"), subscriptions.WithDeleteProjectID("explicit-project")); err != nil {
+	if err := scope.Delete(context.Background(), "id", request.Custom(func(c *request.Config[subscriptions.DeleteOpts]) error {
+		c.Options.ClientID = "explicit-client"
+		return nil
+	}), request.Custom(func(c *request.Config[subscriptions.DeleteOpts]) error {
+		c.Options.ProjectID = "explicit-project"
+		return nil
+	})); err != nil {
 		t.Fatal(err)
 	}
 	if calls.Load() != 4 || len(c.MoreHeaders) != 0 {
@@ -437,7 +467,10 @@ func TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend(t *testing.T) 
 				w.Header().Set("X-Request-ID", "optional-id")
 				testcloud.JSON(w, 201, tc.body)
 			})
-			value, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "http://example.invalid"}, subscriptions.WithCreateTTL(3600), subscriptions.WithCreateDeliveryOptions(map[string]any{"example": true}))
+			value, err := scope.Create(context.Background(), subscriptions.CreateOpts{Subscriber: "http://example.invalid"}, request.Custom(func(c *request.Config[subscriptions.CreateOpts]) error {
+				c.Options.TTL = request.Present(int64(3600))
+				return nil
+			}), subscriptions.WithCreateDeliveryOptions(map[string]any{"example": true}))
 			if err != nil || value == nil || value.ID != tc.id || value.StatusCode != 201 || value.Header.Get("Location") != "https://never-follow.invalid/collection" || value.Header.Get("X-Request-ID") != "optional-id" || value.Subscriber != "" || len(value.TTL) != 0 || len(value.Options) != 0 || calls.Load() != 1 {
 				t.Fatal(value, err, calls.Load())
 			}

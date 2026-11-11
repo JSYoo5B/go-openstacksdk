@@ -145,21 +145,17 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) (d
 }
 
 // FindOpts: IgnoreMissing defaults to true and Detail to true, as in Python.
+// Detail selects detail=true on the fallback list.
 type FindOpts struct{ IgnoreMissing, Detail bool }
 
-// FindOption is one option of Find: WithFindDetail, request.IgnoreMissing,
-// request.Header or request.Custom over *request.Config[FindOpts]. Other
-// shared calls fail with resource.ErrInvalidOption before HTTP.
+// FindOption is one option of Find: request.IgnoreMissing, request.Header or
+// request.Custom over *request.Config[FindOpts] (for example to set Detail).
+// Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type FindOption = request.FindCall
 
 var findCalls = calls.Spec[request.Config[FindOpts]]{
 	Header:        calls.ConfigHeader[FindOpts],
 	IgnoreMissing: func(c *request.Config[FindOpts], ignore bool) error { c.Options.IgnoreMissing = ignore; return nil },
-}
-
-// WithFindDetail selects detail=true on the fallback list.
-func WithFindDetail(detail bool) FindOption {
-	return request.Custom(func(c *request.Config[FindOpts]) error { c.Options.Detail = detail; return nil })
 }
 
 // Find resolves a name or UUID. It first reads GET /deploy_templates/{ref}; a

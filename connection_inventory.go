@@ -183,11 +183,6 @@ func WithInventoryBare() InventoryOption {
 	return func(o *InventoryOpts) error { o.Expansion = InventoryExpandNone; return nil }
 }
 
-// WithInventoryPrivate maps the private constructor flag for this call.
-func WithInventoryPrivate(private bool) InventoryOption {
-	return func(o *InventoryOpts) error { o.Private = private; return nil }
-}
-
 // WithInventoryContinueOnCloudError keeps going when one cloud cannot be
 // connected or listed; the failure is recorded instead of returned. Without it
 // the first failing cloud aborts the call (fail_on_cloud_config=True). Context

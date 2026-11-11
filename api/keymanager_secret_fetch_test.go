@@ -103,10 +103,18 @@ func TestKeyManagerSecretFetchContentTypeSelectionPolicies(t *testing.T) {
 		{name: "response payload type does not select", metadata: `{"payload_content_type":"text/plain"}`},
 		{name: "metadata chooses", metadata: `{"content_types":{"default":"application/octet-stream"}}`, payload: true, accept: "application/octet-stream"},
 		{name: "empty metadata choice", metadata: `{"content_types":{"default":""}}`, payload: true},
-		{name: "seed bypasses malformed container", metadata: `{"content_types":null}`, options: []secrets.FetchOption{secrets.WithFetchContentType("custom/type")}, payload: true, accept: "custom/type"},
-		{name: "seed bypasses missing default", metadata: `{"content_types":{}}`, options: []secrets.FetchOption{secrets.WithFetchContentType("")}, payload: true},
-		{name: "disable bypasses malformed selection", metadata: `{"content_types":null}`, options: []secrets.FetchOption{secrets.WithFetchPayload(false)}},
-		{name: "disable wins seed", metadata: `{}`, options: []secrets.FetchOption{secrets.WithFetchPayload(false), secrets.WithFetchContentType("text/plain")}},
+		{name: "seed bypasses malformed container", metadata: `{"content_types":null}`, options: []secrets.FetchOption{request.Custom(func(c *request.Config[secrets.FetchOpts]) error {
+			v := "custom/type"
+			c.Options.ContentType = &v
+			return nil
+		})}, payload: true, accept: "custom/type"},
+		{name: "seed bypasses missing default", metadata: `{"content_types":{}}`, options: []secrets.FetchOption{request.Custom(func(c *request.Config[secrets.FetchOpts]) error { v := ""; c.Options.ContentType = &v; return nil })}, payload: true},
+		{name: "disable bypasses malformed selection", metadata: `{"content_types":null}`, options: []secrets.FetchOption{request.Custom(func(c *request.Config[secrets.FetchOpts]) error { v := false; c.Options.Payload = &v; return nil })}},
+		{name: "disable wins seed", metadata: `{}`, options: []secrets.FetchOption{request.Custom(func(c *request.Config[secrets.FetchOpts]) error { v := false; c.Options.Payload = &v; return nil }), request.Custom(func(c *request.Config[secrets.FetchOpts]) error {
+			v := "text/plain"
+			c.Options.ContentType = &v
+			return nil
+		})}},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			cloud := testcloud.New(t)
@@ -161,7 +169,11 @@ func TestKeyManagerSecretFetchExactTextAndBinary(t *testing.T) {
 				w.Header().Set("X-Bytes", "original")
 				_, _ = w.Write(test.body)
 			})
-			value, err := secrets.New(secretFetchClient(cloud)).Fetch(context.Background(), resource.ID("secret-alpha"), secrets.WithFetchContentType(test.contentType))
+			value, err := secrets.New(secretFetchClient(cloud)).Fetch(context.Background(), resource.ID("secret-alpha"), request.Custom(func(c *request.Config[secrets.FetchOpts]) error {
+				v := test.contentType
+				c.Options.ContentType = &v
+				return nil
+			}))
 			if value == nil || value.Payload == nil || (err != nil) != test.fail || (value.Payload.Text != nil) != test.text || !reflect.DeepEqual(value.Payload.Body, test.body) || value.Payload.Accept != test.contentType || calls.Load() != 2 {
 				t.Fatal(value, err, calls.Load())
 			}
@@ -278,7 +290,7 @@ func TestKeyManagerSecretFetchNameLookupAndPreparedOwnership(t *testing.T) {
 		t.Fatal(value, err, listCalls.Load(), metadataCalls.Load(), payloadCalls.Load())
 	}
 	// A missing explicit Name is not a heuristic direct ID fetch.
-	_, err = secrets.New(client).Fetch(context.Background(), resource.Name("missing"), secrets.WithFetchPayload(false))
+	_, err = secrets.New(client).Fetch(context.Background(), resource.Name("missing"), request.Custom(func(c *request.Config[secrets.FetchOpts]) error { v := false; c.Options.Payload = &v; return nil }))
 	if !errors.Is(err, resource.ErrNotFound) || metadataCalls.Load() != 1 || payloadCalls.Load() != 1 {
 		t.Fatal(err, metadataCalls.Load(), payloadCalls.Load())
 	}
@@ -438,7 +450,11 @@ func TestKeyManagerSecretFetchSourceAndOptionPreflight(t *testing.T) {
 			return nil
 		})},
 		{name: "argument unsupported", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error { c.Arguments["base_path"] = "other"; return nil })},
-		{name: "content type newline", option: secrets.WithFetchContentType("text/plain\r\nX-Other:value")},
+		{name: "content type newline", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error {
+			v := "text/plain\r\nX-Other:value"
+			c.Options.ContentType = &v
+			return nil
+		})},
 		{name: "option changes type", option: request.Custom(func(c *request.Config[secrets.FetchOpts]) error { return nil }), change: func(c *gophercloud.ServiceClient) { c.Type = "compute" }},
 		{name: "provider nil", change: func(c *gophercloud.ServiceClient) { c.ProviderClient = nil }},
 	} {

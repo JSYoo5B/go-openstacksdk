@@ -261,7 +261,7 @@ func TestCloudServerGetServerFindsWithDetailsAndExpands(t *testing.T) {
 	if got, err := cloud.Conn.GetServer(ctx, "gone"); got != nil || err != nil {
 		t.Fatal(got, err)
 	}
-	bare, err := cloud.Conn.GetServer(ctx, "s1", sdk.WithCloudServerBare(true))
+	bare, err := cloud.Conn.GetServer(ctx, "s1", func(c *sdk.CloudServerReadOpts) error { c.Bare = true; return nil })
 	if err != nil || bare.Server.ID != "s1" || bare.Record == nil || bare.Interfaces != nil || bare.Hostvars != nil {
 		t.Fatalf("%+v %v", bare, err)
 	}
@@ -269,7 +269,7 @@ func TestCloudServerGetServerFindsWithDetailsAndExpands(t *testing.T) {
 	if err != nil || plain.Interfaces == nil || plain.Interfaces.PublicIPv4 != "8.8.8.8" || plain.Hostvars != nil {
 		t.Fatalf("%+v %v", plain, err)
 	}
-	detailed, err := cloud.Conn.GetServer(ctx, "s1", sdk.WithCloudServerDetailed(true))
+	detailed, err := cloud.Conn.GetServer(ctx, "s1", func(c *sdk.CloudServerReadOpts) error { c.Detailed = true; return nil })
 	if err != nil || detailed.Hostvars == nil || detailed.Interfaces != detailed.Hostvars.Interfaces || string(detailed.Hostvars.Flavor.Name) != `"small"` {
 		t.Fatalf("%+v %v", detailed, err)
 	}
@@ -279,7 +279,7 @@ func TestCloudServerGetServerFindsWithDetailsAndExpands(t *testing.T) {
 	}
 	// A name falls back from GET servers/{name} to the detailed list (details=True).
 	cloud.JSON("GET "+r2CloudComputeBase+"/servers/web-2", 404, `{"itemNotFound":{"message":"nf","code":404}}`)
-	byName, err := cloud.Conn.GetServer(ctx, "web-2", sdk.WithCloudServerBare(true))
+	byName, err := cloud.Conn.GetServer(ctx, "web-2", func(c *sdk.CloudServerReadOpts) error { c.Bare = true; return nil })
 	if err != nil || byName == nil || byName.Server.ID != "s2" {
 		t.Fatalf("%+v %v", byName, err)
 	}
@@ -302,7 +302,7 @@ func TestCloudServerGetServerFindsWithDetailsAndExpands(t *testing.T) {
 	if _, err := cloud.Conn.GetServer(ctx, "", sdk.WithCloudServerExpression("[].name")); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
-	if _, err := cloud.Conn.GetServerByID(ctx, "s1", sdk.WithCloudServerDetailed(true)); !errors.Is(err, resource.ErrInvalidOption) {
+	if _, err := cloud.Conn.GetServerByID(ctx, "s1", func(c *sdk.CloudServerReadOpts) error { c.Detailed = true; return nil }); !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}
 }
@@ -322,11 +322,11 @@ func TestCloudServerListAndSearchServersExpandEveryRow(t *testing.T) {
 	if listed[0].Interfaces.PublicIPv4 != "8.8.8.8" || listed[0].Record == nil {
 		t.Fatalf("%+v", listed[0])
 	}
-	bare, err := cloud.Conn.ListServers(ctx, sdk.WithCloudServerBare(true), sdk.WithCloudServerListOptions(request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })))
+	bare, err := cloud.Conn.ListServers(ctx, func(c *sdk.CloudServerReadOpts) error { c.Bare = true; return nil }, sdk.WithCloudServerListOptions(request.Custom(func(c *servers.RecordFindOpts) error { v := true; c.AllProjects = &v; return nil })))
 	if err != nil || len(bare) != 2 || bare[0].Interfaces != nil {
 		t.Fatalf("%+v %v", bare, err)
 	}
-	detailed, err := cloud.Conn.ListServers(ctx, sdk.WithCloudServerDetailed(true))
+	detailed, err := cloud.Conn.ListServers(ctx, func(c *sdk.CloudServerReadOpts) error { c.Detailed = true; return nil })
 	if err != nil || len(detailed) != 2 || detailed[0].Hostvars == nil || detailed[1].Hostvars == nil || detailed[1].Hostvars.Image.BootFromVolume || detailed[1].Hostvars.Image.ID != "" {
 		t.Fatalf("%+v %v", detailed, err)
 	}
@@ -334,7 +334,7 @@ func TestCloudServerListAndSearchServersExpandEveryRow(t *testing.T) {
 	if err != nil || len(search.Inventory) != 2 || len(search.Servers) != 1 || search.Servers[0].Server.ID != "s1" {
 		t.Fatalf("%+v %v", search, err)
 	}
-	expression, err := cloud.Conn.SearchServers(ctx, "", sdk.WithCloudServerDetailed(true), sdk.WithCloudServerExpression("[].flavor.name"))
+	expression, err := cloud.Conn.SearchServers(ctx, "", func(c *sdk.CloudServerReadOpts) error { c.Detailed = true; return nil }, sdk.WithCloudServerExpression("[].flavor.name"))
 	if err != nil || !expression.Expression || string(expression.Value) != `["small"]` || len(expression.Servers) != 0 {
 		t.Fatalf("%+v %s %v", expression, expression.Value, err)
 	}
@@ -364,7 +364,7 @@ func TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion(t *testing.
 		testcloud.JSON(w, 202, `{"server":`+strings.Replace(hostvarsServerS1, `"id":"s1"`, `"id":"s1","adminPass":"pw"`, 1)+`}`)
 	})
 	ctx := context.Background()
-	updated, err := cloud.Conn.UpdateServer(ctx, "s1", sdk.CloudServerUpdate{Name: request.Present("renamed")}, sdk.WithCloudServerDetailed(true))
+	updated, err := cloud.Conn.UpdateServer(ctx, "s1", sdk.CloudServerUpdate{Name: request.Present("renamed")}, func(c *sdk.CloudServerReadOpts) error { c.Detailed = true; return nil })
 	if err != nil || updated.Hostvars == nil || updated.Server.Name != "renamed" {
 		t.Fatalf("%+v %v", updated, err)
 	}
@@ -380,7 +380,7 @@ func TestCloudServerUpdateAndRebuildApplyDefaultAndDetailedExpansion(t *testing.
 	if err != nil || rebuilt.Interfaces == nil || rebuilt.Interfaces.PublicIPv4 != "8.8.8.8" || rebuilt.Hostvars != nil || rebuilt.AdminPassword != "pw" {
 		t.Fatalf("%+v %v", rebuilt, err)
 	}
-	detailed, err := cloud.Conn.RebuildServer(ctx, "s1", "i1", sdk.WithCloudServerActionDetailed(true))
+	detailed, err := cloud.Conn.RebuildServer(ctx, "s1", "i1", func(c *sdk.CloudServerActionOpts) error { c.Detailed = true; return nil })
 	if err != nil || detailed.Hostvars == nil || string(detailed.Hostvars.Image.Name) != `"ubuntu"` || detailed.Interfaces != detailed.Hostvars.Interfaces {
 		t.Fatalf("%+v %v", detailed, err)
 	}

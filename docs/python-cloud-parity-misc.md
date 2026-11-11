@@ -1077,7 +1077,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters`
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand`
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryBare`
-- `github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk.InventoryHostView`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
@@ -1093,7 +1093,7 @@ Go API:
 Python/Go differences:
 
 - Go returns typed compute servers with explicit failures instead of swallowing SDKException.
-- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
+- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call InventoryOpts.Private option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
 - WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.
 - The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 - Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items).
@@ -1115,7 +1115,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters`
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand`
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryBare`
-- `github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk.InventoryHostView`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
@@ -1129,7 +1129,7 @@ Go API:
 Python/Go differences:
 
 - Filter keys are the JSON field names of the Go compute server record.
-- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
+- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call InventoryOpts.Private option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
 - WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.
 - The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 - Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items).
@@ -1151,7 +1151,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryFilters`
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryExpand`
 - `github.com/JSYoo5B/go-openstacksdk.WithInventoryBare`
-- `github.com/JSYoo5B/go-openstacksdk.WithInventoryPrivate`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk.InventoryHostView`
 - `github.com/JSYoo5B/go-openstacksdk/compute/v2/servers.API.ListCloudRecords`
 
@@ -1165,7 +1165,7 @@ Go API:
 Python/Go differences:
 
 - Go returns resource.AmbiguousError instead of SDKException.
-- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call WithInventoryPrivate option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
+- Python's use_direct_get is accepted but unused, and refresh only invalidates the Python cache; Go has no cache layer, so neither has a counterpart. The private flag is a per-call InventoryOpts.Private option rather than a constructor argument and maps to compute.WithPrivateCloud(true).
 - WithInventoryBare is a Go extension that skips every expansion. An expansion failure fails that cloud under the same failure policy as a listing failure; the security group and volume steps record their failures in the hostvars as get_hostvars_from_server swallows them.
 - The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here.
 - Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items).

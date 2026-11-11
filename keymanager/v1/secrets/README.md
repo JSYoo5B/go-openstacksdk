@@ -38,10 +38,10 @@ key must be a string; missing keys, null/nonobject containers, and other default
 types return an error with the metadata response body, headers, and status.
 An empty string is a selected value and sends an empty `Accept` header.
 
-`WithFetchContentType` represents a preexisting Python `payload_content_type`
+`FetchOpts.ContentType` represents a preexisting Python `payload_content_type`
 attribute: it wins over the response's default, including malformed
 `content_types`. A response's `payload_content_type` does not select the payload
-type for that call. `WithFetchPayload(false)` is an additional Go option that
+type for that call. `FetchOpts.Payload = false` is an additional Go option that
 skips selection and the payload request after reading metadata.
 
 ```go
@@ -58,7 +58,7 @@ import (
 
 func fetchBinarySecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
     value, err := secrets.New(client).Fetch(ctx, resource.ID("secret-id"),
-        secrets.WithFetchContentType("application/octet-stream"),
+        request.Custom(func(c *request.Config[secrets.FetchOpts]) error { v := "application/octet-stream"; c.Options.ContentType = &v; return nil }),
         request.Header("X-Trace", "caller-trace"))
     // value may contain the successful metadata response even when err
     // describes a later selection, payload HTTP/read, or UTF-8 failure.
@@ -90,8 +90,8 @@ evidence. Metadata headers and payload headers remain separate.
 | Option | Behavior |
 | --- | --- |
 | `WithFetchOptions(FetchOpts)` | Snapshots the optional bool/string pointers at construction and application. |
-| `WithFetchContentType(string)` | Overrides automatic selection, including an explicit empty string. |
-| `WithFetchPayload(bool)` | Defaults to automatic retrieval; false requests only metadata. |
+| `FetchOpts.ContentType` | Overrides automatic selection, including an explicit empty string. |
+| `FetchOpts.Payload` | Defaults to automatic retrieval; false requests only metadata. |
 | `request.Header(key, value)` | Adds an extra header to both requests, subject to service-header precedence. |
 
 Both requests require a configured `key-manager` client and share its provider,
@@ -103,7 +103,7 @@ case variants of a header are rejected, while equal values are accepted.
 Configured service headers retain native precedence over per-call extras.
 `Accept`, authentication, routing, content, and version headers are owned by the
 SDK and cannot be set through Fetch extras or `ServiceClient.MoreHeaders`.
-Use `WithFetchContentType` to select the payload representation. Body, query,
+Use `FetchOpts.ContentType` to select the payload representation. Body, query,
 and argument extensions are unsupported.
 
 An explicit `resource.ID` performs no resolver HTTP. An explicit

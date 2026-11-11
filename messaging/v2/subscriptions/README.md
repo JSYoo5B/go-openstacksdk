@@ -16,13 +16,10 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.API.InQueue`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.Create`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateSubscriber`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateTTL`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateDeliveryOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateClientID`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithCreateProjectID`
 
 - Pinned _proxy.py:191-205 and Subscription.create_opts(request_key=None) map to one POST queues/{fixed queue}/subscriptions with flat subscriber/optional ttl/options JSON, accepting 201 and an actual root object. subscription_id is an optional response field: omitted/null/empty values return the decoded raw model with no ID inferred from Location or request inputs. Omitted ttl remains omitted rather than submitting the documented server default 3600. No Queue GET, confirmation or implicit fetch is performed; collection-valued or foreign Location remains passive response evidence rather than an ID/action/request target.
   Tests: `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels`, `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsCreateSnapshotsExactMetadataAndIdentity`, `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend`.
@@ -55,8 +52,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.QueueScope.Get`
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetClientID`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithGetProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - One GET queues/{fixed queue}/subscriptions/{escaped literal identity} accepts 200 and a flat object. Get remains strict for native missing/error status and does not use name lookup, alternate Location, response source/ID or an incidental queue name to retarget the request.
   Tests: `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels`, `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend`.
@@ -88,8 +84,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListClientID`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithListProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
 
@@ -126,8 +121,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteOptions`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
 - `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteClientID`
-- `github.com/JSYoo5B/go-openstacksdk/messaging/v2/subscriptions.WithDeleteProjectID`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 
 - Pinned _proxy.py:250-278 default ignore_missing=True maps to one DELETE queues/{fixed queue}/subscriptions/{escaped literal identity}, accepting 204 with no request JSON or implicit GET/Queue lookup. Go returns error-only; explicit false preserves actual native404, while default true suppresses only actual HTTP404. Other status errors remain terminal.
   Tests: `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsFourRoutesFixedQueueAndRawModels`, `api/messaging_subscriptions_test.go:TestMessagingSubscriptionsMutationAndReadEvidenceNeverResend`.

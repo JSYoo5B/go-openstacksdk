@@ -29,12 +29,12 @@ type ListOpts struct {
 	Paginated         *bool
 }
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListGlobalDefault, WithListFilter, WithListFilters, request.Query with a
-// string or []string value (a wire-only extension that overrides an
-// identically named typed query and does not enable Python Body filtering or
-// attribute aliases), request.MaxItems, request.Paginated or request.Custom
-// over *request.Config[ListOpts]. Other shared calls fail with
+// ListOption is one option of List and All: WithListOptions, WithListFilter,
+// WithListFilters, request.Query with a string or []string value (a wire-only
+// extension that overrides an identically named typed query and does not enable
+// Python Body filtering or attribute aliases), request.MaxItems,
+// request.Paginated or request.Custom over *request.Config[ListOpts] (for
+// example to set GlobalDefault). Other shared calls fail with
 // resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
@@ -63,14 +63,6 @@ func WithListOptions(value ListOpts) ListOption {
 	owned := copyOptions(value)
 	return request.Custom(func(config *request.Config[ListOpts]) error {
 		config.Options = copyOptions(owned)
-		return nil
-	})
-}
-
-func WithListGlobalDefault(value bool) ListOption {
-	return request.Custom(func(config *request.Config[ListOpts]) error {
-		owned := value
-		config.Options.GlobalDefault = &owned
 		return nil
 	})
 }

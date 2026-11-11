@@ -96,7 +96,13 @@ func TestKeyManagerQuotasFourOperationsKeepFixedProjectAndLiveProvider(t *testin
 	if err != nil || string(configured.Secrets) != "null" || configured.Containers != nil || string(configured.Data["project_id"]) != `"other-project"` {
 		t.Fatal(configured, err)
 	}
-	result, err := scope.Update(context.Background(), quotas.UpdateOpts{}, quotas.WithUpdateSecrets(0), quotas.WithUpdateOrders(-1))
+	result, err := scope.Update(context.Background(), quotas.UpdateOpts{}, request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+		c.Options.Secrets = request.Present(int64(0))
+		return nil
+	}), request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+		c.Options.Orders = request.Present(int64(-1))
+		return nil
+	}))
 	if err != nil || result.StatusCode != 204 || len(result.Body) != 0 || result.Header.Get("X-Request-ID") != "updated" {
 		t.Fatal(result, err)
 	}
@@ -131,7 +137,13 @@ func TestKeyManagerQuotasReplacementPresenceAndOwnedOptions(t *testing.T) {
 	options := quotas.UpdateOpts{Secrets: request.Present(int64(0)), Orders: request.Present(int64(-1)), Containers: request.Present(int64(9007199254740993)), Consumers: request.Present(int64(-2)), CAs: request.Present(int64(math.MaxInt64))}
 	bulk := quotas.WithUpdateOptions(options)
 	options.Secrets = request.Present(int64(99))
-	for _, option := range [][]quotas.UpdateOption{{}, {bulk}, {bulk, quotas.WithUpdateSecrets(5)}, {quotas.WithUpdateSecrets(5), bulk}, {bulk, quotas.WithUpdateOptions(quotas.UpdateOpts{})}} {
+	for _, option := range [][]quotas.UpdateOption{{}, {bulk}, {bulk, request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+		c.Options.Secrets = request.Present(int64(5))
+		return nil
+	})}, {request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+		c.Options.Secrets = request.Present(int64(5))
+		return nil
+	}), bulk}, {bulk, quotas.WithUpdateOptions(quotas.UpdateOpts{})}} {
 		if _, err := scope.Update(context.Background(), quotas.UpdateOpts{}, option...); err != nil {
 			t.Fatal(err)
 		}
@@ -439,7 +451,10 @@ func TestKeyManagerQuotasUpdateAcknowledgementAndTerminalFailures(t *testing.T) 
 				}
 				testcloud.JSON(w, code, `{"project_quotas":{"secrets":9}}`)
 			})
-			result, err := quotaScope(t, cloud.Client("key-manager", quotaPrefix), "project").Update(context.Background(), quotas.UpdateOpts{}, quotas.WithUpdateSecrets(1))
+			result, err := quotaScope(t, cloud.Client("key-manager", quotaPrefix), "project").Update(context.Background(), quotas.UpdateOpts{}, request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+				c.Options.Secrets = request.Present(int64(1))
+				return nil
+			}))
 			if result != nil || !gophercloud.ResponseCodeIs(err, code) || calls.Load() != 1 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -487,7 +502,13 @@ func TestKeyManagerQuotasHeadersSnapshotReuseAndCancellation(t *testing.T) {
 	})
 	client := cloud.Client("key-manager", quotaPrefix)
 	scope := quotaScope(t, client, "project")
-	opts := []quotas.UpdateOption{quotas.WithUpdateCAs(4), quotas.WithUpdateConsumers(0), request.Header("x-trace", "first"), request.Header("X-Trace", "last")}
+	opts := []quotas.UpdateOption{request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+		c.Options.CAs = request.Present(int64(4))
+		return nil
+	}), request.Custom(func(c *request.Config[quotas.UpdateOpts]) error {
+		c.Options.Consumers = request.Present(int64(0))
+		return nil
+	}), request.Header("x-trace", "first"), request.Header("X-Trace", "last")}
 	var wg sync.WaitGroup
 	for i := 0; i < 4; i++ {
 		wg.Add(1)

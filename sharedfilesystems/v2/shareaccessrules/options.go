@@ -27,24 +27,12 @@ type AllowOption = request.WriteCall
 var allowCalls = manilaown.HeaderFieldCalls[AllowOpts]()
 
 func WithAllowOptions(value AllowOpts) AllowOption { return request.Custom(request.WithOptions(value)) }
-func WithAccessLevel(value string) AllowOption {
-	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.AccessLevel = value; return nil })
-}
 func WithMetadata(value map[string]string) AllowOption {
 	copy := make(map[string]string, len(value))
 	for key, item := range value {
 		copy[key] = item
 	}
 	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.Metadata = &copy; return nil })
-}
-func WithLockVisibility(value bool) AllowOption {
-	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.LockVisibility = &value; return nil })
-}
-func WithLockDeletion(value bool) AllowOption {
-	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.LockDeletion = &value; return nil })
-}
-func WithLockReason(value string) AllowOption {
-	return request.Custom(func(c *request.Config[AllowOpts]) error { c.Options.LockReason = &value; return nil })
 }
 
 // DenyOpts configures access revocation. Nil IgnoreMissing means true.
@@ -53,10 +41,10 @@ type DenyOpts struct {
 	IgnoreMissing *bool `json:"-"`
 }
 
-// DenyOption is one option of Deny: WithDenyOptions, WithUnrestrict,
-// WithDenyField, request.Header, request.IgnoreMissing or request.Custom over
-// *request.Config[DenyOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// DenyOption is one option of Deny: WithDenyOptions, WithDenyField,
+// request.Header, request.IgnoreMissing or request.Custom over
+// *request.Config[DenyOpts] (for example to set Unrestrict). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type DenyOption = request.DeleteCall
 
 var denyCalls = func() calls.Spec[request.Config[DenyOpts]] {
@@ -72,9 +60,6 @@ func WithDenyOptions(value DenyOpts) DenyOption { return request.Custom(request.
 // this option stays.
 func WithDenyField(key string, value any) DenyOption {
 	return request.Custom(request.WithField[DenyOpts](key, value))
-}
-func WithUnrestrict(value bool) DenyOption {
-	return request.Custom(func(c *request.Config[DenyOpts]) error { c.Options.Unrestrict = &value; return nil })
 }
 
 type GetOpts struct{}

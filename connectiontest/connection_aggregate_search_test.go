@@ -65,7 +65,7 @@ func TestR2CloudComputeSearchAggregatesRejectsServerOnlyOptionsBeforeHTTP(t *tes
 	if !errors.Is(err, resource.ErrInvalidOption) || len(cloud.Calls()) != 0 {
 		t.Fatal(err, cloud.Calls())
 	}
-	_, err = cloud.Conn.SearchAggregates(context.Background(), "", sdk.WithCloudServerBare(true))
+	_, err = cloud.Conn.SearchAggregates(context.Background(), "", func(c *sdk.CloudServerReadOpts) error { c.Bare = true; return nil })
 	if !errors.Is(err, resource.ErrInvalidOption) {
 		t.Fatal(err)
 	}

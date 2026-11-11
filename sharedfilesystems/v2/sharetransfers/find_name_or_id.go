@@ -16,21 +16,17 @@ import (
 // to true (a missing resource returns nil, nil).
 type FindOpts struct {
 	IgnoreMissing *bool
-	AllProjects   *bool
+	// AllProjects sends all_tenants=true or false on the list fallback only.
+	AllProjects *bool
 }
 
-// FindOption is one option of FindByNameOrID: WithFindAllProjects,
-// request.Query (a list-fallback filter, a string or []string value; a
-// supplied "name" replaces the default name=<identity> filter, as Python
-// does), request.IgnoreMissing or request.Custom over
-// *request.Config[FindOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// FindOption is one option of FindByNameOrID: request.Query (a list-fallback
+// filter, a string or []string value; a supplied "name" replaces the default
+// name=<identity> filter, as Python does), request.IgnoreMissing or
+// request.Custom over *request.Config[FindOpts] (for example to set
+// AllProjects). Other shared calls fail with resource.ErrInvalidOption before
+// HTTP.
 type FindOption = request.FindCall
-
-// WithFindAllProjects sends all_tenants=true or false on the list fallback only.
-func WithFindAllProjects(value bool) FindOption {
-	return request.Custom(func(c *request.Config[FindOpts]) error { c.Options.AllProjects = &value; return nil })
-}
 
 var findCalls = manilaown.FindCalls(func(o *FindOpts) **bool { return &o.IgnoreMissing })
 

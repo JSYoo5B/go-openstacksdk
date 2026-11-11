@@ -64,7 +64,7 @@ func TestMagnumQuotaScopedOperationsKeepProjectResourceBodyAndMetadata(t *testin
 	extension := map[string]string{"tier": "requested"}
 	field := request.Field("vendor", extension)
 	extension["tier"] = "caller-change"
-	updated, err := scope.Update(context.Background(), quotas.WithHardLimit(0), field)
+	updated, err := scope.Update(context.Background(), request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), field)
 	if err != nil || updated == nil || updated.RequestProjectID != "project-fixed" || updated.RequestResource != quotas.Cluster || updated.StatusCode != 202 || updated.Header.Get("X-Openstack-Request-Id") != "quota-update" || updated.ID != "9007199254740993" || string(updated.Body["optional"]) != "null" {
 		t.Fatal(updated, err)
 	}
@@ -137,14 +137,14 @@ func TestMagnumQuotaOperationsPreflightRejectsInvalidOptionsAndNilScopes(t *test
 	scope := newMagnumQuotaScope(t, cloud)
 	for _, options := range [][]quotas.QuotaUpdateOption{
 		nil, {nil}, {quotas.WithQuotaUpdateOptions(quotas.QuotaUpdateOpts{})},
-		{quotas.WithHardLimit(0), request.Field("hard_limit", 1)},
-		{quotas.WithHardLimit(0), request.Field("project_id", "changed")},
-		{quotas.WithHardLimit(0), request.Field("resource", "changed")},
-		{quotas.WithHardLimit(0), request.Field("id", 1)},
-		{quotas.WithHardLimit(0), request.Field("vendor", make(chan bool))},
-		{quotas.WithHardLimit(0), request.Custom(request.WithQuery[quotas.QuotaUpdateOpts]("all_tenants", "true"))},
-		{quotas.WithHardLimit(0), request.Custom(request.WithHeader[quotas.QuotaUpdateOpts]("X-Vendor", "value"))},
-		{quotas.WithHardLimit(0), request.Custom(request.WithArgument[quotas.QuotaUpdateOpts]("unsupported", true))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Field("hard_limit", 1)},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Field("project_id", "changed")},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Field("resource", "changed")},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Field("id", 1)},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Field("vendor", make(chan bool))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Custom(request.WithQuery[quotas.QuotaUpdateOpts]("all_tenants", "true"))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Custom(request.WithHeader[quotas.QuotaUpdateOpts]("X-Vendor", "value"))},
+		{request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }), request.Custom(request.WithArgument[quotas.QuotaUpdateOpts]("unsupported", true))},
 	} {
 		if value, err := scope.Update(context.Background(), options...); value != nil || !errors.Is(err, resource.ErrInvalidOption) || calls.Load() != 0 {
 			t.Fatal(value, err, calls.Load())
@@ -168,7 +168,7 @@ func magnumQuotaOperation(scope *quotas.ResourceQuotaScope, operation string, ct
 		_, err := scope.Get(ctx)
 		return err
 	case "Update":
-		_, err := scope.Update(ctx, quotas.WithHardLimit(0))
+		_, err := scope.Update(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }))
 		return err
 	default:
 		_, err := scope.Delete(ctx)

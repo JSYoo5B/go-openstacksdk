@@ -33,9 +33,9 @@ func TestContainerInfraSharedCallsUnsupportedBeforeHTTP(t *testing.T) {
 		}
 	}
 	// Create and Update take Field only; Delete takes IgnoreMissing only.
-	_, err := scope.Create(ctx, quotas.WithHardLimit(1), request.Header("X-Test", "1"))
+	_, err := scope.Create(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Header("X-Test", "1"))
 	requireUnsupportedCall(t, err, "Header")
-	_, err = scope.Update(ctx, quotas.WithHardLimit(1), request.Microversion("1.1"))
+	_, err = scope.Update(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 1; c.Options.HardLimit = &v; return nil }), request.Microversion("1.1"))
 	requireUnsupportedCall(t, err, "Microversion")
 	_, err = scope.Delete(ctx, request.Header("X-Test", "1"))
 	requireUnsupportedCall(t, err, "Header")

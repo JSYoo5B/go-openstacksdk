@@ -74,7 +74,7 @@ func TestR2IronicBDeployTemplateListDetailAndPaging(t *testing.T) {
 	fake := r2IronicBFixed(t, cloud, 200, `{"deploy_templates":[{"uuid":"a","name":"A"},{"uuid":"b","name":"B"}]}`)
 	api := deploytemplates.New(r2IronicBClient(cloud))
 	n := 0
-	for v, err := range api.List(context.Background(), deploytemplates.WithListDetail(true)) {
+	for v, err := range api.List(context.Background(), request.Custom(func(c *request.Config[deploytemplates.ListOpts]) error { c.Options.Detail = true; return nil })) {
 		if err != nil || v.Name == "" {
 			t.Fatal(v, err)
 		}
@@ -114,7 +114,7 @@ func TestR2IronicBDeployTemplateFindDirectThenListFallback(t *testing.T) {
 		}
 	}
 	api, fake = r2IronicBFindCloud(t, 404, `{"deploy_templates":[{"uuid":"a"}]}`)
-	if v, err := api.Find(ctx, "nope", deploytemplates.WithFindDetail(false)); err != nil || v != nil || fake.all()[1].RawQuery != "" {
+	if v, err := api.Find(ctx, "nope", request.Custom(func(c *request.Config[deploytemplates.FindOpts]) error { c.Options.Detail = false; return nil })); err != nil || v != nil || fake.all()[1].RawQuery != "" {
 		t.Fatal(v, err)
 	}
 	if _, err := api.Find(ctx, "nope", request.IgnoreMissing(false)); !errors.Is(err, resource.ErrNotFound) {
@@ -174,7 +174,7 @@ func TestR2IronicBInspectionRuleOperations(t *testing.T) {
 	cloud = testcloud.New(t)
 	fake = r2IronicBFixed(t, cloud, 200, `{"inspection_rules":[{"uuid":"a"}]}`)
 	api = inspectionrules.New(r2IronicBClient(cloud))
-	for _, err := range api.List(ctx, inspectionrules.WithListDetail(true)) {
+	for _, err := range api.List(ctx, request.Custom(func(c *request.Config[inspectionrules.ListOpts]) error { c.Options.Detail = true; return nil })) {
 		if err != nil {
 			t.Fatal(err)
 		}

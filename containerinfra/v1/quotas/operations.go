@@ -19,7 +19,8 @@ type QuotaUpdateOpts = QuotaCreateOpts
 type QuotaUpdateOption = request.WriteCall
 
 // WithQuotaUpdateOptions snapshots the hard limit at construction, replacing
-// typed update attributes. WithHardLimit can also be used for an update.
+// typed update attributes. QuotaCreateOpts.HardLimit can also be used for an
+// update.
 func WithQuotaUpdateOptions(value QuotaUpdateOpts) QuotaUpdateOption {
 	return WithQuotaCreateOptions(value)
 }

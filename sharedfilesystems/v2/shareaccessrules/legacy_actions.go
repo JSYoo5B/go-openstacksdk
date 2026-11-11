@@ -72,17 +72,13 @@ type DenyActionOpts struct {
 	Unrestrict    *bool
 }
 
-// DenyActionOption is one option of DenyAccessAction: WithDenyActionUnrestrict,
-// request.IgnoreMissing (Python's ignore_missing; the default is true) or
-// request.Custom over *request.Config[DenyActionOpts]. Other shared calls
-// fail with resource.ErrInvalidOption before HTTP.
+// DenyActionOption is one option of DenyAccessAction: request.IgnoreMissing
+// (Python's ignore_missing; the default is true) or request.Custom over
+// *request.Config[DenyActionOpts] (for example to set Unrestrict). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type DenyActionOption = request.DeleteCall
 
 var denyActionCalls = manilaown.IgnoreMissingCalls(func(o *DenyActionOpts) **bool { return &o.IgnoreMissing })
-
-func WithDenyActionUnrestrict(value bool) DenyActionOption {
-	return request.Custom(func(c *request.Config[DenyActionOpts]) error { c.Options.Unrestrict = &value; return nil })
-}
 
 // DenyActionResult is the actual HTTP response of the accepted action, the
 // equivalent of the raw response Python returns.

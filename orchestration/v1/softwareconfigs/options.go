@@ -48,13 +48,6 @@ var (
 func WithCreateOptions(opts CreateOpts) CreateOption { return request.Custom(swcommon.Snapshot(opts)) }
 func WithListOptions(opts ListOpts) ListOption       { return request.Custom(swcommon.Snapshot(opts)) }
 
-func WithCreateName(value string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.Name = request.Present(value); return nil })
-}
-func WithCreateGroup(value string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.Group = request.Present(value); return nil })
-}
-
 // WithCreateConfig sends any JSON-encodable value, such as a script string or
 // a mapping. The value is encoded immediately.
 func WithCreateConfig(value any) CreateOption {

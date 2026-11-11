@@ -168,7 +168,7 @@ func TestR2CloudComputeGetServerByIDReturnsNilOnNotFoundAndExpandsFound(t *testi
 	if got, err := cloud.Conn.GetServerByID(ctx, "boom"); got != nil || err == nil {
 		t.Fatal(got, err)
 	}
-	got, err := cloud.Conn.GetServerByID(ctx, "s1", sdk.WithCloudServerBare(true))
+	got, err := cloud.Conn.GetServerByID(ctx, "s1", func(c *sdk.CloudServerReadOpts) error { c.Bare = true; return nil })
 	if err != nil || got == nil || got.Server == nil || got.Server.ID != "s1" || got.Interfaces != nil {
 		t.Fatalf("%+v %v", got, err)
 	}
@@ -193,7 +193,7 @@ func TestR2CloudComputeUpdateServerFindsStrictlyAndSendsOnlySuppliedAttributes(t
 	})
 	ctx := context.Background()
 	update := sdk.CloudServerUpdate{Name: request.Present("renamed"), Description: request.Null[string]()}
-	got, err := cloud.Conn.UpdateServer(ctx, "web-1", update, sdk.WithCloudServerBare(true))
+	got, err := cloud.Conn.UpdateServer(ctx, "web-1", update, func(c *sdk.CloudServerReadOpts) error { c.Bare = true; return nil })
 	if err != nil || got == nil || !got.Sent || got.Server == nil || got.Server.Name != "renamed" || got.Record == nil {
 		t.Fatalf("%+v %v", got, err)
 	}

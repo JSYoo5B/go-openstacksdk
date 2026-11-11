@@ -47,11 +47,11 @@ type CreateOption = request.WriteCall
 // resource.ErrInvalidOption before HTTP.
 type UpdateOption = request.WriteCall
 
-// ListOption is one option of List and All: WithListOptions,
-// WithListServerID, request.Limit, request.Marker, request.Query with a string
-// or []string value (it cannot replace limit, marker or server_id) or
-// request.Custom over *request.Config[ListOpts]. Other shared calls fail with
-// resource.ErrInvalidOption before HTTP.
+// ListOption is one option of List and All: WithListOptions, request.Limit,
+// request.Marker, request.Query with a string or []string value (it cannot
+// replace limit, marker or server_id) or request.Custom over
+// *request.Config[ListOpts] (for example to set ServerID). Other shared calls
+// fail with resource.ErrInvalidOption before HTTP.
 type ListOption = request.ListCall
 
 var (
@@ -63,31 +63,6 @@ var (
 func WithCreateOptions(opts CreateOpts) CreateOption { return request.Custom(swcommon.Snapshot(opts)) }
 func WithUpdateOptions(opts UpdateOpts) UpdateOption { return request.Custom(swcommon.Snapshot(opts)) }
 func WithListOptions(opts ListOpts) ListOption       { return request.Custom(swcommon.Snapshot(opts)) }
-func WithListServerID(serverID string) ListOption {
-	return request.Custom(func(c *request.Config[ListOpts]) error { c.Options.ServerID = &serverID; return nil })
-}
-
-func WithCreateAction(v string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.Action = request.Present(v); return nil })
-}
-func WithCreateConfigID(v string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.ConfigID = request.Present(v); return nil })
-}
-func WithCreateServerID(v string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.ServerID = request.Present(v); return nil })
-}
-func WithCreateStackUserProjectID(v string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error {
-		c.Options.StackUserProjectID = request.Present(v)
-		return nil
-	})
-}
-func WithCreateStatus(v string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.Status = request.Present(v); return nil })
-}
-func WithCreateStatusReason(v string) CreateOption {
-	return request.Custom(func(c *request.Config[CreateOpts]) error { c.Options.StatusReason = request.Present(v); return nil })
-}
 
 // WithCreateInputValues and WithCreateOutputValues encode any JSON-encodable
 // value immediately; Heat expects an object.
@@ -112,18 +87,6 @@ func WithCreateOutputValues(value any) CreateOption {
 	})
 }
 
-func WithUpdateAction(v string) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Action = request.Present(v); return nil })
-}
-func WithUpdateConfigID(v string) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.ConfigID = request.Present(v); return nil })
-}
-func WithUpdateStatus(v string) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.Status = request.Present(v); return nil })
-}
-func WithUpdateStatusReason(v string) UpdateOption {
-	return request.Custom(func(c *request.Config[UpdateOpts]) error { c.Options.StatusReason = request.Present(v); return nil })
-}
 func WithUpdateInputValues(value any) UpdateOption {
 	encoded, err := swcommon.RawJSON("input_values", value)
 	return request.Custom(func(c *request.Config[UpdateOpts]) error {

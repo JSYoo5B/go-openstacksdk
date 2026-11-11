@@ -153,7 +153,7 @@ func TestR2IronicBRunbookListFollowsNextLinkQueryOnly(t *testing.T) {
 	})
 	api := runbooks.New(r2IronicBClient(cloud))
 	var ids []string
-	for value, err := range api.List(context.Background(), runbooks.WithListDetail(true), request.Limit(1), request.Query("sort_key", "name")) {
+	for value, err := range api.List(context.Background(), request.Custom(func(c *request.Config[runbooks.ListOpts]) error { c.Options.Detail = true; return nil }), request.Limit(1), request.Query("sort_key", "name")) {
 		if err != nil {
 			t.Fatal(err)
 		}

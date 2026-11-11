@@ -16,7 +16,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.API.List`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.API.All`
 - `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores.WithListGlobalDefault`
+- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
 - `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
@@ -135,7 +135,7 @@ import (
 func ListNonDefaultBackends(ctx context.Context, client *gophercloud.ServiceClient) ([]*secretstores.SecretStore, error) {
 	return secretstores.New(client).All(ctx,
 		secretstores.WithListOptions(secretstores.ListOpts{Status: "ACTIVE", Limit: 10}),
-		secretstores.WithListGlobalDefault(false),
+		request.Custom(func(c *request.Config[secretstores.ListOpts]) error { v := false; c.Options.GlobalDefault = &v; return nil }),
 		request.MaxItems(5),
 		request.Paginated(false),
 	)

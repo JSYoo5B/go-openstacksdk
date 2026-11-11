@@ -108,7 +108,7 @@ func TestR2ManilaHeatFindByNameOrIDFollowsPythonFindFallbackAndDuplicates(t *tes
 		t.Fatal(err)
 	}
 	lists = nil
-	if _, err := api.FindByNameOrID(ctx, "nothing", shares.WithFindAllProjects(true), request.Query("project_id", "p")); err != nil || len(lists) != 1 || lists[0] != "all_tenants=true&name=nothing&project_id=p" {
+	if _, err := api.FindByNameOrID(ctx, "nothing", request.Custom(func(c *request.Config[shares.FindOpts]) error { v := true; c.Options.AllProjects = &v; return nil }), request.Query("project_id", "p")); err != nil || len(lists) != 1 || lists[0] != "all_tenants=true&name=nothing&project_id=p" {
 		t.Fatal(err, lists)
 	}
 	lists = nil
@@ -181,7 +181,11 @@ func TestR2ManilaHeatAccessActionsSkipVersionFloorAndLookups(t *testing.T) {
 			t.Fatal("collision accepted")
 		}
 	}
-	result, err := api.DenyAccessAction(ctx, r2ManilaID, "acc", shareaccessrules.WithDenyActionUnrestrict(true))
+	result, err := api.DenyAccessAction(ctx, r2ManilaID, "acc", request.Custom(func(c *request.Config[shareaccessrules.DenyActionOpts]) error {
+		v := true
+		c.Options.Unrestrict = &v
+		return nil
+	}))
 	if err != nil || result.StatusCode != 202 || result.Header.Get("X-Request-Id") != "deny" {
 		t.Fatal(result, err)
 	}

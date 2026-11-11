@@ -34,7 +34,7 @@ described in [rules](../../baremetalintrospection/v1/rules/README.md).
   resource instance; Go returns a boolean.
 - `Get` accepts `WithGetFields(server member names...)`, sent as a CSV `fields`
   query. Python also maps SDK attribute names (for example `id`) to server names.
-- List: `WithListDetail(true)` sends `detail=true` (false sends nothing, as
+- List: `ListOpts.Detail = true` sends `detail=true` (false sends nothing, as
   Python). `request.Limit` is a page size; without a published `next` link the
   walk continues with `marker=<last uuid>` until an empty page, like Python.
   A next link is used only for its query and only if it continues the same
@@ -48,7 +48,7 @@ described in [rules](../../baremetalintrospection/v1/rules/README.md).
 - `find_deploy_template` in Python passes `details=True` into the direct fetch
   as an unrecognised query and discards it in the fallback list. Go reads the
   reference directly, falls back on 400/403/404 to one complete list matched by
-  exact uuid or name, and applies `WithFindDetail` (default true) as `detail=true`
+  exact uuid or name, and applies `FindOpts.Detail` (default true) as `detail=true`
   on that list. Two matches return `resource.AmbiguousError`.
 - Runbook trait routes escape the trait as one path segment; Python joins it
   unescaped. `SetTraits(nil)` sends `{"traits":[]}`. Python also updates the local

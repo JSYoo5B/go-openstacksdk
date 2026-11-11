@@ -17,23 +17,14 @@ type QuotaCreateOpts struct {
 	HardLimit *int `json:"hard_limit"`
 }
 
-// QuotaCreateOption is one option of Create and Update: WithHardLimit,
-// WithQuotaCreateOptions, request.Field (an additional deployment JSON field;
-// core quota attributes and scope identity cannot be replaced) or
-// request.Custom over *request.Config[QuotaCreateOpts]. Other shared calls
-// fail with resource.ErrInvalidOption before HTTP.
+// QuotaCreateOption is one option of Create and Update: WithQuotaCreateOptions,
+// request.Field (an additional deployment JSON field; core quota attributes and
+// scope identity cannot be replaced) or request.Custom over
+// *request.Config[QuotaCreateOpts] (for example to set HardLimit). Other shared
+// calls fail with resource.ErrInvalidOption before HTTP.
 type QuotaCreateOption = request.WriteCall
 
 var quotaWriteCalls = calls.Spec[request.Config[QuotaCreateOpts]]{Field: calls.ConfigField[QuotaCreateOpts]}
-
-// WithHardLimit supplies an exact integer without requiring a pointer variable.
-func WithHardLimit(value int) QuotaCreateOption {
-	return request.Custom(func(config *request.Config[QuotaCreateOpts]) error {
-		copy := value
-		config.Options.HardLimit = &copy
-		return nil
-	})
-}
 
 // WithQuotaCreateOptions snapshots its pointer at option construction and gives
 // each application a private copy. It replaces all typed create attributes.

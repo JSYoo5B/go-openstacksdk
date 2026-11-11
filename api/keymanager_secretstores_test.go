@@ -260,7 +260,11 @@ func TestKeyManagerSecretStoresListQuerySnapshotsAndConcurrentReuse(t *testing.T
 	a := secretstores.New(secretStoresClient(cloud))
 	opts := []secretstores.ListOption{options, request.Custom(query)}
 	seq := a.List(context.Background(), opts...)
-	opts[0] = secretstores.WithListGlobalDefault(true)
+	opts[0] = request.Custom(func(c *request.Config[secretstores.ListOpts]) error {
+		v := true
+		c.Options.GlobalDefault = &v
+		return nil
+	})
 	if calls.Load() != 0 {
 		t.Fatal("iterator construction was eager")
 	}

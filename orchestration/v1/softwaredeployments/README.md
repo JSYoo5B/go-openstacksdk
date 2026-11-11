@@ -24,7 +24,7 @@ is SDK-owned. It corresponds to the pinned openstacksdk
 - `input_values`/`output_values` keep exact JSON (large integers survive).
 - `Delete` ignores a missing deployment by default; use
   `resource.WithMissingError()` to report it.
-- `List` paging matches softwareconfigs. `WithListServerID` sends Heat's
+- `List` paging matches softwareconfigs. `ListOpts.ServerID` sends Heat's
   documented `server_id` filter; Python's query mapping lacks it.
 - Mutations are sent once, never replayed, and success is an acknowledgement
   only; observe `Status` through `Get` when completion matters.

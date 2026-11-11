@@ -122,7 +122,7 @@ func r2CloudComputeFloatingFixture(t *testing.T, remains bool, fipDelete int) *r
 
 func TestR2CloudComputeDeleteServerDeleteIPsRemovesFloatingBeforeServer(t *testing.T) {
 	cloud := r2CloudComputeFloatingFixture(t, false, 204)
-	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerDeleteIPs(true))
+	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", func(c *sdk.CloudServerActionOpts) error { c.DeleteIPs = true; return nil })
 	if err != nil || !ok {
 		t.Fatal(ok, err)
 	}
@@ -139,7 +139,7 @@ func TestR2CloudComputeDeleteServerDeleteIPsRemovesFloatingBeforeServer(t *testi
 
 func TestR2CloudComputeDeleteServerDeleteIPsFailureAbortsServerDelete(t *testing.T) {
 	cloud := r2CloudComputeFloatingFixture(t, true, 500)
-	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", sdk.WithCloudServerDeleteIPs(true))
+	ok, err := cloud.Conn.DeleteServer(context.Background(), "s1", func(c *sdk.CloudServerActionOpts) error { c.DeleteIPs = true; return nil })
 	if err == nil || ok {
 		t.Fatal(ok, err)
 	}
@@ -173,14 +173,14 @@ func TestR2CloudComputeRebuildServerSendsImageAndPasswordAndRejectsEmptyImage(t 
 	if len(cloud.Calls()) != 0 {
 		t.Fatal(cloud.Calls())
 	}
-	got, err := cloud.Conn.RebuildServer(ctx, "s1", "img1", sdk.WithCloudServerActionBare(true))
+	got, err := cloud.Conn.RebuildServer(ctx, "s1", "img1", func(c *sdk.CloudServerActionOpts) error { c.Bare = true; return nil })
 	if err != nil || got == nil || !got.Sent || got.Server == nil || got.AdminPassword != "fresh" {
 		t.Fatalf("%+v %v", got, err)
 	}
 	if body := cloud.Calls()[0].Body; body != `{"rebuild":{"imageRef":"img1"}}` {
 		t.Fatal(body)
 	}
-	if _, err = cloud.Conn.RebuildServer(ctx, "s1", "img1", sdk.WithCloudServerAdminPassword("pw"), sdk.WithCloudServerActionBare(true)); err != nil {
+	if _, err = cloud.Conn.RebuildServer(ctx, "s1", "img1", func(c *sdk.CloudServerActionOpts) error { c.AdminPassword = "pw"; return nil }, func(c *sdk.CloudServerActionOpts) error { c.Bare = true; return nil }); err != nil {
 		t.Fatal(err)
 	}
 	if body := cloud.Calls()[1].Body; body != `{"rebuild":{"adminPass":"pw","imageRef":"img1"}}` {
@@ -199,8 +199,8 @@ func TestR2CloudComputeRebuildServerWaitRestoresAdminPasswordOnActiveServer(t *t
 		}
 		testcloud.JSON(w, 200, `{"server":{"id":"s1","status":"`+status+`","name":"web-1","addresses":{}}}`)
 	})
-	got, err := cloud.Conn.RebuildServer(context.Background(), "s1", "img1", sdk.WithCloudServerAdminPassword("supplied"), sdk.WithCloudServerWait(true),
-		sdk.WithCloudServerWaitOptions(resource.WithPollInterval(time.Millisecond)), sdk.WithCloudServerActionBare(true))
+	got, err := cloud.Conn.RebuildServer(context.Background(), "s1", "img1", func(c *sdk.CloudServerActionOpts) error { c.AdminPassword = "supplied"; return nil }, sdk.WithCloudServerWait(true),
+		sdk.WithCloudServerWaitOptions(resource.WithPollInterval(time.Millisecond)), func(c *sdk.CloudServerActionOpts) error { c.Bare = true; return nil })
 	if err != nil || got == nil || got.Server == nil || got.Server.Status != "ACTIVE" || got.Server.AdminPass != "supplied" || got.AdminPassword != "supplied" || gets.Load() < 2 {
 		t.Fatalf("%+v %v", got, err)
 	}
@@ -213,7 +213,7 @@ func TestR2CloudComputeRebuildServerWaitFailureKeepsActionResultWithoutReplay(t 
 	cloud := r2CloudComputeNew(t)
 	cloud.JSON("POST "+r2CloudComputeBase+"/servers/s1/action", 202, `{"server":{"id":"s1","status":"REBUILD","adminPass":"fresh","addresses":{}}}`)
 	cloud.JSON("GET "+r2CloudComputeBase+"/servers/s1", 200, `{"server":{"id":"s1","status":"ERROR","addresses":{}}}`)
-	got, err := cloud.Conn.RebuildServer(context.Background(), "s1", "img1", sdk.WithCloudServerWait(true), sdk.WithCloudServerActionBare(true))
+	got, err := cloud.Conn.RebuildServer(context.Background(), "s1", "img1", sdk.WithCloudServerWait(true), func(c *sdk.CloudServerActionOpts) error { c.Bare = true; return nil })
 	if !errors.Is(err, resource.ErrFailedState) || got == nil || got.Server == nil || got.AdminPassword != "fresh" {
 		t.Fatalf("%+v %v", got, err)
 	}
