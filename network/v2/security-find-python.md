@@ -20,7 +20,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -80,7 +80,7 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.FindRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindOpts`
 - `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordFindQuery`
+- `github.com/JSYoo5B/go-openstacksdk/request.Query`
 - `github.com/JSYoo5B/go-openstacksdk/request.Custom`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
@@ -170,7 +170,7 @@ func main() {
     if *group != "" {
         options := []groups.RecordFindOption{request.IgnoreMissing(!*strict)}
         if *project != "" {
-            options = append(options, groups.WithRecordFindQuery("project_id", *project))
+            options = append(options, request.Query("project_id", *project))
         }
         value, err := service.SecurityGroups.FindRecord(ctx, *group, options...)
         if err != nil { log.Fatal(err) }
@@ -179,10 +179,10 @@ func main() {
     if *rule != "" {
         options := []rules.RecordFindOption{request.IgnoreMissing(!*strict)}
         if *project != "" {
-            options = append(options, rules.WithRecordFindQuery("project_id", *project))
+            options = append(options, request.Query("project_id", *project))
         }
         if *groupFilter != "" {
-            options = append(options, rules.WithRecordFindQuery("security_group_id", *groupFilter))
+            options = append(options, request.Query("security_group_id", *groupFilter))
         }
         value, err := service.SecurityRules.FindRecord(ctx, *rule, options...)
         if err != nil { log.Fatal(err) }

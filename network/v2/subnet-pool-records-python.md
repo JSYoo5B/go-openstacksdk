@@ -167,7 +167,6 @@ Go API:
 - `github.com/JSYoo5B/go-openstacksdk/request.Field`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.UpdateRecord`
 - `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordMutationOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.WithRecordAttribute`
 - `github.com/JSYoo5B/go-openstacksdk/request.Headers`
 - `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
 
@@ -241,6 +240,7 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
+    "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
 func main() {
@@ -271,8 +271,8 @@ func main() {
         rows, err = network.SubnetPools.AllRecords(ctx)
     case "update":
         options := []subnetpools.RecordMutationOption{}
-        if sent["name"] { options = append(options, subnetpools.WithRecordAttribute("name", *name)) }
-        if sent["quota"] { options = append(options, subnetpools.WithRecordAttribute("default_quota", *quota)) }
+        if sent["name"] { options = append(options, request.Field("name", *name)) }
+        if sent["quota"] { options = append(options, request.Field("default_quota", *quota)) }
         row, updateErr := network.SubnetPools.UpdateRecord(ctx, *pool, options...)
         err = updateErr
         if row != nil { rows = append(rows, row) }

@@ -227,7 +227,6 @@ import (
 
     sdk "github.com/JSYoo5B/go-openstacksdk"
     "github.com/JSYoo5B/go-openstacksdk/identity"
-    "github.com/JSYoo5B/go-openstacksdk/identity/v3/projects"
     "github.com/JSYoo5B/go-openstacksdk/request"
 )
 
