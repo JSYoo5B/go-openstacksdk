@@ -202,6 +202,9 @@ func (g *generator) generateServices() error {
 		if err := writeGo(g.root, key+"/service_generated.go", registry.Bytes()); err != nil {
 			return err
 		}
+		if err := writePackageDoc(filepath.Join(g.root, key), parts[1], servicePackageDoc(key, spec)); err != nil {
+			return err
+		}
 		if err := g.writeServiceREADME(key, spec, paths); err != nil {
 			return err
 		}

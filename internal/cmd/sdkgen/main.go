@@ -584,6 +584,9 @@ func (g *generator) generate(path string) error {
 	if err := os.WriteFile(filepath.Join(dir, "api_generated.go"), source, 0644); err != nil {
 		return err
 	}
+	if err := writePackageDoc(dir, e.pkg.Name(), apiPackageDoc(path, e.pkg.Name())); err != nil {
+		return err
+	}
 	if err := g.emitNeutronDelete(pkg); err != nil {
 		return err
 	}
