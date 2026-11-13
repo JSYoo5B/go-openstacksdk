@@ -174,8 +174,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("Keystone v2.0 was removed in Queens and works only on older deployments. [Native Keystone v2.0 calls](native-calls.md) describes request bodies, success statuses, and administrator-only extension, role, tenant, token, and user calls." + "\n\n")
 		out.WriteString("See [Python Proxy mappings](python-parity.md) for openstacksdk identity v2 methods." + "\n\n")
 	case "placement/v1":
-		out.WriteString("[Native Placement calls](native-calls.md) describes paths, bodies, microversion headers, and success statuses for resource providers, inventories, allocations, traits, and related APIs.\n\n")
-		out.WriteString("See [Python Placement mappings](python-parity.md) for openstacksdk Proxy methods, Go APIs, and differences." + "\n\n")
+		out.WriteString("Run `go doc` on each package for call paths, bodies, microversion headers and success statuses. Python openstacksdk mappings, contracts and differences are recorded in [the review ledger](../../api/sdk_reviews.json).\n\n")
 	case "identity/v3":
 		out.WriteString("`Credentials.UpdateRecord` accepts concrete options for declared fields, preserving omission/null and Source seed overlays. [Credential updates](credential-update-python.md) and [Trust CRUD and lookup](trusts-python.md) describe owned results and defaults.\n\n")
 		out.WriteString("Owned credential/access-rule calls under `ApplicationCredentials.InUser` and `Credentials.CreateRecord/GetRecord/ListRecords/FindRecord/DeleteRecord` expose raw responses and default missing/list policies. [Application credentials and access rules](application-credentials-python.md) and [generic credentials](credentials-python.md) describe concrete options and distinctions from native EC2 routes.\n\n")

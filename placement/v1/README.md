@@ -13,9 +13,7 @@ Use Gophercloud v2.15.0's placement/v1 API through one authenticated service obj
 
 Native API coverage and openstacksdk Resource/workflow coverage are tracked separately. Python input aliases are not automatically applied to Go fields. Default responses use Gophercloud models; SDK-owned additions are documented per service. Editing a returned response does not automatically persist it.
 
-[Native Placement calls](native-calls.md) describes paths, bodies, microversion headers, and success statuses for resource providers, inventories, allocations, traits, and related APIs.
-
-See [Python Placement mappings](python-parity.md) for openstacksdk Proxy methods, Go APIs, and differences.
+Run `go doc` on each package for call paths, bodies, microversion headers and success statuses. Python openstacksdk mappings, contracts and differences are recorded in [the review ledger](../../api/sdk_reviews.json).
 
 ## Go usage
 

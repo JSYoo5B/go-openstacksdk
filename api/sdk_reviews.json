@@ -64523,7 +64523,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python create_resource_provider attribute handling and microversion negotiation are tracked separately.",
@@ -64548,7 +64548,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider and find_resource_provider lookup are tracked separately.",
@@ -64575,7 +64575,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python resource_providers query mapping, 1.39 repeated filters and generator behavior are tracked separately.",
@@ -64602,7 +64602,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python update_resource_provider attribute handling are tracked separately.",
@@ -64627,7 +64627,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider ignore_missing and wait_for_delete are tracked separately.",
@@ -64652,7 +64652,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python fetch_resource_provider_usages are tracked separately.",
@@ -64677,7 +64677,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python resource_provider_allocations are tracked separately.",
@@ -64702,7 +64702,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python resource_provider_inventories are tracked separately.",
@@ -64729,7 +64729,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python set_resource_provider_inventories are tracked separately.",
@@ -64754,7 +64754,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider_inventories are tracked separately.",
@@ -64779,7 +64779,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider_inventory are tracked separately.",
@@ -64806,7 +64806,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python create_resource_provider_inventory and update_resource_provider_inventory are tracked separately.",
@@ -64831,7 +64831,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider_inventory are tracked separately.",
@@ -64856,7 +64856,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider_trait are tracked separately.",
@@ -64883,7 +64883,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python set_resource_provider_trait are tracked separately.",
@@ -64908,7 +64908,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python delete_resource_provider_trait are tracked separately.",
@@ -64933,7 +64933,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python get_resource_provider_aggregates and fetch_resource_provider_aggregates are tracked separately.",
@@ -64961,7 +64961,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceproviders call only; Python set_resource_provider_aggregates are tracked separately.",
@@ -64988,7 +64988,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python create_resource_class are tracked separately.",
@@ -65013,7 +65013,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python get_resource_class are tracked separately.",
@@ -65038,7 +65038,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python resource_classes generator are tracked separately.",
@@ -65063,7 +65063,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python update_resource_class are tracked separately.",
@@ -65088,7 +65088,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/resourceclasses call only; Python delete_resource_class are tracked separately.",
@@ -65113,7 +65113,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/traits call only; Python create_trait are tracked separately.",
@@ -65138,7 +65138,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/traits call only; Python get_trait are tracked separately.",
@@ -65165,7 +65165,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/traits call only; Python traits generator are tracked separately.",
@@ -65190,7 +65190,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/traits call only; Python delete_trait are tracked separately.",
@@ -65215,7 +65215,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/allocations call only; Python get_allocation are tracked separately.",
@@ -65242,7 +65242,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/allocations call only; Python create_allocations and update_allocation are tracked separately.",
@@ -65269,7 +65269,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/allocations call only; Python batch allocation workflows are tracked separately.",
@@ -65294,7 +65294,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/allocations call only; Python delete_allocation are tracked separately.",
@@ -65327,7 +65327,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/allocationcandidates call only; Python allocation_candidates are tracked separately.",
@@ -65354,7 +65354,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/native-calls.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native placement/v1/usages call only; Python usages and the pre-1.38 ExtractPre138 shape are tracked separately.",
@@ -69891,8 +69891,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/allocationcandidates/python-list-query.md",
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.34.",
@@ -69918,7 +69917,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
@@ -69944,7 +69943,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
@@ -69983,8 +69982,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/allocations/python-create-record.md",
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
@@ -70023,7 +70021,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md",
+        "placement/v1/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -70048,7 +70046,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
@@ -70076,7 +70074,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
@@ -70112,8 +70110,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/resourceclasses/python-update-record.md",
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python sends min(1.2, server maximum) or the session default microversion; Go always sends 1.2 for this call because 1.7 and later turn the PUT into a bodyless ensure-exists call.",
@@ -70138,7 +70135,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
@@ -70166,7 +70163,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.2.",
@@ -70191,7 +70188,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70219,7 +70216,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70245,7 +70242,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70270,7 +70267,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70304,7 +70301,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70334,7 +70331,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70359,7 +70356,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70384,7 +70381,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python emits RemovedInSDK50Warning and delegates to fetch_resource_provider_aggregates; Go has a single non-deprecated GetAggregates.",
@@ -70415,7 +70412,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70455,8 +70452,7 @@
         "Python takes total as a keyword-only int and sends nothing else by default; Go requires the CreateInventoryOpts struct."
       ],
       "documentation": [
-        "placement/v1/python-parity.md",
-        "placement/v1/python-inventory-and-deletion-waits.md"
+        "placement/v1/README.md"
       ]
     },
     {
@@ -70483,7 +70479,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md",
+        "placement/v1/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -70507,7 +70503,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python sends only the attrs it was given plus resource_provider_generation and placement fills defaults; Go always sends all six fields including zeros, so the caller supplies placement's defaults for fields Python would omit.",
@@ -70531,7 +70527,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python keeps the class name in id; Go returns only the fields in the response.",
@@ -70555,7 +70551,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python yields one ResourceProviderInventory per class and filters Body attribute query arguments locally; Go returns one map keyed by class and the caller filters.",
@@ -70579,7 +70575,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python uses ResourceProvider's 1.20.",
@@ -70604,7 +70600,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python uses ResourceProvider's 1.20.",
@@ -70628,7 +70624,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.20.",
@@ -70653,7 +70649,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python yields one ResourceProviderAllocation per consumer and filters Body attribute query arguments locally; Go returns one map keyed by consumer UUID.",
@@ -70677,7 +70673,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
@@ -70716,7 +70712,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md",
+        "placement/v1/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -70747,7 +70743,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
@@ -70774,7 +70770,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
@@ -70799,7 +70795,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
@@ -70823,7 +70819,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.6.",
@@ -70862,7 +70858,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md",
+        "placement/v1/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -70894,7 +70890,7 @@
         }
       ],
       "documentation": [
-        "placement/v1/python-parity.md"
+        "placement/v1/README.md"
       ],
       "differences": [
         "Python negotiates min(Resource._max_microversion, server maximum) per call unless the session sets a default; Go sends the service client's Microversion string unchanged, so the caller builds a client with the matching value. Python pins 1.38.",
@@ -70975,8 +70971,7 @@
         "Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "documentation": [
-        "placement/v1/python-parity.md",
-        "placement/v1/python-inventory-and-deletion-waits.md",
+        "placement/v1/README.md",
         "docs/python-proxy-waits.md"
       ]
     },
@@ -71050,8 +71045,7 @@
         "Python waits use a fixed poll interval. resource.WithWaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of the interval and strategy options wins."
       ],
       "documentation": [
-        "placement/v1/python-parity.md",
-        "placement/v1/python-inventory-and-deletion-waits.md",
+        "placement/v1/README.md",
         "docs/python-proxy-waits.md"
       ]
     },
