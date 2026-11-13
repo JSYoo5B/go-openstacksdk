@@ -4,14 +4,7 @@
 
 Use Gophercloud v2.15.0's messaging/v2 API through one authenticated service object. Connection manages authentication, region, endpoint interface and TLS.
 
-| Operation | openstacksdk | Go |
-|---|---|---|
-| Service access | `conn.message` | `conn.MessagingV2(ctx)` |
-| Optional arguments and defaults | keyword arguments | concrete options and operation-specific `With...Options` |
-| Extension inputs | `**attrs`, `**query` | `request.Field`, `request.Query` and `request.Header` where the operation supports them |
-| Results | Resource or generator | typed values and errors, or `iter.Seq2` |
-
-Native API coverage and openstacksdk Resource/workflow coverage are tracked separately. Python input aliases are not automatically applied to Go fields. Default responses use Gophercloud models; SDK-owned additions are documented per service. Editing a returned response does not automatically persist it.
+Service access: `conn.MessagingV2(ctx)` (openstacksdk: `conn.message`).
 
 `Subscriptions.InQueue(ctx, queueName)` fixes the caller's queue name without lookup. Create/Get/List/All return SDK-owned Subscription models; Delete returns only error. POST201 preserves optional subscription_id and actual raw output. Location may be a collection URL and is not followed or treated as an item ID. A stable connection Client-ID is used; listing follows Python MessageResource row-count limit/last-ID marker rules. See [subscriptions](subscriptions/README.md) for per-call project headers, omitted TTL, consumption controls, delete404 defaults and remaining Resource/cache contracts.
 
@@ -27,9 +20,9 @@ for value, err := range service.Queues.List(ctx) {
 }
 ```
 
-Examples use standard-library `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`. Find treats missing resources as errors by default; `resource.WithIgnoreMissing()` returns `nil, nil`. Delete ignores missing resources by default.
+Examples use `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`.
 
-## Resources and common policies
+## Resources
 
 | Service field | API package | Common policies and scope |
 |---|---|---|
@@ -38,12 +31,4 @@ Examples use standard-library `fmt` and `github.com/JSYoo5B/go-openstacksdk/reso
 | `Queues` | [queues](queues/api_generated.go) | API operations; no common Collection policies |
 | `Subscriptions` | [subscriptions](subscriptions/api.go) | `InQueue(ctx, queueName)`: fixed-name Create/Get/List/All/Delete; no Resources/Find/Wait/Update |
 
-Common Collections provide exact name lookup, duplicate-name errors, pagination, context cancellation, and preserved HTTP errors. Wait returns `ErrUnsupported` for resources without status support.
-
-## Mutation requests
-
-Pass concrete options to resource Create/Update APIs. Use typed options for standard fields and `request.Field` for extension fields; extension queries and headers use `request.Query` and `request.Header`. Each generated option type is a `request` call category, so an extension mechanism the operation does not support does not compile. Standard-field/header overrides are rejected before requests. The SDK implements request-builder interfaces.
-
-Operations requiring parents use [scope objects](../../docs/scoped-resources.md), whose Create/Update methods accept the same concrete options. This API reference does not imply support for response tracking or every composite Python cloud operation.
-
-See the [openstacksdk inventory](../../api/openstacksdk/README.md), [complete API reference](../../api/README.md), and [project README](../../README.md) for comparison criteria, Go APIs, and validation.
+Shared rules for options, name lookup, listing, parent scopes, waits and microversions are in [common operations](../../docs/common-operations.md), [finding identities](../../docs/finding-identities.md), [listing](../../docs/listing.md), [scoped resources](../../docs/scoped-resources.md), [service waits](../../docs/service-waits.md) and [microversions](../../docs/microversions.md). Run `go doc` on a package for its calls; Python openstacksdk mappings and contracts are recorded in [the review ledger](../../api/sdk_reviews.json).

@@ -46,14 +46,11 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	if parts[0] == "metric" {
 		pythonAccess = "No directly corresponding service (Aetos)"
 	}
-	fmt.Fprintf(&out, "| Operation | openstacksdk | Go |\n|---|---|---|\n| Service access | %s | `conn.%s(ctx)` |\n| Optional arguments and defaults | keyword arguments | concrete options and operation-specific `With...Options` |\n| Extension inputs | `**attrs`, `**query` | `request.Field`, `request.Query` and `request.Header` where the operation supports them |\n| Results | Resource or generator | typed values and errors, or `iter.Seq2` |\n\n", pythonAccess, method)
-	out.WriteString("Native API coverage and openstacksdk Resource/workflow coverage are tracked separately. Python input aliases are not automatically applied to Go fields. ")
+	fmt.Fprintf(&out, "Service access: `conn.%s(ctx)` (openstacksdk: %s).", method, pythonAccess)
 	if sdkOwnedService {
-		out.WriteString("SDK-owned typed responses preserve original fields, HTTP headers and status codes. Each endpoint validates its declared object envelope rather than using Python's permissive flat/empty response fallback. ")
-	} else {
-		out.WriteString("Default responses use Gophercloud models; SDK-owned additions are documented per service. ")
+		out.WriteString(" Responses keep original fields, HTTP headers and status codes.")
 	}
-	out.WriteString("Editing a returned response does not automatically persist it.\n\n")
+	out.WriteString("\n\n")
 	if key == "compute/v2" || key == "blockstorage/v2" || key == "blockstorage/v3" || key == "image/v2" {
 		out.WriteString("Selected stateful resources provide `WaitForState(ctx, ref, target, options...)` and `WaitForDelete(ctx, ref, options...)`. State waits use the service's exact ERROR/error failure defaults and no SDK timeout; deletion observation defaults to 120 seconds, with a 2-second interval. Compute Server `WaitForServer` defaults to ACTIVE and 120 seconds; Cinder Volume/Snapshot `WaitForAvailable` defaults to available. Caller `resource.With...` options apply last. Common `WaitFor/WaitForDeletion` retain their 5-minute default; native `WaitForStatus` has a separate contract. See [wait policies](../../docs/service-waits.md).\n\n")
 	}
@@ -174,7 +171,6 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("Keystone v2.0 was removed in Queens and works only on older deployments. [Native Keystone v2.0 calls](native-calls.md) describes request bodies, success statuses, and administrator-only extension, role, tenant, token, and user calls." + "\n\n")
 		out.WriteString("See [Python Proxy mappings](python-parity.md) for openstacksdk identity v2 methods." + "\n\n")
 	case "placement/v1":
-		out.WriteString("Run `go doc` on each package for call paths, bodies, microversion headers and success statuses. Python openstacksdk mappings, contracts and differences are recorded in [the review ledger](../../api/sdk_reviews.json).\n\n")
 	case "identity/v3":
 		out.WriteString("`Credentials.UpdateRecord` accepts concrete options for declared fields, preserving omission/null and Source seed overlays. [Credential updates](credential-update-python.md) and [Trust CRUD and lookup](trusts-python.md) describe owned results and defaults.\n\n")
 		out.WriteString("Owned credential/access-rule calls under `ApplicationCredentials.InUser` and `Credentials.CreateRecord/GetRecord/ListRecords/FindRecord/DeleteRecord` expose raw responses and default missing/list policies. [Application credentials and access rules](application-credentials-python.md) and [generic credentials](credentials-python.md) describe concrete options and distinctions from native EC2 routes.\n\n")
@@ -319,11 +315,11 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 			return err
 		}
 	}
-	out.WriteString("```\n\nExamples use standard-library `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`. Find treats missing resources as errors by default; `resource.WithIgnoreMissing()` returns `nil, nil`. Delete ignores missing resources by default.\n\n")
+	out.WriteString("```\n\nExamples use `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`.\n\n")
 	if parts[0] == "metric" {
 		out.WriteString("`metrics` refers to `github.com/JSYoo5B/go-openstacksdk/metric/v1/metrics`.\n\n")
 	}
-	out.WriteString("## Resources and common policies\n\n| Service field | API package | Common policies and scope |\n|---|---|---|\n")
+	out.WriteString("## Resources\n\n| Service field | API package | Common policies and scope |\n|---|---|---|\n")
 	for _, path := range paths {
 		var policies []string
 		apiFile := "api_generated.go"
@@ -491,17 +487,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		}
 		fmt.Fprintf(&out, "| `%s` | [%s](%s/%s) | %s |\n", registryField(path), path, path, apiFile, policy)
 	}
-	out.WriteString("\nCommon Collections provide exact name lookup, duplicate-name errors, pagination, context cancellation, and preserved HTTP errors. Wait returns `ErrUnsupported` for resources without status support.\n\n")
-	for _, record := range g.collections {
-		if record.Source != "" || record.Model == "" || record.Kind != "" || !strings.HasPrefix(record.Package, "github.com/JSYoo5B/go-openstacksdk/"+key+"/") {
-			continue
-		}
-		out.WriteString("Native-pager `Resources.List/All` and parent-scope `List/All` accept `resource.WithMaxItems(n)` and `resource.WithPaginated(false)` to cap raw rows or consume only the first page. Caps apply before local name/status and Trove user-host filters. Zero is unlimited; negative values fail during lazy iteration before HTTP. Native routes do not send caps as wire limit hints and preserve explicit page sizes, queries, and headers. Full-page extraction may still fail on malformed rows beyond the cap. Existing operation-specific options remain available on native typed List; common consumption options belong to Collections/scopes. See [service list comparisons](../../docs/listing.md) for actual bindings and continuation policies.\n\n")
-		break
-	}
-	out.WriteString("## Mutation requests\n\nPass concrete options to resource Create/Update APIs. Use typed options for standard fields and `request.Field` for extension fields; extension queries and headers use `request.Query` and `request.Header`. Each generated option type is a `request` call category, so an extension mechanism the operation does not support does not compile. Standard-field/header overrides are rejected before requests. The SDK implements request-builder interfaces.\n\n")
-	out.WriteString("Operations requiring parents use [scope objects](../../docs/scoped-resources.md), whose Create/Update methods accept the same concrete options. This API reference does not imply support for response tracking or every composite Python cloud operation.\n\n")
-	out.WriteString("See the [openstacksdk inventory](../../api/openstacksdk/README.md), [complete API reference](../../api/README.md), and [project README](../../README.md) for comparison criteria, Go APIs, and validation.\n")
+	out.WriteString("\nShared rules for options, name lookup, listing, parent scopes, waits and microversions are in [common operations](../../docs/common-operations.md), [finding identities](../../docs/finding-identities.md), [listing](../../docs/listing.md), [scoped resources](../../docs/scoped-resources.md), [service waits](../../docs/service-waits.md) and [microversions](../../docs/microversions.md). Run `go doc` on a package for its calls; Python openstacksdk mappings and contracts are recorded in [the review ledger](../../api/sdk_reviews.json).\n")
 	return os.WriteFile(filepath.Join(g.root, key, "README.md"), []byte(out.String()), 0644)
 }
 

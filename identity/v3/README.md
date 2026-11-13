@@ -4,14 +4,7 @@
 
 Use Gophercloud v2.15.0's identity/v3 API through one authenticated service object. Connection manages authentication, region, endpoint interface and TLS.
 
-| Operation | openstacksdk | Go |
-|---|---|---|
-| Service access | `conn.identity` | `conn.IdentityV3(ctx)` |
-| Optional arguments and defaults | keyword arguments | concrete options and operation-specific `With...Options` |
-| Extension inputs | `**attrs`, `**query` | `request.Field`, `request.Query` and `request.Header` where the operation supports them |
-| Results | Resource or generator | typed values and errors, or `iter.Seq2` |
-
-Native API coverage and openstacksdk Resource/workflow coverage are tracked separately. Python input aliases are not automatically applied to Go fields. Default responses use Gophercloud models; SDK-owned additions are documented per service. Editing a returned response does not automatically persist it.
+Service access: `conn.IdentityV3(ctx)` (openstacksdk: `conn.identity`).
 
 `Projects/Users/Groups/Domains/Roles.FindIdentity(ctx, identity, options...)` resolves name/ID strings automatically, with list fallback after GET400/403/404, exact ID/name and duplicate checks, and a default missing result of `nil, nil`. Select strict handling with `resource.WithIdentityFindIgnoreMissing(false)`. Caller `WithIdentityFindQuery` filters survive GET and fallback listing; automatic name hints apply only to listing. Concrete options control query/fallback. See [identity finding](../../docs/finding-identities.md) for binding, fixed parents, domain filters and path policy.
 
@@ -62,9 +55,9 @@ if err != nil { return err }
 _ = value
 ```
 
-Examples use standard-library `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`. Find treats missing resources as errors by default; `resource.WithIgnoreMissing()` returns `nil, nil`. Delete ignores missing resources by default.
+Examples use `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`.
 
-## Resources and common policies
+## Resources
 
 | Service field | API package | Common policies and scope |
 |---|---|---|
@@ -95,14 +88,4 @@ Examples use standard-library `fmt` and `github.com/JSYoo5B/go-openstacksdk/reso
 | `Trusts` | [trusts](trusts/api_generated.go) | `Resources`: ID reads, lists, deletion/deletion waits |
 | `Users` | [users](users/api_generated.go) | `Resources`: ID reads, lists, name lookup, deletion/deletion waits |
 
-Common Collections provide exact name lookup, duplicate-name errors, pagination, context cancellation, and preserved HTTP errors. Wait returns `ErrUnsupported` for resources without status support.
-
-Native-pager `Resources.List/All` and parent-scope `List/All` accept `resource.WithMaxItems(n)` and `resource.WithPaginated(false)` to cap raw rows or consume only the first page. Caps apply before local name/status and Trove user-host filters. Zero is unlimited; negative values fail during lazy iteration before HTTP. Native routes do not send caps as wire limit hints and preserve explicit page sizes, queries, and headers. Full-page extraction may still fail on malformed rows beyond the cap. Existing operation-specific options remain available on native typed List; common consumption options belong to Collections/scopes. See [service list comparisons](../../docs/listing.md) for actual bindings and continuation policies.
-
-## Mutation requests
-
-Pass concrete options to resource Create/Update APIs. Use typed options for standard fields and `request.Field` for extension fields; extension queries and headers use `request.Query` and `request.Header`. Each generated option type is a `request` call category, so an extension mechanism the operation does not support does not compile. Standard-field/header overrides are rejected before requests. The SDK implements request-builder interfaces.
-
-Operations requiring parents use [scope objects](../../docs/scoped-resources.md), whose Create/Update methods accept the same concrete options. This API reference does not imply support for response tracking or every composite Python cloud operation.
-
-See the [openstacksdk inventory](../../api/openstacksdk/README.md), [complete API reference](../../api/README.md), and [project README](../../README.md) for comparison criteria, Go APIs, and validation.
+Shared rules for options, name lookup, listing, parent scopes, waits and microversions are in [common operations](../../docs/common-operations.md), [finding identities](../../docs/finding-identities.md), [listing](../../docs/listing.md), [scoped resources](../../docs/scoped-resources.md), [service waits](../../docs/service-waits.md) and [microversions](../../docs/microversions.md). Run `go doc` on a package for its calls; Python openstacksdk mappings and contracts are recorded in [the review ledger](../../api/sdk_reviews.json).

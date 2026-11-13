@@ -4,14 +4,7 @@
 
 Use Gophercloud v2.15.0's blockstorage/v3 API through one authenticated service object. Connection manages authentication, region, endpoint interface and TLS.
 
-| Operation | openstacksdk | Go |
-|---|---|---|
-| Service access | `conn.block_storage` | `conn.BlockStorageV3(ctx)` |
-| Optional arguments and defaults | keyword arguments | concrete options and operation-specific `With...Options` |
-| Extension inputs | `**attrs`, `**query` | `request.Field`, `request.Query` and `request.Header` where the operation supports them |
-| Results | Resource or generator | typed values and errors, or `iter.Seq2` |
-
-Native API coverage and openstacksdk Resource/workflow coverage are tracked separately. Python input aliases are not automatically applied to Go fields. Default responses use Gophercloud models; SDK-owned additions are documented per service. Editing a returned response does not automatically persist it.
+Service access: `conn.BlockStorageV3(ctx)` (openstacksdk: `conn.block_storage`).
 
 Selected stateful resources provide `WaitForState(ctx, ref, target, options...)` and `WaitForDelete(ctx, ref, options...)`. State waits use the service's exact ERROR/error failure defaults and no SDK timeout; deletion observation defaults to 120 seconds, with a 2-second interval. Compute Server `WaitForServer` defaults to ACTIVE and 120 seconds; Cinder Volume/Snapshot `WaitForAvailable` defaults to available. Caller `resource.With...` options apply last. Common `WaitFor/WaitForDeletion` retain their 5-minute default; native `WaitForStatus` has a separate contract. See [wait policies](../../docs/service-waits.md).
 
@@ -66,9 +59,9 @@ if err != nil { return err }
 _ = value
 ```
 
-Examples use standard-library `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`. Find treats missing resources as errors by default; `resource.WithIgnoreMissing()` returns `nil, nil`. Delete ignores missing resources by default.
+Examples use `fmt` and `github.com/JSYoo5B/go-openstacksdk/resource`.
 
-## Resources and common policies
+## Resources
 
 | Service field | API package | Common policies and scope |
 |---|---|---|
@@ -97,14 +90,4 @@ Examples use standard-library `fmt` and `github.com/JSYoo5B/go-openstacksdk/reso
 | `Volumes` | [volumes](volumes/api_generated.go) | `Resources`: ID reads, lists, name lookup, deletion/deletion waits, status waits; `MetadataIn(ctx, ref)`: fixed metadata Get/Merge/Replace/DeleteKeys; SDK-owned requests and actual metadata responses; `WaitForState/WaitForDelete`: service-specific defaults and caller options |
 | `VolumeTypes` | [volumetypes](volumetypes/api_generated.go) | `Resources`: ID reads, lists, name lookup, deletion/deletion waits |
 
-Common Collections provide exact name lookup, duplicate-name errors, pagination, context cancellation, and preserved HTTP errors. Wait returns `ErrUnsupported` for resources without status support.
-
-Native-pager `Resources.List/All` and parent-scope `List/All` accept `resource.WithMaxItems(n)` and `resource.WithPaginated(false)` to cap raw rows or consume only the first page. Caps apply before local name/status and Trove user-host filters. Zero is unlimited; negative values fail during lazy iteration before HTTP. Native routes do not send caps as wire limit hints and preserve explicit page sizes, queries, and headers. Full-page extraction may still fail on malformed rows beyond the cap. Existing operation-specific options remain available on native typed List; common consumption options belong to Collections/scopes. See [service list comparisons](../../docs/listing.md) for actual bindings and continuation policies.
-
-## Mutation requests
-
-Pass concrete options to resource Create/Update APIs. Use typed options for standard fields and `request.Field` for extension fields; extension queries and headers use `request.Query` and `request.Header`. Each generated option type is a `request` call category, so an extension mechanism the operation does not support does not compile. Standard-field/header overrides are rejected before requests. The SDK implements request-builder interfaces.
-
-Operations requiring parents use [scope objects](../../docs/scoped-resources.md), whose Create/Update methods accept the same concrete options. This API reference does not imply support for response tracking or every composite Python cloud operation.
-
-See the [openstacksdk inventory](../../api/openstacksdk/README.md), [complete API reference](../../api/README.md), and [project README](../../README.md) for comparison criteria, Go APIs, and validation.
+Shared rules for options, name lookup, listing, parent scopes, waits and microversions are in [common operations](../../docs/common-operations.md), [finding identities](../../docs/finding-identities.md), [listing](../../docs/listing.md), [scoped resources](../../docs/scoped-resources.md), [service waits](../../docs/service-waits.md) and [microversions](../../docs/microversions.md). Run `go doc` on a package for its calls; Python openstacksdk mappings and contracts are recorded in [the review ledger](../../api/sdk_reviews.json).
