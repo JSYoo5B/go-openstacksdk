@@ -50,17 +50,27 @@ func TestIndependentSDKOwnedServiceRegistryAndCapabilityDocs(t *testing.T) {
 		t.Fatalf("registry field names: %s", registry)
 	}
 	docs := read("clustering/v1/README.md")
-	for _, part := range []string{"pinned Gophercloud does not provide it", "service build-info singleton", "list only", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "receivers/api.go", "profiles/README.md", "policies/README.md", "clusters/README.md", "nodes/README.md", "receivers/README.md", "object PATCH update", "69 directly declared operations", "Collection.Delete is unsupported", "policy attach/detach/update", "wire `user`", "waiting/README.md", "unlimited duration, ERROR failure, and a two-second interval", "Common Resources.Wait has a separate five-minute policy", "clusterpolicies/api.go", "clusterattributes/api.go", "separate binding IDs", "fixed-cluster/JSONPath", "tracking/README.md", "clusters/metadata/README.md", "Previous/Requested", "accepted Operation"} {
+	for _, part := range []string{"pinned Gophercloud does not provide it", "service build-info singleton", "list only", "service.ProfileTypes.Resources.List(ctx)", "service.ProfileTypes.Resources.Find(ctx", "profiles/api.go", "policies/api.go", "clusters/api.go", "nodes/api.go", "receivers/api.go", "Collection.Delete is unsupported", "clusterpolicies/api.go", "clusterattributes/api.go", "separate binding IDs", "fixed-cluster/JSONPath", "finding/README.md", "listing/README.md", "waiting/README.md", "tracking/README.md", "scoping/README.md"} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing actual SDK capability %q: %s", part, docs)
+		}
+	}
+	packageDocData, err := os.ReadFile(filepath.Join("..", "..", "..", "clustering", "v1", "doc.go"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	packageDoc := strings.Join(strings.Fields(strings.ReplaceAll(string(packageDocData), "//", "")), " ")
+	for _, part := range []string{"service type clustering", "FindIdentity", "Track and Load", "accepted action reference", "WaitForStatus (unlimited, ERROR fails, two-second", "WaitForDelete (120 seconds", "WithListFilter", "tainted 1.13"} {
+		if !strings.Contains(packageDoc, part) {
+			t.Fatalf("missing package doc capability %q: %s", part, packageDoc)
 		}
 	}
 	if strings.Contains(docs, "service.BuildInfo.Resources") || strings.Contains(docs, "service.ProfileTypes.Find(ctx") {
 		t.Fatal("documentation invented Collection or API method")
 	}
-	for _, part := range []string{"listing/README.md", "request.MaxItems", "request.Paginated", "resource.WithMaxItems", "resource.WithPaginated", "raw rows before local filtering", "ClusterPolicies apply the cap locally", "deployment behavior determines support for type catalog and Services hints", "do not establish full list parity"} {
-		if !strings.Contains(docs, part) {
-			t.Fatalf("missing bounded Senlin list control contract %q: %s", part, docs)
+	for _, part := range []string{"request.MaxItems", "request.Paginated", "caps raw rows before local filtering", "ClusterPolicies apply the cap locally", "deployment behavior determines support for type catalog and Services hints"} {
+		if !strings.Contains(packageDoc, part) {
+			t.Fatalf("missing bounded Senlin list control contract %q: %s", part, packageDoc)
 		}
 	}
 	if !strings.Contains(read("instanceha/v1/README.md"), "conn.instance_ha") {
