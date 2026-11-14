@@ -203,12 +203,9 @@ func (s *Service) WaitForImageRecordStatus(ctx context.Context, seed *ImageRecor
 		}
 		return cloneImageRecord(p.seed), nil
 	}
-	policy, expired, err := imageRecordWaitPolicy(p.config, false)
+	policy, err := imageRecordWaitPolicy(p.config, false)
 	if err != nil {
 		return p.failure(ctx, operation, err)
-	}
-	if expired {
-		return p.failure(ctx, operation, context.DeadlineExceeded)
 	}
 	observation, err := p.collection(target, false).Wait(p.ctx, resource.ID(p.id), imageRecordWaitReached, resource.WithWaitPolicy(policy))
 	if err != nil {
@@ -230,12 +227,9 @@ func (s *Service) WaitForImageRecordDelete(ctx context.Context, seed *ImageRecor
 	if err != nil {
 		return nil, wrapImageMutationError(ctx, operation, err)
 	}
-	policy, expired, err := imageRecordWaitPolicy(p.config, true)
+	policy, err := imageRecordWaitPolicy(p.config, true)
 	if err != nil {
 		return p.failure(ctx, operation, err)
-	}
-	if expired {
-		return p.failure(ctx, operation, context.DeadlineExceeded)
 	}
 	err = p.collection("deleted", true).WaitDeleted(p.ctx, resource.ID(p.id), resource.WithWaitPolicy(policy))
 	if err != nil {

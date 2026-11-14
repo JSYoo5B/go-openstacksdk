@@ -2,6 +2,7 @@ package image
 
 import (
 	"context"
+	"errors"
 	"testing"
 	"time"
 
@@ -9,18 +10,18 @@ import (
 )
 
 func TestImageWaitBundlesKeepDefaultsAndSourceValues(t *testing.T) {
-	policy, err := resolveImageRecordCloudWait(nil, nil)
+	policy, err := resolveImageRecordCloudWait(nil)
 	if err != nil || policy.Timeout != 3600*time.Second || policy.Unlimited || policy.Strategy.Delay(3) != 2*time.Second {
 		t.Fatal(policy, err)
 	}
-	zero := time.Duration(0)
-	policy, err = resolveImageRecordCloudWait(&zero, nil)
-	if err != nil || policy.Timeout != 0 || policy.Unlimited {
-		t.Fatal("source zero timeout must stay an expiring budget", policy, err)
-	}
-	policy, err = resolveImageRecordCloudWait(&zero, []resource.WaitOption{resource.WithTimeout(5 * time.Second), resource.WithUnlimitedWait()})
+	policy, err = resolveImageRecordCloudWait([]resource.WaitOption{resource.WithTimeout(5 * time.Second), resource.WithUnlimitedWait()})
 	if err != nil || !policy.Unlimited {
 		t.Fatal(policy, err)
+	}
+	for _, option := range []resource.WaitOption{resource.WithTimeout(0), resource.WithTimeout(-time.Second), resource.WithPollInterval(0), resource.WithPollInterval(-time.Second)} {
+		if _, err := resolveImageRecordCloudWait([]resource.WaitOption{option}); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(err)
+		}
 	}
 	check := func(context.Context) error { return nil }
 	record, err := prepareImageRecordWait(context.Background(), check, nil, false)

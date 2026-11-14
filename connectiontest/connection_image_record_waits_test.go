@@ -87,7 +87,7 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 	originalBody := string(seed.Envelope)
 	callbacks, options := 0, 0
 	status, err := service.WaitForImageRecordStatus(context.Background(), seed, "active",
-		image.WithImageRecordWaitPollInterval(time.Millisecond), image.WithImageRecordWaitTimeout(time.Second),
+		image.WithImageRecordWait(resource.WithPollInterval(time.Millisecond)), image.WithImageRecordWait(resource.WithTimeout(time.Second)),
 		request.Header("X-Call", "status"),
 		request.Custom(func(config *image.ImageRecordWaitOpts) error {
 			options++
@@ -110,7 +110,7 @@ func TestConnectionImageRecordWaitsShareOwnedSourceAndLatestObservation(t *testi
 		t.Fatal("source facts or seed ownership lost", seed, status)
 	}
 	deleted, err := service.WaitForImageRecordDelete(context.Background(), seed,
-		image.WithImageRecordWaitPollInterval(time.Millisecond), image.WithImageRecordWaitTimeout(time.Second),
+		image.WithImageRecordWait(resource.WithPollInterval(time.Millisecond)), image.WithImageRecordWait(resource.WithTimeout(time.Second)),
 		request.Header("X-Call", "delete"),
 		request.Custom(func(config *image.ImageRecordWaitOpts) error {
 			options++

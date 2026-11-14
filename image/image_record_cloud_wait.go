@@ -16,22 +16,20 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-// ImageRecordCloudWaitOpts controls Cloud wait_for_image. Timeout is the
-// Source timeout: nil means 3600 seconds and a zero or negative timeout
-// expires before the first lookup. Wait holds shared resource wait options
-// applied over it: WithTimeout and WithUnlimitedWait (Python None) override
-// Timeout, and WithPollInterval or WithWaitStrategy replace the fixed
-// two-second iterate_timeout pause, a Go extension. Other shared controls fail
-// with resource.ErrInvalidOption before HTTP.
+// ImageRecordCloudWaitOpts controls Cloud wait_for_image. Wait holds shared
+// resource wait options: WithTimeout (default 3600 seconds), WithUnlimitedWait
+// (Python None), and WithPollInterval or WithWaitStrategy, which replace the
+// fixed two-second iterate_timeout pause as a Go extension. A zero or negative
+// timeout or poll interval and other shared controls fail with
+// resource.ErrInvalidOption before HTTP.
 type ImageRecordCloudWaitOpts struct {
 	Headers map[string]string
-	Timeout *time.Duration
 	Wait    []resource.WaitOption
 }
 
 // ImageRecordCloudWaitOption is one option of the Cloud image waits:
 // WithImageRecordCloudWaitOpts, WithImageRecordCloudWaitHeaders (merges),
-// WithImageRecordCloudWaitTimeout, WithImageRecordCloudWait, request.Header
+// WithImageRecordCloudWait, request.Header
 // (merges one header) or request.Custom over *ImageRecordCloudWaitOpts. Other
 // shared calls, including request.Headers, fail with resource.ErrInvalidOption
 // before HTTP.
@@ -43,10 +41,6 @@ var imageRecordCloudWaitCalls = calls.Spec[ImageRecordCloudWaitOpts]{
 
 func copyImageRecordCloudWait(value ImageRecordCloudWaitOpts) ImageRecordCloudWaitOpts {
 	value.Headers = copyImageRecordHeaders(value.Headers)
-	if value.Timeout != nil {
-		owned := *value.Timeout
-		value.Timeout = &owned
-	}
 	value.Wait = slices.Clone(value.Wait)
 	return value
 }
@@ -57,17 +51,6 @@ func WithImageRecordCloudWaitOpts(value ImageRecordCloudWaitOpts) ImageRecordClo
 func WithImageRecordCloudWaitHeaders(values map[string]string) ImageRecordCloudWaitOption {
 	owned := copyImageRecordHeaders(values)
 	return request.Custom(func(config *ImageRecordCloudWaitOpts) error { return mergeImageRecordHeaders(&config.Headers, owned) })
-}
-
-// WithImageRecordCloudWaitTimeout sets the Source timeout; zero or negative
-// expires before the first lookup. A WithTimeout or WithUnlimitedWait in
-// WithImageRecordCloudWait overrides it.
-func WithImageRecordCloudWaitTimeout(value time.Duration) ImageRecordCloudWaitOption {
-	return request.Custom(func(config *ImageRecordCloudWaitOpts) error {
-		owned := value
-		config.Timeout = &owned
-		return nil
-	})
 }
 
 // WithImageRecordCloudWait appends shared resource wait options to Wait: the
@@ -89,8 +72,8 @@ type imageRecordCloudWaitPolicy struct {
 	Strategy  resource.WaitStrategy
 }
 
-// resolveImageRecordCloudWait resolves the Source timeout and shared options.
-func resolveImageRecordCloudWait(timeout *time.Duration, options []resource.WaitOption) (imageRecordCloudWaitPolicy, error) {
+// resolveImageRecordCloudWait resolves the shared options over the defaults.
+func resolveImageRecordCloudWait(options []resource.WaitOption) (imageRecordCloudWaitPolicy, error) {
 	settings, err := sourcewait.Resolve(0, options)
 	if err != nil {
 		return imageRecordCloudWaitPolicy{}, err
@@ -98,8 +81,6 @@ func resolveImageRecordCloudWait(timeout *time.Duration, options []resource.Wait
 	policy := imageRecordCloudWaitPolicy{Timeout: 3600 * time.Second, Strategy: resource.FixedWait(2 * time.Second)}
 	if settings.TimeoutSet {
 		policy.Timeout, policy.Unlimited = settings.Timeout, settings.Unlimited
-	} else if timeout != nil {
-		policy.Timeout = *timeout
 	}
 	if settings.StrategySet {
 		policy.Strategy = settings.Strategy
@@ -122,7 +103,7 @@ func prepareImageRecordCloudWait(ctx context.Context, check func(context.Context
 		}
 		value = copyImageRecordCloudWait(owned)
 	}
-	policy, err := resolveImageRecordCloudWait(value.Timeout, value.Wait)
+	policy, err := resolveImageRecordCloudWait(value.Wait)
 	if err != nil {
 		return policy, err
 	}

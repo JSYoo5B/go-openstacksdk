@@ -9,6 +9,7 @@ import (
 
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 	"github.com/JSYoo5B/go-openstacksdk/compute"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 func Example_backupServer() {
@@ -35,7 +36,7 @@ func Example_backupServer() {
 	}
 	result, err := service.BackupServer(ctx, *id,
 		compute.BackupServerRequest{Name: *name, BackupType: *kind, Rotation: *rotation},
-		compute.WithBackupServerWait(*wait), compute.WithBackupServerTimeout(*timeout))
+		compute.WithBackupServerWait(*wait), compute.WithBackupServerWaitOptions(resource.WithTimeout(*timeout)))
 	if result != nil && result.Action != nil {
 		log.Printf("Nova action status=%d image_id=%q operation_version=%q",
 			result.Action.StatusCode, result.Action.ImageID, result.Action.Microversion)

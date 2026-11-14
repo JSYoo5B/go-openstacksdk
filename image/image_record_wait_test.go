@@ -34,19 +34,17 @@ func imageRecordWaitSeed(status json.RawMessage) *ImageRecord {
 }
 
 func TestImageRecordWaitStatusInitialTargetReturnsIndependentSeed(t *testing.T) {
-	for _, mode := range []string{"ordinary", "zero timeout", "target is default failure", "custom attribute", "empty target", "negative duration ignored after initial match"} {
+	for _, mode := range []string{"ordinary", "target is default failure", "custom attribute", "empty target", "invalid failure state ignored after initial match"} {
 		t.Run(mode, func(t *testing.T) {
 			seed := imageRecordWaitSeed(json.RawMessage(`"AcTiVe"`))
 			target := "ACTIVE"
 			options := []ImageRecordWaitOption{}
 			switch mode {
-			case "zero timeout":
-				options = append(options, WithImageRecordWaitTimeout(0))
 			case "empty target":
 				seed.Resource.Body["status"] = json.RawMessage(`""`)
 				target = ""
-			case "negative duration ignored after initial match":
-				options = append(options, WithImageRecordWaitOpts(ImageRecordWaitOpts{Timeout: taskOptionPointer(-time.Second), Wait: []resource.WaitOption{resource.WithFailureStates(string([]byte{0xff}))}}))
+			case "invalid failure state ignored after initial match":
+				options = append(options, WithImageRecordWaitOpts(ImageRecordWaitOpts{Wait: []resource.WaitOption{resource.WithFailureStates(string([]byte{0xff}))}}))
 			case "target is default failure":
 				seed.Resource.Body["status"] = json.RawMessage(`"ERROR"`)
 				target = "error"
@@ -119,7 +117,7 @@ func TestImageRecordWaitStatusFreshSelectionFailureAndPending(t *testing.T) {
 				}
 				return taskCoreJSON(req, 200, `{"status":"ACTIVE"}`), nil
 			})
-			options := append([]ImageRecordWaitOption{WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
+			options := append([]ImageRecordWaitOption{WithImageRecordWait(resource.WithPollInterval(time.Nanosecond)), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Fatalf("progress = %v, want %v", progress, 0)
@@ -194,7 +192,7 @@ func TestImageRecordWaitDeleteFreshFetchAnd404OwnedReturn(t *testing.T) {
 					return err
 				}
 			}
-			got, err := New(client).WaitForImageRecordDelete(context.Background(), seed, WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
+			got, err := New(client).WaitForImageRecordDelete(context.Background(), seed, WithImageRecordWait(resource.WithPollInterval(time.Nanosecond)), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Fatalf("progress = %v, want %v", progress, 0)
@@ -251,14 +249,11 @@ func TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID(t *testin
 	cloud := "captured"
 	facts := resource.CloudLocation{Cloud: &cloud, Project: resource.CloudProject{ID: json.RawMessage(`"token project"`)}}
 	headers := map[string]string{"X-Option": "factory snapshot"}
-	wait := []resource.WaitOption{resource.WithFailureStates("ERROR")}
-	timeout := time.Second
-	interval := time.Nanosecond
-	option := WithImageRecordWaitOpts(ImageRecordWaitOpts{Headers: headers, Wait: wait, Timeout: &timeout, PollInterval: &interval})
+	wait := []resource.WaitOption{resource.WithFailureStates("ERROR"), resource.WithTimeout(time.Second), resource.WithPollInterval(time.Nanosecond)}
+	option := WithImageRecordWaitOpts(ImageRecordWaitOpts{Headers: headers, Wait: wait})
 	headers["X-Option"] = "caller changed"
 	wait[0] = resource.WithFailureStates("PENDING")
-	timeout = 0
-	interval = time.Hour
+	wait[2] = resource.WithPollInterval(time.Hour)
 	calls, locations, optionsApplied, callbacks := 0, 0, 0, 0
 	var retained *ImageRecordWaitOpts
 	var client *gophercloud.ServiceClient
@@ -275,8 +270,7 @@ func TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID(t *testin
 		deadline = selected
 		retained.Headers["X-Option"] = "retained changed"
 		retained.Wait[0] = resource.WithFailureStates("PENDING")
-		*retained.Timeout = 0
-		*retained.PollInterval = time.Hour
+		retained.Wait[2] = resource.WithPollInterval(time.Hour)
 		if calls == 1 {
 			return taskCoreJSON(req, 201, `{"id":"response decoy","status":"pending","name":"first name"}`), nil
 		}
@@ -326,31 +320,9 @@ func TestImageRecordWaitStatusOwnsOneBudgetLocationHeadersAndLiteralID(t *testin
 	}
 }
 
-func TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget(t *testing.T) {
-	t.Run("zero interval unlimited uses100ms", func(t *testing.T) {
-		calls := 0
-		var first time.Time
-		client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
-			calls++
-			if _, present := req.Context().Deadline(); present {
-				t.Fatal("unlimited SDK deadline")
-			}
-			if calls == 1 {
-				first = time.Now()
-				return taskCoreJSON(req, 200, `{"status":"pending"}`), nil
-			}
-			if time.Since(first) < 90*time.Millisecond {
-				t.Fatal("zero interval busy loop", time.Since(first))
-			}
-			return taskCoreJSON(req, 200, `{"status":"active"}`), nil
-		})
-		got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWait(resource.WithUnlimitedWait()), WithImageRecordWaitPollInterval(0))
-		if got == nil || err != nil || calls != 2 {
-			t.Fatal(got, err, calls)
-		}
-	})
+func TestImageRecordWaitRejectsNonpositiveControlsAndParentBudget(t *testing.T) {
 	for _, deleteWait := range []bool{false, true} {
-		t.Run(fmt.Sprintf("zero timeout delete=%v", deleteWait), func(t *testing.T) {
+		for _, invalid := range []resource.WaitOption{resource.WithTimeout(0), resource.WithTimeout(-time.Second), resource.WithPollInterval(0), resource.WithPollInterval(-time.Second)} {
 			calls := 0
 			client := taskCoreClient(func(*http.Request) (*http.Response, error) { calls++; return nil, nil })
 			service := New(client)
@@ -358,26 +330,15 @@ func TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget(t *testing.T) {
 			var got *ImageRecord
 			var err error
 			if deleteWait {
-				got, err = service.WaitForImageRecordDelete(context.Background(), seed, WithImageRecordWaitTimeout(0))
+				got, err = service.WaitForImageRecordDelete(context.Background(), seed, WithImageRecordWait(invalid))
 			} else {
-				got, err = service.WaitForImageRecordStatus(context.Background(), seed, "active", WithImageRecordWaitTimeout(0))
+				got, err = service.WaitForImageRecordStatus(context.Background(), seed, "active", WithImageRecordWait(invalid))
 			}
-			if got != nil || !errors.Is(err, context.DeadlineExceeded) || calls != 0 {
-				t.Fatal(got, err, calls)
+			if got != nil || !errors.Is(err, resource.ErrInvalidOption) || calls != 0 {
+				t.Fatal(deleteWait, got, err, calls)
 			}
-		})
-	}
-	t.Run("zero interval bounded by shorter timeout", func(t *testing.T) {
-		calls, callbacks := 0, 0
-		client := taskCoreClient(func(req *http.Request) (*http.Response, error) {
-			calls++
-			return taskCoreJSON(req, 200, `{"status":"pending"}`), nil
-		})
-		got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitTimeout(50*time.Millisecond), WithImageRecordWaitPollInterval(0), WithImageRecordWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
-		if got == nil || !errors.Is(err, context.DeadlineExceeded) || calls != 1 || callbacks != 1 || got.StatusCode != 200 {
-			t.Fatal(got, err, calls, callbacks)
 		}
-	})
+	}
 	t.Run("parent budget wins", func(t *testing.T) {
 		parent, cancel := context.WithTimeout(context.Background(), time.Second)
 		defer cancel()
@@ -389,7 +350,7 @@ func TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"status":"active"}`), nil
 		})
-		got, err := New(client).WaitForImageRecordStatus(parent, imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitTimeout(time.Hour))
+		got, err := New(client).WaitForImageRecordStatus(parent, imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWait(resource.WithTimeout(time.Hour)))
 		if got == nil || err != nil {
 			t.Fatal(got, err)
 		}
@@ -419,7 +380,7 @@ func TestImageRecordWaitAcceptedJSONToleranceAndBodyStateErrors(t *testing.T) {
 				retries++
 				return err
 			}
-			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
+			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWait(resource.WithPollInterval(time.Nanosecond)), WithImageRecordWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 			if test.invalid {
 				projected := test.raw == `{"status":false}`
 				if (got != nil) != projected || !errors.Is(err, resource.ErrInvalidOption) || calls != 1 || callbacks != 0 {
@@ -491,7 +452,7 @@ func TestImageRecordWaitHTTPFailuresAnd404HandlingFaultsAreTerminal(t *testing.T
 				}
 				return taskCoreJSON(req, 200, `null`), nil
 			})
-			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitPollInterval(time.Nanosecond))
+			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWait(resource.WithPollInterval(time.Nanosecond)))
 			if got == nil || err == nil || calls != 2 || got.StatusCode != 203 || string(got.Resource.Body["name"]) != `"last successful"` || string(got.Envelope) != `{"status":"pending","name":"last successful"}` {
 				t.Fatal(got, err, calls)
 			}
@@ -638,7 +599,7 @@ func TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET(t *testing.T) {
 			calls, callbacks := 0, 0
 			client := taskCoreClient(func(req *http.Request) (*http.Response, error) { calls++; return taskCoreJSON(req, 203, raw), nil })
 			service := New(client)
-			options := []ImageRecordWaitOption{WithImageRecordWaitPollInterval(time.Hour), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
+			options := []ImageRecordWaitOption{WithImageRecordWait(resource.WithPollInterval(time.Hour)), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Fatalf("progress = %v, want %v", progress, 0)
@@ -656,7 +617,7 @@ func TestImageRecordWaitCallbacksGuardBeforePauseOrNextGET(t *testing.T) {
 				return nil
 			}))}
 			if mode == "timeout while paused" {
-				options = append(options, WithImageRecordWaitTimeout(5*time.Millisecond))
+				options = append(options, WithImageRecordWait(resource.WithTimeout(5*time.Millisecond)))
 			}
 			got, err := service.WaitForImageRecordStatus(ctx, imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", options...)
 			if got == nil || err == nil || calls != 1 || callbacks != 1 || got.StatusCode != 203 {
@@ -696,8 +657,8 @@ func TestImageRecordWaitCompletePreflightAndConcreteReplacement(t *testing.T) {
 		{"nonstring initial selected state", func(seed *ImageRecord) { seed.Resource.Body["status"] = json.RawMessage(`false`) }, "active", nil},
 		{"invalid UTF8 target", nil, string([]byte{0xff}), nil},
 		{"nil option", nil, "active", []ImageRecordWaitOption{nil}},
-		{"negative timeout", nil, "active", []ImageRecordWaitOption{WithImageRecordWaitTimeout(-time.Nanosecond)}},
-		{"negative interval", nil, "active", []ImageRecordWaitOption{WithImageRecordWaitPollInterval(-time.Nanosecond)}},
+		{"negative timeout", nil, "active", []ImageRecordWaitOption{WithImageRecordWait(resource.WithTimeout(-time.Nanosecond))}},
+		{"negative interval", nil, "active", []ImageRecordWaitOption{WithImageRecordWait(resource.WithPollInterval(-time.Nanosecond))}},
 		{"shared zero timeout", nil, "active", []ImageRecordWaitOption{WithImageRecordWait(resource.WithTimeout(0))}},
 		{"nil shared option", nil, "active", []ImageRecordWaitOption{WithImageRecordWait(nil)}},
 		{"remote attr alias", nil, "active", []ImageRecordWaitOption{WithImageRecordWait(resource.WithStatusAttribute("os_hidden"))}},
@@ -786,7 +747,7 @@ func TestImageRecordWaitUnicodeStatusComparison(t *testing.T) {
 				}
 				return taskCoreJSON(req, 203, `{"status":`+string(status)+`}`), nil
 			})
-			got, err := New(client).WaitForImageRecordStatus(context.Background(), seed, test.target, WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
+			got, err := New(client).WaitForImageRecordStatus(context.Background(), seed, test.target, WithImageRecordWait(resource.WithPollInterval(time.Nanosecond)), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Fatalf("progress = %v, want %v", progress, 0)
@@ -830,7 +791,7 @@ func TestImageRecordWaitUnicodeStatusComparison(t *testing.T) {
 				}
 				return taskCoreJSON(req, 200, `{"status":"active"}`), nil
 			})
-			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), test.target, WithImageRecordWait(resource.WithFailureStates(test.failure)), WithImageRecordWaitPollInterval(time.Nanosecond), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
+			got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), test.target, WithImageRecordWait(resource.WithFailureStates(test.failure)), WithImageRecordWait(resource.WithPollInterval(time.Nanosecond)), WithImageRecordWait(resource.WithProgressCallback(func(progress int) error {
 				callbacks++
 				if progress != 0 {
 					t.Fatalf("progress = %v, want %v", progress, 0)

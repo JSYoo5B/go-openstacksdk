@@ -7,7 +7,6 @@ import (
 	"errors"
 	"slices"
 	"strings"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
@@ -28,14 +27,12 @@ const (
 type ImageRecordCloudDeleteOpts struct {
 	Headers     map[string]string
 	Wait        bool
-	Timeout     *time.Duration
 	WaitOptions []resource.WaitOption
 }
 
 // ImageRecordCloudDeleteOption is one option of DeleteCloudImageRecord:
 // WithImageRecordCloudDeleteOpts, WithImageRecordCloudDeleteHeaders (merges),
-// WithImageRecordCloudDeleteWait, WithImageRecordCloudDeleteTimeout,
-// WithImageRecordCloudDeleteWaitOptions, request.Header (merges one header)
+// WithImageRecordCloudDeleteWait, WithImageRecordCloudDeleteWaitOptions, request.Header (merges one header)
 // or request.Custom over *ImageRecordCloudDeleteOpts. Other shared calls,
 // including request.Headers and request.IgnoreMissing, fail with
 // resource.ErrInvalidOption before HTTP.
@@ -46,8 +43,8 @@ var imageRecordCloudDeleteCalls = calls.Spec[ImageRecordCloudDeleteOpts]{
 }
 
 func copyImageRecordCloudDelete(value ImageRecordCloudDeleteOpts) ImageRecordCloudDeleteOpts {
-	wait := copyImageRecordCloudWait(ImageRecordCloudWaitOpts{Headers: value.Headers, Timeout: value.Timeout, Wait: value.WaitOptions})
-	value.Headers, value.Timeout, value.WaitOptions = wait.Headers, wait.Timeout, wait.Wait
+	wait := copyImageRecordCloudWait(ImageRecordCloudWaitOpts{Headers: value.Headers, Wait: value.WaitOptions})
+	value.Headers, value.WaitOptions = wait.Headers, wait.Wait
 	return value
 }
 func WithImageRecordCloudDeleteOpts(value ImageRecordCloudDeleteOpts) ImageRecordCloudDeleteOption {
@@ -63,17 +60,6 @@ func WithImageRecordCloudDeleteHeaders(values map[string]string) ImageRecordClou
 }
 func WithImageRecordCloudDeleteWait(value bool) ImageRecordCloudDeleteOption {
 	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error { config.Wait = value; return nil })
-}
-
-// WithImageRecordCloudDeleteTimeout sets the Source timeout of the absence
-// loop; zero or negative expires before the first lookup. A WithTimeout or
-// WithUnlimitedWait in WithImageRecordCloudDeleteWaitOptions overrides it.
-func WithImageRecordCloudDeleteTimeout(value time.Duration) ImageRecordCloudDeleteOption {
-	return request.Custom(func(config *ImageRecordCloudDeleteOpts) error {
-		owned := value
-		config.Timeout = &owned
-		return nil
-	})
 }
 
 // WithImageRecordCloudDeleteWaitOptions appends shared resource wait options
@@ -106,7 +92,7 @@ func prepareImageRecordCloudDelete(ctx context.Context, check func(context.Conte
 	// The wait policy validation and header rules are shared with
 	// WaitForCloudImageRecord, applied once to an owned snapshot.
 	wait, err := prepareImageRecordCloudWait(ctx, check, []ImageRecordCloudWaitOption{WithImageRecordCloudWaitOpts(ImageRecordCloudWaitOpts{
-		Headers: value.Headers, Timeout: value.Timeout, Wait: value.WaitOptions,
+		Headers: value.Headers, Wait: value.WaitOptions,
 	})})
 	value.Headers = wait.Headers
 	return value, wait, err

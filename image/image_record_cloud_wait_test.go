@@ -74,21 +74,21 @@ func TestCloudImageRecordWaitFailuresKeepLastRecord(t *testing.T) {
 		service := cloudImageService(t, &calls, func(req *http.Request) *http.Response {
 			return taskCoreJSON(req, 200, `{"id":"img","status":"saving"}`)
 		})
-		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitTimeout(20*time.Millisecond), WithImageRecordCloudWait(resource.WithPollInterval(5*time.Millisecond)))
+		result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWait(resource.WithTimeout(20*time.Millisecond)), WithImageRecordCloudWait(resource.WithPollInterval(5*time.Millisecond)))
 		var response *resource.ResponseError
 		if !errors.Is(err, context.DeadlineExceeded) || !errors.As(err, &response) || response.StatusCode != 200 || calls < 2 || result.Last == nil || result.Image != nil || result.Lookups != calls {
 			t.Fatal(result, err, calls)
 		}
 	})
-	t.Run("nonpositive timeout expires before lookup", func(t *testing.T) {
-		for _, timeout := range []time.Duration{0, -time.Second} {
+	t.Run("nonpositive timeout or interval fails before lookup", func(t *testing.T) {
+		for _, invalid := range []resource.WaitOption{resource.WithTimeout(0), resource.WithTimeout(-time.Second), resource.WithPollInterval(0), resource.WithPollInterval(-time.Second)} {
 			calls := 0
 			service := cloudImageService(t, &calls, func(req *http.Request) *http.Response {
 				t.Fatal("unexpected request", req.URL)
 				return nil
 			})
-			result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWaitTimeout(timeout))
-			if !errors.Is(err, context.DeadlineExceeded) || calls != 0 || result.Lookups != 0 || result.Last != nil {
+			result, err := service.WaitForCloudImageRecord(context.Background(), cloudWaitSeed(t, "img"), WithImageRecordCloudWait(invalid))
+			if !errors.Is(err, resource.ErrInvalidOption) || calls != 0 || result != nil && (result.Lookups != 0 || result.Last != nil) {
 				t.Fatal(result, err)
 			}
 		}

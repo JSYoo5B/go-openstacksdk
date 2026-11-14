@@ -10,7 +10,7 @@ lazily; applications do not implement a resolver or builder.
 |---|---|
 | `backup_server(server_id, "backup", "daily", 3)` | `service.BackupServer(ctx, serverID, compute.BackupServerRequest{Name: "backup", BackupType: "daily", Rotation: 3})` |
 | `wait=True` | `compute.WithBackupServerWait(true)` |
-| `timeout=120` | library default; override with `compute.WithBackupServerTimeout(120*time.Second)` |
+| `timeout=120` | library default; override with `compute.WithBackupServerWaitOptions(resource.WithTimeout(120*time.Second))` |
 | `timeout=None` runtime behavior | `compute.WithBackupServerWaitOptions(resource.WithUnlimitedWait())` |
 | direct `Server.backup(...)` action only | `service.API.Servers.CreateBackupAction(ctx, serverID, request)` |
 
@@ -85,9 +85,10 @@ are terminal and do not start image lookup or repeat the accepted action.
 ## Options, partial results, and direct clients
 
 `WithBackupServerWait` defaults false. The wait timeout defaults **120 seconds**
-and the Cloud polling interval defaults two seconds. A zero or negative timeout
-expires before the first wait lookup, after the unconditional initial lookup;
-its value is unused when wait=false. `WithBackupServerWaitOptions` (or
+and the Cloud polling interval defaults two seconds. With wait=true, a zero or
+negative timeout or interval fails with `resource.ErrInvalidOption` before the
+backup action, unlike Python, which expires such a timeout before the first
+wait lookup. `WithBackupServerWaitOptions` (or
 `BackupServerOpts.WaitOptions`) takes the shared resource wait options:
 `resource.WithTimeout` or `resource.WithUnlimitedWait` replaces the timeout, and
 `resource.WithPollInterval` or `resource.WithWaitStrategy` replaces the fixed

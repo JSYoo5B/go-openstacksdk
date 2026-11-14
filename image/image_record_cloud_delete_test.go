@@ -88,7 +88,7 @@ func TestCloudImageRecordDeleteFindsDeletesCleansAndWaits(t *testing.T) {
 				}
 				return cloudDeleteAbsent(route, req)
 			})
-			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(5*time.Second), WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(time.Millisecond)))
+			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteWaitOptions(resource.WithTimeout(5*time.Second)), WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if err != nil || !result.Deleted || result.Found == nil || result.Delete == nil || result.WaitLookups != 1 || result.WaitLast != nil {
 				t.Fatal(result, err, routes)
 			}
@@ -110,7 +110,7 @@ func TestCloudImageRecordDeleteFindsDeletesCleansAndWaits(t *testing.T) {
 	t.Run("missing image returns false without delete", func(t *testing.T) {
 		var routes []string
 		service := cloudDeleteService(t, "true", &routes, cloudDeleteAbsent)
-		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(time.Second))
+		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteWaitOptions(resource.WithTimeout(time.Second)))
 		if err != nil || result.Deleted || result.Found != nil || result.Delete != nil || len(routes) != 3 {
 			t.Fatal(result, err, routes)
 		}
@@ -154,7 +154,7 @@ func TestCloudImageRecordDeleteLateFailuresKeepPhases(t *testing.T) {
 				}
 				return taskCoreJSON(req, 203, test.image)
 			})
-			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(time.Second))
+			result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteWaitOptions(resource.WithTimeout(time.Second)))
 			want := 2
 			if test.listed {
 				want = 3
@@ -187,7 +187,7 @@ func TestCloudImageRecordDeleteLateFailuresKeepPhases(t *testing.T) {
 			}
 			return taskCoreJSON(req, 200, `{"id":"img","status":"deleted"}`)
 		})
-		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteTimeout(15*time.Millisecond), WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
+		result, err := service.DeleteCloudImageRecord(context.Background(), "img", request.Header("X-Cloud", "delete"), WithImageRecordCloudDeleteWait(true), WithImageRecordCloudDeleteWaitOptions(resource.WithTimeout(15*time.Millisecond)), WithImageRecordCloudDeleteWaitOptions(resource.WithPollInterval(5*time.Millisecond)))
 		if !errors.Is(err, context.DeadlineExceeded) || result.Deleted || result.WaitLookups < 1 || result.WaitLast == nil {
 			t.Fatal(result, err, routes)
 		}

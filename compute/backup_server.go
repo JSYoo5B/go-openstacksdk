@@ -20,19 +20,18 @@ import (
 // the supplied backup name/type/rotation, including empty strings or zero.
 type BackupServerRequest = servers.BackupActionRequest
 
-// BackupServerOpts owns the optional Proxy wait controls. Timeout nil defaults
-// to 120 seconds here, rather than Cloud wait_for_image's standalone 3600; a
-// zero or negative Timeout expires the image wait before its first lookup.
-// WaitOptions tune the image wait with the shared resource wait options:
-// resource.WithTimeout or resource.WithUnlimitedWait (Python None) replaces
-// Timeout, and resource.WithPollInterval or resource.WithWaitStrategy (a
-// Go-only extension) replaces the fixed two-second pause. With Wait set,
-// failure states, a status attribute, progress or an invalid option fail with
-// resource.ErrInvalidOption before HTTP.
+// BackupServerOpts owns the optional Proxy wait controls. WaitOptions tune
+// the image wait with the shared resource wait options: resource.WithTimeout
+// (default 120 seconds here, rather than Cloud wait_for_image's standalone
+// 3600) or resource.WithUnlimitedWait (Python None), and
+// resource.WithPollInterval or resource.WithWaitStrategy (a Go-only
+// extension), which replace the fixed two-second pause. With Wait set, a zero
+// or negative timeout or poll interval, failure states, a status attribute,
+// progress or another invalid option fail with resource.ErrInvalidOption
+// before HTTP.
 // ImageService is a concrete direct-client override; Connection binds it lazily.
 type BackupServerOpts struct {
 	Wait          bool
-	Timeout       *time.Duration
 	WaitOptions   []resource.WaitOption
 	ActionOptions []servers.BackupActionOption
 	// ImageService supplies a concrete Glance service for direct clients. Nil
@@ -43,13 +42,6 @@ type BackupServerOption func(*BackupServerOpts) error
 
 func WithBackupServerWait(enabled bool) BackupServerOption {
 	return func(c *BackupServerOpts) error { c.Wait = enabled; return nil }
-}
-
-// WithBackupServerTimeout sets the Python timeout of the image wait; zero or
-// negative expires before the first lookup. A resource.WithTimeout or
-// resource.WithUnlimitedWait in WithBackupServerWaitOptions overrides it.
-func WithBackupServerTimeout(value time.Duration) BackupServerOption {
-	return func(c *BackupServerOpts) error { owned := value; c.Timeout = &owned; return nil }
 }
 
 // WithBackupServerWaitOptions appends shared wait options for the image wait;
@@ -64,10 +56,6 @@ func WithBackupServerActionOptions(values ...servers.BackupActionOption) BackupS
 }
 
 func copyBackupServerOptions(value BackupServerOpts) BackupServerOpts {
-	if value.Timeout != nil {
-		owned := *value.Timeout
-		value.Timeout = &owned
-	}
 	value.WaitOptions = slices.Clone(value.WaitOptions)
 	value.ActionOptions = slices.Clone(value.ActionOptions)
 	return value
@@ -194,11 +182,7 @@ func (s *Service) BackupServer(ctx context.Context, serverID string, input Backu
 	if !config.Wait {
 		return result, nil
 	}
-	timeout := 120 * time.Second
-	if config.Timeout != nil {
-		timeout = *config.Timeout
-	}
-	waitOptions := []image.ImageRecordCloudWaitOption{image.WithImageRecordCloudWaitTimeout(timeout), image.WithImageRecordCloudWait(config.WaitOptions...)}
+	waitOptions := []image.ImageRecordCloudWaitOption{image.WithImageRecordCloudWait(append([]resource.WaitOption{resource.WithTimeout(120 * time.Second)}, config.WaitOptions...)...)}
 	result.Wait, err = selected.WaitForCloudImageRecord(opctx, result.Image, waitOptions...)
 	if result.Wait != nil && result.Wait.Last != nil {
 		result.Image = result.Wait.Last

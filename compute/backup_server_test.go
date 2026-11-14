@@ -135,7 +135,7 @@ func TestBackupServerWaitUsesCloudCaseAndFreshLookups(t *testing.T) {
 }
 
 func TestBackupServerWaitFailureTimeoutAndMissingSeed(t *testing.T) {
-	for _, scenario := range []string{"error", "zero timeout", "missing no wait", "missing wait"} {
+	for _, scenario := range []string{"error", "missing no wait", "missing wait"} {
 		t.Run(scenario, func(t *testing.T) {
 			getCount := 0
 			f := newBackupServerFixture(t, func(req *http.Request) *http.Response {
@@ -159,9 +159,6 @@ func TestBackupServerWaitFailureTimeoutAndMissingSeed(t *testing.T) {
 			if scenario != "missing no wait" {
 				options = append(options, compute.WithBackupServerWait(true), compute.WithBackupServerWaitOptions(resource.WithPollInterval(time.Nanosecond)))
 			}
-			if scenario == "zero timeout" {
-				options = append(options, compute.WithBackupServerTimeout(0))
-			}
 			result, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, options...)
 			if result == nil || result.Action == nil || result.Action.StatusCode != 202 || result.Lookup == nil {
 				t.Fatal(result, err)
@@ -170,10 +167,6 @@ func TestBackupServerWaitFailureTimeoutAndMissingSeed(t *testing.T) {
 			case "error":
 				if !errors.Is(err, resource.ErrFailedState) || result.Wait == nil || result.Wait.Lookups != 1 || result.Image == nil || string(result.Image.Resource.Body["status"]) != `"error"` {
 					t.Fatal(result, err)
-				}
-			case "zero timeout":
-				if !errors.Is(err, context.DeadlineExceeded) || result.Wait == nil || result.Wait.Lookups != 0 || getCount != 1 {
-					t.Fatal(result, err, getCount)
 				}
 			case "missing no wait":
 				if err != nil || result.Image != nil || result.Wait != nil {
@@ -336,7 +329,7 @@ func TestBackupServerSourceAndOptionsFailBeforeWork(t *testing.T) {
 	}
 }
 
-func TestBackupServerWaitOptionsSnapshotAndOverridePythonTimeout(t *testing.T) {
+func TestBackupServerWaitOptionsSnapshotAndRejectNonpositive(t *testing.T) {
 	statuses := []string{"active", "queued", "active"}
 	f := newBackupServerFixture(t, func(req *http.Request) *http.Response {
 		if req.Method == http.MethodPost {
@@ -349,9 +342,12 @@ func TestBackupServerWaitOptionsSnapshotAndOverridePythonTimeout(t *testing.T) {
 	wait := []resource.WaitOption{resource.WithPollInterval(time.Nanosecond), resource.WithTimeout(time.Minute)}
 	option := compute.WithBackupServerWaitOptions(wait...)
 	wait[0], wait[1] = resource.WithPollInterval(0), nil
-	// The later WithTimeout replaces the zero Python timeout, which alone would
-	// expire before the first lookup.
-	result, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerWait(true), compute.WithBackupServerTimeout(0), option)
+	for _, invalid := range []resource.WaitOption{resource.WithTimeout(0), resource.WithTimeout(-time.Second), resource.WithPollInterval(0), resource.WithPollInterval(-time.Second)} {
+		if _, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerWait(true), compute.WithBackupServerWaitOptions(invalid)); !errors.Is(err, resource.ErrInvalidOption) || len(f.calls) != 0 {
+			t.Fatal(err, f.calls)
+		}
+	}
+	result, err := f.service.BackupServer(context.Background(), "s1", backupServerInput, compute.WithBackupServerWait(true), compute.WithBackupServerWaitOptions(resource.WithTimeout(time.Second)), option)
 	assertBackupStage(t, f, result, err)
 	if result.Wait == nil || result.Wait.Lookups != 2 || len(statuses) != 0 {
 		t.Fatal(result, statuses)

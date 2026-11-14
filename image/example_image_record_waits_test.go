@@ -80,8 +80,8 @@ func runImageRecordWaits(ctx context.Context, cloud, imageID, target string, wai
 		return nil
 	}))
 	ready, err := service.WaitForImageRecordStatus(ctx, seed, target,
-		image.WithImageRecordWaitTimeout(2*time.Minute),
-		image.WithImageRecordWaitPollInterval(2*time.Second),
+		image.WithImageRecordWait(resource.WithTimeout(2*time.Minute)),
+		image.WithImageRecordWait(resource.WithPollInterval(2*time.Second)),
 		callback,
 		request.Header("X-Request-Source", "image-record-waits-example"))
 	if err := waitResultImageRecordWaits(ready, err); err != nil {
