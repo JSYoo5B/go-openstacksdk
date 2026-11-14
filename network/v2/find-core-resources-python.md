@@ -48,7 +48,7 @@ port = conn.network.find_port(
 
 ```go
 port, err := service.Ports.FindRecord(ctx, "app-port",
-    ports.WithRecordFindQuery("binding_profile",
+    request.Query("binding_profile",
         map[string]any{"nested": map[string]any{"enabled": true}}))
 ```
 

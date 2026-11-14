@@ -11,8 +11,8 @@ implementing a resource builder. This comparison pins openstacksdk
 | `network.get_address_scope(id, fields=["is_shared", "name"])` | `AddressScopes.GetRecord(ctx, id, addressscopes.WithRecordReadFields("is_shared", "name"))` |
 | `network.find_address_scope(name_or_id)` | `AddressScopes.FindRecord(ctx, nameOrID)` |
 | `ignore_missing=False` | `request.IgnoreMissing(false)` |
-| `network.address_scopes(is_shared=False, tenant_id="project")` | `AddressScopes.ListRecords(ctx, addressscopes.WithRecordListQuery("is_shared", false), addressscopes.WithRecordListQuery("tenant_id", "project"))` |
-| `paginated=False`, `max_items=10` | `WithRecordListQuery("paginated", false)`, `WithRecordListQuery("max_items", 10)` |
+| `network.address_scopes(is_shared=False, tenant_id="project")` | `AddressScopes.ListRecords(ctx, request.Query("is_shared", false), request.Query("tenant_id", "project"))` |
+| `paginated=False`, `max_items=10` | `request.Query("paginated", false)`, `request.Query("max_items", 10)` |
 | `scope.to_dict()` | `json.MarshalIndent(scope.Resource, "", "  ")` |
 | Received response fields | `scope.Wire`; whole body/header/status in `Envelope`, `Header`, `StatusCode` |
 
