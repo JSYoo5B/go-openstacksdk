@@ -1,30 +1,6 @@
 # Python Port Association Find
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/find_bgpvpn_port_association`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.GetPortAssociation`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.ListPortAssociations`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns.API.FindPortAssociationRecord`
-
-- GetPortAssociation returns the 404 error for a missing ID and ListPortAssociations sends the unfiltered association list, the two requests Python's find sends.
-  Tests: `network/v2/extensions/bgpvpns/python_parity_test.go:TestPythonBGPVPNPortAssociationFindHasNoHelper`.
-- Owned parent-scoped GET-first find reuses Source fetch controls, declared Body defaults/casts, local fallback filters, complete pagination and late duplicate detection; raw HTTP proof and terminal faults remain distinct.
-  Tests: `network/v2/extensions/bgpvpns/python_port_association_find_test.go:TestPythonPortAssociationFindMemberProjectionAndOwnership`, `network/v2/extensions/bgpvpns/python_port_association_find_test.go:TestPythonPortAssociationFindFallbackLocalFiltersAndLateDuplicates`, `network/v2/extensions/bgpvpns/python_port_association_find_test.go:TestPythonPortAssociationFindMissingAndStrictJSONIdentity`, `network/v2/extensions/bgpvpns/python_port_association_find_test.go:TestPythonPortAssociationFindRawFetchControlsAndHeadersPhase`, `network/v2/extensions/bgpvpns/python_port_association_find_test.go:TestPythonPortAssociationFindOptionsGuardAndPreflight`, `network/v2/extensions/bgpvpns/python_port_association_find_test.go:TestPythonPortAssociationFindPhysicalFaultNeverFallback`.
-
-Python/Go differences:
-
-- Go takes fixed parent and lookup string IDs plus finite UTF-8 JSON options; arbitrary Python Resource/class/session/connection/location runtime and shared cache are not modeled. Raw URI formatter supports only common literal/%(id)s/%% paths, not dynamic %(bgpvpn_id)s; the parent argument supplies that URI value.
-- SDK-R1/C1/S1, real-cloud compatibility and release validation remain; local tests and source review do not establish full SDK parity.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

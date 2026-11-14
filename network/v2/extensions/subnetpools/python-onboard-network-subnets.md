@@ -1,26 +1,6 @@
 # Python Onboard Network Subnets
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/onboard_network_subnets`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools.API.OnboardNetworkSubnetsRecord`
-
-- SDK-owned one-PUT onboard route sends unwrapped network_id without preliminary GETs, accepts arbitrary JSON under Source status policy, snapshots options and guards physical errors/source identity.
-  Tests: `network/v2/extensions/subnetpools/python_onboard_network_test.go:TestPythonOnboardNetworkSubnetsUnwrappedBodyAndArbitraryJSON`, `network/v2/extensions/subnetpools/python_onboard_network_test.go:TestPythonOnboardNetworkSubnetsHTTPAndDecodeFailures`, `network/v2/extensions/subnetpools/python_onboard_network_test.go:TestPythonOnboardNetworkSubnetsOptionsOwnershipAndGuard`, `network/v2/extensions/subnetpools/python_onboard_network_test.go:TestPythonOnboardNetworkSubnetsPhysicalFaultsStopCallbacks`, `network/v2/extensions/subnetpools/python_onboard_network_test.go:TestPythonOnboardNetworkSubnetsPreflight`.
-
-Python/Go differences:
-
-- Go accepts literal string pool/network IDs, escapes the pool route and keeps independent JSON/HTTP proof; arbitrary Python Resource inputs and mutable cache/runtime are not modeled.
-- SDK-R1/C1/S1, real-cloud compatibility and release validation remain; local tests and source review do not establish full SDK parity.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

@@ -1,35 +1,6 @@
 # Python Available
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/find_available_ip`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.API.FindAvailableIPRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/floatingips.WithAvailableIPOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-
-- List sends GET floatingips without a query, follows floatingips_links lazily and stops fetching when the caller breaks at the first row with an empty PortID; no row yields nil.
-  Tests: `network/v2/extensions/layer3/floatingips/python_parity_core_test.go:TestPythonParityCoreFloatingIPFindAvailableStopsAtFirstFreeRow`.
-- FindAvailableIPRecord owns unfiltered Source-profile floating IP list iteration, returns the first falsey untyped port_id including missing/null/empty string/false/zero/underflow/empty collections, preserves raw extension/resource views, stops before later malformed row construction and continuation parsing, and returns nil on exhausted inventory.
-  Tests: `network/v2/extensions/layer3/floatingips/python_available_test.go:TestPythonAvailableIPFalseyPortIDAndRawExtensionProjection`, `network/v2/extensions/layer3/floatingips/python_available_test.go:TestPythonAvailableIPEarlyStopPagingAndExhaustion`.
-- Owned transport-only options do not add server filters, snapshot caller headers, and guard cancellation/selected source mutation before HTTP. Accepted status203 retains actual page evidence; malformed consumed pages/rows and rejected500 yield no fabricated free IP.
-  Tests: `network/v2/extensions/layer3/floatingips/python_available_test.go:TestPythonAvailableIPAcceptedStatusAndFailures`, `network/v2/extensions/layer3/floatingips/python_available_test.go:TestPythonAvailableIPOwnedTransportOptionsAndCancellation`.
-
-Python/Go differences:
-
-- FindAvailableIPRecord is the SDK-owned no-query first-falsey-port helper; native typed List remains available as a separate ABI. Returned immutable RawResource views and page receipt do not return a Python mutable Resource object.
-- network.FloatingIPs.Available remains a different workflow that filters by network/project and may allocate; this helper only observes existing inventory.
-- Explicit Go profile boundaries include transport-only headers/microversion extras absent from Source formals, guarded continuation/route policy, full Requests charset/nonfinite JSON/adapter-session-cache and arbitrary Python object behavior. These are not a remaining absence of the named helper.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

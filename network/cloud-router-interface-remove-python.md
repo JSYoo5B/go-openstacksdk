@@ -1,56 +1,6 @@
 # Cloud Router Interface Remove Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_network/NetworkCloudMixin/remove_router_interface`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveInterfaceRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceSubnet`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfacePort`
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.RemoveRouterInterface`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemoveSubnetID`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceRemovePortID`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.API.RemoveCloudInterfaceRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers.WithRouterInterfaceOpts`
-
-- RemoveInterfaceRecord sends PUT /v2.0/routers/{id}/remove_router_interface with subnet_id, or port_id when a port is given, and with neither it still sends subnet_id null.
-  Tests: `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBRemoveRouterInterfaceBodies`.
-- Concrete SDK options own absent/null/raw JSON and cached SDK Resource references. Both subnet_id and port_id falsey rejects before network service/router ID validation or HTTP. Python-loaded float-underflow/empty values are falsey; nonnil Resources remain truthy even with null/false/zero/empty IDs. Plain JSON dictionaries remain body values rather than being treated as Resources.
-  Tests: `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveBothFalseyFirstAndHTTPZero`, `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemovePortFirstRawAndCachedResourceReferences`.
-- Source performs no get_router/find/name resolution: strings are literal router IDs. A truthy port wins and causes only port_id to be sent, otherwise subnet_id. SDK-owned raw/PortRecord/SubnetRecord/RawResource conversion avoids application builders/per-record adapters and owns copied options, selected service/API/client/header state and immediately stopping callbacks after detected source changes.
-  Tests: `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemovePortFirstRawAndCachedResourceReferences`, `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveOwnsOptionRefsHeadersAndEscapedState`, `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveCancellationNilOptionsAndStickySourceStopCallbacks`.
-- Router.remove_interface evaluates actual response.json before cloud discards it and returns None. Successful Value is JSON null for arbitrary valid object/list/string/number/bool/null, while ResponseJSON/optional actual Wire/whole Envelope/header/status retain independent physical observations. Accepted empty204 or malformed JSON remains decode error; no synthetic router Resource/default or convergence claim is created.
-  Tests: `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveSourceNoneAfterArbitraryJSONAndActualCopies`, `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveAcceptedDecodeAndCleanHTTPErrors`.
-- A closed new helper reuses existing interface reference/body/header/JSON and shared REST contracts, opting into Source100..399 and StopFaultRetryCallbacks. Existing RemoveInterfaceRecord default-subnet-null/200..399 and native status/required behavior remain unchanged; 199 lane isolation is verified without promoting another Source API.
-  Tests: `network/v2/extensions/layer3/routers/python_cloud_interface_remove_test.go:TestPythonCloudRouterInterfaceRemoveClosedSourceStatusAndLegacyIsolation`.
-- Clean403/404/409 remains actual native error, not absence/success. Accepted and rejected physical read/Close/cancel/source faults preserve actual status/body/header and original causes with exactly one physical PUT/body Close and zero retry/backoff/reauth callbacks. Native401 ErrOriginal is explicitly inspected despite absent Unwrap, and ErrReauth preserves read/Close causes. Clean401 renewal and503 retry keep original request body/headers and actual final receipt.
-  Tests: `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveAcceptedDecodeAndCleanHTTPErrors`, `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemovePhysicalFaultsKeepActualProofAndPreventReplay`, `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveCleanRetryAndTokenRenewalKeepCapturedBody`, `network/v2/extensions/layer3/routers/python_cloud_interface_remove_test.go:TestPythonCloudRouterInterfaceRemovePhysicalOptInNeverCallsHooks`.
-- Only RemoveCloudInterfaceRecord normalizes explicit ISO8859-1/latin1, UTF16/32 with BOM or explicit LE/BE through the fixed shared responsejson.Normalize ABI. Parsed Value and optional object Wire.Body use normalized JSON; Envelope/Header/status/ResponseError.Body and Wire HTTP metadata preserve actual wire evidence. Unknown/malformed charset and bare UTF16 without BOM keep Unsupported cause; normalized malformed JSON retains SyntaxError and original bytes. Existing RemoveInterfaceRecord and generic routerJSONFromResponse charset/status/body defaults stay unchanged.
-  Tests: `network/v2/extensions/layer3/routers/python_cloud_interface_remove_test.go:TestPythonCloudRouterInterfaceRemoveExplicitCharsetsKeepRawProofAndLegacy`, `network/v2/extensions/layer3/routers/python_cloud_interface_remove_test.go:TestPythonCloudRouterInterfaceRemoveCharsetFailuresKeepOriginalResponse`.
-- The existing cloud Service exposes successful None as Value null after charset-aware parsing while diagnostic ResponseJSON and optional normalized object Wire preserve parsed fields; actual raw Envelope/Header/status remain independent. Unsupported charset does not expose successful Value/ResponseJSON and retains original accepted ResponseError proof.
-  Tests: `network/cloud_router_interface_remove_test.go:TestCloudRouterInterfaceRemoveExplicitCharsetReceiptAndNone`.
-
-Python/Go differences:
-
-- Existing RemoveInterfaceRecord keeps its original parsed-JSON return. The separate Service.RemoveRouterInterface returns Source None as Value null with an SDK-owned diagnostic ResponseJSON and physical response receipt.
-- The cloud remove_router_interface flow uses SDK-owned validation, options, port-first selection, a None-equivalent result and actual response evidence, without a new Connection forwarding method. conn.Network(ctx) service construction may authenticate and discover before argument validation; a missing ID on a directly selected or nil Service fails without HTTP.
-- Go router input is a validated nonblank UTF8 string ID, escaping slash/percent/query as one segment and rejecting controls/traversal. Source arbitrary Router Resource/dict/null/nonstring dynamic dispatch and URI/class/member/session/cache behavior remain shared SDK-R1/C1/S1 foundation scope. No name lookup is invented, and broad Python runtime objects are not claimed from raw JSON preservation.
-- Go returns an owned diagnostic result with Value:null for Source None plus actual parsed ResponseJSON/Wire/Envelope/Header/StatusCode rather than returning a bare nil. Failed observations never expose successful Value/ResponseJSON or a synthetic Router Resource. Valid JSON numeric tokens preserve Go raw precision; Python floating/runtime representation and wire key order remain explicit Go policies.
-- The closed Source100..399/physical-fault callback suppression opt-in leaves existing native and legacy leaf policies unchanged. Headers are a concrete Go transport convenience with immutable selected source/client/captured framing and live token renewal. Stock Neutron27 project ADMIN_OR_PROJECT_MEMBER gate is documented without inferring parent-owner reader/shared-subnet authorization or live ACL acceptance.
-- Evidence is actual CPython3.14.8 pinned cloud/Proxy/Resource/Router code with Adapter.put/_get_connection fixtures (75 observations), plus independently audited bounded router13 observations. Source/AST, Go/race, main compilation and live backend authorization are separate claims; no live backend was used.
-- Cycle12 changes only the fixed cloud dependency to reuse internal/responsejson.Normalize for bounded explicit charsets. The generic/legacy decoder and common ABI/codec set remain unchanged. BOM is required for bare UTF16/32; explicit LE/BE works without it. Actual raw proof stays separate from normalized diagnostic JSON. Reused Source75 and independent13 observations are not rerun or combined into a new count. Worker ran gofmt only; root owns Go/race/main builds; no mapping promotion is claimed.
-- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
-- Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as "latest"; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

@@ -1,46 +1,6 @@
 # Cloud Port Update Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_network/NetworkCloudMixin/update_port`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.UpdateWithAttributes`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.WithAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.UpdatePortRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithPortUpdateJSON`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithPortUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithPortUpdateOpts`
-
-- With attributes, FindRecord with ignore_missing false (member GET, then name list) followed by UpdateWithAttributes sends Python's lookup and PUT body, and a missing port fails before any PUT.
-  Tests: `network/python_parity_cloud_b_test.go:TestPythonCloudNetworkBUpdatePortAndSubnetChains`.
-- SDK-owned cloud helper snapshots strict thirteen-key kwargs, validates before lookup, always resolves even empty kwargs, skips PUT for no attributes or Python-equal raw wire values, and PUTs only changed fields to the resolved response ID. Explicit null/false/empty collections remain distinct from omission; raw string boolean values are not replaced by descriptor getter views.
-  Tests: `network/cloud_port_update_test.go:TestCloudPortUpdateLookupOnlyAndDirtySelection`, `network/cloud_port_update_test.go:TestCloudPortUpdateNameFallbackAndMissing`.
-- Options own caller JSON, unsupported canonical aliases/revision/extensions and malformed inputs fail before HTTP; canceled context or selected-service mutation cannot send lookup/PUT. A default-client conflict retains a separate lookup record and makes one PUT attempt without fabricated native success. No new mutation retry policy is added; configured provider retry/reauthentication hooks remain in force.
-  Tests: `network/cloud_port_update_test.go:TestCloudPortUpdateOwnedOptionsAndPreflight`, `network/cloud_port_update_test.go:TestCloudPortUpdateConflictKeepsLookupAndSingleAttempt`.
-- An accepted PUT (any status 200-399, as Python raise_from_response) returns Response, an owned UpdateReceipt with the actual body bytes, headers and status. Body follows Python Resource._translate_response: the resource-key member when present, otherwise the whole top-level object, without self and with unknown members preserved. Merged is the lookup wire row overlaid with every effective attribute and then Body, so a partial body keeps lookup fields; an empty, 204, truncated or otherwise unparsable body sets BodyIgnored and keeps that pre-commit state without error. Non-object JSON or a non-object resource-key member fails after remote success with the receipt and no Merged/native model. A rejected PUT has no receipt, and nothing is replayed. The native model is the projection of Merged.
-  Tests: `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptMergesPythonTranslateResponse`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptNonObjectBodiesFailAfterRemoteSuccess`, `network/cloud_update_receipt_test.go:TestCloudUpdateReceiptRejectedPutHasNoReceipt`.
-- A fallback LIST row named by attribute names (is_port_security_enabled, is_admin_state_up, binding_host_id) is stored under its wire keys by the Resource.existing constructor rules, without self and with unknown members kept. Only values that differ from that state are sent, and the accepted response's attribute-named members are merged under their wire keys (Merged) while Body keeps the actual names.
-  Tests: `network/cloud_update_source_state_test.go:TestCloudUpdateSourceStateListRowAndResponseMapping`, `internal/neutronfind/source_state_test.go:TestSourceStateConsumeAttrsMapping`.
-
-Python/Go differences:
-
-- Python raises SDKException for a missing port; Go FindRecord returns its own not-found error.
-- Go returns the native Port projection, which omits extension attributes; Response.Merged keeps them with every other wire member.
-- Cloud UpdatePortRecord returns a separate Lookup PortRecord, the PUT receipt and its native Port projection; NoOp has Lookup and no fabricated Port or receipt. This callable JSON profile owns defaults/options and does not return the same Python mutable Resource instance.
-- Lookup dirty comparison and receipt merge use the pinned Python body-attribute state (SourceBody/TranslateSourceBody): Resource._consume_attrs over CPython dict order maps attribute-named members to their wire keys, with translate rules for member GET and PUT responses and constructor rules for fallback LIST rows. The native model omits Merged members its schema cannot hold and reports them in UpdateReceipt.ProjectionError without failing the accepted update; Merged keeps the raw values Python would keep. NaN/Infinity bodies are invalid JSON to Go and take the BodyIgnored branch where Python would merge them (shared nonfinite JSON boundary in docs/sdk-support-ledger.md).
-- Inputs are typed Go values; arbitrary Python objects, iterables and numeric types accepted by dynamic kwargs have no equivalent; see Deliberate runtime differences in docs/sdk-support-ledger.md.
-- Results are immutable owned snapshots rather than Python's mutable Resource with adapter, session, cache and dirty state (SDK-R1/C1/S1); see Deliberate runtime differences in docs/sdk-support-ledger.md.
-- Configured provider retry and reauthentication hooks apply as for other native calls; the helper sends one PUT and adds no further replay guard.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

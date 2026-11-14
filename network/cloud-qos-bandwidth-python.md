@@ -1,125 +1,6 @@
 # Cloud QoS Bandwidth Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_network/NetworkCloudMixin/list_qos_bandwidth_limit_rules`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSBandwidthLimitRules`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitFilters`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-
-- Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.
-- Extension gate consumes every alias including later unhashable alias or failed page after an early QoS match; absence has typed unavailable extension error and no policy/callback/rule request.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy`.
-- Policy missing and ambiguity prevent rules/callback/filter expansion, preserve real extension inventory and typed missing/ambiguity without inventing policy None HTTP evidence.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPolicyMissingAndAmbiguityRetainActualGate`.
-- Source proxy generator JMESPath literals/Unicode/object keys/nested generator/null/type errors distinguish rule HTTP from completed prerequisite HTTP; owned base_path succeeds while existing typed raw base_path rejection stays unchanged.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary`.
-- CPython falsey filters, truthy nonobject pre-rule errors, initialized owned callback maps, joined option error/cancellation or original captured-source mutation and real prerequisite receipts.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases`.
-- Actual truncated401 rule response keeps native reauthentication pointer/UnexpectedResponseCode/body/header/EOF, stops willing retry/reauth callbacks; late failed page preserves only earlier actual Inventory and completed parent/extensions.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPhysical401RulePageAndLateFailurePreserveStageProof`.
-
-Python/Go differences:
-
-- Concrete JSON/context/captured-client Go APIs and protected route/header policy replace dynamic Python session/Resource class/constructor/callable substitutions; arbitrary Python-only objects are not accepted.
-- SourceProxy lane accepts100..399 with Source loaded local equality and computed location:null. Existing typed list/Get record status200..399 and typed raw base_path rejection remain compatibility APIs; concrete typed BasePath is additive.
-- JMESPath literal object key iteration uses Go lexical order vs Python insertion order; existing strict syntax/exact JSON numeric evaluator/custom Resource function type policies remain explicit differences.
-- Literal and nested generator values never acquire fake BandwidthLimitRecord or HTTP receipts. Actual extension/policy/rule proofs and observed partial inventory are retained with Go errors.
-- Standalone Service computed location is Source null, including ignoring raw location in logical view. Full Connection computed location and mutable Resource/session model are tracked shared SDK-C1/R1 scope.
-- Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added.
-
-### `python:cloud/_network/NetworkCloudMixin/search_qos_bandwidth_limit_rules`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.SearchQoSBandwidthLimitRules`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitFilters`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.ProxyBandwidthLimitRecords`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-
-- Complete QoS extension gate then exactly one parent policy resolution, owned untyped defaults/unknown fields/computed-null location, bound URI parent and local Body filtering with shared actual paging.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthListOwnsGateParentPagingAndRawFields`.
-- Search delegates exactly one complete list workflow, preserves identifier/glob selection and CPython loaded bool/integer local equality, applies original ordered dictionary filter after list and retains actual Inventory/proof on unknown-key failure.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSearchKeepsRuleIDPhaseAndFilterPresence`.
-- Extension gate consumes every alias including later unhashable alias or failed page after an early QoS match; absence has typed unavailable extension error and no policy/callback/rule request.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy`.
-- Policy missing and ambiguity prevent rules/callback/filter expansion, preserve real extension inventory and typed missing/ambiguity without inventing policy None HTTP evidence.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPolicyMissingAndAmbiguityRetainActualGate`.
-- Source proxy generator JMESPath literals/Unicode/object keys/nested generator/null/type errors distinguish rule HTTP from completed prerequisite HTTP; owned base_path succeeds while existing typed raw base_path rejection stays unchanged.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSourceProxyLiteralsBasePathAndOldTypedBoundary`.
-- CPython falsey filters, truthy nonobject pre-rule errors, initialized owned callback maps, joined option error/cancellation or original captured-source mutation and real prerequisite receipts.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases`.
-- Actual truncated401 rule response keeps native reauthentication pointer/UnexpectedResponseCode/body/header/EOF, stops willing retry/reauth callbacks; late failed page preserves only earlier actual Inventory and completed parent/extensions.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPhysical401RulePageAndLateFailurePreserveStageProof`.
-- Source search without identifier skips falsey literal values; nested generator membership consumes actual rule records before unknown-key failure, while identifier phase rejects opaque generator without rule HTTP.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthSearchSourceFalseyLiteralsAndNestedMembership`.
-
-Python/Go differences:
-
-- Concrete JSON/context/captured-client Go APIs and protected route/header policy replace dynamic Python session/Resource class/constructor/callable substitutions; arbitrary Python-only objects are not accepted.
-- SourceProxy lane accepts100..399 with Source loaded local equality and computed location:null. Existing typed list/Get record status200..399 and typed raw base_path rejection remain compatibility APIs; concrete typed BasePath is additive.
-- JMESPath literal object key iteration uses Go lexical order vs Python insertion order; existing strict syntax/exact JSON numeric evaluator/custom Resource function type policies remain explicit differences.
-- Literal and nested generator values never acquire fake BandwidthLimitRecord or HTTP receipts. Actual extension/policy/rule proofs and observed partial inventory are retained with Go errors.
-- Standalone Service computed location is Source null, including ignoring raw location in logical view. Full Connection computed location and mutable Resource/session model are tracked shared SDK-C1/R1 scope.
-- Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added.
-
-### `python:cloud/_network/NetworkCloudMixin/get_qos_bandwidth_limit_rule`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/rules.API.GetBandwidthLimitRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSBandwidthLimitRule`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSBandwidthLimitOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-
-- After the cloud extension gate, Go sends the same GET /extensions, QoS policy GET-then-name-list find, rule GET/POST/DELETE, rule-type GET, policy POST and policy DELETE requests, while a rule DELETE 404 stays an error.
-  Tests: `network/python_cloud_parity_a_test.go:TestPythonCloudQoSRequestsAfterExtensionGate`.
-- Literal rule getter gates and resolves policy once, returns raw untyped record/default location on success, and preserves native404 without rule Find fallback or ignored missing.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGetResolvesPolicyOnceAndKeeps404`.
-- Extension gate consumes every alias including later unhashable alias or failed page after an early QoS match; absence has typed unavailable extension error and no policy/callback/rule request.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthGateConsumesAllExtensionsAndStopsBeforePolicy`.
-- Policy missing and ambiguity prevent rules/callback/filter expansion, preserve real extension inventory and typed missing/ambiguity without inventing policy None HTTP evidence.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPolicyMissingAndAmbiguityRetainActualGate`.
-- CPython falsey filters, truthy nonobject pre-rule errors, initialized owned callback maps, joined option error/cancellation or original captured-source mutation and real prerequisite receipts.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthFilterOwnershipCallbackGuardAndFalseyCases`.
-- Actual truncated401 rule response keeps native reauthentication pointer/UnexpectedResponseCode/body/header/EOF, stops willing retry/reauth callbacks; late failed page preserves only earlier actual Inventory and completed parent/extensions.
-  Tests: `network/cloud_qos_bandwidth_test.go:TestCloudQoSBandwidthPhysical401RulePageAndLateFailurePreserveStageProof`.
-
-Python/Go differences:
-
-- Concrete JSON/context/captured-client Go APIs and protected route/header policy replace dynamic Python session/Resource class/constructor/callable substitutions; arbitrary Python-only objects are not accepted.
-- SourceProxy lane accepts100..399 with Source loaded local equality and computed location:null. Existing typed list/Get record status200..399 and typed raw base_path rejection remain compatibility APIs; concrete typed BasePath is additive.
-- JMESPath literal object key iteration uses Go lexical order vs Python insertion order; existing strict syntax/exact JSON numeric evaluator/custom Resource function type policies remain explicit differences.
-- Literal and nested generator values never acquire fake BandwidthLimitRecord or HTTP receipts. Actual extension/policy/rule proofs and observed partial inventory are retained with Go errors.
-- Standalone Service computed location is Source null, including ignoring raw location in logical view. Full Connection computed location and mutable Resource/session model are tracked shared SDK-C1/R1 scope.
-- Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -130,7 +11,6 @@ import argparse
 import json
 import os
 import openstack
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -152,7 +32,6 @@ def main():
         values = [conn.get_qos_bandwidth_limit_rule(args.policy, args.rule)]
     for value in values:
         print(json.dumps(value.to_dict() if hasattr(value, "to_dict") else value, ensure_ascii=False, indent=2))
-
 
 if __name__ == "__main__":
     main()

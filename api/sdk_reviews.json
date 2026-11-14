@@ -43886,7 +43886,7 @@
         "network/floating-ip-ensure.md",
         "network/network-roles.md",
         "network/floating-ip-plan.md",
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "The generated facade owns concrete options/builders and extracts a native typed value. Higher-level Create/Ensure add safe Ref/name selection, unique IPv4 destination policy, optional wait and partial allocation results around that native call; these workflow differences do not characterize all native CreateOptsBuilder inputs.",
@@ -54201,7 +54201,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
@@ -54226,7 +54226,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
@@ -54253,7 +54253,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
@@ -54278,7 +54278,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/networks call only; Python resource models, finders and waits are tracked separately.",
@@ -54305,7 +54305,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
@@ -54330,7 +54330,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
@@ -54357,7 +54357,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
@@ -54382,7 +54382,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/subnets call only; Python resource models, finders and waits are tracked separately.",
@@ -54409,7 +54409,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
@@ -54434,7 +54434,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
@@ -54461,7 +54461,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
@@ -54486,7 +54486,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/ports call only; Python resource models, finders and waits are tracked separately.",
@@ -54513,7 +54513,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -54538,7 +54538,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -54564,7 +54564,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -54589,7 +54589,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -54616,7 +54616,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -54641,7 +54641,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -54668,7 +54668,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -54693,7 +54693,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -54718,7 +54718,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/floatingips call only; Python resource models, finders and waits are tracked separately.",
@@ -54745,7 +54745,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/floatingips call only; Python resource models, finders and waits are tracked separately.",
@@ -54770,7 +54770,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/floatingips call only; Python resource models, finders and waits are tracked separately.",
@@ -54794,7 +54794,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native bulk rule call only; it has no extension option builder.",
@@ -54821,7 +54821,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
@@ -54846,7 +54846,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
@@ -54873,7 +54873,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
@@ -54898,7 +54898,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python resource models, finders and waits are tracked separately.",
@@ -54924,7 +54924,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
@@ -54950,7 +54950,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
@@ -54976,7 +54976,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
@@ -55002,7 +55002,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
@@ -55028,7 +55028,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
@@ -55054,7 +55054,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
@@ -55080,7 +55080,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native router action call only; Python router helpers are tracked separately.",
@@ -55107,7 +55107,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/subnetpools call only; Python resource models, finders and waits are tracked separately.",
@@ -55133,7 +55133,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/subnetpools call only; Python resource models, finders and waits are tracked separately.",
@@ -55160,7 +55160,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/subnetpools call only; Python resource models, finders and waits are tracked separately.",
@@ -55185,7 +55185,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/subnetpools call only; Python resource models, finders and waits are tracked separately.",
@@ -55212,7 +55212,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/subnetpools call only; Python resource models, finders and waits are tracked separately.",
@@ -55239,7 +55239,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/subnetpools call only; Python resource models, finders and waits are tracked separately.",
@@ -55266,7 +55266,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/addressscopes call only; Python resource models, finders and waits are tracked separately.",
@@ -55291,7 +55291,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/addressscopes call only; Python resource models, finders and waits are tracked separately.",
@@ -55318,7 +55318,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/addressscopes call only; Python resource models, finders and waits are tracked separately.",
@@ -55345,7 +55345,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/addressscopes call only; Python resource models, finders and waits are tracked separately.",
@@ -55370,7 +55370,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/addressscopes call only; Python resource models, finders and waits are tracked separately.",
@@ -55397,7 +55397,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/trunks call only; Python resource models, finders and waits are tracked separately.",
@@ -55422,7 +55422,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/trunks call only; Python resource models, finders and waits are tracked separately.",
@@ -55449,7 +55449,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/trunks call only; Python resource models, finders and waits are tracked separately.",
@@ -55474,7 +55474,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/trunks call only; Python resource models, finders and waits are tracked separately.",
@@ -55499,7 +55499,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/trunks call only; Python resource models, finders and waits are tracked separately.",
@@ -55526,7 +55526,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/trunks call only; Python resource models, finders and waits are tracked separately.",
@@ -55553,7 +55553,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/trunks call only; Python resource models, finders and waits are tracked separately.",
@@ -55580,7 +55580,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/portforwarding call only; Python resource models, finders and waits are tracked separately.",
@@ -55605,7 +55605,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/portforwarding call only; Python resource models, finders and waits are tracked separately.",
@@ -55632,7 +55632,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/portforwarding call only; Python resource models, finders and waits are tracked separately.",
@@ -55659,7 +55659,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/portforwarding call only; Python resource models, finders and waits are tracked separately.",
@@ -55684,7 +55684,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/portforwarding call only; Python resource models, finders and waits are tracked separately.",
@@ -55711,7 +55711,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -55736,7 +55736,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -55763,7 +55763,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -55788,7 +55788,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -55815,7 +55815,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -55840,7 +55840,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -55867,7 +55867,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -55892,7 +55892,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -55919,7 +55919,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -55946,7 +55946,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -55971,7 +55971,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -55998,7 +55998,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56023,7 +56023,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56050,7 +56050,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56077,7 +56077,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56102,7 +56102,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56129,7 +56129,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56154,7 +56154,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56181,7 +56181,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -56206,7 +56206,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/ruletypes call only; Python resource models, finders and waits are tracked separately.",
@@ -56231,7 +56231,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/qos/ruletypes call only; Python resource models, finders and waits are tracked separately.",
@@ -56258,7 +56258,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -56283,7 +56283,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -56310,7 +56310,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -56337,7 +56337,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -56362,7 +56362,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -56389,7 +56389,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -56416,7 +56416,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/security/addressgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -56443,7 +56443,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -56468,7 +56468,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -56495,7 +56495,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -56522,7 +56522,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -56547,7 +56547,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/rbacpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -56574,7 +56574,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
@@ -56599,7 +56599,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
@@ -56624,7 +56624,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
@@ -56649,7 +56649,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
@@ -56674,7 +56674,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
@@ -56699,7 +56699,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/attributestags call only; Python resource models, finders and waits are tracked separately.",
@@ -56724,7 +56724,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/apiversions call only; Python resource models, finders and waits are tracked separately.",
@@ -56749,7 +56749,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/apiversions call only; Python resource models, finders and waits are tracked separately.",
@@ -56774,7 +56774,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions call only; Python resource models, finders and waits are tracked separately.",
@@ -56799,7 +56799,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions call only; Python resource models, finders and waits are tracked separately.",
@@ -56826,7 +56826,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -56851,7 +56851,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -56878,7 +56878,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -56905,7 +56905,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -56930,7 +56930,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -56955,7 +56955,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -56980,7 +56980,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/groups call only; Python resource models, finders and waits are tracked separately.",
@@ -57007,7 +57007,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -57032,7 +57032,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -57059,7 +57059,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -57086,7 +57086,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -57111,7 +57111,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -57138,7 +57138,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -57163,7 +57163,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/policies call only; Python resource models, finders and waits are tracked separately.",
@@ -57190,7 +57190,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -57215,7 +57215,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -57242,7 +57242,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -57269,7 +57269,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -57294,7 +57294,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/fwaas_v2/rules call only; Python resource models, finders and waits are tracked separately.",
@@ -57321,7 +57321,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -57346,7 +57346,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -57373,7 +57373,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -57400,7 +57400,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -57425,7 +57425,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/endpointgroups call only; Python resource models, finders and waits are tracked separately.",
@@ -57452,7 +57452,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57477,7 +57477,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57504,7 +57504,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57531,7 +57531,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57556,7 +57556,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ikepolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57583,7 +57583,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57608,7 +57608,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57635,7 +57635,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57662,7 +57662,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57687,7 +57687,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/ipsecpolicies call only; Python resource models, finders and waits are tracked separately.",
@@ -57714,7 +57714,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
@@ -57739,7 +57739,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
@@ -57766,7 +57766,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
@@ -57793,7 +57793,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
@@ -57818,7 +57818,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/services call only; Python resource models, finders and waits are tracked separately.",
@@ -57845,7 +57845,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
@@ -57870,7 +57870,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
@@ -57897,7 +57897,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
@@ -57924,7 +57924,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
@@ -57949,7 +57949,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/vpnaas/siteconnections call only; Python resource models, finders and waits are tracked separately.",
@@ -57976,7 +57976,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
@@ -58001,7 +58001,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
@@ -58028,7 +58028,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
@@ -58055,7 +58055,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
@@ -58080,7 +58080,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-crud.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/taas/tapmirrors call only; Python resource models, finders and waits are tracked separately.",
@@ -63072,7 +63072,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63099,7 +63099,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63124,7 +63124,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63151,7 +63151,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63176,7 +63176,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63203,7 +63203,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63228,7 +63228,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63253,7 +63253,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63280,7 +63280,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63305,7 +63305,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63330,7 +63330,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63357,7 +63357,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63382,7 +63382,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63407,7 +63407,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/agents call only; Python agent resource models, finders and admin helpers are tracked separately.",
@@ -63434,7 +63434,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
@@ -63459,7 +63459,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
@@ -63486,7 +63486,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
@@ -63511,7 +63511,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
@@ -63538,7 +63538,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/segments call only; Python segment resource models, finders and waits are tracked separately.",
@@ -63563,7 +63563,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/networkipavailabilities call only; Python network IP availability resource models and finders are tracked separately.",
@@ -63590,7 +63590,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/networkipavailabilities call only; Python network IP availability resource models and finders are tracked separately.",
@@ -63614,7 +63614,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-admin.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/layer3/routers call only; Python router L3 agent helpers and agent resource models are tracked separately.",
@@ -63641,7 +63641,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
@@ -63666,7 +63666,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
@@ -63691,7 +63691,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
@@ -63716,7 +63716,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
@@ -63743,7 +63743,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/peers call only; Python BGP peer resource models, finders and waits are tracked separately.",
@@ -63770,7 +63770,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63797,7 +63797,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63824,7 +63824,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63849,7 +63849,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63874,7 +63874,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63899,7 +63899,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63924,7 +63924,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63951,7 +63951,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -63978,7 +63978,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -64005,7 +64005,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgp/speakers call only; Python BGP speaker resource models, finders, waits and dragent scheduling helpers are tracked separately.",
@@ -64032,7 +64032,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64059,7 +64059,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64086,7 +64086,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64113,7 +64113,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64138,7 +64138,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64163,7 +64163,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64188,7 +64188,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64213,7 +64213,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64238,7 +64238,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64263,7 +64263,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64288,7 +64288,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64313,7 +64313,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64340,7 +64340,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64367,7 +64367,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64394,7 +64394,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64421,7 +64421,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64448,7 +64448,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64475,7 +64475,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -64502,7 +64502,7 @@
         }
       ],
       "documentation": [
-        "network/v2/native-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native networking/v2/extensions/bgpvpns call only; Python BGP VPN and BGP VPN association resource models, finders and waits are tracked separately.",
@@ -88304,7 +88304,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88318,7 +88318,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88332,7 +88332,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88346,7 +88346,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88360,7 +88360,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88374,7 +88374,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88388,7 +88388,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88402,7 +88402,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88416,7 +88416,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88430,7 +88430,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88444,7 +88444,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88458,7 +88458,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88472,7 +88472,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88486,7 +88486,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88500,7 +88500,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88514,7 +88514,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88528,7 +88528,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88542,7 +88542,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88556,7 +88556,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88570,7 +88570,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88584,7 +88584,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88598,7 +88598,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88612,7 +88612,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88626,7 +88626,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88640,7 +88640,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88654,7 +88654,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88668,7 +88668,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88682,7 +88682,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88696,7 +88696,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -88710,7 +88710,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md"
+        "network/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -89644,7 +89644,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-lbaas-metering.md",
+        "network/v2/README.md",
         "network/v2/extensions/layer3/floatingips/python-list-records.md"
       ],
       "differences": [
@@ -89673,7 +89673,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-sfc-tap.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
@@ -89723,7 +89723,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-sfc-tap.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
@@ -89835,7 +89835,7 @@
       ],
       "documentation": [
         "network/v2/extensions/taas/tapmirrors/python-list-query.md",
-        "network/v2/python-parity-sfc-tap.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python sends only declared query keys (name, project_id, sort_key, sort_dir, fields, limit, marker), filters other Body attributes such as port_id locally and drops unknown keys; Go forwards every request.Query, request.Query or resource.WithQuery key to the server.",
@@ -89865,7 +89865,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-sfc-tap.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
@@ -89898,7 +89898,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-sfc-tap.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a TapMirror Resource or an ID string; Go takes the ID string (or a resource.Ref).",
@@ -97925,7 +97925,7 @@
         }
       ],
       "documentation": [
-        "network/v2/extensions/fwaas_v2/policies/python-insert-rule.md",
+        "network/v2/README.md",
         "network/v2/python-parity-l3-qos-fw.md"
       ],
       "differences": [
@@ -99310,7 +99310,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts an Agent Resource or an ID; Go Remove takes resource.ID."
@@ -99355,7 +99355,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.",
@@ -99381,7 +99381,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.",
@@ -99407,7 +99407,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python returns the decoded response body; Go returns only an error.",
@@ -99432,7 +99432,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python also sends {\"network_id\": id} as a JSON body on the DELETE; Go sends no body.",
@@ -99481,7 +99481,7 @@
       ],
       "documentation": [
         "network/v2/extensions/agents/python-dhcp-networks.md",
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts the agent as an ID or an Agent Resource; Go takes an ID string, and Python base_path and jmespath_filters are not supported.",
@@ -99543,7 +99543,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python sends whatever attributes it is given and leaves validation to Neutron; Go requires network_id and network_type before HTTP.",
@@ -99569,7 +99569,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Segment Resource or an ID; Go Remove takes resource.ID."
@@ -99671,7 +99671,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.",
@@ -99760,7 +99760,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model.",
@@ -99838,7 +99838,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/extensions/python-records.md"
       ],
       "differences": [
@@ -99927,7 +99927,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/extensions/python-records.md"
       ],
       "differences": [
@@ -99999,7 +99999,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/extensions/networkipavailabilities/python-records.md"
       ],
       "differences": [
@@ -100054,7 +100054,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Go GetWithFields returns the Gophercloud v2.15.0 typed model, so attributes Neutron returns outside that model are dropped and attributes the server omits are zero values instead of None; Python returns a sparse Resource.",
@@ -100107,7 +100107,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/extensions/networkipavailabilities/python-records.md"
       ],
       "differences": [
@@ -100324,7 +100324,7 @@
         "Both list local filters and cloud dictionary selection opt into CPython JSON-loaded equality. Full JMESPath retains documented exact-decimal/lexical object traversal/strict grammar boundaries, and JSON-map object functions can differ from Python Port exact-typename function checks."
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/ports/python-list-records.md"
       ]
     },
@@ -100406,7 +100406,7 @@
         "Source renamed subnet_id keyword compatibility is represented by the explicit SubnetPortID constructor rather than accepting dynamic keyword aliases."
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/ports/python-user-helpers.md"
       ]
     },
@@ -100498,7 +100498,7 @@
         "Bulk atomicy and per-row/attribute user/admin policy remain server/plugin responsibilities; official Neutron27 Pecan validation/policy and ML2 native bulk transaction source were reviewed, no live deployment/rollback was tested."
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/ports/python-user-helpers.md"
       ]
     },
@@ -100518,7 +100518,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python takes Port and FloatingIP Resources and also commits any other dirty FloatingIP attributes; Go takes the floating IP ID and sends only the given fields.",
@@ -100542,7 +100542,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python takes a FloatingIP Resource and also commits its other dirty attributes; Go takes the floating IP ID.",
@@ -100584,7 +100584,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/extensions/layer3/floatingips/python-available.md"
       ],
       "differences": [
@@ -100610,7 +100610,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python returns the response dictionary; Go returns AddGatewayNetworkOpts decoded from it.",
@@ -100635,7 +100635,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python's Resource action uses Proxy.request without raise_from_response, so an HTTP error returns the error body; Go returns the HTTP error.",
@@ -100659,7 +100659,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python returns the whole response dictionary; Go yields the advertised_routes rows as typed values."
@@ -100682,7 +100682,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python returns the response dictionary with sub_ports; Go returns a typed Subport slice.",
@@ -100784,7 +100784,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "docs/python-proxy-waits.md"
       ],
       "differences": [
@@ -100867,7 +100867,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "docs/python-proxy-waits.md"
       ],
       "differences": [
@@ -101033,7 +101033,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/availabilityzones/README.md"
       ],
       "differences": [
@@ -101102,7 +101102,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/serviceproviders/README.md"
       ],
       "differences": [
@@ -101157,7 +101157,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/autoallocatedtopologies/README.md"
       ],
       "differences": [
@@ -101198,7 +101198,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/autoallocatedtopologies/README.md"
       ],
       "differences": [
@@ -101257,7 +101257,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/autoallocatedtopologies/README.md"
       ],
       "differences": [
@@ -101287,7 +101287,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-core.md",
+        "network/v2/README.md",
         "network/v2/extensions/subnetpools/python-onboard-network-subnets.md"
       ],
       "differences": [
@@ -103040,7 +103040,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "CreateOpts.AdminStateUp has no omitempty, so Go sends admin_state_up null when it is nil; Python omits the key and Neutron applies true, so Go callers set AdminStateUp explicitly.",
@@ -103068,7 +103068,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -103116,7 +103116,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -103219,7 +103219,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/vpnaas/services/python-records.md"
       ],
       "differences": [
@@ -103246,7 +103246,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -103271,7 +103271,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "CreateOpts.Endpoints has no omitempty and is sent as null when nil, while Python omits endpoints it was not given.",
@@ -103299,7 +103299,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -103347,7 +103347,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -103450,7 +103450,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/vpnaas/endpointgroups/python-records.md"
       ],
       "differences": [
@@ -103477,7 +103477,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -103502,7 +103502,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Empty algorithm strings and a zero lifetime value are omitted; Neutron rejects those values, so no valid Python request is lost.",
@@ -103530,7 +103530,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -103578,7 +103578,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -103708,7 +103708,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/vpnaas/ikepolicies/python-records.md"
       ],
       "differences": [
@@ -103736,7 +103736,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "UpdateOpts.Phase1NegotiationMode is sent as phase_1_negotiation_mode; Python's phase1_negotiation_mode is sent with request.Field(\"phase1_negotiation_mode\", value), which is not a reserved Opts key.",
@@ -103763,7 +103763,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Empty algorithm strings and a zero lifetime value are omitted; Neutron rejects those values, so no valid Python request is lost.",
@@ -103791,7 +103791,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -103839,7 +103839,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -103969,7 +103969,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/vpnaas/ipsecpolicies/python-records.md"
       ],
       "differences": [
@@ -103996,7 +103996,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -104022,7 +104022,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Go always sends ikepolicy_id, ipsecpolicy_id, vpnservice_id, peer_address, peer_id and psk, which Neutron requires anyway; zero mtu and DPD values are omitted.",
@@ -104050,7 +104050,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -104098,7 +104098,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -104210,7 +104210,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/vpnaas/siteconnections/python-record-list.md"
       ],
       "differences": [
@@ -104247,8 +104247,7 @@
         }
       ],
       "documentation": [
-        "network/v2/extensions/vpnaas/siteconnections/python-update-record.md",
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a VpnIPSecSiteConnection Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.",
@@ -104275,7 +104274,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Go always sends name, auth_type, peer_ip and remote_as; Python omits unset keys, so Neutron's auth_type default none must be passed explicitly in Go.",
@@ -104304,7 +104303,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -104329,7 +104328,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -104365,8 +104364,7 @@
         }
       ],
       "documentation": [
-        "network/v2/extensions/bgp/peers/python-update-record.md",
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a BgpPeer Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.",
@@ -104410,7 +104408,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/bgp/peers/python-records.md"
       ],
       "differences": [
@@ -104503,7 +104501,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Go always sends advertise_floating_ip_host_routes and advertise_tenant_networks (false when unset) while Python omits them and Neutron defaults both to true, so Go callers set them explicitly.",
@@ -104532,7 +104530,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -104557,7 +104555,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -104593,8 +104591,7 @@
         }
       ],
       "documentation": [
-        "network/v2/extensions/bgp/speakers/python-update-record.md",
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a BgpSpeaker Resource or an ID string; Go takes the ID string and rejects blank, '.' and '..' IDs before HTTP.",
@@ -104637,7 +104634,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/bgp/speakers/python-records.md"
       ],
       "differences": [
@@ -104730,7 +104727,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python returns the whole response dict; Go decodes only bgp_peer_id into AddBGPPeerOpts.",
@@ -104755,7 +104752,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts any 2xx; Go accepts only 200."
@@ -104779,7 +104776,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python always issues a second GET agents and returns those rows filtered by the hosting IDs; Go returns the hosting rows directly and the second list is optional.",
@@ -104803,7 +104800,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python never checks the POST response and returns None even on HTTP errors; Go returns the error for any status other than 201.",
@@ -104828,7 +104825,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python always issues a second GET bgp-speakers and returns those rows filtered by the hosted IDs; Go returns the hosted rows directly and the second list is optional.",
@@ -104852,7 +104849,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python never checks the DELETE response and returns None even on HTTP errors; Go returns the error.",
@@ -104888,8 +104885,7 @@
         }
       ],
       "documentation": [
-        "network/v2/extensions/bgpvpns/python-create-record.md",
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python converts values of list-typed attributes before sending; Go serializes the Go value as given.",
@@ -104916,7 +104912,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -104964,7 +104960,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -104990,7 +104986,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -105136,7 +105132,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a BgpVpn Resource or ID; Go takes the BGP VPN ID string.",
@@ -105162,7 +105158,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to resource.IgnoreMissing around the generated delete; ignore_missing=False is the plain call, which returns the 404 error.",
@@ -105214,7 +105210,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -105242,7 +105238,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python's association QueryParameters only hold limit and marker, so other keywords such as network_id are local filters in Python; Go sends request.Query keys to the server.",
@@ -105267,7 +105263,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a BgpVpn Resource or ID; Go takes the BGP VPN ID string.",
@@ -105293,7 +105289,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to resource.IgnoreMissing around the generated delete; ignore_missing=False is the plain call, which returns the 404 error.",
@@ -105345,7 +105341,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -105373,7 +105369,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python's association QueryParameters only hold limit and marker, so other keywords such as port_id are local filters in Python; Go sends request.Query keys to the server.",
@@ -105398,7 +105394,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -105423,7 +105419,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a BgpVpn Resource or ID; Go takes the BGP VPN ID string.",
@@ -105449,7 +105445,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to resource.IgnoreMissing around the generated delete; ignore_missing=False is the plain call, which returns the 404 error.",
@@ -105501,7 +105497,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -105529,7 +105525,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python's association QueryParameters only hold limit and marker, so other keywords such as router_id are local filters in Python; Go sends request.Query keys to the server.",
@@ -105554,7 +105550,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md"
+        "network/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource or an ID string and returns a mutable Resource; Go takes ID strings and returns the native Gophercloud model pointer with zero values for null or omitted fields.",
@@ -105591,7 +105587,7 @@
         }
       ],
       "documentation": [
-        "network/v2/python-parity-vpn-bgp.md",
+        "network/v2/README.md",
         "network/v2/extensions/bgpvpns/python-port-association-find.md"
       ],
       "differences": [
@@ -107385,7 +107381,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns a mutable Subnet Resource; Go returns the native Gophercloud Subnet model, so unknown response fields are not kept.",
@@ -107410,7 +107406,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Go returns the native SubnetPool model, which requires the three prefix length fields; a projected response without them fails instead of yielding a partial Resource.",
@@ -107436,7 +107432,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns an empty list when has_service('network') is false; Go fails when the network service client cannot be built.",
@@ -107463,7 +107459,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Like Python, a router ID passed as name_or_id is only sent as a name query; Go does not add a local ID match.",
@@ -107489,7 +107485,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced.",
@@ -107514,7 +107510,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced.",
@@ -107539,7 +107535,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced.",
@@ -107565,7 +107561,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md"
+        "network/README.md"
       ],
       "differences": [
         "Only the default secgroup_source=neutron path with a network service is mapped; the Nova /os-security-groups branch with its normalization and the OpenStackCloudUnavailableFeature raised when secgroup_source is unset are not reproduced. The Nova branch returns False on 404, which Go does not provide.",
@@ -107653,7 +107649,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-network-lists-python.md",
         "README.md"
       ],
@@ -107748,7 +107744,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-network-lists-python.md",
         "README.md"
       ],
@@ -107884,7 +107880,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-subnet-lists-python.md",
         "README.md"
       ],
@@ -108018,7 +108014,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-subnet-lists-python.md",
         "README.md"
       ],
@@ -108298,7 +108294,7 @@
         "Computed current cloud location is injected by Connection and optional for direct leaf; shared Source service configuration disable controls are not inferred from absent endpoint tests."
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/v2/ports/python-list-records.md",
         "network/v2/ports/python-user-helpers.md"
       ]
@@ -108510,7 +108506,7 @@
         "Connection models clean service-catalog absence and explicit endpoint overrides; the broad Python has_service configuration-disabled service policy remains a shared SDK-C1 contract. Typed Connection.ListPorts intentionally retains record-only results; the named list_ports row remains unresolved for polymorphic iterable conversion."
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/v2/ports/python-list-records.md"
       ],
       "remaining": []
@@ -108561,7 +108557,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-router-interfaces-python.md"
       ],
       "differences": [
@@ -108646,7 +108642,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-router-interface-remove-python.md",
         "network/v2/router-interfaces-python.md"
       ],
@@ -108709,7 +108705,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-router-update-python.md"
       ],
       "differences": [
@@ -108776,7 +108772,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-subnet-update-python.md"
       ],
       "differences": [
@@ -108841,7 +108837,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-port-update-python.md"
       ],
       "differences": [
@@ -108908,7 +108904,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-policies-python.md"
       ],
       "differences": [
@@ -108981,7 +108977,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-policies-python.md"
       ],
       "differences": [
@@ -109054,7 +109050,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-rule-types-python.md"
       ],
       "differences": [
@@ -109133,7 +109129,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-policy-mutations-python.md"
       ],
       "differences": [
@@ -109206,7 +109202,7 @@
         "Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added."
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-bandwidth-python.md",
         "network/v2/qos-bandwidth-limit-records-python.md"
       ]
@@ -109284,7 +109280,7 @@
         "Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added."
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-bandwidth-python.md",
         "network/v2/qos-bandwidth-limit-records-python.md"
       ]
@@ -109371,7 +109367,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-rule-updates-python.md"
       ],
       "differences": [
@@ -109452,7 +109448,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-dscp-python.md"
       ],
       "differences": [
@@ -109546,7 +109542,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-dscp-python.md"
       ],
       "differences": [
@@ -109640,7 +109636,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-rule-updates-python.md"
       ],
       "differences": [
@@ -109721,7 +109717,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-minimum-bandwidth-python.md"
       ],
       "differences": [
@@ -109815,7 +109811,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-minimum-bandwidth-python.md"
       ],
       "differences": [
@@ -109909,7 +109905,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-qos-rule-updates-python.md"
       ],
       "differences": [
@@ -110098,7 +110094,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-firewall-group-update-python.md"
       ],
       "differences": [
@@ -110164,7 +110160,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-firewall-policy-update-python.md"
       ],
       "differences": [
@@ -110225,7 +110221,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-firewall-rule-update-python.md"
       ],
       "differences": [
@@ -110266,7 +110262,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-firewall-policy-insert-rule-python.md"
       ],
       "differences": [
@@ -110307,7 +110303,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-firewall-policy-remove-rule-python.md"
       ],
       "differences": [
@@ -110386,7 +110382,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-security-group-reads-python.md"
       ],
       "differences": [
@@ -110482,7 +110478,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-b.md",
+        "network/README.md",
         "network/cloud-security-group-reads-python.md"
       ],
       "differences": [
@@ -110793,7 +110789,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns a Network Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
@@ -110821,7 +110817,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns a Router Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
@@ -110849,7 +110845,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns a Subnet Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
@@ -110877,7 +110873,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns a Port Resource or None; Go returns a record with Resource/Wire attribute views and the raw response, or nil.",
@@ -110903,7 +110899,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python docstring says None when missing but the proxy raises NotFoundException; Go returns the Gophercloud 404 error.",
@@ -110927,7 +110923,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python docstring says None when missing but the proxy raises NotFoundException; Go returns the Gophercloud 404 error.",
@@ -110951,7 +110947,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns set[str] of aliases; Go yields Extension values through an iterator and the caller collects Alias."
@@ -110976,7 +110972,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python accepts a Router object or ID; Go takes the router ID string.",
@@ -111002,7 +110998,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python rejects kwargs outside its valid_kwargs list; Go WithAttribute forwards any key.",
@@ -111029,7 +111025,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns True/False; Go callers derive the bool from whether FindRecord returned a record and pass its id to DeleteWithOptions.",
@@ -111056,7 +111052,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns True/False; Go callers derive the bool from whether FindRecord returned a record and pass its id to DeleteWithOptions.",
@@ -111083,7 +111079,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python returns True/False; Go callers derive the bool from whether FindRecord returned a record and pass its id to DeleteWithOptions.",
@@ -111112,7 +111108,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python Resource.find falls back to the name list after a 400 or 403 member GET and matches rows by ID or name; Go Find(resource.ID) treats only 404 as absent and Find(resource.Name) uses the server-side name filter.",
@@ -111143,7 +111139,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md"
+        "network/README.md"
       ],
       "differences": [
         "Python Resource.find falls back to the name list after a 400 or 403 member GET and matches rows by ID or name; Go Find(resource.ID) treats only 404 as absent and Find(resource.Name) uses the server-side name filter.",
@@ -111179,8 +111175,8 @@
         }
       ],
       "documentation": [
-        "network/v2/extensions/fwaas_v2/rules/python-create-record.md",
-        "network/python-cloud-parity-a.md"
+        "network/v2/README.md",
+        "network/README.md"
       ],
       "differences": [
         "Python returns the FirewallRule Resource merged from request attributes and the response; Go returns RuleRecord with the typed Rule, the raw response object fields, headers and status.",
@@ -111736,7 +111732,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-router-create-python.md"
       ],
       "differences": [
@@ -111849,7 +111845,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-subnet-create-python.md"
       ],
       "differences": [
@@ -111949,7 +111945,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-policy-actions-python.md"
       ],
       "differences": [
@@ -112026,7 +112022,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-policy-mutations-python.md"
       ],
       "differences": [
@@ -112093,7 +112089,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-policy-actions-python.md"
       ],
       "differences": [
@@ -112197,7 +112193,7 @@
         "Source policy and extension/user authorization are checked by the real Neutron deployment; these are read-only named helpers and no creation/update/delete or server-side policy emulation is added."
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-bandwidth-python.md",
         "network/v2/qos-bandwidth-limit-records-python.md"
       ]
@@ -112284,7 +112280,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-rule-creates-python.md"
       ],
       "differences": [
@@ -112409,7 +112405,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-rule-deletes-python.md"
       ],
       "differences": [
@@ -112483,7 +112479,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-dscp-python.md"
       ],
       "differences": [
@@ -112576,7 +112572,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-rule-creates-python.md"
       ],
       "differences": [
@@ -112701,7 +112697,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-rule-deletes-python.md"
       ],
       "differences": [
@@ -112775,7 +112771,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-minimum-bandwidth-python.md"
       ],
       "differences": [
@@ -112868,7 +112864,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-rule-creates-python.md"
       ],
       "differences": [
@@ -112993,7 +112989,7 @@
         }
       ],
       "documentation": [
-        "network/python-cloud-parity-a.md",
+        "network/README.md",
         "network/cloud-qos-rule-deletes-python.md"
       ],
       "differences": [

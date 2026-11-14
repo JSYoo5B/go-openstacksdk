@@ -1,36 +1,6 @@
 # Availabilityzones
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/availability_zones`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/availabilityzones.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/availabilityzones.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/availabilityzones.WithProxyQuery`
-
-- Proxy accepts but drops every query kwarg without marshaling, URL filters, Body predicates or JMESPath evaluation.
-  Tests: `network/v2/availabilityzones/records_test.go:TestAvailabilityZonesProxyDiscardsAllQueryKwargsWithoutMarshalOrFiltering`.
-- Source nullable declarations, unknown/raw extensions and independent actual page metadata are preserved.
-  Tests: `network/v2/availabilityzones/records_test.go:TestAvailabilityZonesDeclaredDefaultsUnknownFieldsAndActualReceiptOwnBytes`.
-- Lazy iterator stops before next request; eager AllRecords discards partial pages on error.
-  Tests: `network/v2/availabilityzones/records_test.go:TestAvailabilityZonesPagingAndAllRecordsDiscardPartialErrors`.
-- Selected source/context callbacks are guarded and runtime shapes fail atomically with actual response proof.
-  Tests: `network/v2/availabilityzones/records_test.go:TestAvailabilityZonesCallbacksCannotHideSourceChangeOrCancellation`.
-- Clean401 reauthentication retains project-independent zone route and latest shared token.
-  Tests: `network/v2/availabilityzones/records_test.go:TestAvailabilityZonesNative401KeepsActualOriginalErrorAndCleanReauth`.
-
-Python/Go differences:
-
-- Go returns detached Source Resource/Wire with actual response metadata and uses context plus owned callback guards; optional Python Adapter cache/session and object/dirty lifecycle remain tracked whole-project SDK-R1/C1/S1.
-- Common Neutron/REST engine owns strict UTF8, continuation origin and request/header/version policies; no live-cloud support is claimed.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

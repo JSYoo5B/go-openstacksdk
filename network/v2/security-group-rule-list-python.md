@@ -1,58 +1,6 @@
 # Security Group Rule List Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/security_group_rules`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.New`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.RawClient`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules.WithRecordListHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-
-- Pinned Source SecurityGroupRule MRO reuses existing SecurityGroupRuleRecord and canonical descriptor mapping:18 Body fields, NetworkResource row Header if_match list, TagMixin tags defaultempty and Computed location ownednull. Only port ranges/revision have Source int conversion; bool/null/rawexact/Unicode string/digit faults, ether canonical/wire orderedlastvalue and project absent-only tenant fallback remain distinct from Wire. Wholepage headers never overwrite row Header constructor attributes. Unknown/bodyIF_MATCH/self/forgedlocation are retained only in appropriate independent carriers and clones.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListSourceDescriptorsHeadersAndOwnedEvidence`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListPagesEnvelopeAndConstructorProof`.
-- Lazy Source-owned List maps declared server queries and canonical aliases ether_type/any_tags/not_tags/not_any_tags, preserving Requests repeated/null/bool values and canonicalpriority, allowing id serverquery and not inventing namehint. Declared nonquery Body localfilters are evaluated without client re-filtering serverfields. Unknown/Header/all_projects kwargs are discarded before marshaling and do not expand authority.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListServerAliasesLocalFieldsAndUnknownDiscard`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListOrderedDictionaryFiltersAndExactEquality`.
-- Ordered local recursive mapping filters preserve top-level/nested order and short-circuit. Empty mapping matches truthfulscalar, nonemptymapping ontruthfulscalar yields actualpage failure, Python float underflow truthiness and bool-number behavior are reused. Shared exactdecimal equality intentionally distinguishes actual9007199254740992 fromrawfilter9007199254740993.0.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListOrderedDictionaryFiltersAndExactEquality`.
-- Shared Engine.List retains plural/singleton/next/plurallinks/HTTPLink/versionedalias/shortpage marker, empty stop and falseydecimal continuation, rawcap includingfilteredrows withzero-limit hint, singlepage/consumerbreak and no evaluationof unusedmalformedrow/unsafe next. Wrongshape/invalidconstructor cls/connection/microversion/_synchronized/digitfaults/unsafeorigincollectionfilter/cycle preserve actualwholepage proof; laterdenial remainsvisible and AllRecords discards partial slice.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListRawCapAndBreakAvoidUnconsumedWork`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListPagesEnvelopeAndConstructorProof`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListStatusPoliciesAndLateDenial`.
-- Shared Engine accepted200..399 and actualnative informational199/400..599 errors remain distinct; no findfallback or ignore404 for list. Actual status/body/header/methodURL and source/cancel/Read/Close/mixedcauses are preserved. StopFaultRetryCallbacks=true suppresses originalRetryFunc before physicalfault exposure across accepted/rejected70lanes including401 and mixed Read/Close/Source/cancel faults; exactlyoneHTTP/onephysicalClose, no replay or manufactured Resource. A willing original ReauthFunc stays uncalled on physical401. Native *ErrUnableToReauthenticate ErrOriginal keeps actual401 method/URL/status/body/Header; non-unwrapped ErrReauth preserves exact guard/physical causes and one close.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListStatusPoliciesAndLateDenial`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListPhysicalFaultsStopRetryCallbacks`.
-- Selected/default network version or absence and explicit per-list override use no invented ceiling/discovery. Source AcceptJSON overridescapturedAccept and explicit safeHeaderwins. Cleanretry/reauth/tokenrenewal preserve request; auth/framing/foreignNovaCinder/versionOmit/bodytamper retainsactualrejection and callbackcause withoutsecondHTTP. Native OkCodes expansion canresend but original acceptedpolicy rejectsactual400.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListVersionsHeadersRetryAndReauthentication`.
-- ConcreteJSON/header/version/optionslice and retainedcallback states are snapshotted on eachlazyexecution; API/source capturedbeforecallback, nilctxAPIoption andbadcontrols/header/query/negativecap/limit/cancellation fail beforeHTTP withoutfakeproof. Existing nativeRuleRecorder and publicGophercloudtesthelpertestcloud reused; concurrentfactory reuse exercisesrealHTTP andsourceimmutability withoutnewtransport/pager/mockserver framework. SDK owns initialized Query/Headers maps before the first customcallback and after nil reset/empty DTO factory; direct writes and later retained-map mutation are isolated.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListPreflightAndOwnedOptionSnapshots`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListPublicFixtureConcurrentReuse`, `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListCustomCallbacksReceiveOwnedMaps`.
-- SourceFindPolicy fixes all four conditional headers (If-Match, If-None-Match, If-Modified-Since, If-Unmodified-Since) to their selected values or required absence. Clean native retry preserves explicitly selected conditions and ordinary new headers. Injection of an absent condition, replacement or omission of a selected condition fails before HTTP attempt two, preserving the actual503 status/body/Header and callback cause; caller client headers remain unchanged.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListConditionalHeadersRemainSelected`.
-- Source Proxy._list jmespath_filters is a named deprecated arbitrary-transform control, not unknown query. Bounded Go record iterator explicitly rejects key presence (null/false/empty/string/malformed raw/unmarshalable value) as unsupported SDK-S1 before JSON marshaling or HTTP, consistently for query factory, bulk DTO and custom callback. No manufactured response proof; Source falsey no-transform behavior is an explicit Go difference. Existing known wire aliases are unchanged.
-  Tests: `network/v2/extensions/security/rules/python_list_contracts_test.go:TestPythonSecurityRuleListJMESPathTransformPresenceIsExplicitlyUnsupported`.
-
-Python/Go differences:
-
-- Exactlyone unresolvednamed python:network/v2/security_group_rules is mapped; existing typedList/All/generatedCollection and SourceFind/mutations are not recounted or changed. Library-owned profile reuses existing canonicaldescriptors/SecurityGroupRuleRecord plus shared neutronfind.Engine.List/SourceFindPolicy and StopFaultRetryCallbacks=true; no sharedexisting/generatorwrites or newtransport/pager implementation.
-- SecurityGroupRule derives NetworkResource/TagMixinNetwork:18 declaredBody + row Header if_match + Computedlocation. Resource defaults/casts/unknownextensions are separate fromphysicalWire/Envelope/status/Header. Null ownedconnectionview and exactcomputedlocation ownership do not claim Python Connection/currentLocation/Resourcemutablecache/dirtyState/session/runtimeSubclass parity; shared SDK-R1/C1/S1 remainsindependent.
-- SequentialJSONquerylocalfilter order is retained, bulkGoMap/newcallbackkey order sorted; numeric equalityuses sharedSDK-C1 exactdecimal, not arbitrary CPythonfloatrounding/nonfinite/runtimeobjects. Intdescriptors use auditedUnicode16 tables/arbitraryprecision rather than caller interface casts or configurablePython integerstringlimit.
-- UnknownLISTkwargs ignoredbeforemarshal and noHeaderfilter; safeconcreteoptions reject Resourceconstructor/session/basepath override. Go rawmax_items and limit are finite nonnegative machineintegers under sharedpager; safeorigin/collection/filter/cycle checks and finitepagebound replace Source broadretargeting. HTTPLinkRFC/dictionarylinks are explicitGocompatibility with exactversionedalias.
-- Engine acceptedfinal200..399 differs from pinnedgeneric valid100..399, strictUTF8 differs Requests replacementdecode. Actualnative status/body/header/methodURL and physicalsource/cancelmixedcauses remainobservable. StopFaultRetryCallbacks is explicitGo guard preventing faultcallback/resend; cleanRetryFunc/reauth remain. Ordinary new retry headers remain allowed; all four conditional headers are fixed to selected values or required absence, and injection/replacement/OmitHeaders fails before HTTP attempt two. Existing selected headers and protocol absence remain protected. OkCodes expansion mayretry but cannot establishsuccess outsideoriginalacceptance. Faulty401 has native *ErrUnableToReauthenticate public ErrOriginal/ErrReauth, which do not Unwrap; inspect the original receipt and guard cause separately. A willing hook is suppressed while existing clean401 renewal remains.
-- PinnedNeutron27 get_security_group_rule ADMIN_OR_SG_OWNER_READER/projectscope applies collection/member. StockDB collectsfilteredcandidates usingadmincontext, controllerfilters eachrow byactualpolicy; emptysuccessisnormal and notproofof fullauthority. No localRBAC inference/expansion; policyoverride/extensions/livecloudacceptance remainactualdeploymentwork distinctfromfixtures.
-- Source Proxy._list openstack/proxy.py866–916 accepts named deprecated jmespath_filters and applies a truthy-string JMESPath expression with arbitrary output. This bounded Resource record API does not implement the transform (SDK-S1) and rejects presence before marshaling/HTTP instead of silently losing it. Explicit null/false/empty presence is also rejected, unlike Source falsey passthrough. Unknown kwargs and known canonical/wire aliases retain their existing behavior.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -63,7 +11,6 @@ import argparse
 import json
 import os
 import openstack
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -87,7 +34,6 @@ def main():
         query["limit"] = args.page_size
     for rule in conn.network.security_group_rules(**query):
         print(json.dumps(rule.to_dict(), ensure_ascii=False))
-
 
 if __name__ == "__main__":
     main()

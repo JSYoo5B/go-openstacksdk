@@ -1,54 +1,6 @@
 # Python Records
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/vpn_ipsec_policies`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.New`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies.WithRecordListConflictingAttrs`
-
-- List sends GET vpn/ipsecpolicies with WithListOptions and request.Query values as query and follows the ipsecpolicies_links next href.
-  Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_parity_test.go:TestPythonIPsecPolicyListQueryAndLinks`.
-- Owned nullable Source policy descriptors keep lifetime nested values raw, units separate and value integer; unknown/tenant/tag/revision fields do not leak into Resource while actual Wire/Envelope remain unmodified.
-  Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsDescriptorDefaultsAndActualProof`.
-- Exact server query including phase1_negotiation_mode is separated from nested lifetime/top-level units/value local filters; allpages follow next and unknown values are discarded before encoding.
-  Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsServerQueryAndLocalBodyFiltersAllPages`.
-- No-link limit marker continuation and paginated=false are SDK-owned; max_items counts raw rows before filtering and stops before invalid tail/foreign next.
-  Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsMarkerContinuationRawCapAndPaginationFlag`.
-- Header/version/basepath/rawquery options are snapshotted and apply only to private operation copies.
-  Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsSnapshotControlsAndVersion`.
-- Descriptor/constructor/shape errors retain accepted actual proof, physical body faults suppress retry callbacks, unsafe options/source changes fail before HTTP; Proxy generator JMESPath has correct noHTTP behavior.
-  Tests: `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsResponseErrorsAndPhysicalFaults`, `network/v2/extensions/vpnaas/ipsecpolicies/python_record_contracts_test.go:TestVPNPolicyRecordsPreflightAndProxyGenerator`.
-
-Python/Go differences:
-
-- Existing native typed List retains its native query/model behavior; new record APIs use pinned Source QueryParameters and apply non-query Body kwargs locally across all pages.
-- Source policy lifetime is a nullable dict; comment defaults seconds/3600 are not descriptor defaults. Top-level units/value remain separate. Go JSONprofile preserves received bytes and owned descriptor projection, with literal path/origin safety and full Requests/NaN/Infinity/runtime-type differences.
-- Source declaration/dict-conversion/nested-filter audit used22 AST-extracted assertions with stubs; this is not full Proxy/HTTP/decoder runtime or live Neutron evidence.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -58,7 +10,6 @@ Examples use the surrounding guide's service object and context unless they decl
 import argparse
 import json
 import openstack
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -74,7 +25,6 @@ def main():
     with openstack.connect(cloud=args.cloud) as conn:
         for row in conn.network.vpn_ipsec_policies(**query):
             print(json.dumps(row.to_dict(), ensure_ascii=False))
-
 
 if __name__ == "__main__":
     main()

@@ -1,116 +1,6 @@
 # Rbac Policy Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/find_rbac_policy`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.FindRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordFindOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-
-- GET-first passes original kwargs to member query and constructor seed, then clean400/403/404 alone allow complete unique exact ID/name list search. No automatic name server hint exists for RBAC mapping. Default clean missing is nil and explicit strict missing is ErrNotFound.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordFallbackQuerySeedsAndNoNameHint`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordCleanFallbackMissingAndCompleteUniqueness`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordNativeClean404RetryStillFallsBackOnce`.
-- Member requested fields remain untransposed Find kwargs while fallback LIST transposes target_project_id alias separately and applies declared tenant_id filters. Per-call override affects GET only; LIST returns to configured version.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordFallbackQuerySeedsAndNoNameHint`.
-- Constructor/route options preflight, actual body defaults and arbitrary extensions reuse Source projector; physical404 or any read/Close/cancel/source failure stays terminal rather than hidden fallback/missing.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordOptionsOwnershipAndPreflight`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordPhysicalCompoundFaultsAreTerminalAndKeepActualProof`.
-- Presence of bound rbac_policy, name_or_id or ignore_missing query controls is rejected before HTTP and before evaluating their JSON value, including null/false/zero. Typed IgnoreMissing remains the public control.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyFindRecordBoundArgumentsFailBeforeHTTP`.
-- An actual unknown response microversion is retained unchanged in Wire while the Source runtime attribute in Resource reflects the selected member version string or null; response values never control routing or request version.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyMemberMicroversionAttributeUsesSelectedVersion`.
-
-Python/Go differences:
-
-- Go takes owned JSON-domain options/record snapshots and literal nonblank UTF-8 IDs rather than Resource/Munch/subclasses; Connection-derived location is null unless received as an unknown extension. Mutable lifecycle and session response-cache parity are not claimed.
-- The shared Neutron reader retains existing200..399 admission; Source accepts<400, so synthetic100..199 responses are a documented Go admission difference. All400..599 rejections retain physical read/Close/cancel/source/callback errors and actual native evidence.
-- Go owns fixed source/route, selected network version or absence and reserved protocol/header behavior through native retries. Explicit Get/List microversion/header settings are library extensions; normal retry headers and live provider token remain native.
-- Get/List/Find return Source-shaped Body descriptors/defaults plus raw unknown response extensions and independent HTTP proof. Native typed APIs retain their existing contract and are not used to claim these three Python callable mappings.
-- Route/session/constructor controls and invalid UTF-8 IDs/known JSON are rejected before HTTP; arbitrary dynamic Python kwargs and adapter behavior are not reproduced.
-- Unknown list kwargs are discarded before value evaluation; id/name/tenant_id are local declared Body filters even if the server can filter additional fields. Source arbitrary extension query filtering is not inferred from readable unknown Body extensions.
-- Local ordinary JSON number equality uses exact decimals rather than Source binary64 rounding/underflow:9007199254740992 versus9007199254740993.0 is unequal, and1e-4000 versus0 is unequal. Source float truthiness is separately preserved for dict filters/paginated/next controls.
-- Ordered functional query options preserve kwargs insertion order; bulk Query maps are sorted. Constructor canonical/wire aliases can therefore differ from unordered Python mappings.
-- Pagination keeps fixed origin/path/initial filters and detects loops, validates numeric controls, and requires one nonempty wire ID marker query value. Source permissive adapter and arbitrary iterable/object marker encoding are not fully reproduced. Dictionary links are a Go extension.
-- Pinned ignore_missing default true/deprecation warning is kept as behavior; Go emits no Python warning. GET unknown kwargs are preserved JSON-domain constructor/query values and discarded on list fallback.
-- Go fixes the SDK-owned location view to null while preserving actual values in Wire. Source Computed location may accept explicit row kwargs in LIST construction; mutable Connection-derived location remains unresolved under SDK-R1.
-
-### `python:network/v2/get_rbac_policy`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.GetRecord`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordGetFields`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-
-- Literal member GET transposes nonempty public fields to wire target_tenant while preserving requested order/duplicates/unknown field names; nil/empty fields omit query and do not seed Resource. Received null/false/zero/untyped fields and unknown extensions/defaults remain independent actual proof.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyGetRecordFieldsAliasesDefaultsAndOwnedEvidence`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyGetRecordEnvelopeAndMissingAreTerminal`.
-- Source ordered canonical/wire aliases retain response input-order last value; project_id alias tenant_id applies only when absent, not explicit null. No tags/revision/timestamp/if_match Body defaults are inherited.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordsOrderedResponseAliasesAndNullPrecedence`.
-- Options own fields/header/raw bytes; invalid controls and canceled custom cause stop before HTTP. Accepted/rejected compound faults preserve method/status/body/header and original read/Close/sticky source/cancel causes with oneClose and no replay.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordOptionsOwnershipAndPreflight`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordPhysicalCompoundFaultsAreTerminalAndKeepActualProof`.
-- An actual unknown response microversion is retained unchanged in Wire while the Source runtime attribute in Resource reflects the selected member version string or null; response values never control routing or request version.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyMemberMicroversionAttributeUsesSelectedVersion`.
-
-Python/Go differences:
-
-- Go takes owned JSON-domain options/record snapshots and literal nonblank UTF-8 IDs rather than Resource/Munch/subclasses; Connection-derived location is null unless received as an unknown extension. Mutable lifecycle and session response-cache parity are not claimed.
-- The shared Neutron reader retains existing200..399 admission; Source accepts<400, so synthetic100..199 responses are a documented Go admission difference. All400..599 rejections retain physical read/Close/cancel/source/callback errors and actual native evidence.
-- Go owns fixed source/route, selected network version or absence and reserved protocol/header behavior through native retries. Explicit Get/List microversion/header settings are library extensions; normal retry headers and live provider token remain native.
-- Get/List/Find return Source-shaped Body descriptors/defaults plus raw unknown response extensions and independent HTTP proof. Native typed APIs retain their existing contract and are not used to claim these three Python callable mappings.
-- Route/session/constructor controls and invalid UTF-8 IDs/known JSON are rejected before HTTP; arbitrary dynamic Python kwargs and adapter behavior are not reproduced.
-- Source _get_with_fields is exposed through typed []string Fields. Other constructor/fetch kwargs are unavailable on this public get callable. Default404 remains terminal with no list fallback.
-- Go fixes the SDK-owned location view to null while preserving actual values in Wire. Source Computed location may accept explicit row kwargs in LIST construction; mutable Connection-derived location remains unresolved under SDK-R1.
-
-### `python:network/v2/rbac_policies`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/rbacpolicies.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-
-- Lazy list uses exactly declared query aliases and local nonquery Body filters, preserved omission/null/false/zero, Source constructor defaults and raw unknown extensions; no name hint or inherited NetworkResource/TagMixin fields.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordQueriesDefaultsAndUnknownDiscard`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordsOrderedResponseAliasesAndNullPrecedence`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordLocalFiltersExactEqualityAndFloatTruthiness`.
-- Raw cap and consumer break precede trailing constructor/link errors. Four presence collisions(connection/microversion/_synchronized/cls), Source link/short-page marker behavior, fixed scope and late errors preserve actual page receipt.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordPagingFormatsAndOriginalWireMarker`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordRawCapsBreakAndConstructorCollisions`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyListRecordLatePageAndContinuationErrorsKeepActualReceipt`.
-- LIST Accept overrides configured default with application/json or explicit operation header, explicit version governs all pages, native retry protects owned headers and permits ordinary header/fresh token retry. Physical accepted/rejected faults retain actual evidence and no replay.
-  Tests: `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordPhysicalCompoundFaultsAreTerminalAndKeepActualProof`, `network/v2/extensions/rbacpolicies/python_records_contracts_test.go:TestPythonRBACPolicyRecordListHeaderAndNativeRetryOwnership`.
-
-Python/Go differences:
-
-- Go takes owned JSON-domain options/record snapshots and literal nonblank UTF-8 IDs rather than Resource/Munch/subclasses; Connection-derived location is null unless received as an unknown extension. Mutable lifecycle and session response-cache parity are not claimed.
-- The shared Neutron reader retains existing200..399 admission; Source accepts<400, so synthetic100..199 responses are a documented Go admission difference. All400..599 rejections retain physical read/Close/cancel/source/callback errors and actual native evidence.
-- Go owns fixed source/route, selected network version or absence and reserved protocol/header behavior through native retries. Explicit Get/List microversion/header settings are library extensions; normal retry headers and live provider token remain native.
-- Get/List/Find return Source-shaped Body descriptors/defaults plus raw unknown response extensions and independent HTTP proof. Native typed APIs retain their existing contract and are not used to claim these three Python callable mappings.
-- Route/session/constructor controls and invalid UTF-8 IDs/known JSON are rejected before HTTP; arbitrary dynamic Python kwargs and adapter behavior are not reproduced.
-- Unknown list kwargs are discarded before value evaluation; id/name/tenant_id are local declared Body filters even if the server can filter additional fields. Source arbitrary extension query filtering is not inferred from readable unknown Body extensions.
-- Local ordinary JSON number equality uses exact decimals rather than Source binary64 rounding/underflow:9007199254740992 versus9007199254740993.0 is unequal, and1e-4000 versus0 is unequal. Source float truthiness is separately preserved for dict filters/paginated/next controls.
-- Ordered functional query options preserve kwargs insertion order; bulk Query maps are sorted. Constructor canonical/wire aliases can therefore differ from unordered Python mappings.
-- Pagination keeps fixed origin/path/initial filters and detects loops, validates numeric controls, and requires one nonempty wire ID marker query value. Source permissive adapter and arbitrary iterable/object marker encoding are not fully reproduced. Dictionary links are a Go extension.
-- Go fixes the SDK-owned location view to null while preserving actual values in Wire. Source Computed location may accept explicit row kwargs in LIST construction; mutable Connection-derived location remains unresolved under SDK-R1.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -120,7 +10,6 @@ Examples use the surrounding guide's service object and context unless they decl
 import argparse
 import json
 import openstack
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -152,7 +41,6 @@ def main():
         print("not found")
     else:
         print(json.dumps(value.to_dict(), indent=2, ensure_ascii=False))
-
 
 if __name__ == "__main__":
     main()

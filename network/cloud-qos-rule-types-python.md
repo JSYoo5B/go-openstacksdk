@@ -1,62 +1,6 @@
 # Cloud QoS Rule Types Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_network/NetworkCloudMixin/list_qos_rule_types`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.ListQoSRuleTypeValues`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleTypeListFilters`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithQoSRuleTypeListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithProxyListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.WithRecordListBasePath`
-
-- Every call reads the complete fresh qos alias inventory before kwargs/callbacks; missing, late HTTP failure or unhashable aliases stop the rule list and preserve actual observed Extension records. Clean HTTP403 preserves the native ErrUnexpectedResponseCode value with actual Method/URL/Body/ResponseHeader; accepted200 alias-projection faults retain ResponseError.
-  Tests: `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesFreshCompleteGateAndMissingShortCircuit`, `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesGateReadsPastFirstMatchAndKeepsActualFailure`.
-- Source falsey JSON and binary64 underflow normalize to empty kwargs; truthy nonobjects fail after the extension gate. Original ordered JSON kwargs, header/version/path formals and one conflicting-attrs pass are library-owned.
-  Tests: `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesFalseyFiltersAndTruthyShapeAfterGate`, `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesOriginalKwargsOwnedHeadersVersionPathAndConflictMerge`, `network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyOriginalExpressionWinsAfterOneConflictPass`.
-- Generator JMESPath precedes list() conversion; literal arrays/objects/strings and nested generators remain polymorphic without fabricated RuleType or HTTP metadata; unused transport formals remain lazy.
-  Tests: `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesGeneratorJMESPathAndPolymorphicListConversion`, `network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxySourceFormalsStayLazyBehindConstantExpressions`, `network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyGuardsObserveEveryOptionAndOpaqueIdentity`.
-- Successful empty lists are nonnil; nullable aliases, drivers descriptors and unknown extensions retain separate owned Resource/Wire and actual page proof; late errors retain Inventory without success Values/RuleTypes/JSON. Late clean403 remains a native value error with the actual rejected page status/header/body/URL.
-  Tests: `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesEmptyDefaultsAliasesAndWireOwnership`, `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesLatePageFailureRetainsInventoryWithoutSuccessValues`.
-- Every callback sees a clone and a before/after source check; cancellation, source changes, native401 physical Read/Close faults retain actual native original proof and stop faulty retry/reauth hooks.
-  Tests: `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesOptionGuardsStopRestoreAndCancellationCallbacks`, `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesPhysical401PreservesActualNativeFieldsAndNoHooks`, `network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyUnknownValuesAndCallbackMapsAreOwned`.
-- Existing typed raw reserved-key rejection and 200..399 admission stay unchanged; only the explicit typed BasePath and separate Proxy lanes broaden options.
-  Tests: `network/cloud_qos_rule_types_test.go:TestCloudQoSRuleTypesOldStatusAndTypedRawRejectionRemainUnchanged`, `network/v2/extensions/qos/ruletypes/python_proxy_list_test.go:TestQoSRuleTypeProxyOwnsRawFormalsAndTypedBasePathKeepsOldRawRejection`.
-
-Python/Go differences:
-
-- Go sorts object keys lexically when list() consumes a JMESPath object, while Python preserves insertion order; arrays and Unicode character ordering are preserved.
-- Existing rule type leaf keeps 200..399 versus Source synthetic100..199, nonnegative Go-integer max_items, exact-decimal id/name local equality versus Python loaded float rounding/underflow, and explicit safe origin/path/header/UTF8/continuation policy. These are documented Go policies; they are not full runtime parity.
-- Concrete owned JSON/client/context/options do not provide arbitrary Python class/session/operator replacement or mutable Resource/cloud configuration/cache lifecycle. Whole-project SDK-R1 remains separate; no live deployment support or whole SDK supported promotion is claimed.
-
-### `python:cloud/_network/NetworkCloudMixin/get_qos_rule_type_details`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.GetQoSRuleTypeDetails`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/ruletypes.API.GetRecord`
-
-- Two ordered fresh extension listings (qos, then qos-rule-type-details) precede GET qos/rule-types/{name}; every extension row is retained with the Resource/Wire rule type record.
-  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetQoSRuleTypeDetailsGatesThenGet`.
-- A missing qos-rule-type-details alias returns UnavailableExtensionError before any rule type request; a 404 and an empty name are errors.
-  Tests: `api/r2_cloud_net_firewall_test.go:TestR2CloudNetQoSRuleTypeDetailsMissingExtensionAndErrors`.
-
-Python/Go differences:
-
-- The Python filters argument is ignored by the pinned source and has no Go parameter.
-- Neutron restricts the details read to administrators by default; Go reports the server denial as the HTTP error and performs no client-side role check.
-- Typed Go options (ruletypes record get options) replace Resource get kwargs; the result is an SDK record, not a Resource.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -69,12 +13,10 @@ import os
 import types
 import openstack
 
-
 def print_value(value):
     if hasattr(value, "to_dict"):
         value = value.to_dict()
     print(json.dumps(value, ensure_ascii=False, indent=2))
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -88,7 +30,6 @@ def main():
                 print_value(record)
         else:
             print_value(value)
-
 
 if __name__ == "__main__":
     main()

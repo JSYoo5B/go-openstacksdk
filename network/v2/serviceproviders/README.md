@@ -1,54 +1,6 @@
 # Serviceproviders
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:network/v2/service_providers`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.New`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListJMESPath`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/serviceproviders.WithRecordListConflictingAttrs`
-
-- Library-owned service provider list uses the common neutronfind engine for GET /service-providers and full Source defaults, independent actual Resource/Wire/whole-page/Header/status, raw unknown extensions and sparse rows without inventing provider IDs. Source Resource has no Neutron revision/tag/Header mixin. is_default aliases default, bool coercion follows CPython and omission/null remains null.
-  Tests: `network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListOwnedDefaultsAliasesAndNoNetworkMixins`.
-- All six canonical query attributes including inherited limit/marker, literal fields, service_type/name and canonical is_default/default presence are server queries; id is a local Body condition and unknown caller kwargs are discarded before marshaling. Canonical null/false precedence and server-only name/default behavior remain explicit.
-  Tests: `network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListFullQueriesDefaultPresenceAndLocalID`.
-- Actual Proxy JMES evaluation receives an opaque unconsumed generator. Projection null/literal/identity results and runtime failures occur with zero HTTP, nested generator identity remains Value with no fake JSON/evidence, and real source HTTP starts only when the generator is consumed.
-  Tests: `network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderProxyJMESPreservesOpaqueGeneratorBeforeHTTP`.
-- Shared owned Source kwargs consume headers/version/base_path, one-pass conflicting attrs and selected collection continuation, preserving original client facts. Accepted malformed envelope/null-row/constructor failures retain actual status/body/Header. Endpoint route is service-relative and request source/token remain owned.
-  Tests: `network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListSourceControlsPagingAndActualErrors`.
-- Raw cap counts excluded rows and stops before out-of-range constructor or invalid continuation; option callback maps remain owned through nil reset and retained callback mutation, without requiring user builders or transport classes.
-  Tests: `network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListCapsAndOwnedCallbackMaps`.
-- Real Gophercloud testhelper HTTP transport response read/Close faults never call RetryFunc or ReauthFunc and preserve one HTTP/one Close plus all physical causes. Accepted faults retain actual ResponseError, rejected native401 pointer keeps ErrOriginal receipt and ErrReauth failures; native503 actual status/body/Header is preserved.
-  Tests: `network/v2/serviceproviders/python_record_contracts_test.go:TestServiceProviderListPhysicalProofNeverReauthsOrRetries`.
-
-Python/Go differences:
-
-- Gophercloud2.15 has no native binding for this resource; concrete SDK-owned API/profile/options reuse common reader, projection, paging and JMES engines. Source readonly capabilities are preserved and provider names do not become IDs.
-- Immutable eager JSON view differs from mutable Python Resource/lazy descriptors/cache/current_location; location is an owned null view and Wire remains original. None-valued headers, arbitrary adapters/subclasses/runtime non-JSON objects and URI percent-format are outside the concrete JSON option boundary, separately tracked through shared SDK foundations.
-- Same-origin selected collection/filter/cursor guards bound broad Source routing. Empty base_path falls back to the default in Go whereas Source empty URI returns without HTTP. Missing stock provider IDs do not become invented marker IDs; unsupported limit/marker continuation fails with actual page evidence. Explicit single-page is available.
-- Completed200..399 are supported, informational100..199/replacement UTF8 are explicit differences. Nativephysical/source/cancel causes and clean retry/token renewal retain actual metadata and method ownership rather than fabricating successful Resource data.
-- Actual Source Proxy generator JMES results are distinct from cloud filter arrays. Arbitrary JSON or nested opaque generators are returned by ProxyListRecords.Value/JSON; typed ListRecords/AllRecords remain resource iterators and redirect truthy expressions to that API.
-- Neutron27 stock get_service_provider is project role:reader without owner project_id because providers are not project resources. SDK does not create drivers, elevate privileges or prove actual deployment backend support; fixture/race/source/main evidence has that explicit scope.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

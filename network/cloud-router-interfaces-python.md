@@ -1,42 +1,6 @@
 # Cloud Router Interfaces Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_network/NetworkCloudMixin/list_router_interfaces`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk.Connection.ListRouterInterfaces`
-- `github.com/JSYoo5B/go-openstacksdk/network.Service.ListRouterInterfaces`
-- `github.com/JSYoo5B/go-openstacksdk/network.RouterInterfaceRouterID`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceType`
-- `github.com/JSYoo5B/go-openstacksdk/network.WithRouterInterfaceTypeJSON`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/network/v2/ports.API.ListRecords`
-
-- Library reads literal router dictionary id and sends only the declared device_id query without router member fetch/name lookup/response seeds. Null/bool/number/list/dict ID query behavior, missing/nonmapping input errors and real untyped owner values follow Source JSON-domain semantics.
-  Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesRouterDictionaryReadDoesNotResolveOrSeed`.
-- Every port page is collected before the Source discriminator. None/false/zero/underflow/empty values select both buckets; exact internal/external select their owner families; other truthy values yield empty success after I/O. Internal owners precede gateway owners with stable within-bucket order and no duplicate removal.
-  Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesCollectsEveryPageBeforeStableOwnerBuckets`, `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesFalseyExactUnknownAndNonstringTypes`.
-- Actual normalized Port Resource/raw Wire/envelope/header/status, selected Ports and partial Inventory/LastPort/JSON Value are independently owned. CurrentLocation is injected by Connection with loaded project semantics and no forged wire zone. Headers/microversion/JSON pointers are snapshots and source/API/context guards span callbacks, collection and selection.
-  Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesOwnedInputsLocationHeadersAndRawReceipt`, `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesSourceGuardCancellationAndPreflight`, `connectiontest/connection_router_interface_records_test.go:TestConnectionRouterInterfacesClassifyCompletePortsWithConfiguredLocation`.
-- Late physical pages at 200/203/401/404/429/503 preserve real response body/header/status and native pointer401 ErrOriginal VALUE receipt/ErrReauth, stop fault retry/backoff/reauth callbacks and prevent successful partial Ports/Value even for unknown interface_type.
-  Tests: `network/cloud_router_interfaces_test.go:TestCloudRouterInterfacesLatePagesPreventPartialSuccessAndKeepPhysicalFaults`.
-
-Python/Go differences:
-
-- Go returns a raw JSON-domain router dictionary and concrete discriminator/header/version/location options plus a literal ID dictionary convenience; no user builder or extra router lookup is introduced. Malformed JSON and nil/unsafe sources fail as explicit Go errors.
-- Go separates selected Ports/Value from actual partial Inventory/LastPort receipts with independent raw bytes/metadata and automatically configured Connection location. Unknown/nonstring owners are skipped instead of guessed; no fake interface Resource is synthesized.
-- The existing frozen Port list transport retains its reviewed 200..399 status policy and service-relative request/paging/Link/cycle ownership. Python mutable Resource/dirty/session/cache and descriptor-laziness contracts remain SDK-R1/C1/S1 generic scope; stock controller read/field policies and authenticated live cloud acceptance remain separate.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
