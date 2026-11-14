@@ -6,7 +6,7 @@ Use Gophercloud v2.15.0's objectstorage/v1 API through one authenticated service
 
 Service access: `conn.ObjectStorageV1(ctx)` (openstacksdk: `conn.object_store`).
 
-Package docs describe the service, accounts, containers and objects (`go doc ./objectstorage/v1/...`). Guides: [accounts](accounts/README.md), [containers](containers/README.md), [objects](objects/README.md), [object creation](objects/create.md), [directory markers](objects/directory-marker.md), [reads](objects/read.md), [deletion](objects/delete.md), [waits](objects/wait.md), [capabilities](info.md), [signing](signing.md), [temp URL keys](temp_url_key.md) and [swauth](swauth/README.md).
+Package docs describe the service, accounts, containers and objects (`go doc ./objectstorage/v1/...`). Guides: [accounts](accounts/README.md), [containers](containers/README.md), [objects](objects/README.md), [object creation](objects/create.md), [directory markers](objects/directory-marker.md), [reads](objects/read.md), [deletion](objects/delete.md), [waits](objects/wait.md), [capabilities](info.md), [signing](signing.md) and [temp URL keys](temp_url_key.md).
 
 ## Go usage
 

@@ -1,51 +1,6 @@
 # Cloud Object Stream Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_object_store/ObjectStoreCloudMixin/stream_object`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamObject`
-- `github.com/JSYoo5B/go-openstacksdk.Connection.StreamObjectChunks`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.StreamObjectChunks`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectStreamOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.StreamCloudObject`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudStreamOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-
-- Library-owned factory returns a lazy, single-use closeable binary chunk iterator; default1024 and query_string ignored even when malformed. No discovery/options/GET before iteration; connection supplies the cached Swift Cloud facade. Receipt is actual status/header and each returned chunk is independently owned.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamLazyDefaultBinaryChunksAndSingleUse`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamLazyAliasIgnoredQueryAndCleanMissing`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamDiscoversLazilyAndSharesCachedFacade`.
-- Typed concrete ChunkSize/QueryString options and pointer snapshots require no application interface builder. Short physical reads are assembled into bounded owned chunks, nil default and explicit sizes are copied before mutation; nil/cancelled context/client/options and unsafe literal names fail without HTTP.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamChunkSizeSnapshotShortReadsAndValidation`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNilCancelledAndOptionSourceMutationBeforeHTTP`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamNilCancelledAndClosedHandleStayLazy`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamPreflightAndClosedHandleNeverDiscover`.
-- Source-valid physical100..399 status range includes199/203/204/206 and provided304 body; native400+ errors retain actual status/header/body. Only a clean404 after successful physicalRead/Close and encoded-body validation becomes empty success, retaining receipt404; mixed404 physical/decode failures remain errors.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamSourceSuccessStatusAnd304Body`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamClean404OnlyEmptyAndOtherNativeStatuses`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamMissingReadCloseFaultsAreNotSuppressed`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCompressedRejectionsValidateBeforeIgnoring404`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamMissingReturnsActualReceipt`.
-- EOF/error/break/consumerClose cleans physical body once; callbackClose prevents GET; Close during GET adopts and closes late unread body plus actual receipt. Check Err/Close for early-break cleanup failure; consumerClose prevents next Read; private receipt and unary/native error snapshots resist caller header/body mutation.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamBreakClosesOnceAndRetainsCleanupFailure`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCloseFromOptionsAndConsumerStopsBeforeAnotherRead`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamConcurrentCloseDuringGETOwnsLateBody`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamPartialReadCloseAndImmutableCurrentChunkProof`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNativePolicyErrorCopiesUnaryActualReceipt`, `connectiontest/connection_swift_object_stream_test.go:TestConnectionSwiftChunkStreamCleanupErrorsKeepPrivateProof`.
-- Bodyless GET pins selected source/provider/account route/version/header facts through options, read, Close, auth/retry. Restored source plus custom cancellation/read/Close retain actual physical partial proof; native401 physical fault keeps ErrOriginal+ErrReauth and suppresses all retry/reauth/backoff hooks. Clean401 renewal and429/498 backoff reuse fixed request.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamStickyRestoredSourceAndCancellationAfterActualRead`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamNative401PhysicalFaultDoesNotInvokeHooks`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamCleanNativeRenewalAndBackoffReuseFixedRoute`.
-- Requests baseline Accept:*/* and explicit Accept-Encoding:gzip, deflate, zstd fix request defaults without X-Newest. Owned caller override is snapshotted and native retry cannot change it. Real default Go transport preserves actual compressed Content-Encoding/Content-Length while bytes stream decoded, with no accidental auto-gzip double decoding.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamEncodingOverrideIsOwnedThroughCallbacksAndNativeRetry`, `objectstorage/cloud_object_stream_test.go:TestSwiftCloudObjectStreamDefaultTransportGzipAndZstandard`.
-- Incremental gzip/x-gzip, zlib/rawdeflate including raw zlib-prefix fallback, zstd and reverse ordered chains up to5 match installed Requests decoder selection; unrecognized single/br remains opaque. Empty bodies yield nothing. Clean gzip truncatedtrailer/partialheader and post-complete tail normalize after actualEOF; badmagic/CRC and physical faults never become successfulEOF, including encoded404.
-  Tests: `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamRequestsCodecsAndReverseEncodingChain`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamEmptyBodiesAndMalformedCodecKeepReceipt`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamDeflateFallsBackAfterValidZlibPrefix`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamGzipCleanEOFTrailerTailHeaderAndCompressed404`, `objectstorage/v1/objects/python_cloud_stream_test.go:TestPythonCloudObjectStreamGzipEOFNormalizationNeverHidesPhysicalFaults`.
-
-Python/Go differences:
-
-- This closes the named cloud fixed string container/object branch only. Python dynamically accepted mutable Object/Container, dirtyattrs, inherited metadata and arbitrary sessions are excluded typed Go semantics; Proxy.stream_object and native Objects.StreamObject review judgments are unchanged. SDK-R1/C1/S1 constructor/resource/session/cache foundations remain unsupported and supported=0.
-- Go ChunkSize is typed positive int1..16777216; nil selects SDK1024. Python None/negative/bool/zero/float branches and HTTP-versus-chunk-validation precedence are deliberate Go defaults/safety differences; invalidtyped options are rejected beforeGET.
-- Go assembles short Reads/framing pieces into owned bounded chunks, whereas Requests physicalchunked response can yield shorter wire-boundary segments; binary content and maximum requested chunk bound are preserved, not identical transportsegmentation.
-- CloudObjectStream/Chunks/Err/Close/Receipt are SDK-owned implementations, single-use like Source generator. SDK automatic EOF/error/breakcleanup and partialbytes+error improve Go ownership. Close may stop pendingGET and capture latebody; serialiteration/Close only, blockingRead interruption uses context rather than concurrentClose as with shared guarded reader.
-- Go validates safe UTF8 literalSwift names and PathEscapes complete object segment; Source utils.urljoin strips outer slashes and preserves inner object slash as path. Name/route/framing/auth/version guards and malformedtyped preflight are deliberate Go protocol policy.
-- Receipt exposes actual status/header snapshot plus errorchain proof without buffering successful object payload. physical Read errors retain only that current compressed/raw Read partialbytes; decoded partial bytes are yielded separately. Rejected physical bytes are already owned by nativeGophercloud and codec validation never rereads/recloses that response.
-- Decoder comparison uses CPython3.14.8, Requests2.34.2 andurllib3.2.8.0 with gzip/xgzip/deflate/zstd installed; zstd implementation is pinned klauspost/compressv1.18.0. Single optionalbr/unknown stays opaque as in this runtime, and optionalPython decoder installation/session customization is not genericResource/transport parity.
-- NativeGophercloud clean401/429/498 callbacks remain provider-owned with SDK guard; ErrUnableToReauthenticate does notUnwrap its original/reauth branches. Accepted status policy is Source100..399 and does not expand existing nativeStreamObject200/206/304 semantics. Source exception rendering/KSA authentication/cache behavior remain foundationdifferences.
-- Actual pinned Source execution has41 observations using real cloud/Proxy/Object/Requests/urllib3 and only memoryHTTP adapter/Connectionstub. Finalroot focused3packages passed28newgroups(leaf21/cloud3/Connection4); PythonmainAST and byteexactPython/Go guide fences passed. These are not livecloud authentication, SwiftACL or releaseacceptance. Review file is a candidate pending canonicalmerge; fullsupported count remains0.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

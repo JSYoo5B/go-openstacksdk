@@ -60474,7 +60474,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/accounts call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60501,7 +60501,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/accounts call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60528,7 +60528,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/containers call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60555,7 +60555,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/containers call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60582,7 +60582,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/containers call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60607,7 +60607,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/containers call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60634,7 +60634,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/containers call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60659,7 +60659,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/containers call only; Python object store Resource parity and SDK-owned metadata, temp URL and lifecycle workflows are tracked separately.",
@@ -60705,7 +60705,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md",
+        "objectstorage/v1/README.md",
         "objectstorage/v1/objects/create-defaults-python.md"
       ],
       "differences": [
@@ -60734,7 +60734,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
@@ -60762,7 +60762,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
@@ -60789,7 +60789,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
@@ -60816,7 +60816,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
@@ -60844,7 +60844,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
@@ -60871,7 +60871,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
@@ -60896,7 +60896,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects call only; Python object Resource parity and SDK-owned create, read, delete, metadata and wait workflows are tracked separately.",
@@ -60921,7 +60921,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/native-calls.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/objects CreateTempURL call only; the SDK-owned GenerateTempURL and signing workflows are tracked separately.",
@@ -69827,7 +69827,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/swauth/README.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/swauth call only; openstacksdk relies on keystoneauth plugins for TempAuth and that parity is tracked separately.",
@@ -69852,7 +69852,7 @@
         }
       ],
       "documentation": [
-        "objectstorage/v1/swauth/README.md"
+        "objectstorage/v1/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native objectstorage/v1/swauth constructor only; openstacksdk relies on keystoneauth plugins for TempAuth and that parity is tracked separately.",

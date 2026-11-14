@@ -1,63 +1,6 @@
 # Cloud Object Get Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_object_store/ObjectStoreCloudMixin/get_object`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetObject`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DownloadObject`
-- `github.com/JSYoo5B/go-openstacksdk.Connection.GetObjectText`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.Cloud.GetObjectText`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.GetCloudObjectText`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetOutfile`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithObjectGetWriter`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetContent`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage.WithoutObjectGetOutfile`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetOutfile`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCloudGetWriter`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCloudGetContent`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithoutCloudGetOutfile`
-
-- Eager closed string-name cloud get_object ignores declaredquery_string/stream, default response.text returns lowercase tupleheaders plus optionaltext/actualreceipt. Memory ignores resp_chunk_size, byte/text empty and unknown/repeated headers retain presence; clean404 Missing retains actualreceipt404 without header/body tuple.
-  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetDefaultTextLowerHeadersEagerAndIgnoredControls`, `objectstorage/cloud_object_get_test.go:TestSwiftCloudObjectGetEagerLowerHeadersTextAndMissingReceipt`.
-- Concrete owned options snapshot pointerChunkSize/Outfile and distinguish defaultNone(memory) from falseynonNone(emptypath/OmitContent headers-only): falsebranch does no acceptedbodyread/text/write/decoder/chunkvalidation and closesbody. Output reset returns memory; nil/client/context/cancel/options/unsafe names/conflictingborrowedtargets fail withoutHTTP.
-  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetOptionsSnapshotsPreflightAndDestinationReset`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetFalseyNonNoneOutfileSkipsReadWriteTextAndChunkValidation`, `objectstorage/cloud_object_get_test.go:TestSwiftCloudObjectGetNilCancelledAndStatisticalGapStayExplicit`.
-- Nonempty path opens afteracceptedGET/status/headercopy, writes opaque decodedbinary and closes itsownedhandle; clean404 never opens/truncates path. Borrowedwriter success flushes onlyifFlush supported, nevercloses; noFlush io.Writer works withoutdeveloperbuilder. Destination bytes count actualwrites and binarypath bypasses textdetector.
-  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetPathOutputBinaryOwnedCloseAndMissingNoTruncation`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetBorrowedWriterFlushOnlyAndNoStatisticalTextRead`, `objectstorage/cloud_object_get_test.go:TestSwiftCloudObjectGetFileWriterAndFalseyOutputOptions`.
-- Accepted decoderconstruction follows output/pathopen; missingdirectory wins overbadgzip or6encodingchain ctorerror, existingpath truncatesbeforectorfailure, falseypath neverdecoderinit. Source raw integerheader bad is preserved withoutnew eagervalidation; actualreadfault keeps itsphysicalproof.
-  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetPathOpenFailurePrecedesBodyCodecAndAlwaysClosesResponse`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetDecoderConstructorsFollowPathOpenAndSkipFalseyOutfile`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetTranslatedIntegerHeaderKeepsRawValueAndReadFailuresRemainFirst`.
-- Write/shortwrite/flush failures retain actualHTTP receipt, currentdecodedchunk/acceptedBytesWritten and independentcleanup causes; failedRead nevercallsdestination, writefailure skipsFlush, borrowedClose neverruns. Postwrite sourcechange/customcancel remainssticky whenphysicalClose restoresendpoint and errorchain retains read/Close/actual401original+reauth withouthooks/replay.
-  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetWriterFailureShortWriteFlushFailurePreserveStageAndCleanup`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetAcceptedReadFaultNeverCallsDestination`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetWriterSourceCancellationIsStickyAcrossRestoringClose`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetBufferedPhysicalFaultsAnd401OriginalRemainActual`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetOptionMutationGuardsSourceBeforeDestinationOrHTTP`.
-- Subset textsemantics matchRequests headerpermissivesplit/case-sensitive defaulttextLatin1/defaultJSONUTF8/lastcharsetwins, explicitASCII/Latin1/cp1252/UTF8SIG andUTF16/32 includingshortreplacement/highsurrogate+oddbyte, rawIANA ShiftJIS alias andnormalBOM. Defaultstatistical unmarkednonUTF8/NUL/malformedBOM andknownunsupportedPythoncodecs return explicitErrUnsupported with actualfullreceived-body evidence ratherthansilentdeclaredcompletion.
-  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetRequestsHeaderCharsetDefaultsReplacementAndAliases`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetUnmarkedBOMAndExplicitUTF16UTF32`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetStatisticalCharsetGapIsExplicitWithOwnedActualEvidence`, `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetDetectorGapIncludesUTF8NULMalformedBOMAndKnownPythonCodecs`.
-- ReuseSourceaccepted100..399 guardedrawGET, pinnedheaderdefaults/encoding policy andincrementalgzip/xgzip/zlib/rawdeflate/zstd decoderhelpers; originalcompressedHeader remainsdistinct fromdecodedtext/filebytes. Cleancompressed404 requiresdecoder success, corruptcompressed404 stayserror with actualraw nativeproof andnoMissing.
-  Tests: `objectstorage/v1/objects/python_cloud_get_test.go:TestPythonCloudObjectGetSharedCodecsAndCompressedMissingFaults`.
-- Eager Connection text/output handling shares the cached Swift facade and retained actual receipt, preserving cancellation and invalid-call failures before discovery.
-  Tests: `connectiontest/connection_record_service_cache_test.go:TestConnectionObjectGetTextSharesCachedSwiftAndRetainsReceipt`, `connectiontest/connection_record_service_cache_test.go:TestConnectionCycle7PreflightPreservesCancellationBeforeDiscovery`.
-
-Python/Go differences:
-
-- GetObjectText is the closed cloud text API; general Proxy.get_object mutable Object/Container state and the existing native GetObject/DownloadObject reviews are unchanged.
-- GoObjectGetResult separates lowercaseHeaders, optionalBody *string, actualReceipt, Missing andBytesWritten. SourceNone onclean404 becomes Missingwith actual404receipt, nofakeheaders/text; errorresults may retainreceivedheader/status/partialproof evenwhenSourcewouldraisebeforetuple.
-- Go supports limited explicitheadercharset/BOM/validUTF8 policies with golang.org/x/textv0.41.0 andsimplePythonaliasnormalization; these do notreplaceRequests2.34.2 charset_normalizer3.5.2 apparent_encoding orfullCPython textcodec lookup/errorsemantics. Unresolved detector scopeincludesallunmarkedbytes, notmerelynonUTF8; knownNUL/malformedBOM/unicode_escape/cp1006/palmos negatives retainUnsupported+actualbytes.
-- Sourceget_object outfileNone/falseynonNone truthiness is represented by typednilcontrols, explicitemptyOutfile/OmitContent, concretepathorborrowedio.Writer. Pythonarbitrary filelikebool/callbacks/Resources are nottransferredtoGo. QueryString/Streamignored formalcontrols staylibraryowned, noapplicationinterface builderrequired.
-- NonemptyGooutput chunk is typedpositive1..16MiB validated beforeHTTP/fileopen, whileSource mayopenpaththenvalidate dynamicchunk type; memory/discardignoreChunkSize. Go detects io.ErrShortWrite whereSource ignoreswrite returncount, optionalFlush supportsstandardunbuffered Go writers, andownedpath/HTTPbody cleanup occurs onall errors instead ofSourcefinally absence.
-- Accepted outputorder is rawGET/status→lowerheadercopy→pathopen→decoderinit→reads/writes→Flush/Close. SourceObject rawheadercopy is retained withoutdemanding eagerdescriptorcasts. CallerPathError concreteerrors.As type remainsavailable; no reusedcachedstream-error snapshot canerase it.
-- Names followSDK safeUTF8 literalSwiftvalidation andwholeobject PathEscape, source/provider/accountendpoint/version/header facts are capturedbeforeoptions andremainsticky throughnativecallbacks/Read/Write/Flush/Close. Late writer/reader resource.ErrNotFound is aphasefailure with actualreceivedproof, not cleanHTTP404 suppression.
-- Decoder behavior andnative clean401/429/498 policyreuse existingownedSwift streamhelpers, accepted100..399 doesnotexpandnativeStreamObject200/206/304. Error bodyproof maybeactual currentcompressedphysicalbytes orcurrentdecodedwriterchunk asstageappropriate; noentireobjectbuffer iskeptforoutputmodes.
-- ActualpinnedSource cloud/Proxy/Object/Requests/urllib3 execution has65observations withmemoryHTTPadapter/eagerRequests-like buffering andonlypathopen recordingstub. Sourcefield/runtimefiles arehash-recorded; oracle/mains/fixtures donotprove liveauth/filesystemACL/release. Originalpins areGophercloudv2.15.0 andopenstacksdkef55d7d1666099f50bf1e1c40b59d7e7b72a51fe; fullsupported count remains0.
-- Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

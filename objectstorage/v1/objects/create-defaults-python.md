@@ -1,34 +1,6 @@
 # Create Defaults Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `gophercloud:objectstorage/v1/objects.Create`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.Create`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithCreateBytes`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-
-- Create retains native escaped object PUT, core/extension headers and query, default content MD5, explicit ETag with NoETag, native201/202 status and actual PUT header decoding. Final plain-nil Content creates an empty object rather than invoking the upstream nil-reader MD5 panic; typed-nil supplied Content is ErrInvalidOption before HTTP under every ETag mode.
-  Tests: `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyDefaults`, `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateTypedNilReadersAndPreflight`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateUpdateDeleteHeadersAndEscaping`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectStatusesNamesAndPreflight`, `objectstorage/v1/objects/native_contracts_test.go:TestNativeObjectCreateNilContentUsesEmptyBody`.
-- WithCreateBytes snapshots nil/empty/nonempty bytes at option construction and creates a fresh reader on each application. Request options retain last-applied Content precedence; mutation of caller bytes and reusing an option do not change later uploads.
-  Tests: `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateBytesSnapshotAndOptionOrder`, `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyDefaults`.
-- Native checksum preparation retains physical read/seek causes and Create/objects wrapping without HTTP or closing a failed preflight reader. Empty bodies retain default ETag through an actual native503 retry to201;204 is still a native rejection.
-  Tests: `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateDefaultReaderErrorsRetainCause`, `objectstorage/v1/objects/create_defaults_test.go:TestNativeObjectCreateEmptyNativeRetryAndStatus`.
-
-Python/Go differences:
-
-- This declaration maps the native Gophercloud object Create call only. Python Resource and owned CreateObject bytes/file/SLO/DLO workflows remain separately tracked; fixing nil Content does not declare Python create_object full parity.
-- The SDK applies an empty-reader default after final typed options, rejecting typed-nil readers before HTTP. Native URL, headers/query, status decoding and reader/retry behavior remain unchanged; WithCreateBytes is a reusable immutable input option, not a replacement for the owned CreateObject replay/evidence workflow.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

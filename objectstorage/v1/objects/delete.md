@@ -1,61 +1,6 @@
 # Delete
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:object_store/v1/delete_object`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.API.DeleteObject`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectHeaders`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectStaticLargeObject`
-- `github.com/JSYoo5B/go-openstacksdk/request.IgnoreMissing`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.WithDeleteObjectNewest`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkInfo.UnmarshalJSON`
-- `github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/objects.ObjectDeleteBulkError.Error`
-
-- Automatic HEAD and DELETE use the same literal UTF8 object and effective ResourceBase with one escape, optional opaque version-id on both phases, explicit Newest values and no request body. Known true/false SLO skips HEAD.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreWorkflowAndAcknowledgements`, `objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsSnapshots`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsRoutesAndSelection`, `connectiontest/connection_objectstorage_object_delete_test.go:TestConnectionObjectDeleteSharesClientAndOwnsPhases`.
-- Absent HEAD flag means ordinary deletion; one OWS-trimmed true/false/1/0 value selects SLO. Empty, malformed or duplicate flags fail with HEAD proof and no DELETE. HEAD200/204 and DELETE202/204 retain actual raw acknowledgements; SLO202/204 has nil Bulk and unknown counts.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreWorkflowAndAcknowledgements`, `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreSLOFlagProjection`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsRoutesAndSelection`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes`.
-- Default missing policy ignores only clean physical HEAD404 or DELETE404 and retains phase-specific proof. Strict missing remains a native error, completed Discovery survives later failure, and NumberNotFound is informational.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreMissingAndPhaseProofs`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsMissingEvidence`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes`, `connectiontest/connection_objectstorage_object_delete_test.go:TestConnectionObjectDeleteSharesClientAndOwnsPhases`.
-- Only SLO actual200 decodes the required bulk JSON report after whitespace or heartbeats. The atomic decoder retains raw extensions, exact int64 counts and passive metadata. Embedded2xx plus empty Errors succeeds; other outcomes return parsed Bulk plus actual200 ResponseError and independent ObjectDeleteBulkError, retaining literal failure names and messages.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreBulkDecoderAndFailure`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes`.
-- Invalid accepted bulk reports, fractional or exponent counts, malformed error pairs, UTF8 faults and decoded Unicode control characters in Response Status fail with raw Deletion evidence and nil Bulk. Failed direct decoding leaves the previous model unchanged.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreBulkDecoderAndFailure`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsBulkOutcomes`.
-- Full options replace config; map and bool pointers are captured; Without helpers restore nil/default behavior. Callbacks run once and retained configs cannot change later phases. Canonical overlays and parallel reuse preserve owned requests and results, while live original auth changes remain visible.
-  Tests: `objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsSnapshots`, `objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsParallelReuse`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsOptionsAndSnapshots`, `connectiontest/connection_objectstorage_object_delete_test.go:TestConnectionObjectDeleteSharesClientAndOwnsPhases`.
-- Invalid context, literal names, nil options, UTF8/control version-id, header case aliases and reserved auth/framing/metadata/Newest/SLO headers fail before HTTP. Invalid source headers fail before option callbacks.
-  Tests: `objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsPreflight`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsOptionsAndSnapshots`.
-- Read, Close, EOF-plus-error, custom context and source faults retain joined causes and partial phase evidence. They cannot make dirty404 ignored, bodies close once and accepted bodies are not replayed. Source drift stays sticky even if Close restores it; result mutation cannot corrupt owned error proof.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreBodyAndSourceFailures`, `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreMissingAndPhaseProofs`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsMissingEvidence`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsPhaseErrorsAndGuards`.
-- Original API, client, provider and target guards stop callback or native retry/backoff/reauth/redirect source changes and retain native rejected-status or nested404 evidence. Later DELETE transport or rejected errors retain completed Discovery.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreNativePolicyGuards`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsPhaseErrorsAndGuards`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsNativePolicy`.
-- Every physical SLO DELETE forces one application/json Accept after native retry or redirect aliases while retaining other advanced native header overrides and live auth. Retry does not rerun callbacks, hooks cannot broaden phase codes, and original native Delete202/204 remains available.
-  Tests: `objectstorage/v1/objects/delete_core_test.go:TestObjectDeleteCoreNativePolicyGuards`, `objectstorage/v1/objects/delete_options_test.go:TestObjectDeleteOptionsNativeRetrySnapshots`, `objectstorage/v1/objects/delete_contracts_test.go:TestObjectDeleteContractsNativePolicy`.
-- Swift generated service/native API files remain byte-exact and accounts/containers/objects gain no generated Collections. The service guide retains the phase and SLO acknowledgement policy.
-  Tests: `internal/cmd/sdkgen/swift_object_delete_test.go:TestSwiftObjectDeletePreservesNativeAndRegistry`.
-- DeleteObject HEADs the object, then DELETEs it (with multipart-manifest=delete for an SLO manifest), and treats a 404 as ignored by default like Python ignore_missing=True.
-  Tests: `objectstorage/v1/objects/python_rejudge_test.go:TestPythonRejudgeObjectDeleteRequests`.
-
-Python/Go differences:
-
-- Go requires explicit literal container/object and returns owned Discovery/Deletion responses, nullable SLO selection, missing flag and optional Bulk; Python reuses mutable Object/container metadata and returns None.
-- Go uses strict nullable bool options and single true/false/1/0 HEAD header parsing; Python Header(type=bool) coerces nonempty strings with bool(value), including false.
-- Go requires strict SLO200 bulk JSON embedded2xx plus emptyErrors and preserves failures through actual200 ResponseError/ObjectDeleteBulkError; pinned Python Resource.delete uses has_body=False and does not inspect embedded bulk failure.
-- Go keeps native HEAD200/204 and DELETE202/204 compatibility; SLO202/204 is raw acknowledgement with nilBulk/unknown counts, while VersionID/Newest are explicit Go extensions applied to both phases.
-- For SLO manifests Go adds Accept: application/json to read the bulk report; Python sends no Accept header and ignores the body.
-- Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
