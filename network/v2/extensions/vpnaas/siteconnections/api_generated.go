@@ -18,13 +18,17 @@ type API struct {
 	Resources *resource.Collection[Connection]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Action is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.Action.
 type Action = upstream.Action
 
 const ActionClear = upstream.ActionClear
@@ -33,20 +37,40 @@ const ActionHold = upstream.ActionHold
 const ActionRestart = upstream.ActionRestart
 const ActionRestartByPeer = upstream.ActionRestartByPeer
 
+// Connection is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.Connection.
 type Connection = upstream.Connection
+
+// ConnectionPage is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.ConnectionPage.
 type ConnectionPage = upstream.ConnectionPage
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DPD is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.DPD.
 type DPD = upstream.DPD
+
+// DPDCreateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.DPDCreateOpts.
 type DPDCreateOpts = upstream.DPDCreateOpts
+
+// DPDUpdateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.DPDUpdateOpts.
 type DPDUpdateOpts = upstream.DPDUpdateOpts
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.GetResult.
 type GetResult = upstream.GetResult
+
+// Initiator is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.Initiator.
 type Initiator = upstream.Initiator
 
 const InitiatorBiDirectional = upstream.InitiatorBiDirectional
 const InitiatorResponseOnly = upstream.InitiatorResponseOnly
 
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const StatusActive = upstream.StatusActive
@@ -57,10 +81,16 @@ const StatusPendingCreate = upstream.StatusPendingCreate
 const StatusPendingDelete = upstream.StatusPendingDelete
 const StatusPendingUpdate = upstream.StatusPendingUpdate
 
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/siteconnections.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -112,8 +142,10 @@ func (a *API) Get(ctx context.Context, id string) (*Connection, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -154,8 +186,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

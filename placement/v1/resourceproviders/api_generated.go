@@ -18,45 +18,110 @@ type API struct {
 	Resources *resource.Collection[ResourceProvider]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Allocation is Gophercloud's openstack/placement/v1/resourceproviders.Allocation.
 type Allocation = upstream.Allocation
+
+// CreateOpts is Gophercloud's openstack/placement/v1/resourceproviders.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/placement/v1/resourceproviders.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/placement/v1/resourceproviders.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetAggregatesResult is Gophercloud's openstack/placement/v1/resourceproviders.GetAggregatesResult.
 type GetAggregatesResult = upstream.GetAggregatesResult
+
+// GetAllocationsResult is Gophercloud's openstack/placement/v1/resourceproviders.GetAllocationsResult.
 type GetAllocationsResult = upstream.GetAllocationsResult
+
+// GetInventoriesResult is Gophercloud's openstack/placement/v1/resourceproviders.GetInventoriesResult.
 type GetInventoriesResult = upstream.GetInventoriesResult
+
+// GetInventoryResult is Gophercloud's openstack/placement/v1/resourceproviders.GetInventoryResult.
 type GetInventoryResult = upstream.GetInventoryResult
+
+// GetResult is Gophercloud's openstack/placement/v1/resourceproviders.GetResult.
 type GetResult = upstream.GetResult
+
+// GetTraitsResult is Gophercloud's openstack/placement/v1/resourceproviders.GetTraitsResult.
 type GetTraitsResult = upstream.GetTraitsResult
+
+// GetUsagesResult is Gophercloud's openstack/placement/v1/resourceproviders.GetUsagesResult.
 type GetUsagesResult = upstream.GetUsagesResult
+
+// Inventory is Gophercloud's openstack/placement/v1/resourceproviders.Inventory.
 type Inventory = upstream.Inventory
+
+// ListOpts is Gophercloud's openstack/placement/v1/resourceproviders.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListOpts139 is Gophercloud's openstack/placement/v1/resourceproviders.ListOpts139.
 type ListOpts139 = upstream.ListOpts139
+
+// ResourceProvider is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProvider.
 type ResourceProvider = upstream.ResourceProvider
+
+// ResourceProviderAggregates is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProviderAggregates.
 type ResourceProviderAggregates = upstream.ResourceProviderAggregates
+
+// ResourceProviderAllocations is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProviderAllocations.
 type ResourceProviderAllocations = upstream.ResourceProviderAllocations
+
+// ResourceProviderInventories is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProviderInventories.
 type ResourceProviderInventories = upstream.ResourceProviderInventories
+
+// ResourceProviderInventory is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProviderInventory.
 type ResourceProviderInventory = upstream.ResourceProviderInventory
+
+// ResourceProviderLinks is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProviderLinks.
 type ResourceProviderLinks = upstream.ResourceProviderLinks
+
+// ResourceProviderTraits is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProviderTraits.
 type ResourceProviderTraits = upstream.ResourceProviderTraits
+
+// ResourceProviderUsage is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProviderUsage.
 type ResourceProviderUsage = upstream.ResourceProviderUsage
+
+// ResourceProvidersPage is Gophercloud's openstack/placement/v1/resourceproviders.ResourceProvidersPage.
 type ResourceProvidersPage = upstream.ResourceProvidersPage
+
+// UpdateAggregatesOpts is Gophercloud's openstack/placement/v1/resourceproviders.UpdateAggregatesOpts.
 type UpdateAggregatesOpts = upstream.UpdateAggregatesOpts
+
+// UpdateInventoriesOpts is Gophercloud's openstack/placement/v1/resourceproviders.UpdateInventoriesOpts.
 type UpdateInventoriesOpts = upstream.UpdateInventoriesOpts
+
+// UpdateInventoryOpts is Gophercloud's openstack/placement/v1/resourceproviders.UpdateInventoryOpts.
 type UpdateInventoryOpts = upstream.UpdateInventoryOpts
+
+// UpdateInventoryResult is Gophercloud's openstack/placement/v1/resourceproviders.UpdateInventoryResult.
 type UpdateInventoryResult = upstream.UpdateInventoryResult
+
+// UpdateOpts is Gophercloud's openstack/placement/v1/resourceproviders.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/placement/v1/resourceproviders.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// UpdateTraitsOpts is Gophercloud's openstack/placement/v1/resourceproviders.UpdateTraitsOpts.
 type UpdateTraitsOpts = upstream.UpdateTraitsOpts
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -171,8 +236,10 @@ func (a *API) GetUsages(ctx context.Context, resourceProviderID string) (*Resour
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -213,8 +280,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -253,8 +322,10 @@ func (a *API) Update(ctx context.Context, resourceProviderID string, opts Update
 	return value0, err
 }
 
+// UpdateAggregatesOption is a per-call option of API.UpdateAggregates.
 type UpdateAggregatesOption = request.NativeFieldCall
 
+// WithUpdateAggregatesOptions sets the whole UpdateAggregatesOpts of API.UpdateAggregates.
 func WithUpdateAggregatesOptions(value UpdateAggregatesOpts) UpdateAggregatesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -293,8 +364,10 @@ func (a *API) UpdateAggregates(ctx context.Context, resourceProviderID string, o
 	return value0, err
 }
 
+// UpdateInventoriesOption is a per-call option of API.UpdateInventories.
 type UpdateInventoriesOption = request.NativeFieldCall
 
+// WithUpdateInventoriesOptions sets the whole UpdateInventoriesOpts of API.UpdateInventories.
 func WithUpdateInventoriesOptions(value UpdateInventoriesOpts) UpdateInventoriesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -333,8 +406,10 @@ func (a *API) UpdateInventories(ctx context.Context, resourceProviderID string, 
 	return value0, err
 }
 
+// UpdateInventoryOption is a per-call option of API.UpdateInventory.
 type UpdateInventoryOption = request.NativeFieldCall
 
+// WithUpdateInventoryOptions sets the whole UpdateInventoryOpts of API.UpdateInventory.
 func WithUpdateInventoryOptions(value UpdateInventoryOpts) UpdateInventoryOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -373,8 +448,10 @@ func (a *API) UpdateInventory(ctx context.Context, resourceProviderID string, re
 	return value0, err
 }
 
+// UpdateTraitsOption is a per-call option of API.UpdateTraits.
 type UpdateTraitsOption = request.NativeFieldCall
 
+// WithUpdateTraitsOptions sets the whole UpdateTraitsOpts of API.UpdateTraits.
 func WithUpdateTraitsOptions(value UpdateTraitsOpts) UpdateTraitsOption {
 	return request.Custom(request.WithOptions(value))
 }

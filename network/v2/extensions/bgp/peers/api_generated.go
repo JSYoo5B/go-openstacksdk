@@ -18,23 +18,44 @@ type API struct {
 	Resources *resource.Collection[BGPPeer]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BGPPeer is Gophercloud's openstack/networking/v2/extensions/bgp/peers.BGPPeer.
 type BGPPeer = upstream.BGPPeer
+
+// BGPPeerPage is Gophercloud's openstack/networking/v2/extensions/bgp/peers.BGPPeerPage.
 type BGPPeerPage = upstream.BGPPeerPage
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/bgp/peers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/bgp/peers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/bgp/peers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/bgp/peers.GetResult.
 type GetResult = upstream.GetResult
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/bgp/peers.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/bgp/peers.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -98,8 +119,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl)
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

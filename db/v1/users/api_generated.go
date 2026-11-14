@@ -15,17 +15,34 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BatchCreateOpts is Gophercloud's openstack/db/v1/users.BatchCreateOpts.
 type BatchCreateOpts = upstream.BatchCreateOpts
+
+// CreateOpts is Gophercloud's openstack/db/v1/users.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/db/v1/users.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/db/v1/users.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// User is Gophercloud's openstack/db/v1/users.User.
 type User = upstream.User
+
+// UserPage is Gophercloud's openstack/db/v1/users.UserPage.
 type UserPage = upstream.UserPage
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole BatchCreateOpts of API.Create.
 func WithCreateOptions(value BatchCreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

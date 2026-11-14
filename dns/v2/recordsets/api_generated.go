@@ -15,21 +15,46 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/dns/v2/recordsets.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/dns/v2/recordsets.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteOpts is Gophercloud's openstack/dns/v2/recordsets.DeleteOpts.
 type DeleteOpts = upstream.DeleteOpts
+
+// DeleteResult is Gophercloud's openstack/dns/v2/recordsets.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/dns/v2/recordsets.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/dns/v2/recordsets.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RecordSet is Gophercloud's openstack/dns/v2/recordsets.RecordSet.
 type RecordSet = upstream.RecordSet
+
+// RecordSetPage is Gophercloud's openstack/dns/v2/recordsets.RecordSetPage.
 type RecordSetPage = upstream.RecordSetPage
+
+// UpdateOpts is Gophercloud's openstack/dns/v2/recordsets.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/dns/v2/recordsets.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldHeaderCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -86,8 +111,10 @@ func (a *API) Delete(ctx context.Context, zoneID string, rrsetID string) error {
 	return request.Wrap("Delete", "recordsets", upstream.Delete(ctx, a.client, zoneID, rrsetID).ExtractErr())
 }
 
+// DeleteWithOptsOption is a per-call option of API.DeleteWithOpts.
 type DeleteWithOptsOption = request.NativeHeaderCall
 
+// WithDeleteWithOptsOptions sets the whole DeleteOpts of API.DeleteWithOpts.
 func WithDeleteWithOptsOptions(value DeleteOpts) DeleteWithOptsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -131,8 +158,10 @@ func (a *API) Get(ctx context.Context, zoneID string, rrsetID string) (*RecordSe
 	return value0, err
 }
 
+// ListAllOption is a per-call option of API.ListAll.
 type ListAllOption = request.NativeQueryHeaderCall
 
+// WithListAllOptions sets the whole ListOpts of API.ListAll.
 func WithListAllOptions(value ListOpts) ListAllOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -184,8 +213,10 @@ func (a *API) ListAll(ctx context.Context, options ...ListAllOption) iter.Seq2[*
 	})
 }
 
+// ListByZoneOption is a per-call option of API.ListByZone.
 type ListByZoneOption = request.NativeQueryHeaderCall
 
+// WithListByZoneOptions sets the whole ListOpts of API.ListByZone.
 func WithListByZoneOptions(value ListOpts) ListByZoneOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -241,8 +272,10 @@ func (a *API) listByZoneWithControl(ctx context.Context, zoneID string, control 
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldHeaderCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

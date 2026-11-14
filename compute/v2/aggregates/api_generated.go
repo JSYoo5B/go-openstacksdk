@@ -18,27 +18,56 @@ type API struct {
 	Resources *resource.Collection[Aggregate]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ActionResult is Gophercloud's openstack/compute/v2/aggregates.ActionResult.
 type ActionResult = upstream.ActionResult
+
+// AddHostOpts is Gophercloud's openstack/compute/v2/aggregates.AddHostOpts.
 type AddHostOpts = upstream.AddHostOpts
+
+// Aggregate is Gophercloud's openstack/compute/v2/aggregates.Aggregate.
 type Aggregate = upstream.Aggregate
+
+// AggregatesPage is Gophercloud's openstack/compute/v2/aggregates.AggregatesPage.
 type AggregatesPage = upstream.AggregatesPage
+
+// CreateOpts is Gophercloud's openstack/compute/v2/aggregates.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/compute/v2/aggregates.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/compute/v2/aggregates.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/compute/v2/aggregates.GetResult.
 type GetResult = upstream.GetResult
+
+// RemoveHostOpts is Gophercloud's openstack/compute/v2/aggregates.RemoveHostOpts.
 type RemoveHostOpts = upstream.RemoveHostOpts
+
+// SetMetadataOpts is Gophercloud's openstack/compute/v2/aggregates.SetMetadataOpts.
 type SetMetadataOpts = upstream.SetMetadataOpts
+
+// UpdateOpts is Gophercloud's openstack/compute/v2/aggregates.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/compute/v2/aggregates.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddHostOption is a per-call option of API.AddHost.
 type AddHostOption = request.NativeCall
 
+// WithAddHostOptions sets the whole AddHostOpts of API.AddHost.
 func WithAddHostOptions(value AddHostOpts) AddHostOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -57,8 +86,10 @@ func (a *API) AddHost(ctx context.Context, aggregateID int, opts AddHostOpts, op
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -122,8 +153,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl)
 	}, control)
 }
 
+// RemoveHostOption is a per-call option of API.RemoveHost.
 type RemoveHostOption = request.NativeCall
 
+// WithRemoveHostOptions sets the whole RemoveHostOpts of API.RemoveHost.
 func WithRemoveHostOptions(value RemoveHostOpts) RemoveHostOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -142,8 +175,10 @@ func (a *API) RemoveHost(ctx context.Context, aggregateID int, opts RemoveHostOp
 	return value0, err
 }
 
+// SetMetadataOption is a per-call option of API.SetMetadata.
 type SetMetadataOption = request.NativeCall
 
+// WithSetMetadataOptions sets the whole SetMetadataOpts of API.SetMetadata.
 func WithSetMetadataOptions(value SetMetadataOpts) SetMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -162,8 +197,10 @@ func (a *API) SetMetadata(ctx context.Context, aggregateID int, opts SetMetadata
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

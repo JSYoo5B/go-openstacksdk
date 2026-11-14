@@ -18,36 +18,83 @@ type API struct {
 	Resources *resource.Collection[ShareType]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AccessOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.AccessOpts.
 type AccessOpts = upstream.AccessOpts
+
+// AddAccessResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.AddAccessResult.
 type AddAccessResult = upstream.AddAccessResult
+
+// CreateOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ExtraSpecs is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.ExtraSpecs.
 type ExtraSpecs = upstream.ExtraSpecs
+
+// ExtraSpecsOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.ExtraSpecsOpts.
 type ExtraSpecsOpts = upstream.ExtraSpecsOpts
+
+// GetDefaultResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.GetDefaultResult.
 type GetDefaultResult = upstream.GetDefaultResult
+
+// GetExtraSpecsResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.GetExtraSpecsResult.
 type GetExtraSpecsResult = upstream.GetExtraSpecsResult
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RemoveAccessResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.RemoveAccessResult.
 type RemoveAccessResult = upstream.RemoveAccessResult
+
+// SetExtraSpecsOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.SetExtraSpecsOpts.
 type SetExtraSpecsOpts = upstream.SetExtraSpecsOpts
+
+// SetExtraSpecsResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.SetExtraSpecsResult.
 type SetExtraSpecsResult = upstream.SetExtraSpecsResult
+
+// ShareType is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.ShareType.
 type ShareType = upstream.ShareType
+
+// ShareTypeAccess is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.ShareTypeAccess.
 type ShareTypeAccess = upstream.ShareTypeAccess
+
+// ShareTypePage is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.ShareTypePage.
 type ShareTypePage = upstream.ShareTypePage
+
+// ShowAccessResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.ShowAccessResult.
 type ShowAccessResult = upstream.ShowAccessResult
+
+// UnsetExtraSpecsResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.UnsetExtraSpecsResult.
 type UnsetExtraSpecsResult = upstream.UnsetExtraSpecsResult
+
+// UpdateOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/sharedfilesystems/v2/sharetypes.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddAccessOption is a per-call option of API.AddAccess.
 type AddAccessOption = request.NativeFieldCall
 
+// WithAddAccessOptions sets the whole AccessOpts of API.AddAccess.
 func WithAddAccessOptions(value AccessOpts) AddAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -82,8 +129,10 @@ func (a *API) AddAccess(ctx context.Context, id string, opts AccessOpts, options
 	return request.Wrap("AddAccess", "sharetypes", upstream.AddAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -151,8 +200,10 @@ func (a *API) GetExtraSpecs(ctx context.Context, id string) (ExtraSpecs, error) 
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -193,8 +244,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// RemoveAccessOption is a per-call option of API.RemoveAccess.
 type RemoveAccessOption = request.NativeFieldCall
 
+// WithRemoveAccessOptions sets the whole AccessOpts of API.RemoveAccess.
 func WithRemoveAccessOptions(value AccessOpts) RemoveAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -229,8 +282,10 @@ func (a *API) RemoveAccess(ctx context.Context, id string, opts AccessOpts, opti
 	return request.Wrap("RemoveAccess", "sharetypes", upstream.RemoveAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// SetExtraSpecsOption is a per-call option of API.SetExtraSpecs.
 type SetExtraSpecsOption = request.NativeFieldCall
 
+// WithSetExtraSpecsOptions sets the whole SetExtraSpecsOpts of API.SetExtraSpecs.
 func WithSetExtraSpecsOptions(value SetExtraSpecsOpts) SetExtraSpecsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -282,8 +337,10 @@ func (a *API) UnsetExtraSpecs(ctx context.Context, id string, key string) error 
 	return request.Wrap("UnsetExtraSpecs", "sharetypes", upstream.UnsetExtraSpecs(ctx, a.client, id, key).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

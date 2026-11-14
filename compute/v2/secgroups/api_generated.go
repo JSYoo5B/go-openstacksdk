@@ -18,28 +18,62 @@ type API struct {
 	Resources *resource.Collection[SecurityGroup]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddServerResult is Gophercloud's openstack/compute/v2/secgroups.AddServerResult.
 type AddServerResult = upstream.AddServerResult
+
+// CreateOpts is Gophercloud's openstack/compute/v2/secgroups.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/compute/v2/secgroups.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CreateRuleOpts is Gophercloud's openstack/compute/v2/secgroups.CreateRuleOpts.
 type CreateRuleOpts = upstream.CreateRuleOpts
+
+// CreateRuleResult is Gophercloud's openstack/compute/v2/secgroups.CreateRuleResult.
 type CreateRuleResult = upstream.CreateRuleResult
+
+// DeleteResult is Gophercloud's openstack/compute/v2/secgroups.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DeleteRuleResult is Gophercloud's openstack/compute/v2/secgroups.DeleteRuleResult.
 type DeleteRuleResult = upstream.DeleteRuleResult
+
+// GetResult is Gophercloud's openstack/compute/v2/secgroups.GetResult.
 type GetResult = upstream.GetResult
+
+// Group is Gophercloud's openstack/compute/v2/secgroups.Group.
 type Group = upstream.Group
+
+// IPRange is Gophercloud's openstack/compute/v2/secgroups.IPRange.
 type IPRange = upstream.IPRange
+
+// RemoveServerResult is Gophercloud's openstack/compute/v2/secgroups.RemoveServerResult.
 type RemoveServerResult = upstream.RemoveServerResult
+
+// Rule is Gophercloud's openstack/compute/v2/secgroups.Rule.
 type Rule = upstream.Rule
+
+// SecurityGroup is Gophercloud's openstack/compute/v2/secgroups.SecurityGroup.
 type SecurityGroup = upstream.SecurityGroup
+
+// SecurityGroupPage is Gophercloud's openstack/compute/v2/secgroups.SecurityGroupPage.
 type SecurityGroupPage = upstream.SecurityGroupPage
+
+// UpdateOpts is Gophercloud's openstack/compute/v2/secgroups.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/compute/v2/secgroups.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // AddServer invokes the upstream API with library-owned builders and result handling.
@@ -47,8 +81,10 @@ func (a *API) AddServer(ctx context.Context, serverID string, groupName string) 
 	return request.Wrap("AddServer", "secgroups", upstream.AddServer(ctx, a.client, serverID, groupName).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -87,8 +123,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateRuleOption is a per-call option of API.CreateRule.
 type CreateRuleOption = request.NativeFieldCall
 
+// WithCreateRuleOptions sets the whole CreateRuleOpts of API.CreateRule.
 func WithCreateRuleOptions(value CreateRuleOpts) CreateRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -170,8 +208,10 @@ func (a *API) RemoveServer(ctx context.Context, serverID string, groupName strin
 	return request.Wrap("RemoveServer", "secgroups", upstream.RemoveServer(ctx, a.client, serverID, groupName).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

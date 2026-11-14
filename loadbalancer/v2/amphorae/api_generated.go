@@ -18,17 +18,29 @@ type API struct {
 	Resources *resource.Collection[Amphora]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Amphora is Gophercloud's openstack/loadbalancer/v2/amphorae.Amphora.
 type Amphora = upstream.Amphora
+
+// AmphoraPage is Gophercloud's openstack/loadbalancer/v2/amphorae.AmphoraPage.
 type AmphoraPage = upstream.AmphoraPage
+
+// FailoverResult is Gophercloud's openstack/loadbalancer/v2/amphorae.FailoverResult.
 type FailoverResult = upstream.FailoverResult
+
+// GetResult is Gophercloud's openstack/loadbalancer/v2/amphorae.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/loadbalancer/v2/amphorae.ListOpts.
 type ListOpts = upstream.ListOpts
 
 // Failover invokes the upstream API with library-owned builders and result handling.
@@ -44,8 +56,10 @@ func (a *API) Get(ctx context.Context, id string) (*Amphora, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

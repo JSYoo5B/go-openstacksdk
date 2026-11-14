@@ -16,45 +16,102 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AccessToken is Gophercloud's openstack/identity/v3/oauth1.AccessToken.
 type AccessToken = upstream.AccessToken
+
+// AccessTokenRole is Gophercloud's openstack/identity/v3/oauth1.AccessTokenRole.
 type AccessTokenRole = upstream.AccessTokenRole
+
+// AccessTokenRolesPage is Gophercloud's openstack/identity/v3/oauth1.AccessTokenRolesPage.
 type AccessTokenRolesPage = upstream.AccessTokenRolesPage
+
+// AccessTokensPage is Gophercloud's openstack/identity/v3/oauth1.AccessTokensPage.
 type AccessTokensPage = upstream.AccessTokensPage
+
+// AuthOptions is Gophercloud's openstack/identity/v3/oauth1.AuthOptions.
 type AuthOptions = upstream.AuthOptions
+
+// AuthorizeTokenOpts is Gophercloud's openstack/identity/v3/oauth1.AuthorizeTokenOpts.
 type AuthorizeTokenOpts = upstream.AuthorizeTokenOpts
+
+// AuthorizeTokenResult is Gophercloud's openstack/identity/v3/oauth1.AuthorizeTokenResult.
 type AuthorizeTokenResult = upstream.AuthorizeTokenResult
+
+// AuthorizedToken is Gophercloud's openstack/identity/v3/oauth1.AuthorizedToken.
 type AuthorizedToken = upstream.AuthorizedToken
+
+// Consumer is Gophercloud's openstack/identity/v3/oauth1.Consumer.
 type Consumer = upstream.Consumer
+
+// ConsumersPage is Gophercloud's openstack/identity/v3/oauth1.ConsumersPage.
 type ConsumersPage = upstream.ConsumersPage
+
+// CreateAccessTokenOpts is Gophercloud's openstack/identity/v3/oauth1.CreateAccessTokenOpts.
 type CreateAccessTokenOpts = upstream.CreateAccessTokenOpts
+
+// CreateConsumerOpts is Gophercloud's openstack/identity/v3/oauth1.CreateConsumerOpts.
 type CreateConsumerOpts = upstream.CreateConsumerOpts
+
+// CreateConsumerResult is Gophercloud's openstack/identity/v3/oauth1.CreateConsumerResult.
 type CreateConsumerResult = upstream.CreateConsumerResult
+
+// DeleteConsumerResult is Gophercloud's openstack/identity/v3/oauth1.DeleteConsumerResult.
 type DeleteConsumerResult = upstream.DeleteConsumerResult
+
+// GetAccessTokenResult is Gophercloud's openstack/identity/v3/oauth1.GetAccessTokenResult.
 type GetAccessTokenResult = upstream.GetAccessTokenResult
+
+// GetAccessTokenRoleResult is Gophercloud's openstack/identity/v3/oauth1.GetAccessTokenRoleResult.
 type GetAccessTokenRoleResult = upstream.GetAccessTokenRoleResult
+
+// GetConsumerResult is Gophercloud's openstack/identity/v3/oauth1.GetConsumerResult.
 type GetConsumerResult = upstream.GetConsumerResult
 
 const HMACSHA1 = upstream.HMACSHA1
 
+// OAuth1 is Gophercloud's openstack/identity/v3/oauth1.OAuth1.
 type OAuth1 = upstream.OAuth1
 
 const OAuth1TokenContentType = upstream.OAuth1TokenContentType
 const PLAINTEXT = upstream.PLAINTEXT
 
+// RequestTokenOpts is Gophercloud's openstack/identity/v3/oauth1.RequestTokenOpts.
 type RequestTokenOpts = upstream.RequestTokenOpts
+
+// RevokeAccessTokenResult is Gophercloud's openstack/identity/v3/oauth1.RevokeAccessTokenResult.
 type RevokeAccessTokenResult = upstream.RevokeAccessTokenResult
+
+// Role is Gophercloud's openstack/identity/v3/oauth1.Role.
 type Role = upstream.Role
+
+// SignatureMethod is Gophercloud's openstack/identity/v3/oauth1.SignatureMethod.
 type SignatureMethod = upstream.SignatureMethod
+
+// Token is Gophercloud's openstack/identity/v3/oauth1.Token.
 type Token = upstream.Token
+
+// TokenExt is Gophercloud's openstack/identity/v3/oauth1.TokenExt.
 type TokenExt = upstream.TokenExt
+
+// TokenResult is Gophercloud's openstack/identity/v3/oauth1.TokenResult.
 type TokenResult = upstream.TokenResult
+
+// UpdateConsumerOpts is Gophercloud's openstack/identity/v3/oauth1.UpdateConsumerOpts.
 type UpdateConsumerOpts = upstream.UpdateConsumerOpts
+
+// UpdateConsumerResult is Gophercloud's openstack/identity/v3/oauth1.UpdateConsumerResult.
 type UpdateConsumerResult = upstream.UpdateConsumerResult
+
+// AuthorizeTokenOption is a per-call option of API.AuthorizeToken.
 type AuthorizeTokenOption = request.NativeFieldCall
 
+// WithAuthorizeTokenOptions sets the whole AuthorizeTokenOpts of API.AuthorizeToken.
 func WithAuthorizeTokenOptions(value AuthorizeTokenOpts) AuthorizeTokenOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -93,8 +150,10 @@ func (a *API) AuthorizeToken(ctx context.Context, id string, opts AuthorizeToken
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldHeaderCall
 
+// WithCreateOptions sets the whole AuthOptions of API.Create.
 func WithCreateOptions(value AuthOptions) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -152,8 +211,10 @@ func (a *API) Create(ctx context.Context, opts AuthOptions, options ...CreateOpt
 	return value0, err
 }
 
+// CreateAccessTokenOption is a per-call option of API.CreateAccessToken.
 type CreateAccessTokenOption = request.NativeHeaderCall
 
+// WithCreateAccessTokenOptions sets the whole CreateAccessTokenOpts of API.CreateAccessToken.
 func WithCreateAccessTokenOptions(value CreateAccessTokenOpts) CreateAccessTokenOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -192,8 +253,10 @@ func (a *API) CreateAccessToken(ctx context.Context, opts CreateAccessTokenOpts,
 	return value0, err
 }
 
+// CreateConsumerOption is a per-call option of API.CreateConsumer.
 type CreateConsumerOption = request.NativeFieldCall
 
+// WithCreateConsumerOptions sets the whole CreateConsumerOpts of API.CreateConsumer.
 func WithCreateConsumerOptions(value CreateConsumerOpts) CreateConsumerOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -285,8 +348,10 @@ func (a *API) ListConsumers(ctx context.Context) iter.Seq2[*Consumer, error] {
 	})
 }
 
+// RequestTokenOption is a per-call option of API.RequestToken.
 type RequestTokenOption = request.NativeHeaderCall
 
+// WithRequestTokenOptions sets the whole RequestTokenOpts of API.RequestToken.
 func WithRequestTokenOptions(value RequestTokenOpts) RequestTokenOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -330,8 +395,10 @@ func (a *API) RevokeAccessToken(ctx context.Context, userID string, id string) e
 	return request.Wrap("RevokeAccessToken", "oauth1", upstream.RevokeAccessToken(ctx, a.client, userID, id).ExtractErr())
 }
 
+// UpdateConsumerOption is a per-call option of API.UpdateConsumer.
 type UpdateConsumerOption = request.NativeFieldCall
 
+// WithUpdateConsumerOptions sets the whole UpdateConsumerOpts of API.UpdateConsumer.
 func WithUpdateConsumerOptions(value UpdateConsumerOpts) UpdateConsumerOption {
 	return request.Custom(request.WithOptions(value))
 }

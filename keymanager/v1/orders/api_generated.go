@@ -18,30 +18,54 @@ type API struct {
 	Resources *resource.Collection[Order]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const AsymmetricOrder = upstream.AsymmetricOrder
 
+// CreateOpts is Gophercloud's openstack/keymanager/v1/orders.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/keymanager/v1/orders.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/keymanager/v1/orders.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/keymanager/v1/orders.GetResult.
 type GetResult = upstream.GetResult
 
 const KeyOrder = upstream.KeyOrder
 
+// ListOpts is Gophercloud's openstack/keymanager/v1/orders.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Meta is Gophercloud's openstack/keymanager/v1/orders.Meta.
 type Meta = upstream.Meta
+
+// MetaOpts is Gophercloud's openstack/keymanager/v1/orders.MetaOpts.
 type MetaOpts = upstream.MetaOpts
+
+// Order is Gophercloud's openstack/keymanager/v1/orders.Order.
 type Order = upstream.Order
+
+// OrderPage is Gophercloud's openstack/keymanager/v1/orders.OrderPage.
 type OrderPage = upstream.OrderPage
+
+// OrderType is Gophercloud's openstack/keymanager/v1/orders.OrderType.
 type OrderType = upstream.OrderType
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -93,8 +117,10 @@ func (a *API) Get(ctx context.Context, id string) (*Order, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

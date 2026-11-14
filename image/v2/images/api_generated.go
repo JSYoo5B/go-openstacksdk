@@ -18,17 +18,25 @@ type API struct {
 	Resources *resource.Collection[Image]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const AddOp = upstream.AddOp
 
+// CreateOpts is Gophercloud's openstack/image/v2/images.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/image/v2/images.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/image/v2/images.DeleteResult.
 type DeleteResult = upstream.DeleteResult
 
 const FilterEQ = upstream.FilterEQ
@@ -38,10 +46,19 @@ const FilterLT = upstream.FilterLT
 const FilterLTE = upstream.FilterLTE
 const FilterNEQ = upstream.FilterNEQ
 
+// GetResult is Gophercloud's openstack/image/v2/images.GetResult.
 type GetResult = upstream.GetResult
+
+// Image is Gophercloud's openstack/image/v2/images.Image.
 type Image = upstream.Image
+
+// ImageDateFilter is Gophercloud's openstack/image/v2/images.ImageDateFilter.
 type ImageDateFilter = upstream.ImageDateFilter
+
+// ImageDateQuery is Gophercloud's openstack/image/v2/images.ImageDateQuery.
 type ImageDateQuery = upstream.ImageDateQuery
+
+// ImageMemberStatus is Gophercloud's openstack/image/v2/images.ImageMemberStatus.
 type ImageMemberStatus = upstream.ImageMemberStatus
 
 const ImageMemberStatusAccepted = upstream.ImageMemberStatusAccepted
@@ -49,7 +66,10 @@ const ImageMemberStatusAll = upstream.ImageMemberStatusAll
 const ImageMemberStatusPending = upstream.ImageMemberStatusPending
 const ImageMemberStatusRejected = upstream.ImageMemberStatusRejected
 
+// ImagePage is Gophercloud's openstack/image/v2/images.ImagePage.
 type ImagePage = upstream.ImagePage
+
+// ImageStatus is Gophercloud's openstack/image/v2/images.ImageStatus.
 type ImageStatus = upstream.ImageStatus
 
 const ImageStatusActive = upstream.ImageStatusActive
@@ -62,6 +82,7 @@ const ImageStatusQueued = upstream.ImageStatusQueued
 const ImageStatusSaving = upstream.ImageStatusSaving
 const ImageStatusUploading = upstream.ImageStatusUploading
 
+// ImageVisibility is Gophercloud's openstack/image/v2/images.ImageVisibility.
 type ImageVisibility = upstream.ImageVisibility
 
 const ImageVisibilityCommunity = upstream.ImageVisibilityCommunity
@@ -69,28 +90,56 @@ const ImageVisibilityPrivate = upstream.ImageVisibilityPrivate
 const ImageVisibilityPublic = upstream.ImageVisibilityPublic
 const ImageVisibilityShared = upstream.ImageVisibilityShared
 
+// ListOpts is Gophercloud's openstack/image/v2/images.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Patch is Gophercloud's openstack/image/v2/images.Patch.
 type Patch = upstream.Patch
 
 const RemoveOp = upstream.RemoveOp
 
+// ReplaceImageChecksum is Gophercloud's openstack/image/v2/images.ReplaceImageChecksum.
 type ReplaceImageChecksum = upstream.ReplaceImageChecksum
+
+// ReplaceImageHidden is Gophercloud's openstack/image/v2/images.ReplaceImageHidden.
 type ReplaceImageHidden = upstream.ReplaceImageHidden
+
+// ReplaceImageMinDisk is Gophercloud's openstack/image/v2/images.ReplaceImageMinDisk.
 type ReplaceImageMinDisk = upstream.ReplaceImageMinDisk
+
+// ReplaceImageMinRam is Gophercloud's openstack/image/v2/images.ReplaceImageMinRam.
 type ReplaceImageMinRam = upstream.ReplaceImageMinRam
+
+// ReplaceImageName is Gophercloud's openstack/image/v2/images.ReplaceImageName.
 type ReplaceImageName = upstream.ReplaceImageName
+
+// ReplaceImageProtected is Gophercloud's openstack/image/v2/images.ReplaceImageProtected.
 type ReplaceImageProtected = upstream.ReplaceImageProtected
+
+// ReplaceImageTags is Gophercloud's openstack/image/v2/images.ReplaceImageTags.
 type ReplaceImageTags = upstream.ReplaceImageTags
 
 const ReplaceOp = upstream.ReplaceOp
 
+// UpdateImageProperty is Gophercloud's openstack/image/v2/images.UpdateImageProperty.
 type UpdateImageProperty = upstream.UpdateImageProperty
+
+// UpdateOp is Gophercloud's openstack/image/v2/images.UpdateOp.
 type UpdateOp = upstream.UpdateOp
+
+// UpdateOpts is Gophercloud's openstack/image/v2/images.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/image/v2/images.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// UpdateVisibility is Gophercloud's openstack/image/v2/images.UpdateVisibility.
 type UpdateVisibility = upstream.UpdateVisibility
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -142,8 +191,10 @@ func (a *API) Get(ctx context.Context, id string) (*Image, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -184,8 +235,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

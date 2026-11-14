@@ -12,14 +12,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AuthOpts is Gophercloud's openstack/objectstorage/v1/swauth.AuthOpts.
 type AuthOpts = upstream.AuthOpts
+
+// AuthResult is Gophercloud's openstack/objectstorage/v1/swauth.AuthResult.
 type AuthResult = upstream.AuthResult
+
+// GetAuthResult is Gophercloud's openstack/objectstorage/v1/swauth.GetAuthResult.
 type GetAuthResult = upstream.GetAuthResult
+
+// AuthOption is a per-call option of API.Auth.
 type AuthOption = request.NativeHeaderCall
 
+// WithAuthOptions sets the whole AuthOpts of API.Auth.
 func WithAuthOptions(value AuthOpts) AuthOption { return request.Custom(request.WithOptions(value)) }
 
 type authOptsBuilder struct {
@@ -56,8 +67,10 @@ func (a *API) Auth(ctx context.Context, opts AuthOpts, options ...AuthOption) (*
 	return value0, err
 }
 
+// NewObjectStorageV1Option is a per-call option of API.NewObjectStorageV1.
 type NewObjectStorageV1Option = request.NativeCall
 
+// WithNewObjectStorageV1Options sets the whole AuthOpts of API.NewObjectStorageV1.
 func WithNewObjectStorageV1Options(value AuthOpts) NewObjectStorageV1Option {
 	return request.Custom(request.WithOptions(value))
 }

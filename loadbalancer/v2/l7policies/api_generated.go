@@ -18,13 +18,17 @@ type API struct {
 	Resources *resource.Collection[L7Policy]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Action is Gophercloud's openstack/loadbalancer/v2/l7policies.Action.
 type Action = upstream.Action
 
 const ActionRedirectPrefix = upstream.ActionRedirectPrefix
@@ -32,6 +36,7 @@ const ActionRedirectToPool = upstream.ActionRedirectToPool
 const ActionRedirectToURL = upstream.ActionRedirectToURL
 const ActionReject = upstream.ActionReject
 
+// CompareType is Gophercloud's openstack/loadbalancer/v2/l7policies.CompareType.
 type CompareType = upstream.CompareType
 
 const CompareTypeContains = upstream.CompareTypeContains
@@ -40,20 +45,49 @@ const CompareTypeEqual = upstream.CompareTypeEqual
 const CompareTypeRegex = upstream.CompareTypeRegex
 const CompareTypeStartWith = upstream.CompareTypeStartWith
 
+// CreateOpts is Gophercloud's openstack/loadbalancer/v2/l7policies.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/loadbalancer/v2/l7policies.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CreateRuleOpts is Gophercloud's openstack/loadbalancer/v2/l7policies.CreateRuleOpts.
 type CreateRuleOpts = upstream.CreateRuleOpts
+
+// CreateRuleResult is Gophercloud's openstack/loadbalancer/v2/l7policies.CreateRuleResult.
 type CreateRuleResult = upstream.CreateRuleResult
+
+// DeleteResult is Gophercloud's openstack/loadbalancer/v2/l7policies.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DeleteRuleResult is Gophercloud's openstack/loadbalancer/v2/l7policies.DeleteRuleResult.
 type DeleteRuleResult = upstream.DeleteRuleResult
+
+// GetResult is Gophercloud's openstack/loadbalancer/v2/l7policies.GetResult.
 type GetResult = upstream.GetResult
+
+// GetRuleResult is Gophercloud's openstack/loadbalancer/v2/l7policies.GetRuleResult.
 type GetRuleResult = upstream.GetRuleResult
+
+// L7Policy is Gophercloud's openstack/loadbalancer/v2/l7policies.L7Policy.
 type L7Policy = upstream.L7Policy
+
+// L7PolicyPage is Gophercloud's openstack/loadbalancer/v2/l7policies.L7PolicyPage.
 type L7PolicyPage = upstream.L7PolicyPage
+
+// ListOpts is Gophercloud's openstack/loadbalancer/v2/l7policies.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListRulesOpts is Gophercloud's openstack/loadbalancer/v2/l7policies.ListRulesOpts.
 type ListRulesOpts = upstream.ListRulesOpts
+
+// Rule is Gophercloud's openstack/loadbalancer/v2/l7policies.Rule.
 type Rule = upstream.Rule
+
+// RulePage is Gophercloud's openstack/loadbalancer/v2/l7policies.RulePage.
 type RulePage = upstream.RulePage
+
+// RuleType is Gophercloud's openstack/loadbalancer/v2/l7policies.RuleType.
 type RuleType = upstream.RuleType
 
 const TypeCookie = upstream.TypeCookie
@@ -65,12 +99,22 @@ const TypeSSLConnHasCert = upstream.TypeSSLConnHasCert
 const TypeSSLDNField = upstream.TypeSSLDNField
 const TypeSSLVerifyResult = upstream.TypeSSLVerifyResult
 
+// UpdateOpts is Gophercloud's openstack/loadbalancer/v2/l7policies.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/loadbalancer/v2/l7policies.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// UpdateRuleOpts is Gophercloud's openstack/loadbalancer/v2/l7policies.UpdateRuleOpts.
 type UpdateRuleOpts = upstream.UpdateRuleOpts
+
+// UpdateRuleResult is Gophercloud's openstack/loadbalancer/v2/l7policies.UpdateRuleResult.
 type UpdateRuleResult = upstream.UpdateRuleResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -109,8 +153,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateRuleOption is a per-call option of API.CreateRule.
 type CreateRuleOption = request.NativeFieldCall
 
+// WithCreateRuleOptions sets the whole CreateRuleOpts of API.CreateRule.
 func WithCreateRuleOptions(value CreateRuleOpts) CreateRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -175,8 +221,10 @@ func (a *API) GetRule(ctx context.Context, policyID string, ruleID string) (*Rul
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -217,8 +265,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// ListRulesOption is a per-call option of API.ListRules.
 type ListRulesOption = request.NativeQueryCall
 
+// WithListRulesOptions sets the whole ListRulesOpts of API.ListRules.
 func WithListRulesOptions(value ListRulesOpts) ListRulesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -261,8 +311,10 @@ func (a *API) listRulesWithControl(ctx context.Context, policyID string, control
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -301,8 +353,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdateRuleOption is a per-call option of API.UpdateRule.
 type UpdateRuleOption = request.NativeFieldCall
 
+// WithUpdateRuleOptions sets the whole UpdateRuleOpts of API.UpdateRule.
 func WithUpdateRuleOptions(value UpdateRuleOpts) UpdateRuleOption {
 	return request.Custom(request.WithOptions(value))
 }

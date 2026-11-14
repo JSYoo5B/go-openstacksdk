@@ -12,14 +12,28 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddResult is Gophercloud's openstack/networking/v2/extensions/attributestags.AddResult.
 type AddResult = upstream.AddResult
+
+// ConfirmResult is Gophercloud's openstack/networking/v2/extensions/attributestags.ConfirmResult.
 type ConfirmResult = upstream.ConfirmResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/attributestags.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ListResult is Gophercloud's openstack/networking/v2/extensions/attributestags.ListResult.
 type ListResult = upstream.ListResult
+
+// ReplaceAllOpts is Gophercloud's openstack/networking/v2/extensions/attributestags.ReplaceAllOpts.
 type ReplaceAllOpts = upstream.ReplaceAllOpts
+
+// ReplaceAllResult is Gophercloud's openstack/networking/v2/extensions/attributestags.ReplaceAllResult.
 type ReplaceAllResult = upstream.ReplaceAllResult
 
 // Add invokes the upstream API with library-owned builders and result handling.
@@ -53,8 +67,10 @@ func (a *API) List(ctx context.Context, resourceType string, resourceID string) 
 	return value0, err
 }
 
+// ReplaceAllOption is a per-call option of API.ReplaceAll.
 type ReplaceAllOption = request.NativeFieldCall
 
+// WithReplaceAllOptions sets the whole ReplaceAllOpts of API.ReplaceAll.
 func WithReplaceAllOptions(value ReplaceAllOpts) ReplaceAllOption {
 	return request.Custom(request.WithOptions(value))
 }

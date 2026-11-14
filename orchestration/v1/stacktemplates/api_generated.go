@@ -12,12 +12,22 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// GetResult is Gophercloud's openstack/orchestration/v1/stacktemplates.GetResult.
 type GetResult = upstream.GetResult
+
+// ValidateOpts is Gophercloud's openstack/orchestration/v1/stacktemplates.ValidateOpts.
 type ValidateOpts = upstream.ValidateOpts
+
+// ValidateResult is Gophercloud's openstack/orchestration/v1/stacktemplates.ValidateResult.
 type ValidateResult = upstream.ValidateResult
+
+// ValidatedTemplate is Gophercloud's openstack/orchestration/v1/stacktemplates.ValidatedTemplate.
 type ValidatedTemplate = upstream.ValidatedTemplate
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -28,8 +38,10 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string) ([]byte
 	return value0, err
 }
 
+// ValidateOption is a per-call option of API.Validate.
 type ValidateOption = request.NativeFieldCall
 
+// WithValidateOptions sets the whole ValidateOpts of API.Validate.
 func WithValidateOptions(value ValidateOpts) ValidateOption {
 	return request.Custom(request.WithOptions(value))
 }

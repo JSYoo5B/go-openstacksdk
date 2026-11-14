@@ -18,29 +18,62 @@ type API struct {
 	Resources *resource.Collection[Limit]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BatchCreateOpts is Gophercloud's openstack/identity/v3/limits.BatchCreateOpts.
 type BatchCreateOpts = upstream.BatchCreateOpts
+
+// CreateOpts is Gophercloud's openstack/identity/v3/limits.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/limits.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/limits.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// EnforcementModel is Gophercloud's openstack/identity/v3/limits.EnforcementModel.
 type EnforcementModel = upstream.EnforcementModel
+
+// EnforcementModelResult is Gophercloud's openstack/identity/v3/limits.EnforcementModelResult.
 type EnforcementModelResult = upstream.EnforcementModelResult
+
+// GetResult is Gophercloud's openstack/identity/v3/limits.GetResult.
 type GetResult = upstream.GetResult
+
+// Limit is Gophercloud's openstack/identity/v3/limits.Limit.
 type Limit = upstream.Limit
+
+// LimitOutput is Gophercloud's openstack/identity/v3/limits.LimitOutput.
 type LimitOutput = upstream.LimitOutput
+
+// LimitPage is Gophercloud's openstack/identity/v3/limits.LimitPage.
 type LimitPage = upstream.LimitPage
+
+// LimitsOutput is Gophercloud's openstack/identity/v3/limits.LimitsOutput.
 type LimitsOutput = upstream.LimitsOutput
+
+// ListOpts is Gophercloud's openstack/identity/v3/limits.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// UpdateOpts is Gophercloud's openstack/identity/v3/limits.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/identity/v3/limits.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// BatchCreateOption is a per-call option of API.BatchCreate.
 type BatchCreateOption = request.NativeFieldCall
 
+// WithBatchCreateOptions sets the whole BatchCreateOpts of API.BatchCreate.
 func WithBatchCreateOptions(value BatchCreateOpts) BatchCreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -100,8 +133,10 @@ func (a *API) GetEnforcementModel(ctx context.Context) (*EnforcementModel, error
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -142,8 +177,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

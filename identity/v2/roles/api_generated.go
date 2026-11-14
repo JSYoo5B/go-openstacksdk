@@ -15,17 +15,24 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const ExtPath = upstream.ExtPath
 
+// Role is Gophercloud's openstack/identity/v2/roles.Role.
 type Role = upstream.Role
+
+// RolePage is Gophercloud's openstack/identity/v2/roles.RolePage.
 type RolePage = upstream.RolePage
 
 const RolePath = upstream.RolePath
 const UserPath = upstream.UserPath
 
+// UserRoleResult is Gophercloud's openstack/identity/v2/roles.UserRoleResult.
 type UserRoleResult = upstream.UserRoleResult
 
 // AddUser invokes the upstream API with library-owned builders and result handling.

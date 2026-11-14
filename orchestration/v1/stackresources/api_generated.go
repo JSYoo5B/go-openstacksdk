@@ -15,21 +15,49 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// FindResult is Gophercloud's openstack/orchestration/v1/stackresources.FindResult.
 type FindResult = upstream.FindResult
+
+// GetResult is Gophercloud's openstack/orchestration/v1/stackresources.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/orchestration/v1/stackresources.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// MarkUnhealthyOpts is Gophercloud's openstack/orchestration/v1/stackresources.MarkUnhealthyOpts.
 type MarkUnhealthyOpts = upstream.MarkUnhealthyOpts
+
+// MarkUnhealthyResult is Gophercloud's openstack/orchestration/v1/stackresources.MarkUnhealthyResult.
 type MarkUnhealthyResult = upstream.MarkUnhealthyResult
+
+// MetadataResult is Gophercloud's openstack/orchestration/v1/stackresources.MetadataResult.
 type MetadataResult = upstream.MetadataResult
+
+// Resource is Gophercloud's openstack/orchestration/v1/stackresources.Resource.
 type Resource = upstream.Resource
+
+// ResourcePage is Gophercloud's openstack/orchestration/v1/stackresources.ResourcePage.
 type ResourcePage = upstream.ResourcePage
+
+// ResourceTypePage is Gophercloud's openstack/orchestration/v1/stackresources.ResourceTypePage.
 type ResourceTypePage = upstream.ResourceTypePage
+
+// ResourceTypes is Gophercloud's openstack/orchestration/v1/stackresources.ResourceTypes.
 type ResourceTypes = upstream.ResourceTypes
+
+// SchemaResult is Gophercloud's openstack/orchestration/v1/stackresources.SchemaResult.
 type SchemaResult = upstream.SchemaResult
+
+// TemplateResult is Gophercloud's openstack/orchestration/v1/stackresources.TemplateResult.
 type TemplateResult = upstream.TemplateResult
+
+// TypeSchema is Gophercloud's openstack/orchestration/v1/stackresources.TypeSchema.
 type TypeSchema = upstream.TypeSchema
 
 // Find invokes the upstream API with library-owned builders and result handling.
@@ -48,8 +76,10 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string, resourc
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -94,8 +124,10 @@ func (a *API) ListTypes(ctx context.Context) iter.Seq2[*string, error] {
 	})
 }
 
+// MarkUnhealthyOption is a per-call option of API.MarkUnhealthy.
 type MarkUnhealthyOption = request.NativeFieldCall
 
+// WithMarkUnhealthyOptions sets the whole MarkUnhealthyOpts of API.MarkUnhealthy.
 func WithMarkUnhealthyOptions(value MarkUnhealthyOpts) MarkUnhealthyOption {
 	return request.Custom(request.WithOptions(value))
 }

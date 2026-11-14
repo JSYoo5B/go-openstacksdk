@@ -18,27 +18,56 @@ type API struct {
 	Resources *resource.Collection[AddressGroup]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddAddressesResult is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.AddAddressesResult.
 type AddAddressesResult = upstream.AddAddressesResult
+
+// AddressGroup is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.AddressGroup.
 type AddressGroup = upstream.AddressGroup
+
+// AddressGroupPage is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.AddressGroupPage.
 type AddressGroupPage = upstream.AddressGroupPage
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RemoveAddressesResult is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.RemoveAddressesResult.
 type RemoveAddressesResult = upstream.RemoveAddressesResult
+
+// UpdateAddressesOpts is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.UpdateAddressesOpts.
 type UpdateAddressesOpts = upstream.UpdateAddressesOpts
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/security/addressgroups.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddAddressesOption is a per-call option of API.AddAddresses.
 type AddAddressesOption = request.NativeFieldCall
 
+// WithAddAddressesOptions sets the whole UpdateAddressesOpts of API.AddAddresses.
 func WithAddAddressesOptions(value UpdateAddressesOpts) AddAddressesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -77,8 +106,10 @@ func (a *API) AddAddresses(ctx context.Context, id string, opts UpdateAddressesO
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -130,8 +161,10 @@ func (a *API) Get(ctx context.Context, id string) (*AddressGroup, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -172,8 +205,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// RemoveAddressesOption is a per-call option of API.RemoveAddresses.
 type RemoveAddressesOption = request.NativeFieldCall
 
+// WithRemoveAddressesOptions sets the whole UpdateAddressesOpts of API.RemoveAddresses.
 func WithRemoveAddressesOptions(value UpdateAddressesOpts) RemoveAddressesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -212,8 +247,10 @@ func (a *API) RemoveAddresses(ctx context.Context, id string, opts UpdateAddress
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

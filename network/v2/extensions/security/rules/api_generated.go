@@ -18,16 +18,26 @@ type API struct {
 	Resources *resource.Collection[SecGroupRule]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateBulkResult is Gophercloud's openstack/networking/v2/extensions/security/rules.CreateBulkResult.
 type CreateBulkResult = upstream.CreateBulkResult
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/security/rules.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/security/rules.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/security/rules.DeleteResult.
 type DeleteResult = upstream.DeleteResult
 
 const DirEgress = upstream.DirEgress
@@ -35,7 +45,10 @@ const DirIngress = upstream.DirIngress
 const EtherType4 = upstream.EtherType4
 const EtherType6 = upstream.EtherType6
 
+// GetResult is Gophercloud's openstack/networking/v2/extensions/security/rules.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/security/rules.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const ProtocolAH = upstream.ProtocolAH
@@ -62,13 +75,25 @@ const ProtocolUDP = upstream.ProtocolUDP
 const ProtocolUDPLite = upstream.ProtocolUDPLite
 const ProtocolVRRP = upstream.ProtocolVRRP
 
+// RuleDirection is Gophercloud's openstack/networking/v2/extensions/security/rules.RuleDirection.
 type RuleDirection = upstream.RuleDirection
+
+// RuleEtherType is Gophercloud's openstack/networking/v2/extensions/security/rules.RuleEtherType.
 type RuleEtherType = upstream.RuleEtherType
+
+// RuleProtocol is Gophercloud's openstack/networking/v2/extensions/security/rules.RuleProtocol.
 type RuleProtocol = upstream.RuleProtocol
+
+// SecGroupRule is Gophercloud's openstack/networking/v2/extensions/security/rules.SecGroupRule.
 type SecGroupRule = upstream.SecGroupRule
+
+// SecGroupRulePage is Gophercloud's openstack/networking/v2/extensions/security/rules.SecGroupRulePage.
 type SecGroupRulePage = upstream.SecGroupRulePage
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -128,8 +153,10 @@ func (a *API) Get(ctx context.Context, id string) (*SecGroupRule, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

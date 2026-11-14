@@ -12,11 +12,19 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Quota is Gophercloud's openstack/dns/v2/quotas.Quota.
 type Quota = upstream.Quota
+
+// Result is Gophercloud's openstack/dns/v2/quotas.Result.
 type Result = upstream.Result
+
+// UpdateOpts is Gophercloud's openstack/dns/v2/quotas.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -32,8 +40,10 @@ func (a *API) URL(ctx context.Context, projectID string) string {
 	return upstream.URL(a.client, projectID)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

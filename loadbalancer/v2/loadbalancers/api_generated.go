@@ -18,31 +18,68 @@ type API struct {
 	Resources *resource.Collection[LoadBalancer]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AdditionalVip is Gophercloud's openstack/loadbalancer/v2/loadbalancers.AdditionalVip.
 type AdditionalVip = upstream.AdditionalVip
+
+// CreateOpts is Gophercloud's openstack/loadbalancer/v2/loadbalancers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/loadbalancer/v2/loadbalancers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteOpts is Gophercloud's openstack/loadbalancer/v2/loadbalancers.DeleteOpts.
 type DeleteOpts = upstream.DeleteOpts
+
+// DeleteResult is Gophercloud's openstack/loadbalancer/v2/loadbalancers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// FailoverResult is Gophercloud's openstack/loadbalancer/v2/loadbalancers.FailoverResult.
 type FailoverResult = upstream.FailoverResult
+
+// GetResult is Gophercloud's openstack/loadbalancer/v2/loadbalancers.GetResult.
 type GetResult = upstream.GetResult
+
+// GetStatusesResult is Gophercloud's openstack/loadbalancer/v2/loadbalancers.GetStatusesResult.
 type GetStatusesResult = upstream.GetStatusesResult
+
+// ListOpts is Gophercloud's openstack/loadbalancer/v2/loadbalancers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// LoadBalancer is Gophercloud's openstack/loadbalancer/v2/loadbalancers.LoadBalancer.
 type LoadBalancer = upstream.LoadBalancer
+
+// LoadBalancerPage is Gophercloud's openstack/loadbalancer/v2/loadbalancers.LoadBalancerPage.
 type LoadBalancerPage = upstream.LoadBalancerPage
+
+// Stats is Gophercloud's openstack/loadbalancer/v2/loadbalancers.Stats.
 type Stats = upstream.Stats
+
+// StatsResult is Gophercloud's openstack/loadbalancer/v2/loadbalancers.StatsResult.
 type StatsResult = upstream.StatsResult
+
+// StatusTree is Gophercloud's openstack/loadbalancer/v2/loadbalancers.StatusTree.
 type StatusTree = upstream.StatusTree
+
+// UpdateOpts is Gophercloud's openstack/loadbalancer/v2/loadbalancers.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/loadbalancer/v2/loadbalancers.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -81,8 +118,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// DeleteOption is a per-call option of API.Delete.
 type DeleteOption = request.NativeQueryCall
 
+// WithDeleteOptions sets the whole DeleteOpts of API.Delete.
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -147,8 +186,10 @@ func (a *API) GetStatuses(ctx context.Context, id string) (*StatusTree, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -189,8 +230,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

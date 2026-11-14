@@ -13,13 +13,22 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ManageExistingOpts is Gophercloud's openstack/blockstorage/v3/manageablevolumes.ManageExistingOpts.
 type ManageExistingOpts = upstream.ManageExistingOpts
+
+// ManageExistingResult is Gophercloud's openstack/blockstorage/v3/manageablevolumes.ManageExistingResult.
 type ManageExistingResult = upstream.ManageExistingResult
+
+// ManageExistingOption is a per-call option of API.ManageExisting.
 type ManageExistingOption = request.NativeFieldCall
 
+// WithManageExistingOptions sets the whole ManageExistingOpts of API.ManageExisting.
 func WithManageExistingOptions(value ManageExistingOpts) ManageExistingOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -18,27 +18,48 @@ type API struct {
 	Resources *resource.Collection[Listener]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ClientAuthentication is Gophercloud's openstack/loadbalancer/v2/listeners.ClientAuthentication.
 type ClientAuthentication = upstream.ClientAuthentication
 
 const ClientAuthenticationMandatory = upstream.ClientAuthenticationMandatory
 const ClientAuthenticationNone = upstream.ClientAuthenticationNone
 const ClientAuthenticationOptional = upstream.ClientAuthenticationOptional
 
+// CreateOpts is Gophercloud's openstack/loadbalancer/v2/listeners.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/loadbalancer/v2/listeners.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/loadbalancer/v2/listeners.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/loadbalancer/v2/listeners.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/loadbalancer/v2/listeners.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Listener is Gophercloud's openstack/loadbalancer/v2/listeners.Listener.
 type Listener = upstream.Listener
+
+// ListenerPage is Gophercloud's openstack/loadbalancer/v2/listeners.ListenerPage.
 type ListenerPage = upstream.ListenerPage
+
+// LoadBalancerID is Gophercloud's openstack/loadbalancer/v2/listeners.LoadBalancerID.
 type LoadBalancerID = upstream.LoadBalancerID
+
+// Protocol is Gophercloud's openstack/loadbalancer/v2/listeners.Protocol.
 type Protocol = upstream.Protocol
 
 const ProtocolHTTP = upstream.ProtocolHTTP
@@ -50,8 +71,13 @@ const ProtocolTCP = upstream.ProtocolTCP
 const ProtocolTerminatedHTTPS = upstream.ProtocolTerminatedHTTPS
 const ProtocolUDP = upstream.ProtocolUDP
 
+// Stats is Gophercloud's openstack/loadbalancer/v2/listeners.Stats.
 type Stats = upstream.Stats
+
+// StatsResult is Gophercloud's openstack/loadbalancer/v2/listeners.StatsResult.
 type StatsResult = upstream.StatsResult
+
+// TLSVersion is Gophercloud's openstack/loadbalancer/v2/listeners.TLSVersion.
 type TLSVersion = upstream.TLSVersion
 
 const TLSVersionSSLv3 = upstream.TLSVersionSSLv3
@@ -60,10 +86,16 @@ const TLSVersionTLSv1_1 = upstream.TLSVersionTLSv1_1
 const TLSVersionTLSv1_2 = upstream.TLSVersionTLSv1_2
 const TLSVersionTLSv1_3 = upstream.TLSVersionTLSv1_3
 
+// UpdateOpts is Gophercloud's openstack/loadbalancer/v2/listeners.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/loadbalancer/v2/listeners.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -123,8 +155,10 @@ func (a *API) GetStats(ctx context.Context, id string) (*Stats, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -165,8 +199,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

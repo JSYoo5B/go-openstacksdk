@@ -20,28 +20,62 @@ type API struct {
 	Resources *resource.Collection[Instance]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ActionResult is Gophercloud's openstack/db/v1/instances.ActionResult.
 type ActionResult = upstream.ActionResult
+
+// Address is Gophercloud's openstack/db/v1/instances.Address.
 type Address = upstream.Address
+
+// ConfigurationResult is Gophercloud's openstack/db/v1/instances.ConfigurationResult.
 type ConfigurationResult = upstream.ConfigurationResult
+
+// CreateOpts is Gophercloud's openstack/db/v1/instances.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/db/v1/instances.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DatastoreOpts is Gophercloud's openstack/db/v1/instances.DatastoreOpts.
 type DatastoreOpts = upstream.DatastoreOpts
+
+// DeleteResult is Gophercloud's openstack/db/v1/instances.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// EnableRootUserResult is Gophercloud's openstack/db/v1/instances.EnableRootUserResult.
 type EnableRootUserResult = upstream.EnableRootUserResult
+
+// Fault is Gophercloud's openstack/db/v1/instances.Fault.
 type Fault = upstream.Fault
+
+// Flavor is Gophercloud's openstack/db/v1/instances.Flavor.
 type Flavor = upstream.Flavor
+
+// GetResult is Gophercloud's openstack/db/v1/instances.GetResult.
 type GetResult = upstream.GetResult
+
+// Instance is Gophercloud's openstack/db/v1/instances.Instance.
 type Instance = upstream.Instance
+
+// InstancePage is Gophercloud's openstack/db/v1/instances.InstancePage.
 type InstancePage = upstream.InstancePage
+
+// IsRootEnabledResult is Gophercloud's openstack/db/v1/instances.IsRootEnabledResult.
 type IsRootEnabledResult = upstream.IsRootEnabledResult
+
+// NetworkOpts is Gophercloud's openstack/db/v1/instances.NetworkOpts.
 type NetworkOpts = upstream.NetworkOpts
+
+// Volume is Gophercloud's openstack/db/v1/instances.Volume.
 type Volume = upstream.Volume
 
 // AttachConfigurationGroup invokes the upstream API with library-owned builders and result handling.
@@ -49,8 +83,10 @@ func (a *API) AttachConfigurationGroup(ctx context.Context, instanceID string, c
 	return request.Wrap("AttachConfigurationGroup", "instances", upstream.AttachConfigurationGroup(ctx, a.client, instanceID, configID).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

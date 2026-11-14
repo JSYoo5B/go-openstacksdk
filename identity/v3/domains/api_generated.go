@@ -18,24 +18,47 @@ type API struct {
 	Resources *resource.Collection[Domain]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/identity/v3/domains.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/domains.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/domains.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// Domain is Gophercloud's openstack/identity/v3/domains.Domain.
 type Domain = upstream.Domain
+
+// DomainPage is Gophercloud's openstack/identity/v3/domains.DomainPage.
 type DomainPage = upstream.DomainPage
+
+// GetResult is Gophercloud's openstack/identity/v3/domains.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/identity/v3/domains.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// UpdateOpts is Gophercloud's openstack/identity/v3/domains.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/identity/v3/domains.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -87,8 +110,10 @@ func (a *API) Get(ctx context.Context, id string) (*Domain, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -137,8 +162,10 @@ func (a *API) ListAvailable(ctx context.Context) iter.Seq2[*Domain, error] {
 	})
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

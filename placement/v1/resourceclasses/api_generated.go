@@ -18,23 +18,44 @@ type API struct {
 	Resources *resource.Collection[ResourceClass]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/placement/v1/resourceclasses.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/placement/v1/resourceclasses.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/placement/v1/resourceclasses.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/placement/v1/resourceclasses.GetResult.
 type GetResult = upstream.GetResult
+
+// Link is Gophercloud's openstack/placement/v1/resourceclasses.Link.
 type Link = upstream.Link
+
+// ResourceClass is Gophercloud's openstack/placement/v1/resourceclasses.ResourceClass.
 type ResourceClass = upstream.ResourceClass
+
+// ResourceClassesPage is Gophercloud's openstack/placement/v1/resourceclasses.ResourceClassesPage.
 type ResourceClassesPage = upstream.ResourceClassesPage
+
+// UpdateResult is Gophercloud's openstack/placement/v1/resourceclasses.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

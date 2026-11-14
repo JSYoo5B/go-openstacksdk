@@ -18,17 +18,29 @@ type API struct {
 	Resources *resource.Collection[APIVersion]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// APIVersion is Gophercloud's openstack/sharedfilesystems/apiversions.APIVersion.
 type APIVersion = upstream.APIVersion
+
+// APIVersionPage is Gophercloud's openstack/sharedfilesystems/apiversions.APIVersionPage.
 type APIVersionPage = upstream.APIVersionPage
+
+// ErrMultipleVersionsFound is Gophercloud's openstack/sharedfilesystems/apiversions.ErrMultipleVersionsFound.
 type ErrMultipleVersionsFound = upstream.ErrMultipleVersionsFound
+
+// ErrVersionNotFound is Gophercloud's openstack/sharedfilesystems/apiversions.ErrVersionNotFound.
 type ErrVersionNotFound = upstream.ErrVersionNotFound
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/apiversions.GetResult.
 type GetResult = upstream.GetResult
 
 // Get invokes the upstream API with library-owned builders and result handling.

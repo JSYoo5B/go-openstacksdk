@@ -18,25 +18,53 @@ type API struct {
 	Resources *resource.Collection[Hypervisor]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CPUInfo is Gophercloud's openstack/compute/v2/hypervisors.CPUInfo.
 type CPUInfo = upstream.CPUInfo
+
+// GetOpts is Gophercloud's openstack/compute/v2/hypervisors.GetOpts.
 type GetOpts = upstream.GetOpts
+
+// Hypervisor is Gophercloud's openstack/compute/v2/hypervisors.Hypervisor.
 type Hypervisor = upstream.Hypervisor
+
+// HypervisorPage is Gophercloud's openstack/compute/v2/hypervisors.HypervisorPage.
 type HypervisorPage = upstream.HypervisorPage
+
+// HypervisorResult is Gophercloud's openstack/compute/v2/hypervisors.HypervisorResult.
 type HypervisorResult = upstream.HypervisorResult
+
+// ListOpts is Gophercloud's openstack/compute/v2/hypervisors.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Server is Gophercloud's openstack/compute/v2/hypervisors.Server.
 type Server = upstream.Server
+
+// Service is Gophercloud's openstack/compute/v2/hypervisors.Service.
 type Service = upstream.Service
+
+// Statistics is Gophercloud's openstack/compute/v2/hypervisors.Statistics.
 type Statistics = upstream.Statistics
+
+// StatisticsResult is Gophercloud's openstack/compute/v2/hypervisors.StatisticsResult.
 type StatisticsResult = upstream.StatisticsResult
+
+// Topology is Gophercloud's openstack/compute/v2/hypervisors.Topology.
 type Topology = upstream.Topology
+
+// Uptime is Gophercloud's openstack/compute/v2/hypervisors.Uptime.
 type Uptime = upstream.Uptime
+
+// UptimeResult is Gophercloud's openstack/compute/v2/hypervisors.UptimeResult.
 type UptimeResult = upstream.UptimeResult
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -47,8 +75,10 @@ func (a *API) Get(ctx context.Context, hypervisorID string) (*Hypervisor, error)
 	return value0, err
 }
 
+// GetExtOption is a per-call option of API.GetExt.
 type GetExtOption = request.NativeQueryCall
 
+// WithGetExtOptions sets the whole GetOpts of API.GetExt.
 func WithGetExtOptions(value GetOpts) GetExtOption { return request.Custom(request.WithOptions(value)) }
 
 type getExtOptsBuilder struct {
@@ -102,8 +132,10 @@ func (a *API) GetUptime(ctx context.Context, hypervisorID string) (*Uptime, erro
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

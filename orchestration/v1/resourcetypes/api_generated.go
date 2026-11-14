@@ -12,44 +12,69 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AttributeSchema is Gophercloud's openstack/orchestration/v1/resourcetypes.AttributeSchema.
 type AttributeSchema = upstream.AttributeSchema
 
 const BooleanProperty = upstream.BooleanProperty
 
+// ConstraintSchema is Gophercloud's openstack/orchestration/v1/resourcetypes.ConstraintSchema.
 type ConstraintSchema = upstream.ConstraintSchema
+
+// GenerateTemplateOpts is Gophercloud's openstack/orchestration/v1/resourcetypes.GenerateTemplateOpts.
 type GenerateTemplateOpts = upstream.GenerateTemplateOpts
+
+// GeneratedTemplateType is Gophercloud's openstack/orchestration/v1/resourcetypes.GeneratedTemplateType.
 type GeneratedTemplateType = upstream.GeneratedTemplateType
+
+// GetSchemaResult is Gophercloud's openstack/orchestration/v1/resourcetypes.GetSchemaResult.
 type GetSchemaResult = upstream.GetSchemaResult
 
 const IntegerProperty = upstream.IntegerProperty
 
+// ListOpts is Gophercloud's openstack/orchestration/v1/resourcetypes.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const ListProperty = upstream.ListProperty
 
+// ListResult is Gophercloud's openstack/orchestration/v1/resourcetypes.ListResult.
 type ListResult = upstream.ListResult
 
 const MapProperty = upstream.MapProperty
 
+// MinMaxConstraint is Gophercloud's openstack/orchestration/v1/resourcetypes.MinMaxConstraint.
 type MinMaxConstraint = upstream.MinMaxConstraint
+
+// ModuloConstraint is Gophercloud's openstack/orchestration/v1/resourcetypes.ModuloConstraint.
 type ModuloConstraint = upstream.ModuloConstraint
 
 const NumberProperty = upstream.NumberProperty
 
+// PropertySchema is Gophercloud's openstack/orchestration/v1/resourcetypes.PropertySchema.
 type PropertySchema = upstream.PropertySchema
+
+// PropertyType is Gophercloud's openstack/orchestration/v1/resourcetypes.PropertyType.
 type PropertyType = upstream.PropertyType
+
+// ResourceSchema is Gophercloud's openstack/orchestration/v1/resourcetypes.ResourceSchema.
 type ResourceSchema = upstream.ResourceSchema
+
+// ResourceTypeSummary is Gophercloud's openstack/orchestration/v1/resourcetypes.ResourceTypeSummary.
 type ResourceTypeSummary = upstream.ResourceTypeSummary
 
 const StringProperty = upstream.StringProperty
 
+// SupportStatus is Gophercloud's openstack/orchestration/v1/resourcetypes.SupportStatus.
 type SupportStatus = upstream.SupportStatus
 
 const SupportStatusDeprecated = upstream.SupportStatusDeprecated
 
+// SupportStatusDetails is Gophercloud's openstack/orchestration/v1/resourcetypes.SupportStatusDetails.
 type SupportStatusDetails = upstream.SupportStatusDetails
 
 const SupportStatusHidden = upstream.SupportStatusHidden
@@ -57,14 +82,17 @@ const SupportStatusSupported = upstream.SupportStatusSupported
 const SupportStatusUnknown = upstream.SupportStatusUnknown
 const SupportStatusUnsupported = upstream.SupportStatusUnsupported
 
+// TemplateResult is Gophercloud's openstack/orchestration/v1/resourcetypes.TemplateResult.
 type TemplateResult = upstream.TemplateResult
 
 const TemplateTypeCFn = upstream.TemplateTypeCFn
 const TemplateTypeHOT = upstream.TemplateTypeHOT
 const UntypedProperty = upstream.UntypedProperty
 
+// GenerateTemplateOption is a per-call option of API.GenerateTemplate.
 type GenerateTemplateOption = request.NativeQueryCall
 
+// WithGenerateTemplateOptions sets the whole GenerateTemplateOpts of API.GenerateTemplate.
 func WithGenerateTemplateOptions(value GenerateTemplateOpts) GenerateTemplateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -111,8 +139,10 @@ func (a *API) GetSchema(ctx context.Context, resourceType string) (ResourceSchem
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

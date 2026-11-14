@@ -15,27 +15,64 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BatchCreateOpts is Gophercloud's openstack/messaging/v2/messages.BatchCreateOpts.
 type BatchCreateOpts = upstream.BatchCreateOpts
+
+// CreateOpts is Gophercloud's openstack/messaging/v2/messages.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/messaging/v2/messages.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteMessagesOpts is Gophercloud's openstack/messaging/v2/messages.DeleteMessagesOpts.
 type DeleteMessagesOpts = upstream.DeleteMessagesOpts
+
+// DeleteOpts is Gophercloud's openstack/messaging/v2/messages.DeleteOpts.
 type DeleteOpts = upstream.DeleteOpts
+
+// DeleteResult is Gophercloud's openstack/messaging/v2/messages.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetMessagesOpts is Gophercloud's openstack/messaging/v2/messages.GetMessagesOpts.
 type GetMessagesOpts = upstream.GetMessagesOpts
+
+// GetMessagesResult is Gophercloud's openstack/messaging/v2/messages.GetMessagesResult.
 type GetMessagesResult = upstream.GetMessagesResult
+
+// GetResult is Gophercloud's openstack/messaging/v2/messages.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/messaging/v2/messages.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Message is Gophercloud's openstack/messaging/v2/messages.Message.
 type Message = upstream.Message
+
+// MessagePage is Gophercloud's openstack/messaging/v2/messages.MessagePage.
 type MessagePage = upstream.MessagePage
+
+// PopMessage is Gophercloud's openstack/messaging/v2/messages.PopMessage.
 type PopMessage = upstream.PopMessage
+
+// PopMessagesOpts is Gophercloud's openstack/messaging/v2/messages.PopMessagesOpts.
 type PopMessagesOpts = upstream.PopMessagesOpts
+
+// PopResult is Gophercloud's openstack/messaging/v2/messages.PopResult.
 type PopResult = upstream.PopResult
+
+// ResourceList is Gophercloud's openstack/messaging/v2/messages.ResourceList.
 type ResourceList = upstream.ResourceList
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole BatchCreateOpts of API.Create.
 func WithCreateOptions(value BatchCreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -74,8 +111,10 @@ func (a *API) Create(ctx context.Context, queueName string, opts BatchCreateOpts
 	return value0, err
 }
 
+// DeleteOption is a per-call option of API.Delete.
 type DeleteOption = request.NativeQueryCall
 
+// WithDeleteOptions sets the whole DeleteOpts of API.Delete.
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -116,8 +155,10 @@ func (a *API) DeleteMessageURL(ctx context.Context, queueName string, messageID 
 	return upstream.DeleteMessageURL(a.client, queueName, messageID)
 }
 
+// DeleteMessagesOption is a per-call option of API.DeleteMessages.
 type DeleteMessagesOption = request.NativeQueryCall
 
+// WithDeleteMessagesOptions sets the whole DeleteMessagesOpts of API.DeleteMessages.
 func WithDeleteMessagesOptions(value DeleteMessagesOpts) DeleteMessagesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -161,8 +202,10 @@ func (a *API) Get(ctx context.Context, queueName string, messageID string) (Mess
 	return value0, err
 }
 
+// GetMessagesOption is a per-call option of API.GetMessages.
 type GetMessagesOption = request.NativeQueryCall
 
+// WithGetMessagesOptions sets the whole GetMessagesOpts of API.GetMessages.
 func WithGetMessagesOptions(value GetMessagesOpts) GetMessagesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -202,8 +245,10 @@ func (a *API) GetMessages(ctx context.Context, queueName string, options ...GetM
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -240,8 +285,10 @@ func (a *API) List(ctx context.Context, queueName string, options ...ListOption)
 	})
 }
 
+// PopMessagesOption is a per-call option of API.PopMessages.
 type PopMessagesOption = request.NativeQueryCall
 
+// WithPopMessagesOptions sets the whole PopMessagesOpts of API.PopMessages.
 func WithPopMessagesOptions(value PopMessagesOpts) PopMessagesOption {
 	return request.Custom(request.WithOptions(value))
 }

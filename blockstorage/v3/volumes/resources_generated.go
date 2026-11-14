@@ -51,6 +51,8 @@ func (a *API) newResources() *resource.Collection[Volume] {
 			return a.listWithControl(ctx, control, options...)
 		}})
 }
+
+// Find looks up one Volume by ID or name through Resources.
 func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) (*Volume, error) {
 	return a.Resources.Find(ctx, ref, options...)
 }
@@ -59,15 +61,23 @@ func (a *API) Find(ctx context.Context, ref resource.Ref, options ...resource.Lo
 func (a *API) FindIdentity(ctx context.Context, identity string, options ...resource.IdentityFindOption) (*Volume, error) {
 	return a.Resources.FindIdentity(ctx, identity, options...)
 }
+
+// All lists every row through Resources.
 func (a *API) All(ctx context.Context, options ...resource.ListOption) ([]*Volume, error) {
 	return a.Resources.All(ctx, options...)
 }
+
+// Remove deletes a resource by ID or name through Resources.
 func (a *API) Remove(ctx context.Context, ref resource.Ref, options ...resource.LookupOption) error {
 	return a.Resources.Delete(ctx, ref, options...)
 }
+
+// WaitFor polls Resources until the resource reaches status.
 func (a *API) WaitFor(ctx context.Context, ref resource.Ref, status string, options ...resource.WaitOption) (*Volume, error) {
 	return a.Resources.Wait(ctx, ref, status, options...)
 }
+
+// WaitForDeletion polls Resources until the resource is deleted.
 func (a *API) WaitForDeletion(ctx context.Context, ref resource.Ref, options ...resource.WaitOption) error {
 	return a.Resources.WaitDeleted(ctx, ref, options...)
 }

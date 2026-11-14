@@ -18,16 +18,26 @@ type API struct {
 	Resources *resource.Collection[Conductor]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Conductor is Gophercloud's openstack/baremetal/v1/conductors.Conductor.
 type Conductor = upstream.Conductor
+
+// ConductorPage is Gophercloud's openstack/baremetal/v1/conductors.ConductorPage.
 type ConductorPage = upstream.ConductorPage
+
+// GetResult is Gophercloud's openstack/baremetal/v1/conductors.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/baremetal/v1/conductors.ListOpts.
 type ListOpts = upstream.ListOpts
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -38,8 +48,10 @@ func (a *API) Get(ctx context.Context, name string) (*Conductor, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

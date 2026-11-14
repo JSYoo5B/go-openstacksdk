@@ -13,11 +13,19 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// DownloadResult is Gophercloud's openstack/image/v2/imagedata.DownloadResult.
 type DownloadResult = upstream.DownloadResult
+
+// StageResult is Gophercloud's openstack/image/v2/imagedata.StageResult.
 type StageResult = upstream.StageResult
+
+// UploadResult is Gophercloud's openstack/image/v2/imagedata.UploadResult.
 type UploadResult = upstream.UploadResult
 
 // Download invokes the upstream API with library-owned builders and result handling.

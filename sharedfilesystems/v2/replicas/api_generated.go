@@ -18,33 +18,74 @@ type API struct {
 	Resources *resource.Collection[Replica]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/sharedfilesystems/v2/replicas.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ExportLocation is Gophercloud's openstack/sharedfilesystems/v2/replicas.ExportLocation.
 type ExportLocation = upstream.ExportLocation
+
+// ForceDeleteResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.ForceDeleteResult.
 type ForceDeleteResult = upstream.ForceDeleteResult
+
+// GetExportLocationResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.GetExportLocationResult.
 type GetExportLocationResult = upstream.GetExportLocationResult
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.GetResult.
 type GetResult = upstream.GetResult
+
+// ListExportLocationsResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.ListExportLocationsResult.
 type ListExportLocationsResult = upstream.ListExportLocationsResult
+
+// ListOpts is Gophercloud's openstack/sharedfilesystems/v2/replicas.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// PromoteOpts is Gophercloud's openstack/sharedfilesystems/v2/replicas.PromoteOpts.
 type PromoteOpts = upstream.PromoteOpts
+
+// PromoteResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.PromoteResult.
 type PromoteResult = upstream.PromoteResult
+
+// Replica is Gophercloud's openstack/sharedfilesystems/v2/replicas.Replica.
 type Replica = upstream.Replica
+
+// ReplicaPage is Gophercloud's openstack/sharedfilesystems/v2/replicas.ReplicaPage.
 type ReplicaPage = upstream.ReplicaPage
+
+// ResetStateOpts is Gophercloud's openstack/sharedfilesystems/v2/replicas.ResetStateOpts.
 type ResetStateOpts = upstream.ResetStateOpts
+
+// ResetStateResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.ResetStateResult.
 type ResetStateResult = upstream.ResetStateResult
+
+// ResetStatusOpts is Gophercloud's openstack/sharedfilesystems/v2/replicas.ResetStatusOpts.
 type ResetStatusOpts = upstream.ResetStatusOpts
+
+// ResetStatusResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.ResetStatusResult.
 type ResetStatusResult = upstream.ResetStatusResult
+
+// ResyncResult is Gophercloud's openstack/sharedfilesystems/v2/replicas.ResyncResult.
 type ResyncResult = upstream.ResyncResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -109,8 +150,10 @@ func (a *API) GetExportLocation(ctx context.Context, replicaID string, id string
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -147,8 +190,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Replic
 	})
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -199,8 +244,10 @@ func (a *API) ListExportLocations(ctx context.Context, id string) ([]ExportLocat
 	return value0, err
 }
 
+// PromoteOption is a per-call option of API.Promote.
 type PromoteOption = request.NativeFieldCall
 
+// WithPromoteOptions sets the whole PromoteOpts of API.Promote.
 func WithPromoteOptions(value PromoteOpts) PromoteOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -235,8 +282,10 @@ func (a *API) Promote(ctx context.Context, id string, opts PromoteOpts, options 
 	return request.Wrap("Promote", "replicas", upstream.Promote(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// ResetStateOption is a per-call option of API.ResetState.
 type ResetStateOption = request.NativeFieldCall
 
+// WithResetStateOptions sets the whole ResetStateOpts of API.ResetState.
 func WithResetStateOptions(value ResetStateOpts) ResetStateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -271,8 +320,10 @@ func (a *API) ResetState(ctx context.Context, id string, opts ResetStateOpts, op
 	return request.Wrap("ResetState", "replicas", upstream.ResetState(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// ResetStatusOption is a per-call option of API.ResetStatus.
 type ResetStatusOption = request.NativeFieldCall
 
+// WithResetStatusOptions sets the whole ResetStatusOpts of API.ResetStatus.
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
 	return request.Custom(request.WithOptions(value))
 }

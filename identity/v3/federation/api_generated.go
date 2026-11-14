@@ -15,32 +15,70 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateMappingOpts is Gophercloud's openstack/identity/v3/federation.CreateMappingOpts.
 type CreateMappingOpts = upstream.CreateMappingOpts
+
+// CreateMappingResult is Gophercloud's openstack/identity/v3/federation.CreateMappingResult.
 type CreateMappingResult = upstream.CreateMappingResult
+
+// DeleteMappingResult is Gophercloud's openstack/identity/v3/federation.DeleteMappingResult.
 type DeleteMappingResult = upstream.DeleteMappingResult
+
+// Domain is Gophercloud's openstack/identity/v3/federation.Domain.
 type Domain = upstream.Domain
+
+// GetMappingResult is Gophercloud's openstack/identity/v3/federation.GetMappingResult.
 type GetMappingResult = upstream.GetMappingResult
+
+// Group is Gophercloud's openstack/identity/v3/federation.Group.
 type Group = upstream.Group
+
+// Mapping is Gophercloud's openstack/identity/v3/federation.Mapping.
 type Mapping = upstream.Mapping
+
+// MappingRule is Gophercloud's openstack/identity/v3/federation.MappingRule.
 type MappingRule = upstream.MappingRule
+
+// MappingsPage is Gophercloud's openstack/identity/v3/federation.MappingsPage.
 type MappingsPage = upstream.MappingsPage
+
+// RuleLocal is Gophercloud's openstack/identity/v3/federation.RuleLocal.
 type RuleLocal = upstream.RuleLocal
+
+// RuleProject is Gophercloud's openstack/identity/v3/federation.RuleProject.
 type RuleProject = upstream.RuleProject
+
+// RuleProjectRole is Gophercloud's openstack/identity/v3/federation.RuleProjectRole.
 type RuleProjectRole = upstream.RuleProjectRole
+
+// RuleRemote is Gophercloud's openstack/identity/v3/federation.RuleRemote.
 type RuleRemote = upstream.RuleRemote
+
+// RuleUser is Gophercloud's openstack/identity/v3/federation.RuleUser.
 type RuleUser = upstream.RuleUser
+
+// UpdateMappingOpts is Gophercloud's openstack/identity/v3/federation.UpdateMappingOpts.
 type UpdateMappingOpts = upstream.UpdateMappingOpts
+
+// UpdateMappingResult is Gophercloud's openstack/identity/v3/federation.UpdateMappingResult.
 type UpdateMappingResult = upstream.UpdateMappingResult
+
+// UserType is Gophercloud's openstack/identity/v3/federation.UserType.
 type UserType = upstream.UserType
 
 const UserTypeEphemeral = upstream.UserTypeEphemeral
 const UserTypeLocal = upstream.UserTypeLocal
 
+// CreateMappingOption is a per-call option of API.CreateMapping.
 type CreateMappingOption = request.NativeFieldCall
 
+// WithCreateMappingOptions sets the whole CreateMappingOpts of API.CreateMapping.
 func WithCreateMappingOptions(value CreateMappingOpts) CreateMappingOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -100,8 +138,10 @@ func (a *API) ListMappings(ctx context.Context) iter.Seq2[*Mapping, error] {
 	})
 }
 
+// UpdateMappingOption is a per-call option of API.UpdateMapping.
 type UpdateMappingOption = request.NativeFieldCall
 
+// WithUpdateMappingOptions sets the whole UpdateMappingOpts of API.UpdateMapping.
 func WithUpdateMappingOptions(value UpdateMappingOpts) UpdateMappingOption {
 	return request.Custom(request.WithOptions(value))
 }

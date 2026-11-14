@@ -18,11 +18,14 @@ type API struct {
 	Resources *resource.Collection[Node]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const Active = upstream.Active
@@ -30,34 +33,66 @@ const AddOp = upstream.AddOp
 const AdoptFail = upstream.AdoptFail
 const Adopting = upstream.Adopting
 
+// AttachVirtualMediaOpts is Gophercloud's openstack/baremetal/v1/nodes.AttachVirtualMediaOpts.
 type AttachVirtualMediaOpts = upstream.AttachVirtualMediaOpts
 
 const Available = upstream.Available
 
+// BIOSSetting is Gophercloud's openstack/baremetal/v1/nodes.BIOSSetting.
 type BIOSSetting = upstream.BIOSSetting
+
+// BootDeviceOpts is Gophercloud's openstack/baremetal/v1/nodes.BootDeviceOpts.
 type BootDeviceOpts = upstream.BootDeviceOpts
+
+// BootDeviceResult is Gophercloud's openstack/baremetal/v1/nodes.BootDeviceResult.
 type BootDeviceResult = upstream.BootDeviceResult
+
+// CallVendorPassthruOpts is Gophercloud's openstack/baremetal/v1/nodes.CallVendorPassthruOpts.
 type CallVendorPassthruOpts = upstream.CallVendorPassthruOpts
+
+// CallVendorPassthruResult is Gophercloud's openstack/baremetal/v1/nodes.CallVendorPassthruResult.
 type CallVendorPassthruResult = upstream.CallVendorPassthruResult
+
+// ChangePowerStateResult is Gophercloud's openstack/baremetal/v1/nodes.ChangePowerStateResult.
 type ChangePowerStateResult = upstream.ChangePowerStateResult
+
+// ChangeStateResult is Gophercloud's openstack/baremetal/v1/nodes.ChangeStateResult.
 type ChangeStateResult = upstream.ChangeStateResult
 
 const CleanFail = upstream.CleanFail
 const CleanHold = upstream.CleanHold
 
+// CleanStep is Gophercloud's openstack/baremetal/v1/nodes.CleanStep.
 type CleanStep = upstream.CleanStep
 
 const CleanWait = upstream.CleanWait
 const Cleaning = upstream.Cleaning
 
+// ConfigDrive is Gophercloud's openstack/baremetal/v1/nodes.ConfigDrive.
 type ConfigDrive = upstream.ConfigDrive
+
+// CreateOpts is Gophercloud's openstack/baremetal/v1/nodes.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/baremetal/v1/nodes.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CreateSubscriptionMethod is Gophercloud's openstack/baremetal/v1/nodes.CreateSubscriptionMethod.
 type CreateSubscriptionMethod = upstream.CreateSubscriptionMethod
+
+// CreateSubscriptionOpts is Gophercloud's openstack/baremetal/v1/nodes.CreateSubscriptionOpts.
 type CreateSubscriptionOpts = upstream.CreateSubscriptionOpts
+
+// DeleteResult is Gophercloud's openstack/baremetal/v1/nodes.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DeleteSubscriptionMethod is Gophercloud's openstack/baremetal/v1/nodes.DeleteSubscriptionMethod.
 type DeleteSubscriptionMethod = upstream.DeleteSubscriptionMethod
+
+// DeleteSubscriptionOpts is Gophercloud's openstack/baremetal/v1/nodes.DeleteSubscriptionOpts.
 type DeleteSubscriptionOpts = upstream.DeleteSubscriptionOpts
+
+// DeleteSubscriptionVendorPassthruResult is Gophercloud's openstack/baremetal/v1/nodes.DeleteSubscriptionVendorPassthruResult.
 type DeleteSubscriptionVendorPassthruResult = upstream.DeleteSubscriptionVendorPassthruResult
 
 const Deleted = upstream.Deleted
@@ -66,35 +101,58 @@ const DeployDone = upstream.DeployDone
 const DeployFail = upstream.DeployFail
 const DeployHold = upstream.DeployHold
 
+// DeployStep is Gophercloud's openstack/baremetal/v1/nodes.DeployStep.
 type DeployStep = upstream.DeployStep
 
 const DeployWait = upstream.DeployWait
 const Deploying = upstream.Deploying
 
+// DetachVirtualMediaOpts is Gophercloud's openstack/baremetal/v1/nodes.DetachVirtualMediaOpts.
 type DetachVirtualMediaOpts = upstream.DetachVirtualMediaOpts
+
+// DiskType is Gophercloud's openstack/baremetal/v1/nodes.DiskType.
 type DiskType = upstream.DiskType
+
+// DriverValidation is Gophercloud's openstack/baremetal/v1/nodes.DriverValidation.
 type DriverValidation = upstream.DriverValidation
 
 const Enroll = upstream.Enroll
 const Error = upstream.Error
 
+// FirmwareComponent is Gophercloud's openstack/baremetal/v1/nodes.FirmwareComponent.
 type FirmwareComponent = upstream.FirmwareComponent
+
+// GetAllSubscriptionsMethod is Gophercloud's openstack/baremetal/v1/nodes.GetAllSubscriptionsMethod.
 type GetAllSubscriptionsMethod = upstream.GetAllSubscriptionsMethod
+
+// GetAllSubscriptionsVendorPassthru is Gophercloud's openstack/baremetal/v1/nodes.GetAllSubscriptionsVendorPassthru.
 type GetAllSubscriptionsVendorPassthru = upstream.GetAllSubscriptionsVendorPassthru
+
+// GetAllSubscriptionsVendorPassthruResult is Gophercloud's openstack/baremetal/v1/nodes.GetAllSubscriptionsVendorPassthruResult.
 type GetAllSubscriptionsVendorPassthruResult = upstream.GetAllSubscriptionsVendorPassthruResult
+
+// GetBIOSSettingResult is Gophercloud's openstack/baremetal/v1/nodes.GetBIOSSettingResult.
 type GetBIOSSettingResult = upstream.GetBIOSSettingResult
+
+// GetResult is Gophercloud's openstack/baremetal/v1/nodes.GetResult.
 type GetResult = upstream.GetResult
+
+// GetSubscriptionMethod is Gophercloud's openstack/baremetal/v1/nodes.GetSubscriptionMethod.
 type GetSubscriptionMethod = upstream.GetSubscriptionMethod
+
+// GetSubscriptionOpts is Gophercloud's openstack/baremetal/v1/nodes.GetSubscriptionOpts.
 type GetSubscriptionOpts = upstream.GetSubscriptionOpts
 
 const HDD = upstream.HDD
 
+// ImageDownloadSource is Gophercloud's openstack/baremetal/v1/nodes.ImageDownloadSource.
 type ImageDownloadSource = upstream.ImageDownloadSource
 
 const ImageDownloadSourceHTTP = upstream.ImageDownloadSourceHTTP
 const ImageDownloadSourceLocal = upstream.ImageDownloadSourceLocal
 const ImageDownloadSourceSwift = upstream.ImageDownloadSourceSwift
 
+// InjectNMIResult is Gophercloud's openstack/baremetal/v1/nodes.InjectNMIResult.
 type InjectNMIResult = upstream.InjectNMIResult
 
 const InspectFail = upstream.InspectFail
@@ -107,35 +165,71 @@ const InterfaceManagement = upstream.InterfaceManagement
 const InterfacePower = upstream.InterfacePower
 const InterfaceRAID = upstream.InterfaceRAID
 
+// InterfaceType is Gophercloud's openstack/baremetal/v1/nodes.InterfaceType.
 type InterfaceType = upstream.InterfaceType
+
+// InventoryData is Gophercloud's openstack/baremetal/v1/nodes.InventoryData.
 type InventoryData = upstream.InventoryData
+
+// InventoryResult is Gophercloud's openstack/baremetal/v1/nodes.InventoryResult.
 type InventoryResult = upstream.InventoryResult
 
 const JBOD = upstream.JBOD
 
+// Link is Gophercloud's openstack/baremetal/v1/nodes.Link.
 type Link = upstream.Link
+
+// ListBIOSSettingsOpts is Gophercloud's openstack/baremetal/v1/nodes.ListBIOSSettingsOpts.
 type ListBIOSSettingsOpts = upstream.ListBIOSSettingsOpts
+
+// ListBIOSSettingsResult is Gophercloud's openstack/baremetal/v1/nodes.ListBIOSSettingsResult.
 type ListBIOSSettingsResult = upstream.ListBIOSSettingsResult
+
+// ListFirmwareResult is Gophercloud's openstack/baremetal/v1/nodes.ListFirmwareResult.
 type ListFirmwareResult = upstream.ListFirmwareResult
+
+// ListOpts is Gophercloud's openstack/baremetal/v1/nodes.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListVendorPassthruMethodsResult is Gophercloud's openstack/baremetal/v1/nodes.ListVendorPassthruMethodsResult.
 type ListVendorPassthruMethodsResult = upstream.ListVendorPassthruMethodsResult
+
+// ListVirtualInterfacesResult is Gophercloud's openstack/baremetal/v1/nodes.ListVirtualInterfacesResult.
 type ListVirtualInterfacesResult = upstream.ListVirtualInterfacesResult
+
+// LogicalDisk is Gophercloud's openstack/baremetal/v1/nodes.LogicalDisk.
 type LogicalDisk = upstream.LogicalDisk
+
+// MaintenanceOpts is Gophercloud's openstack/baremetal/v1/nodes.MaintenanceOpts.
 type MaintenanceOpts = upstream.MaintenanceOpts
 
 const Manageable = upstream.Manageable
 
+// Node is Gophercloud's openstack/baremetal/v1/nodes.Node.
 type Node = upstream.Node
+
+// NodePage is Gophercloud's openstack/baremetal/v1/nodes.NodePage.
 type NodePage = upstream.NodePage
+
+// NodeValidation is Gophercloud's openstack/baremetal/v1/nodes.NodeValidation.
 type NodeValidation = upstream.NodeValidation
+
+// Patch is Gophercloud's openstack/baremetal/v1/nodes.Patch.
 type Patch = upstream.Patch
+
+// PluginData is Gophercloud's openstack/baremetal/v1/nodes.PluginData.
 type PluginData = upstream.PluginData
 
 const PowerOff = upstream.PowerOff
 const PowerOn = upstream.PowerOn
 
+// PowerStateOpts is Gophercloud's openstack/baremetal/v1/nodes.PowerStateOpts.
 type PowerStateOpts = upstream.PowerStateOpts
+
+// ProvisionState is Gophercloud's openstack/baremetal/v1/nodes.ProvisionState.
 type ProvisionState = upstream.ProvisionState
+
+// ProvisionStateOpts is Gophercloud's openstack/baremetal/v1/nodes.ProvisionStateOpts.
 type ProvisionStateOpts = upstream.ProvisionStateOpts
 
 const RAID0 = upstream.RAID0
@@ -147,7 +241,10 @@ const RAID50 = upstream.RAID50
 const RAID6 = upstream.RAID6
 const RAID60 = upstream.RAID60
 
+// RAIDConfigOpts is Gophercloud's openstack/baremetal/v1/nodes.RAIDConfigOpts.
 type RAIDConfigOpts = upstream.RAIDConfigOpts
+
+// RAIDLevel is Gophercloud's openstack/baremetal/v1/nodes.RAIDLevel.
 type RAIDLevel = upstream.RAIDLevel
 
 const Rebooting = upstream.Rebooting
@@ -165,19 +262,26 @@ const SSD = upstream.SSD
 const ServiceFail = upstream.ServiceFail
 const ServiceHold = upstream.ServiceHold
 
+// ServiceStep is Gophercloud's openstack/baremetal/v1/nodes.ServiceStep.
 type ServiceStep = upstream.ServiceStep
 
 const ServiceWait = upstream.ServiceWait
 const Servicing = upstream.Servicing
 
+// SetBootDeviceResult is Gophercloud's openstack/baremetal/v1/nodes.SetBootDeviceResult.
 type SetBootDeviceResult = upstream.SetBootDeviceResult
+
+// SetMaintenanceResult is Gophercloud's openstack/baremetal/v1/nodes.SetMaintenanceResult.
 type SetMaintenanceResult = upstream.SetMaintenanceResult
+
+// SingleBIOSSetting is Gophercloud's openstack/baremetal/v1/nodes.SingleBIOSSetting.
 type SingleBIOSSetting = upstream.SingleBIOSSetting
 
 const SoftPowerOff = upstream.SoftPowerOff
 const SoftRebooting = upstream.SoftRebooting
 const StepHold = upstream.StepHold
 
+// StepInterface is Gophercloud's openstack/baremetal/v1/nodes.StepInterface.
 type StepInterface = upstream.StepInterface
 
 const StepPowerOff = upstream.StepPowerOff
@@ -185,8 +289,13 @@ const StepPowerOn = upstream.StepPowerOn
 const StepReboot = upstream.StepReboot
 const StepWait = upstream.StepWait
 
+// SubscriptionVendorPassthru is Gophercloud's openstack/baremetal/v1/nodes.SubscriptionVendorPassthru.
 type SubscriptionVendorPassthru = upstream.SubscriptionVendorPassthru
+
+// SubscriptionVendorPassthruResult is Gophercloud's openstack/baremetal/v1/nodes.SubscriptionVendorPassthruResult.
 type SubscriptionVendorPassthruResult = upstream.SubscriptionVendorPassthruResult
+
+// SupportedBootDeviceResult is Gophercloud's openstack/baremetal/v1/nodes.SupportedBootDeviceResult.
 type SupportedBootDeviceResult = upstream.SupportedBootDeviceResult
 
 const TargetAbort = upstream.TargetAbort
@@ -197,10 +306,12 @@ const TargetDeleted = upstream.TargetDeleted
 const TargetInspect = upstream.TargetInspect
 const TargetManage = upstream.TargetManage
 
+// TargetPowerState is Gophercloud's openstack/baremetal/v1/nodes.TargetPowerState.
 type TargetPowerState = upstream.TargetPowerState
 
 const TargetProvide = upstream.TargetProvide
 
+// TargetProvisionState is Gophercloud's openstack/baremetal/v1/nodes.TargetProvisionState.
 type TargetProvisionState = upstream.TargetProvisionState
 
 const TargetRebuild = upstream.TargetRebuild
@@ -211,35 +322,68 @@ const TargetUnrescue = upstream.TargetUnrescue
 const UnrescueFail = upstream.UnrescueFail
 const Unrescuing = upstream.Unrescuing
 
+// UpdateOp is Gophercloud's openstack/baremetal/v1/nodes.UpdateOp.
 type UpdateOp = upstream.UpdateOp
+
+// UpdateOperation is Gophercloud's openstack/baremetal/v1/nodes.UpdateOperation.
 type UpdateOperation = upstream.UpdateOperation
+
+// UpdateOpts is Gophercloud's openstack/baremetal/v1/nodes.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/baremetal/v1/nodes.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// VIF is Gophercloud's openstack/baremetal/v1/nodes.VIF.
 type VIF = upstream.VIF
+
+// ValidateResult is Gophercloud's openstack/baremetal/v1/nodes.ValidateResult.
 type ValidateResult = upstream.ValidateResult
+
+// VendorPassthruCallOpts is Gophercloud's openstack/baremetal/v1/nodes.VendorPassthruCallOpts.
 type VendorPassthruCallOpts = upstream.VendorPassthruCallOpts
+
+// VendorPassthruMethod is Gophercloud's openstack/baremetal/v1/nodes.VendorPassthruMethod.
 type VendorPassthruMethod = upstream.VendorPassthruMethod
+
+// VendorPassthruMethods is Gophercloud's openstack/baremetal/v1/nodes.VendorPassthruMethods.
 type VendorPassthruMethods = upstream.VendorPassthruMethods
+
+// VendorPassthruMethodsResult is Gophercloud's openstack/baremetal/v1/nodes.VendorPassthruMethodsResult.
 type VendorPassthruMethodsResult = upstream.VendorPassthruMethodsResult
 
 const Verifying = upstream.Verifying
 
+// VirtualInterfaceAttachResult is Gophercloud's openstack/baremetal/v1/nodes.VirtualInterfaceAttachResult.
 type VirtualInterfaceAttachResult = upstream.VirtualInterfaceAttachResult
+
+// VirtualInterfaceDetachResult is Gophercloud's openstack/baremetal/v1/nodes.VirtualInterfaceDetachResult.
 type VirtualInterfaceDetachResult = upstream.VirtualInterfaceDetachResult
+
+// VirtualInterfaceOpts is Gophercloud's openstack/baremetal/v1/nodes.VirtualInterfaceOpts.
 type VirtualInterfaceOpts = upstream.VirtualInterfaceOpts
+
+// VirtualMediaAttachResult is Gophercloud's openstack/baremetal/v1/nodes.VirtualMediaAttachResult.
 type VirtualMediaAttachResult = upstream.VirtualMediaAttachResult
 
 const VirtualMediaCD = upstream.VirtualMediaCD
 
+// VirtualMediaDetachResult is Gophercloud's openstack/baremetal/v1/nodes.VirtualMediaDetachResult.
 type VirtualMediaDetachResult = upstream.VirtualMediaDetachResult
+
+// VirtualMediaDeviceType is Gophercloud's openstack/baremetal/v1/nodes.VirtualMediaDeviceType.
 type VirtualMediaDeviceType = upstream.VirtualMediaDeviceType
 
 const VirtualMediaDisk = upstream.VirtualMediaDisk
 const VirtualMediaFloppy = upstream.VirtualMediaFloppy
 
+// VirtualMediaGetResult is Gophercloud's openstack/baremetal/v1/nodes.VirtualMediaGetResult.
 type VirtualMediaGetResult = upstream.VirtualMediaGetResult
+
+// AttachVirtualInterfaceOption is a per-call option of API.AttachVirtualInterface.
 type AttachVirtualInterfaceOption = request.NativeFieldCall
 
+// WithAttachVirtualInterfaceOptions sets the whole VirtualInterfaceOpts of API.AttachVirtualInterface.
 func WithAttachVirtualInterfaceOptions(value VirtualInterfaceOpts) AttachVirtualInterfaceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -274,8 +418,10 @@ func (a *API) AttachVirtualInterface(ctx context.Context, id string, opts Virtua
 	return request.Wrap("AttachVirtualInterface", "nodes", upstream.AttachVirtualInterface(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// AttachVirtualMediaOption is a per-call option of API.AttachVirtualMedia.
 type AttachVirtualMediaOption = request.NativeFieldCall
 
+// WithAttachVirtualMediaOptions sets the whole AttachVirtualMediaOpts of API.AttachVirtualMedia.
 func WithAttachVirtualMediaOptions(value AttachVirtualMediaOpts) AttachVirtualMediaOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -310,8 +456,10 @@ func (a *API) AttachVirtualMedia(ctx context.Context, id string, opts AttachVirt
 	return request.Wrap("AttachVirtualMedia", "nodes", upstream.AttachVirtualMedia(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// CallVendorPassthruOption is a per-call option of API.CallVendorPassthru.
 type CallVendorPassthruOption = request.NativeCall
 
+// WithCallVendorPassthruOptions sets the whole VendorPassthruCallOpts of API.CallVendorPassthru.
 func WithCallVendorPassthruOptions(value VendorPassthruCallOpts) CallVendorPassthruOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -330,8 +478,10 @@ func (a *API) CallVendorPassthru(ctx context.Context, id string, httpMethod stri
 	return value0, err
 }
 
+// ChangePowerStateOption is a per-call option of API.ChangePowerState.
 type ChangePowerStateOption = request.NativeFieldCall
 
+// WithChangePowerStateOptions sets the whole PowerStateOpts of API.ChangePowerState.
 func WithChangePowerStateOptions(value PowerStateOpts) ChangePowerStateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -366,8 +516,10 @@ func (a *API) ChangePowerState(ctx context.Context, id string, opts PowerStateOp
 	return request.Wrap("ChangePowerState", "nodes", upstream.ChangePowerState(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// ChangeProvisionStateOption is a per-call option of API.ChangeProvisionState.
 type ChangeProvisionStateOption = request.NativeFieldCall
 
+// WithChangeProvisionStateOptions sets the whole ProvisionStateOpts of API.ChangeProvisionState.
 func WithChangeProvisionStateOptions(value ProvisionStateOpts) ChangeProvisionStateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -402,8 +554,10 @@ func (a *API) ChangeProvisionState(ctx context.Context, id string, opts Provisio
 	return request.Wrap("ChangeProvisionState", "nodes", upstream.ChangeProvisionState(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -442,8 +596,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateSubscriptionOption is a per-call option of API.CreateSubscription.
 type CreateSubscriptionOption = request.NativeCall
 
+// WithCreateSubscriptionOptions sets the whole CallVendorPassthruOpts of API.CreateSubscription.
 func WithCreateSubscriptionOptions(value CallVendorPassthruOpts) CreateSubscriptionOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -467,8 +623,10 @@ func (a *API) Delete(ctx context.Context, id string) error {
 	return request.Wrap("Delete", "nodes", upstream.Delete(ctx, a.client, id).ExtractErr())
 }
 
+// DeleteSubscriptionOption is a per-call option of API.DeleteSubscription.
 type DeleteSubscriptionOption = request.NativeCall
 
+// WithDeleteSubscriptionOptions sets the whole CallVendorPassthruOpts of API.DeleteSubscription.
 func WithDeleteSubscriptionOptions(value CallVendorPassthruOpts) DeleteSubscriptionOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -489,8 +647,10 @@ func (a *API) DetachVirtualInterface(ctx context.Context, id string, vifID strin
 	return request.Wrap("DetachVirtualInterface", "nodes", upstream.DetachVirtualInterface(ctx, a.client, id, vifID).ExtractErr())
 }
 
+// DetachVirtualMediaOption is a per-call option of API.DetachVirtualMedia.
 type DetachVirtualMediaOption = request.NativeQueryCall
 
+// WithDetachVirtualMediaOptions sets the whole DetachVirtualMediaOpts of API.DetachVirtualMedia.
 func WithDetachVirtualMediaOptions(value DetachVirtualMediaOpts) DetachVirtualMediaOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -533,8 +693,10 @@ func (a *API) Get(ctx context.Context, id string) (*Node, error) {
 	return value0, err
 }
 
+// GetAllSubscriptionsOption is a per-call option of API.GetAllSubscriptions.
 type GetAllSubscriptionsOption = request.NativeCall
 
+// WithGetAllSubscriptionsOptions sets the whole CallVendorPassthruOpts of API.GetAllSubscriptions.
 func WithGetAllSubscriptionsOptions(value CallVendorPassthruOpts) GetAllSubscriptionsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -578,8 +740,10 @@ func (a *API) GetInventory(ctx context.Context, id string) (*InventoryData, erro
 	return value0, err
 }
 
+// GetSubscriptionOption is a per-call option of API.GetSubscription.
 type GetSubscriptionOption = request.NativeCall
 
+// WithGetSubscriptionOptions sets the whole CallVendorPassthruOpts of API.GetSubscription.
 func WithGetSubscriptionOptions(value CallVendorPassthruOpts) GetSubscriptionOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -627,8 +791,10 @@ func (a *API) InjectNMI(ctx context.Context, id string) error {
 	return request.Wrap("InjectNMI", "nodes", upstream.InjectNMI(ctx, a.client, id).ExtractErr())
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -678,8 +844,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Node, 
 	})
 }
 
+// ListBIOSSettingsOption is a per-call option of API.ListBIOSSettings.
 type ListBIOSSettingsOption = request.NativeQueryCall
 
+// WithListBIOSSettingsOptions sets the whole ListBIOSSettingsOpts of API.ListBIOSSettings.
 func WithListBIOSSettingsOptions(value ListBIOSSettingsOpts) ListBIOSSettingsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -719,8 +887,10 @@ func (a *API) ListBIOSSettings(ctx context.Context, id string, options ...ListBI
 	return value0, err
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -800,8 +970,10 @@ func (a *API) ListVirtualInterfaces(ctx context.Context, id string) ([]VIF, erro
 	return value0, err
 }
 
+// SetBootDeviceOption is a per-call option of API.SetBootDevice.
 type SetBootDeviceOption = request.NativeFieldCall
 
+// WithSetBootDeviceOptions sets the whole BootDeviceOpts of API.SetBootDevice.
 func WithSetBootDeviceOptions(value BootDeviceOpts) SetBootDeviceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -836,8 +1008,10 @@ func (a *API) SetBootDevice(ctx context.Context, id string, bootDevice BootDevic
 	return request.Wrap("SetBootDevice", "nodes", upstream.SetBootDevice(ctx, a.client, id, _bootDevice).ExtractErr())
 }
 
+// SetMaintenanceOption is a per-call option of API.SetMaintenance.
 type SetMaintenanceOption = request.NativeFieldCall
 
+// WithSetMaintenanceOptions sets the whole MaintenanceOpts of API.SetMaintenance.
 func WithSetMaintenanceOptions(value MaintenanceOpts) SetMaintenanceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -872,8 +1046,10 @@ func (a *API) SetMaintenance(ctx context.Context, id string, opts MaintenanceOpt
 	return request.Wrap("SetMaintenance", "nodes", upstream.SetMaintenance(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// SetRAIDConfigOption is a per-call option of API.SetRAIDConfig.
 type SetRAIDConfigOption = request.NativeFieldCall
 
+// WithSetRAIDConfigOptions sets the whole RAIDConfigOpts of API.SetRAIDConfig.
 func WithSetRAIDConfigOptions(value RAIDConfigOpts) SetRAIDConfigOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -913,8 +1089,10 @@ func (a *API) UnsetMaintenance(ctx context.Context, id string) error {
 	return request.Wrap("UnsetMaintenance", "nodes", upstream.UnsetMaintenance(ctx, a.client, id).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

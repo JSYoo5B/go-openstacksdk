@@ -13,14 +13,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddResult is Gophercloud's openstack/networking/v2/extensions/layer3/extraroutes.AddResult.
 type AddResult = upstream.AddResult
+
+// Opts is Gophercloud's openstack/networking/v2/extensions/layer3/extraroutes.Opts.
 type Opts = upstream.Opts
+
+// RemoveResult is Gophercloud's openstack/networking/v2/extensions/layer3/extraroutes.RemoveResult.
 type RemoveResult = upstream.RemoveResult
+
+// AddOption is a per-call option of API.Add.
 type AddOption = request.NativeFieldCall
 
+// WithAddOptions sets the whole Opts of API.Add.
 func WithAddOptions(value Opts) AddOption { return request.Custom(request.WithOptions(value)) }
 
 type addOptsBuilder struct {
@@ -57,8 +68,10 @@ func (a *API) Add(ctx context.Context, id string, opts Opts, options ...AddOptio
 	return value0, err
 }
 
+// RemoveOption is a per-call option of API.Remove.
 type RemoveOption = request.NativeFieldCall
 
+// WithRemoveOptions sets the whole Opts of API.Remove.
 func WithRemoveOptions(value Opts) RemoveOption { return request.Custom(request.WithOptions(value)) }
 
 type removeOptsBuilder struct {

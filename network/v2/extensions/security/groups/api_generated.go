@@ -18,24 +18,47 @@ type API struct {
 	Resources *resource.Collection[SecGroup]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/security/groups.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/security/groups.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/security/groups.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/security/groups.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/security/groups.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// SecGroup is Gophercloud's openstack/networking/v2/extensions/security/groups.SecGroup.
 type SecGroup = upstream.SecGroup
+
+// SecGroupPage is Gophercloud's openstack/networking/v2/extensions/security/groups.SecGroupPage.
 type SecGroupPage = upstream.SecGroupPage
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/security/groups.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/security/groups.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -87,8 +110,10 @@ func (a *API) Get(ctx context.Context, id string) (*SecGroup, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 // List invokes the upstream API with library-owned builders and result handling.
@@ -109,8 +134,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -15,38 +15,97 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BandwidthLimitRule is Gophercloud's openstack/networking/v2/extensions/qos/rules.BandwidthLimitRule.
 type BandwidthLimitRule = upstream.BandwidthLimitRule
+
+// BandwidthLimitRulePage is Gophercloud's openstack/networking/v2/extensions/qos/rules.BandwidthLimitRulePage.
 type BandwidthLimitRulePage = upstream.BandwidthLimitRulePage
+
+// BandwidthLimitRulesListOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.BandwidthLimitRulesListOpts.
 type BandwidthLimitRulesListOpts = upstream.BandwidthLimitRulesListOpts
+
+// CreateBandwidthLimitRuleOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.CreateBandwidthLimitRuleOpts.
 type CreateBandwidthLimitRuleOpts = upstream.CreateBandwidthLimitRuleOpts
+
+// CreateBandwidthLimitRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.CreateBandwidthLimitRuleResult.
 type CreateBandwidthLimitRuleResult = upstream.CreateBandwidthLimitRuleResult
+
+// CreateDSCPMarkingRuleOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.CreateDSCPMarkingRuleOpts.
 type CreateDSCPMarkingRuleOpts = upstream.CreateDSCPMarkingRuleOpts
+
+// CreateDSCPMarkingRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.CreateDSCPMarkingRuleResult.
 type CreateDSCPMarkingRuleResult = upstream.CreateDSCPMarkingRuleResult
+
+// CreateMinimumBandwidthRuleOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.CreateMinimumBandwidthRuleOpts.
 type CreateMinimumBandwidthRuleOpts = upstream.CreateMinimumBandwidthRuleOpts
+
+// CreateMinimumBandwidthRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.CreateMinimumBandwidthRuleResult.
 type CreateMinimumBandwidthRuleResult = upstream.CreateMinimumBandwidthRuleResult
+
+// DSCPMarkingRule is Gophercloud's openstack/networking/v2/extensions/qos/rules.DSCPMarkingRule.
 type DSCPMarkingRule = upstream.DSCPMarkingRule
+
+// DSCPMarkingRulePage is Gophercloud's openstack/networking/v2/extensions/qos/rules.DSCPMarkingRulePage.
 type DSCPMarkingRulePage = upstream.DSCPMarkingRulePage
+
+// DSCPMarkingRulesListOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.DSCPMarkingRulesListOpts.
 type DSCPMarkingRulesListOpts = upstream.DSCPMarkingRulesListOpts
+
+// DeleteBandwidthLimitRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.DeleteBandwidthLimitRuleResult.
 type DeleteBandwidthLimitRuleResult = upstream.DeleteBandwidthLimitRuleResult
+
+// DeleteDSCPMarkingRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.DeleteDSCPMarkingRuleResult.
 type DeleteDSCPMarkingRuleResult = upstream.DeleteDSCPMarkingRuleResult
+
+// DeleteMinimumBandwidthRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.DeleteMinimumBandwidthRuleResult.
 type DeleteMinimumBandwidthRuleResult = upstream.DeleteMinimumBandwidthRuleResult
+
+// GetBandwidthLimitRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.GetBandwidthLimitRuleResult.
 type GetBandwidthLimitRuleResult = upstream.GetBandwidthLimitRuleResult
+
+// GetDSCPMarkingRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.GetDSCPMarkingRuleResult.
 type GetDSCPMarkingRuleResult = upstream.GetDSCPMarkingRuleResult
+
+// GetMinimumBandwidthRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.GetMinimumBandwidthRuleResult.
 type GetMinimumBandwidthRuleResult = upstream.GetMinimumBandwidthRuleResult
+
+// MinimumBandwidthRule is Gophercloud's openstack/networking/v2/extensions/qos/rules.MinimumBandwidthRule.
 type MinimumBandwidthRule = upstream.MinimumBandwidthRule
+
+// MinimumBandwidthRulePage is Gophercloud's openstack/networking/v2/extensions/qos/rules.MinimumBandwidthRulePage.
 type MinimumBandwidthRulePage = upstream.MinimumBandwidthRulePage
+
+// MinimumBandwidthRulesListOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.MinimumBandwidthRulesListOpts.
 type MinimumBandwidthRulesListOpts = upstream.MinimumBandwidthRulesListOpts
+
+// UpdateBandwidthLimitRuleOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.UpdateBandwidthLimitRuleOpts.
 type UpdateBandwidthLimitRuleOpts = upstream.UpdateBandwidthLimitRuleOpts
+
+// UpdateBandwidthLimitRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.UpdateBandwidthLimitRuleResult.
 type UpdateBandwidthLimitRuleResult = upstream.UpdateBandwidthLimitRuleResult
+
+// UpdateDSCPMarkingRuleOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.UpdateDSCPMarkingRuleOpts.
 type UpdateDSCPMarkingRuleOpts = upstream.UpdateDSCPMarkingRuleOpts
+
+// UpdateDSCPMarkingRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.UpdateDSCPMarkingRuleResult.
 type UpdateDSCPMarkingRuleResult = upstream.UpdateDSCPMarkingRuleResult
+
+// UpdateMinimumBandwidthRuleOpts is Gophercloud's openstack/networking/v2/extensions/qos/rules.UpdateMinimumBandwidthRuleOpts.
 type UpdateMinimumBandwidthRuleOpts = upstream.UpdateMinimumBandwidthRuleOpts
+
+// UpdateMinimumBandwidthRuleResult is Gophercloud's openstack/networking/v2/extensions/qos/rules.UpdateMinimumBandwidthRuleResult.
 type UpdateMinimumBandwidthRuleResult = upstream.UpdateMinimumBandwidthRuleResult
+
+// CreateBandwidthLimitRuleOption is a per-call option of API.CreateBandwidthLimitRule.
 type CreateBandwidthLimitRuleOption = request.NativeFieldCall
 
+// WithCreateBandwidthLimitRuleOptions sets the whole CreateBandwidthLimitRuleOpts of API.CreateBandwidthLimitRule.
 func WithCreateBandwidthLimitRuleOptions(value CreateBandwidthLimitRuleOpts) CreateBandwidthLimitRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -85,8 +144,10 @@ func (a *API) CreateBandwidthLimitRule(ctx context.Context, policyID string, opt
 	return value0, err
 }
 
+// CreateDSCPMarkingRuleOption is a per-call option of API.CreateDSCPMarkingRule.
 type CreateDSCPMarkingRuleOption = request.NativeFieldCall
 
+// WithCreateDSCPMarkingRuleOptions sets the whole CreateDSCPMarkingRuleOpts of API.CreateDSCPMarkingRule.
 func WithCreateDSCPMarkingRuleOptions(value CreateDSCPMarkingRuleOpts) CreateDSCPMarkingRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -125,8 +186,10 @@ func (a *API) CreateDSCPMarkingRule(ctx context.Context, policyID string, opts C
 	return value0, err
 }
 
+// CreateMinimumBandwidthRuleOption is a per-call option of API.CreateMinimumBandwidthRule.
 type CreateMinimumBandwidthRuleOption = request.NativeFieldCall
 
+// WithCreateMinimumBandwidthRuleOptions sets the whole CreateMinimumBandwidthRuleOpts of API.CreateMinimumBandwidthRule.
 func WithCreateMinimumBandwidthRuleOptions(value CreateMinimumBandwidthRuleOpts) CreateMinimumBandwidthRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -204,8 +267,10 @@ func (a *API) GetMinimumBandwidthRule(ctx context.Context, policyID string, rule
 	return value0, err
 }
 
+// ListBandwidthLimitRulesOption is a per-call option of API.ListBandwidthLimitRules.
 type ListBandwidthLimitRulesOption = request.NativeQueryCall
 
+// WithListBandwidthLimitRulesOptions sets the whole BandwidthLimitRulesListOpts of API.ListBandwidthLimitRules.
 func WithListBandwidthLimitRulesOptions(value BandwidthLimitRulesListOpts) ListBandwidthLimitRulesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -248,8 +313,10 @@ func (a *API) listBandwidthLimitRulesWithControl(ctx context.Context, policyID s
 	}, control)
 }
 
+// ListDSCPMarkingRulesOption is a per-call option of API.ListDSCPMarkingRules.
 type ListDSCPMarkingRulesOption = request.NativeQueryCall
 
+// WithListDSCPMarkingRulesOptions sets the whole DSCPMarkingRulesListOpts of API.ListDSCPMarkingRules.
 func WithListDSCPMarkingRulesOptions(value DSCPMarkingRulesListOpts) ListDSCPMarkingRulesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -292,8 +359,10 @@ func (a *API) listDSCPMarkingRulesWithControl(ctx context.Context, policyID stri
 	}, control)
 }
 
+// ListMinimumBandwidthRulesOption is a per-call option of API.ListMinimumBandwidthRules.
 type ListMinimumBandwidthRulesOption = request.NativeQueryCall
 
+// WithListMinimumBandwidthRulesOptions sets the whole MinimumBandwidthRulesListOpts of API.ListMinimumBandwidthRules.
 func WithListMinimumBandwidthRulesOptions(value MinimumBandwidthRulesListOpts) ListMinimumBandwidthRulesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -336,8 +405,10 @@ func (a *API) listMinimumBandwidthRulesWithControl(ctx context.Context, policyID
 	}, control)
 }
 
+// UpdateBandwidthLimitRuleOption is a per-call option of API.UpdateBandwidthLimitRule.
 type UpdateBandwidthLimitRuleOption = request.NativeFieldCall
 
+// WithUpdateBandwidthLimitRuleOptions sets the whole UpdateBandwidthLimitRuleOpts of API.UpdateBandwidthLimitRule.
 func WithUpdateBandwidthLimitRuleOptions(value UpdateBandwidthLimitRuleOpts) UpdateBandwidthLimitRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -376,8 +447,10 @@ func (a *API) UpdateBandwidthLimitRule(ctx context.Context, policyID string, rul
 	return value0, err
 }
 
+// UpdateDSCPMarkingRuleOption is a per-call option of API.UpdateDSCPMarkingRule.
 type UpdateDSCPMarkingRuleOption = request.NativeFieldCall
 
+// WithUpdateDSCPMarkingRuleOptions sets the whole UpdateDSCPMarkingRuleOpts of API.UpdateDSCPMarkingRule.
 func WithUpdateDSCPMarkingRuleOptions(value UpdateDSCPMarkingRuleOpts) UpdateDSCPMarkingRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -416,8 +489,10 @@ func (a *API) UpdateDSCPMarkingRule(ctx context.Context, policyID string, ruleID
 	return value0, err
 }
 
+// UpdateMinimumBandwidthRuleOption is a per-call option of API.UpdateMinimumBandwidthRule.
 type UpdateMinimumBandwidthRuleOption = request.NativeFieldCall
 
+// WithUpdateMinimumBandwidthRuleOptions sets the whole UpdateMinimumBandwidthRuleOpts of API.UpdateMinimumBandwidthRule.
 func WithUpdateMinimumBandwidthRuleOptions(value UpdateMinimumBandwidthRuleOpts) UpdateMinimumBandwidthRuleOption {
 	return request.Custom(request.WithOptions(value))
 }

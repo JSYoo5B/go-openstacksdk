@@ -18,50 +18,114 @@ type API struct {
 	Resources *resource.Collection[VolumeType]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AccessPage is Gophercloud's openstack/blockstorage/v3/volumetypes.AccessPage.
 type AccessPage = upstream.AccessPage
+
+// AddAccessOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.AddAccessOpts.
 type AddAccessOpts = upstream.AddAccessOpts
+
+// AddAccessResult is Gophercloud's openstack/blockstorage/v3/volumetypes.AddAccessResult.
 type AddAccessResult = upstream.AddAccessResult
+
+// CreateEncryptionOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.CreateEncryptionOpts.
 type CreateEncryptionOpts = upstream.CreateEncryptionOpts
+
+// CreateEncryptionResult is Gophercloud's openstack/blockstorage/v3/volumetypes.CreateEncryptionResult.
 type CreateEncryptionResult = upstream.CreateEncryptionResult
+
+// CreateExtraSpecsResult is Gophercloud's openstack/blockstorage/v3/volumetypes.CreateExtraSpecsResult.
 type CreateExtraSpecsResult = upstream.CreateExtraSpecsResult
+
+// CreateOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/blockstorage/v3/volumetypes.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteEncryptionResult is Gophercloud's openstack/blockstorage/v3/volumetypes.DeleteEncryptionResult.
 type DeleteEncryptionResult = upstream.DeleteEncryptionResult
+
+// DeleteExtraSpecResult is Gophercloud's openstack/blockstorage/v3/volumetypes.DeleteExtraSpecResult.
 type DeleteExtraSpecResult = upstream.DeleteExtraSpecResult
+
+// DeleteResult is Gophercloud's openstack/blockstorage/v3/volumetypes.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// EncryptionType is Gophercloud's openstack/blockstorage/v3/volumetypes.EncryptionType.
 type EncryptionType = upstream.EncryptionType
+
+// ExtraSpecsOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.ExtraSpecsOpts.
 type ExtraSpecsOpts = upstream.ExtraSpecsOpts
+
+// GetEncryptionResult is Gophercloud's openstack/blockstorage/v3/volumetypes.GetEncryptionResult.
 type GetEncryptionResult = upstream.GetEncryptionResult
+
+// GetEncryptionSpecResult is Gophercloud's openstack/blockstorage/v3/volumetypes.GetEncryptionSpecResult.
 type GetEncryptionSpecResult = upstream.GetEncryptionSpecResult
+
+// GetEncryptionType is Gophercloud's openstack/blockstorage/v3/volumetypes.GetEncryptionType.
 type GetEncryptionType = upstream.GetEncryptionType
+
+// GetExtraSpecResult is Gophercloud's openstack/blockstorage/v3/volumetypes.GetExtraSpecResult.
 type GetExtraSpecResult = upstream.GetExtraSpecResult
+
+// GetResult is Gophercloud's openstack/blockstorage/v3/volumetypes.GetResult.
 type GetResult = upstream.GetResult
+
+// ListExtraSpecsResult is Gophercloud's openstack/blockstorage/v3/volumetypes.ListExtraSpecsResult.
 type ListExtraSpecsResult = upstream.ListExtraSpecsResult
+
+// ListOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RemoveAccessOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.RemoveAccessOpts.
 type RemoveAccessOpts = upstream.RemoveAccessOpts
+
+// RemoveAccessResult is Gophercloud's openstack/blockstorage/v3/volumetypes.RemoveAccessResult.
 type RemoveAccessResult = upstream.RemoveAccessResult
+
+// UpdateEncryptionOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.UpdateEncryptionOpts.
 type UpdateEncryptionOpts = upstream.UpdateEncryptionOpts
+
+// UpdateEncryptionResult is Gophercloud's openstack/blockstorage/v3/volumetypes.UpdateEncryptionResult.
 type UpdateEncryptionResult = upstream.UpdateEncryptionResult
+
+// UpdateExtraSpecResult is Gophercloud's openstack/blockstorage/v3/volumetypes.UpdateExtraSpecResult.
 type UpdateExtraSpecResult = upstream.UpdateExtraSpecResult
+
+// UpdateOpts is Gophercloud's openstack/blockstorage/v3/volumetypes.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/blockstorage/v3/volumetypes.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 const VisibilityDefault = upstream.VisibilityDefault
 const VisibilityPrivate = upstream.VisibilityPrivate
 const VisibilityPublic = upstream.VisibilityPublic
 
+// VolumeType is Gophercloud's openstack/blockstorage/v3/volumetypes.VolumeType.
 type VolumeType = upstream.VolumeType
+
+// VolumeTypeAccess is Gophercloud's openstack/blockstorage/v3/volumetypes.VolumeTypeAccess.
 type VolumeTypeAccess = upstream.VolumeTypeAccess
+
+// VolumeTypePage is Gophercloud's openstack/blockstorage/v3/volumetypes.VolumeTypePage.
 type VolumeTypePage = upstream.VolumeTypePage
+
+// AddAccessOption is a per-call option of API.AddAccess.
 type AddAccessOption = request.NativeFieldCall
 
+// WithAddAccessOptions sets the whole AddAccessOpts of API.AddAccess.
 func WithAddAccessOptions(value AddAccessOpts) AddAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -96,8 +160,10 @@ func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, opti
 	return request.Wrap("AddAccess", "volumetypes", upstream.AddAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -136,8 +202,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateEncryptionOption is a per-call option of API.CreateEncryption.
 type CreateEncryptionOption = request.NativeFieldCall
 
+// WithCreateEncryptionOptions sets the whole CreateEncryptionOpts of API.CreateEncryption.
 func WithCreateEncryptionOptions(value CreateEncryptionOpts) CreateEncryptionOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -176,8 +244,10 @@ func (a *API) CreateEncryption(ctx context.Context, id string, opts CreateEncryp
 	return value0, err
 }
 
+// CreateExtraSpecsOption is a per-call option of API.CreateExtraSpecs.
 type CreateExtraSpecsOption = request.NativeFieldCall
 
+// WithCreateExtraSpecsOptions sets the whole ExtraSpecsOpts of API.CreateExtraSpecs.
 func WithCreateExtraSpecsOptions(value ExtraSpecsOpts) CreateExtraSpecsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -263,8 +333,10 @@ func (a *API) GetExtraSpec(ctx context.Context, volumeTypeID string, key string)
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -321,8 +393,10 @@ func (a *API) ListExtraSpecs(ctx context.Context, volumeTypeID string) (map[stri
 	return value0, err
 }
 
+// RemoveAccessOption is a per-call option of API.RemoveAccess.
 type RemoveAccessOption = request.NativeFieldCall
 
+// WithRemoveAccessOptions sets the whole RemoveAccessOpts of API.RemoveAccess.
 func WithRemoveAccessOptions(value RemoveAccessOpts) RemoveAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -357,8 +431,10 @@ func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts
 	return request.Wrap("RemoveAccess", "volumetypes", upstream.RemoveAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -397,8 +473,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdateEncryptionOption is a per-call option of API.UpdateEncryption.
 type UpdateEncryptionOption = request.NativeFieldCall
 
+// WithUpdateEncryptionOptions sets the whole UpdateEncryptionOpts of API.UpdateEncryption.
 func WithUpdateEncryptionOptions(value UpdateEncryptionOpts) UpdateEncryptionOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -437,8 +515,10 @@ func (a *API) UpdateEncryption(ctx context.Context, id string, encryptionID stri
 	return value0, err
 }
 
+// UpdateExtraSpecOption is a per-call option of API.UpdateExtraSpec.
 type UpdateExtraSpecOption = request.NativeCall
 
+// WithUpdateExtraSpecOptions sets the whole ExtraSpecsOpts of API.UpdateExtraSpec.
 func WithUpdateExtraSpecOptions(value ExtraSpecsOpts) UpdateExtraSpecOption {
 	return request.Custom(request.WithOptions(value))
 }

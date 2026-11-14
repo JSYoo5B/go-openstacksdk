@@ -18,112 +18,233 @@ type API struct {
 	Resources *resource.Collection[Server]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ActionResult is Gophercloud's openstack/compute/v2/servers.ActionResult.
 type ActionResult = upstream.ActionResult
+
+// Address is Gophercloud's openstack/compute/v2/servers.Address.
 type Address = upstream.Address
+
+// AddressPage is Gophercloud's openstack/compute/v2/servers.AddressPage.
 type AddressPage = upstream.AddressPage
+
+// AttachedVolume is Gophercloud's openstack/compute/v2/servers.AttachedVolume.
 type AttachedVolume = upstream.AttachedVolume
 
 const Auto = upstream.Auto
 
+// BlockDevice is Gophercloud's openstack/compute/v2/servers.BlockDevice.
 type BlockDevice = upstream.BlockDevice
 
 const CRASHED = upstream.CRASHED
 
+// CreateImageOpts is Gophercloud's openstack/compute/v2/servers.CreateImageOpts.
 type CreateImageOpts = upstream.CreateImageOpts
+
+// CreateImageResult is Gophercloud's openstack/compute/v2/servers.CreateImageResult.
 type CreateImageResult = upstream.CreateImageResult
+
+// CreateMetadatumResult is Gophercloud's openstack/compute/v2/servers.CreateMetadatumResult.
 type CreateMetadatumResult = upstream.CreateMetadatumResult
+
+// CreateOpts is Gophercloud's openstack/compute/v2/servers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/compute/v2/servers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteMetadatumResult is Gophercloud's openstack/compute/v2/servers.DeleteMetadatumResult.
 type DeleteMetadatumResult = upstream.DeleteMetadatumResult
+
+// DeleteResult is Gophercloud's openstack/compute/v2/servers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
 
 const DestinationLocal = upstream.DestinationLocal
 
+// DestinationType is Gophercloud's openstack/compute/v2/servers.DestinationType.
 type DestinationType = upstream.DestinationType
 
 const DestinationVolume = upstream.DestinationVolume
 
+// DiskConfig is Gophercloud's openstack/compute/v2/servers.DiskConfig.
 type DiskConfig = upstream.DiskConfig
+
+// ErrInvalidHowParameterProvided is Gophercloud's openstack/compute/v2/servers.ErrInvalidHowParameterProvided.
 type ErrInvalidHowParameterProvided = upstream.ErrInvalidHowParameterProvided
+
+// ErrNeitherFlavorIDNorFlavorNameProvided is Gophercloud's openstack/compute/v2/servers.ErrNeitherFlavorIDNorFlavorNameProvided.
 type ErrNeitherFlavorIDNorFlavorNameProvided = upstream.ErrNeitherFlavorIDNorFlavorNameProvided
+
+// ErrNeitherImageIDNorImageNameProvided is Gophercloud's openstack/compute/v2/servers.ErrNeitherImageIDNorImageNameProvided.
 type ErrNeitherImageIDNorImageNameProvided = upstream.ErrNeitherImageIDNorImageNameProvided
+
+// ErrNoAdminPassProvided is Gophercloud's openstack/compute/v2/servers.ErrNoAdminPassProvided.
 type ErrNoAdminPassProvided = upstream.ErrNoAdminPassProvided
+
+// ErrNoClientProvidedForIDByName is Gophercloud's openstack/compute/v2/servers.ErrNoClientProvidedForIDByName.
 type ErrNoClientProvidedForIDByName = upstream.ErrNoClientProvidedForIDByName
+
+// ErrNoIDProvided is Gophercloud's openstack/compute/v2/servers.ErrNoIDProvided.
 type ErrNoIDProvided = upstream.ErrNoIDProvided
+
+// ErrNoImageIDProvided is Gophercloud's openstack/compute/v2/servers.ErrNoImageIDProvided.
 type ErrNoImageIDProvided = upstream.ErrNoImageIDProvided
+
+// ErrServer is Gophercloud's openstack/compute/v2/servers.ErrServer.
 type ErrServer = upstream.ErrServer
+
+// ErrServerNotFound is Gophercloud's openstack/compute/v2/servers.ErrServerNotFound.
 type ErrServerNotFound = upstream.ErrServerNotFound
+
+// EvacuateOpts is Gophercloud's openstack/compute/v2/servers.EvacuateOpts.
 type EvacuateOpts = upstream.EvacuateOpts
+
+// EvacuateResult is Gophercloud's openstack/compute/v2/servers.EvacuateResult.
 type EvacuateResult = upstream.EvacuateResult
+
+// Fault is Gophercloud's openstack/compute/v2/servers.Fault.
 type Fault = upstream.Fault
+
+// File is Gophercloud's openstack/compute/v2/servers.File.
 type File = upstream.File
+
+// GetMetadataResult is Gophercloud's openstack/compute/v2/servers.GetMetadataResult.
 type GetMetadataResult = upstream.GetMetadataResult
+
+// GetMetadatumResult is Gophercloud's openstack/compute/v2/servers.GetMetadatumResult.
 type GetMetadatumResult = upstream.GetMetadatumResult
+
+// GetPasswordResult is Gophercloud's openstack/compute/v2/servers.GetPasswordResult.
 type GetPasswordResult = upstream.GetPasswordResult
+
+// GetResult is Gophercloud's openstack/compute/v2/servers.GetResult.
 type GetResult = upstream.GetResult
 
 const HardReboot = upstream.HardReboot
 
+// InjectNetworkResult is Gophercloud's openstack/compute/v2/servers.InjectNetworkResult.
 type InjectNetworkResult = upstream.InjectNetworkResult
+
+// ListOpts is Gophercloud's openstack/compute/v2/servers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// LiveMigrateOpts is Gophercloud's openstack/compute/v2/servers.LiveMigrateOpts.
 type LiveMigrateOpts = upstream.LiveMigrateOpts
+
+// LockResult is Gophercloud's openstack/compute/v2/servers.LockResult.
 type LockResult = upstream.LockResult
 
 const Manual = upstream.Manual
 
+// MetadataOpts is Gophercloud's openstack/compute/v2/servers.MetadataOpts.
 type MetadataOpts = upstream.MetadataOpts
+
+// MetadataResult is Gophercloud's openstack/compute/v2/servers.MetadataResult.
 type MetadataResult = upstream.MetadataResult
+
+// MetadatumOpts is Gophercloud's openstack/compute/v2/servers.MetadatumOpts.
 type MetadatumOpts = upstream.MetadatumOpts
+
+// MetadatumResult is Gophercloud's openstack/compute/v2/servers.MetadatumResult.
 type MetadatumResult = upstream.MetadatumResult
+
+// MigrateResult is Gophercloud's openstack/compute/v2/servers.MigrateResult.
 type MigrateResult = upstream.MigrateResult
 
 const NOSTATE = upstream.NOSTATE
 
+// Network is Gophercloud's openstack/compute/v2/servers.Network.
 type Network = upstream.Network
+
+// NetworkAddressPage is Gophercloud's openstack/compute/v2/servers.NetworkAddressPage.
 type NetworkAddressPage = upstream.NetworkAddressPage
 
 const OSReboot = upstream.OSReboot
 const PAUSED = upstream.PAUSED
 
+// PauseResult is Gophercloud's openstack/compute/v2/servers.PauseResult.
 type PauseResult = upstream.PauseResult
+
+// Personality is Gophercloud's openstack/compute/v2/servers.Personality.
 type Personality = upstream.Personality
 
 const PowerCycle = upstream.PowerCycle
 
+// PowerState is Gophercloud's openstack/compute/v2/servers.PowerState.
 type PowerState = upstream.PowerState
 
 const RUNNING = upstream.RUNNING
 
+// RebootMethod is Gophercloud's openstack/compute/v2/servers.RebootMethod.
 type RebootMethod = upstream.RebootMethod
+
+// RebootOpts is Gophercloud's openstack/compute/v2/servers.RebootOpts.
 type RebootOpts = upstream.RebootOpts
+
+// RebuildOpts is Gophercloud's openstack/compute/v2/servers.RebuildOpts.
 type RebuildOpts = upstream.RebuildOpts
+
+// RebuildResult is Gophercloud's openstack/compute/v2/servers.RebuildResult.
 type RebuildResult = upstream.RebuildResult
+
+// RescueOpts is Gophercloud's openstack/compute/v2/servers.RescueOpts.
 type RescueOpts = upstream.RescueOpts
+
+// RescueResult is Gophercloud's openstack/compute/v2/servers.RescueResult.
 type RescueResult = upstream.RescueResult
+
+// ResetMetadataResult is Gophercloud's openstack/compute/v2/servers.ResetMetadataResult.
 type ResetMetadataResult = upstream.ResetMetadataResult
+
+// ResetNetworkResult is Gophercloud's openstack/compute/v2/servers.ResetNetworkResult.
 type ResetNetworkResult = upstream.ResetNetworkResult
+
+// ResetStateResult is Gophercloud's openstack/compute/v2/servers.ResetStateResult.
 type ResetStateResult = upstream.ResetStateResult
+
+// ResizeOpts is Gophercloud's openstack/compute/v2/servers.ResizeOpts.
 type ResizeOpts = upstream.ResizeOpts
+
+// ResumeResult is Gophercloud's openstack/compute/v2/servers.ResumeResult.
 type ResumeResult = upstream.ResumeResult
 
 const SHUTDOWN = upstream.SHUTDOWN
 const SUSPENDED = upstream.SUSPENDED
 
+// SchedulerHintOpts is Gophercloud's openstack/compute/v2/servers.SchedulerHintOpts.
 type SchedulerHintOpts = upstream.SchedulerHintOpts
+
+// Server is Gophercloud's openstack/compute/v2/servers.Server.
 type Server = upstream.Server
+
+// ServerExtendedStatusExt is Gophercloud's openstack/compute/v2/servers.ServerExtendedStatusExt.
 type ServerExtendedStatusExt = upstream.ServerExtendedStatusExt
+
+// ServerPage is Gophercloud's openstack/compute/v2/servers.ServerPage.
 type ServerPage = upstream.ServerPage
+
+// ServerState is Gophercloud's openstack/compute/v2/servers.ServerState.
 type ServerState = upstream.ServerState
+
+// ShelveOffloadResult is Gophercloud's openstack/compute/v2/servers.ShelveOffloadResult.
 type ShelveOffloadResult = upstream.ShelveOffloadResult
+
+// ShelveResult is Gophercloud's openstack/compute/v2/servers.ShelveResult.
 type ShelveResult = upstream.ShelveResult
+
+// ShowConsoleOutputOpts is Gophercloud's openstack/compute/v2/servers.ShowConsoleOutputOpts.
 type ShowConsoleOutputOpts = upstream.ShowConsoleOutputOpts
+
+// ShowConsoleOutputResult is Gophercloud's openstack/compute/v2/servers.ShowConsoleOutputResult.
 type ShowConsoleOutputResult = upstream.ShowConsoleOutputResult
 
 const SoftReboot = upstream.SoftReboot
@@ -131,24 +252,45 @@ const SourceBlank = upstream.SourceBlank
 const SourceImage = upstream.SourceImage
 const SourceSnapshot = upstream.SourceSnapshot
 
+// SourceType is Gophercloud's openstack/compute/v2/servers.SourceType.
 type SourceType = upstream.SourceType
 
 const SourceVolume = upstream.SourceVolume
 
+// StartResult is Gophercloud's openstack/compute/v2/servers.StartResult.
 type StartResult = upstream.StartResult
 
 const StateActive = upstream.StateActive
 const StateError = upstream.StateError
 
+// StopResult is Gophercloud's openstack/compute/v2/servers.StopResult.
 type StopResult = upstream.StopResult
+
+// SuspendResult is Gophercloud's openstack/compute/v2/servers.SuspendResult.
 type SuspendResult = upstream.SuspendResult
+
+// UnlockResult is Gophercloud's openstack/compute/v2/servers.UnlockResult.
 type UnlockResult = upstream.UnlockResult
+
+// UnpauseResult is Gophercloud's openstack/compute/v2/servers.UnpauseResult.
 type UnpauseResult = upstream.UnpauseResult
+
+// UnrescueResult is Gophercloud's openstack/compute/v2/servers.UnrescueResult.
 type UnrescueResult = upstream.UnrescueResult
+
+// UnshelveOpts is Gophercloud's openstack/compute/v2/servers.UnshelveOpts.
 type UnshelveOpts = upstream.UnshelveOpts
+
+// UnshelveResult is Gophercloud's openstack/compute/v2/servers.UnshelveResult.
 type UnshelveResult = upstream.UnshelveResult
+
+// UpdateMetadataResult is Gophercloud's openstack/compute/v2/servers.UpdateMetadataResult.
 type UpdateMetadataResult = upstream.UpdateMetadataResult
+
+// UpdateOpts is Gophercloud's openstack/compute/v2/servers.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/compute/v2/servers.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // ChangeAdminPassword invokes the upstream API with library-owned builders and result handling.
@@ -161,11 +303,15 @@ func (a *API) ConfirmResize(ctx context.Context, id string) error {
 	return request.Wrap("ConfirmResize", "servers", upstream.ConfirmResize(ctx, a.client, id).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
+
+// WithCreateHintOpts sets the hintOpts argument of API.Create.
 func WithCreateHintOpts(value SchedulerHintOpts) CreateOption {
 	return request.Custom(request.WithArgument[CreateOpts]("hintOpts", value))
 }
@@ -235,8 +381,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateImageOption is a per-call option of API.CreateImage.
 type CreateImageOption = request.NativeFieldCall
 
+// WithCreateImageOptions sets the whole CreateImageOpts of API.CreateImage.
 func WithCreateImageOptions(value CreateImageOpts) CreateImageOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -275,8 +423,10 @@ func (a *API) CreateImage(ctx context.Context, id string, opts CreateImageOpts, 
 	return value0, err
 }
 
+// CreateMetadatumOption is a per-call option of API.CreateMetadatum.
 type CreateMetadatumOption = request.NativeFieldCall
 
+// WithCreateMetadatumOptions sets the whole MetadatumOpts of API.CreateMetadatum.
 func WithCreateMetadatumOptions(value MetadatumOpts) CreateMetadatumOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -327,8 +477,10 @@ func (a *API) DeleteMetadatum(ctx context.Context, id string, key string) error 
 	return request.Wrap("DeleteMetadatum", "servers", upstream.DeleteMetadatum(ctx, a.client, id, key).ExtractErr())
 }
 
+// EvacuateOption is a per-call option of API.Evacuate.
 type EvacuateOption = request.NativeFieldCall
 
+// WithEvacuateOptions sets the whole EvacuateOpts of API.Evacuate.
 func WithEvacuateOptions(value EvacuateOpts) EvacuateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -397,8 +549,10 @@ func (a *API) InjectNetworkInfo(ctx context.Context, id string) error {
 	return request.Wrap("InjectNetworkInfo", "servers", upstream.InjectNetworkInfo(ctx, a.client, id).ExtractErr())
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -452,8 +606,10 @@ func (a *API) ListAddressesByNetwork(ctx context.Context, id string, network str
 	})
 }
 
+// ListSimpleOption is a per-call option of API.ListSimple.
 type ListSimpleOption = request.NativeQueryCall
 
+// WithListSimpleOptions sets the whole ListOpts of API.ListSimple.
 func WithListSimpleOptions(value ListOpts) ListSimpleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -492,8 +648,10 @@ func (a *API) ListSimple(ctx context.Context, options ...ListSimpleOption) iter.
 	})
 }
 
+// LiveMigrateOption is a per-call option of API.LiveMigrate.
 type LiveMigrateOption = request.NativeFieldCall
 
+// WithLiveMigrateOptions sets the whole LiveMigrateOpts of API.LiveMigrate.
 func WithLiveMigrateOptions(value LiveMigrateOpts) LiveMigrateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -559,8 +717,10 @@ func (a *API) Pause(ctx context.Context, id string) error {
 	return request.Wrap("Pause", "servers", upstream.Pause(ctx, a.client, id).ExtractErr())
 }
 
+// RebootOption is a per-call option of API.Reboot.
 type RebootOption = request.NativeFieldCall
 
+// WithRebootOptions sets the whole RebootOpts of API.Reboot.
 func WithRebootOptions(value RebootOpts) RebootOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -595,8 +755,10 @@ func (a *API) Reboot(ctx context.Context, id string, opts RebootOpts, options ..
 	return request.Wrap("Reboot", "servers", upstream.Reboot(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// RebuildOption is a per-call option of API.Rebuild.
 type RebuildOption = request.NativeFieldCall
 
+// WithRebuildOptions sets the whole RebuildOpts of API.Rebuild.
 func WithRebuildOptions(value RebuildOpts) RebuildOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -635,8 +797,10 @@ func (a *API) Rebuild(ctx context.Context, id string, opts RebuildOpts, options 
 	return value0, err
 }
 
+// RescueOption is a per-call option of API.Rescue.
 type RescueOption = request.NativeFieldCall
 
+// WithRescueOptions sets the whole RescueOpts of API.Rescue.
 func WithRescueOptions(value RescueOpts) RescueOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -675,8 +839,10 @@ func (a *API) Rescue(ctx context.Context, id string, opts RescueOpts, options ..
 	return value0, err
 }
 
+// ResetMetadataOption is a per-call option of API.ResetMetadata.
 type ResetMetadataOption = request.NativeFieldCall
 
+// WithResetMetadataOptions sets the whole MetadataOpts of API.ResetMetadata.
 func WithResetMetadataOptions(value MetadataOpts) ResetMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -725,8 +891,10 @@ func (a *API) ResetState(ctx context.Context, id string, state ServerState) erro
 	return request.Wrap("ResetState", "servers", upstream.ResetState(ctx, a.client, id, state).ExtractErr())
 }
 
+// ResizeOption is a per-call option of API.Resize.
 type ResizeOption = request.NativeFieldCall
 
+// WithResizeOptions sets the whole ResizeOpts of API.Resize.
 func WithResizeOptions(value ResizeOpts) ResizeOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -781,8 +949,10 @@ func (a *API) ShelveOffload(ctx context.Context, id string) error {
 	return request.Wrap("ShelveOffload", "servers", upstream.ShelveOffload(ctx, a.client, id).ExtractErr())
 }
 
+// ShowConsoleOutputOption is a per-call option of API.ShowConsoleOutput.
 type ShowConsoleOutputOption = request.NativeFieldCall
 
+// WithShowConsoleOutputOptions sets the whole ShowConsoleOutputOpts of API.ShowConsoleOutput.
 func WithShowConsoleOutputOptions(value ShowConsoleOutputOpts) ShowConsoleOutputOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -851,8 +1021,10 @@ func (a *API) Unrescue(ctx context.Context, id string) error {
 	return request.Wrap("Unrescue", "servers", upstream.Unrescue(ctx, a.client, id).ExtractErr())
 }
 
+// UnshelveOption is a per-call option of API.Unshelve.
 type UnshelveOption = request.NativeFieldCall
 
+// WithUnshelveOptions sets the whole UnshelveOpts of API.Unshelve.
 func WithUnshelveOptions(value UnshelveOpts) UnshelveOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -887,8 +1059,10 @@ func (a *API) Unshelve(ctx context.Context, id string, opts UnshelveOpts, option
 	return request.Wrap("Unshelve", "servers", upstream.Unshelve(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -927,8 +1101,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdateMetadataOption is a per-call option of API.UpdateMetadata.
 type UpdateMetadataOption = request.NativeFieldCall
 
+// WithUpdateMetadataOptions sets the whole MetadataOpts of API.UpdateMetadata.
 func WithUpdateMetadataOptions(value MetadataOpts) UpdateMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }

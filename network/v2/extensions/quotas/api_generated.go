@@ -12,16 +12,34 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/quotas.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetDetailResult is Gophercloud's openstack/networking/v2/extensions/quotas.GetDetailResult.
 type GetDetailResult = upstream.GetDetailResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/quotas.GetResult.
 type GetResult = upstream.GetResult
+
+// Quota is Gophercloud's openstack/networking/v2/extensions/quotas.Quota.
 type Quota = upstream.Quota
+
+// QuotaDetail is Gophercloud's openstack/networking/v2/extensions/quotas.QuotaDetail.
 type QuotaDetail = upstream.QuotaDetail
+
+// QuotaDetailSet is Gophercloud's openstack/networking/v2/extensions/quotas.QuotaDetailSet.
 type QuotaDetailSet = upstream.QuotaDetailSet
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/quotas.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/quotas.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -45,8 +63,10 @@ func (a *API) GetDetail(ctx context.Context, projectID string) (*QuotaDetailSet,
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

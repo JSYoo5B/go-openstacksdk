@@ -15,22 +15,49 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AccessRule is Gophercloud's openstack/identity/v3/applicationcredentials.AccessRule.
 type AccessRule = upstream.AccessRule
+
+// AccessRulePage is Gophercloud's openstack/identity/v3/applicationcredentials.AccessRulePage.
 type AccessRulePage = upstream.AccessRulePage
+
+// ApplicationCredential is Gophercloud's openstack/identity/v3/applicationcredentials.ApplicationCredential.
 type ApplicationCredential = upstream.ApplicationCredential
+
+// ApplicationCredentialPage is Gophercloud's openstack/identity/v3/applicationcredentials.ApplicationCredentialPage.
 type ApplicationCredentialPage = upstream.ApplicationCredentialPage
+
+// CreateOpts is Gophercloud's openstack/identity/v3/applicationcredentials.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/applicationcredentials.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/applicationcredentials.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetAccessRuleResult is Gophercloud's openstack/identity/v3/applicationcredentials.GetAccessRuleResult.
 type GetAccessRuleResult = upstream.GetAccessRuleResult
+
+// GetResult is Gophercloud's openstack/identity/v3/applicationcredentials.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/identity/v3/applicationcredentials.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Role is Gophercloud's openstack/identity/v3/applicationcredentials.Role.
 type Role = upstream.Role
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -95,8 +122,10 @@ func (a *API) GetAccessRule(ctx context.Context, userID string, id string) (*Acc
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

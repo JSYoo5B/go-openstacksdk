@@ -12,9 +12,13 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ConsoleProtocol is Gophercloud's openstack/compute/v2/remoteconsoles.ConsoleProtocol.
 type ConsoleProtocol = upstream.ConsoleProtocol
 
 const ConsoleProtocolMKS = upstream.ConsoleProtocolMKS
@@ -23,6 +27,7 @@ const ConsoleProtocolSPICE = upstream.ConsoleProtocolSPICE
 const ConsoleProtocolSerial = upstream.ConsoleProtocolSerial
 const ConsoleProtocolVNC = upstream.ConsoleProtocolVNC
 
+// ConsoleType is Gophercloud's openstack/compute/v2/remoteconsoles.ConsoleType.
 type ConsoleType = upstream.ConsoleType
 
 const ConsoleTypeNoVNC = upstream.ConsoleTypeNoVNC
@@ -32,11 +37,19 @@ const ConsoleTypeSerial = upstream.ConsoleTypeSerial
 const ConsoleTypeWebMKS = upstream.ConsoleTypeWebMKS
 const ConsoleTypeXVPVNC = upstream.ConsoleTypeXVPVNC
 
+// CreateOpts is Gophercloud's openstack/compute/v2/remoteconsoles.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/compute/v2/remoteconsoles.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// RemoteConsole is Gophercloud's openstack/compute/v2/remoteconsoles.RemoteConsole.
 type RemoteConsole = upstream.RemoteConsole
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -16,35 +16,91 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BulkDeleteResponse is Gophercloud's openstack/objectstorage/v1/objects.BulkDeleteResponse.
 type BulkDeleteResponse = upstream.BulkDeleteResponse
+
+// BulkDeleteResult is Gophercloud's openstack/objectstorage/v1/objects.BulkDeleteResult.
 type BulkDeleteResult = upstream.BulkDeleteResult
+
+// CopyHeader is Gophercloud's openstack/objectstorage/v1/objects.CopyHeader.
 type CopyHeader = upstream.CopyHeader
+
+// CopyOpts is Gophercloud's openstack/objectstorage/v1/objects.CopyOpts.
 type CopyOpts = upstream.CopyOpts
+
+// CopyResult is Gophercloud's openstack/objectstorage/v1/objects.CopyResult.
 type CopyResult = upstream.CopyResult
+
+// CreateHeader is Gophercloud's openstack/objectstorage/v1/objects.CreateHeader.
 type CreateHeader = upstream.CreateHeader
+
+// CreateOpts is Gophercloud's openstack/objectstorage/v1/objects.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/objectstorage/v1/objects.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CreateTempURLOpts is Gophercloud's openstack/objectstorage/v1/objects.CreateTempURLOpts.
 type CreateTempURLOpts = upstream.CreateTempURLOpts
+
+// DeleteHeader is Gophercloud's openstack/objectstorage/v1/objects.DeleteHeader.
 type DeleteHeader = upstream.DeleteHeader
+
+// DeleteOpts is Gophercloud's openstack/objectstorage/v1/objects.DeleteOpts.
 type DeleteOpts = upstream.DeleteOpts
+
+// DeleteResult is Gophercloud's openstack/objectstorage/v1/objects.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DownloadHeader is Gophercloud's openstack/objectstorage/v1/objects.DownloadHeader.
 type DownloadHeader = upstream.DownloadHeader
+
+// DownloadOpts is Gophercloud's openstack/objectstorage/v1/objects.DownloadOpts.
 type DownloadOpts = upstream.DownloadOpts
+
+// DownloadResult is Gophercloud's openstack/objectstorage/v1/objects.DownloadResult.
 type DownloadResult = upstream.DownloadResult
+
+// ErrTempURLDigestNotValid is Gophercloud's openstack/objectstorage/v1/objects.ErrTempURLDigestNotValid.
 type ErrTempURLDigestNotValid = upstream.ErrTempURLDigestNotValid
+
+// ErrTempURLKeyNotFound is Gophercloud's openstack/objectstorage/v1/objects.ErrTempURLKeyNotFound.
 type ErrTempURLKeyNotFound = upstream.ErrTempURLKeyNotFound
+
+// GetHeader is Gophercloud's openstack/objectstorage/v1/objects.GetHeader.
 type GetHeader = upstream.GetHeader
+
+// GetOpts is Gophercloud's openstack/objectstorage/v1/objects.GetOpts.
 type GetOpts = upstream.GetOpts
+
+// GetResult is Gophercloud's openstack/objectstorage/v1/objects.GetResult.
 type GetResult = upstream.GetResult
+
+// HTTPMethod is Gophercloud's openstack/objectstorage/v1/objects.HTTPMethod.
 type HTTPMethod = upstream.HTTPMethod
+
+// ListOpts is Gophercloud's openstack/objectstorage/v1/objects.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Object is Gophercloud's openstack/objectstorage/v1/objects.Object.
 type Object = upstream.Object
+
+// ObjectPage is Gophercloud's openstack/objectstorage/v1/objects.ObjectPage.
 type ObjectPage = upstream.ObjectPage
+
+// UpdateHeader is Gophercloud's openstack/objectstorage/v1/objects.UpdateHeader.
 type UpdateHeader = upstream.UpdateHeader
+
+// UpdateOpts is Gophercloud's openstack/objectstorage/v1/objects.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/objectstorage/v1/objects.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // BulkDelete invokes the upstream API with library-owned builders and result handling.
@@ -55,8 +111,10 @@ func (a *API) BulkDelete(ctx context.Context, container string, objects []string
 	return value0, err
 }
 
+// CopyOption is a per-call option of API.Copy.
 type CopyOption = request.NativeQueryHeaderCall
 
+// WithCopyOptions sets the whole CopyOpts of API.Copy.
 func WithCopyOptions(value CopyOpts) CopyOption { return request.Custom(request.WithOptions(value)) }
 
 type copyOptsBuilder struct {
@@ -106,8 +164,10 @@ func (a *API) Copy(ctx context.Context, containerName string, objectName string,
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeQueryHeaderCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -163,8 +223,10 @@ func (a *API) Create(ctx context.Context, containerName string, objectName strin
 	return value0, err
 }
 
+// CreateTempURLOption is a per-call option of API.CreateTempURL.
 type CreateTempURLOption = request.NativeCall
 
+// WithCreateTempURLOptions sets the whole CreateTempURLOpts of API.CreateTempURL.
 func WithCreateTempURLOptions(value CreateTempURLOpts) CreateTempURLOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -180,8 +242,10 @@ func (a *API) CreateTempURL(ctx context.Context, containerName string, objectNam
 	return upstream.CreateTempURL(ctx, a.client, containerName, objectName, cfg.Options)
 }
 
+// DeleteOption is a per-call option of API.Delete.
 type DeleteOption = request.NativeQueryCall
 
+// WithDeleteOptions sets the whole DeleteOpts of API.Delete.
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -221,8 +285,10 @@ func (a *API) Delete(ctx context.Context, containerName string, objectName strin
 	return value0, err
 }
 
+// DownloadOption is a per-call option of API.Download.
 type DownloadOption = request.NativeQueryHeaderCall
 
+// WithDownloadOptions sets the whole DownloadOpts of API.Download.
 func WithDownloadOptions(value DownloadOpts) DownloadOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -268,8 +334,10 @@ func (a *API) Download(ctx context.Context, containerName string, objectName str
 	return request.OpenDownload(result.Body, header, request.Wrap("Download", "objects", err))
 }
 
+// GetOption is a per-call option of API.Get.
 type GetOption = request.NativeQueryHeaderCall
 
+// WithGetOptions sets the whole GetOpts of API.Get.
 func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {
@@ -315,8 +383,10 @@ func (a *API) Get(ctx context.Context, containerName string, objectName string, 
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -353,8 +423,10 @@ func (a *API) List(ctx context.Context, containerName string, options ...ListOpt
 	})
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeHeaderCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

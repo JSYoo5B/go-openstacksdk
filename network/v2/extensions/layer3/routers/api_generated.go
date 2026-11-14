@@ -18,36 +18,83 @@ type API struct {
 	Resources *resource.Collection[Router]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddExternalGatewaysOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.AddExternalGatewaysOpts.
 type AddExternalGatewaysOpts = upstream.AddExternalGatewaysOpts
+
+// AddInterfaceOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.AddInterfaceOpts.
 type AddInterfaceOpts = upstream.AddInterfaceOpts
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/layer3/routers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/layer3/routers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ExternalFixedIP is Gophercloud's openstack/networking/v2/extensions/layer3/routers.ExternalFixedIP.
 type ExternalFixedIP = upstream.ExternalFixedIP
+
+// GatewayInfo is Gophercloud's openstack/networking/v2/extensions/layer3/routers.GatewayInfo.
 type GatewayInfo = upstream.GatewayInfo
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/layer3/routers.GetResult.
 type GetResult = upstream.GetResult
+
+// InterfaceInfo is Gophercloud's openstack/networking/v2/extensions/layer3/routers.InterfaceInfo.
 type InterfaceInfo = upstream.InterfaceInfo
+
+// InterfaceResult is Gophercloud's openstack/networking/v2/extensions/layer3/routers.InterfaceResult.
 type InterfaceResult = upstream.InterfaceResult
+
+// L3Agent is Gophercloud's openstack/networking/v2/extensions/layer3/routers.L3Agent.
 type L3Agent = upstream.L3Agent
+
+// ListL3AgentsPage is Gophercloud's openstack/networking/v2/extensions/layer3/routers.ListL3AgentsPage.
 type ListL3AgentsPage = upstream.ListL3AgentsPage
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RemoveExternalGatewaysOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.RemoveExternalGatewaysOpts.
 type RemoveExternalGatewaysOpts = upstream.RemoveExternalGatewaysOpts
+
+// RemoveInterfaceOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.RemoveInterfaceOpts.
 type RemoveInterfaceOpts = upstream.RemoveInterfaceOpts
+
+// Route is Gophercloud's openstack/networking/v2/extensions/layer3/routers.Route.
 type Route = upstream.Route
+
+// Router is Gophercloud's openstack/networking/v2/extensions/layer3/routers.Router.
 type Router = upstream.Router
+
+// RouterPage is Gophercloud's openstack/networking/v2/extensions/layer3/routers.RouterPage.
 type RouterPage = upstream.RouterPage
+
+// UpdateExternalGatewaysOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.UpdateExternalGatewaysOpts.
 type UpdateExternalGatewaysOpts = upstream.UpdateExternalGatewaysOpts
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/layer3/routers.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/layer3/routers.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddExternalGatewaysOption is a per-call option of API.AddExternalGateways.
 type AddExternalGatewaysOption = request.NativeFieldCall
 
+// WithAddExternalGatewaysOptions sets the whole AddExternalGatewaysOpts of API.AddExternalGateways.
 func WithAddExternalGatewaysOptions(value AddExternalGatewaysOpts) AddExternalGatewaysOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -86,8 +133,10 @@ func (a *API) AddExternalGateways(ctx context.Context, id string, opts AddExtern
 	return value0, err
 }
 
+// AddInterfaceOption is a per-call option of API.AddInterface.
 type AddInterfaceOption = request.NativeFieldCall
 
+// WithAddInterfaceOptions sets the whole AddInterfaceOpts of API.AddInterface.
 func WithAddInterfaceOptions(value AddInterfaceOpts) AddInterfaceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -126,8 +175,10 @@ func (a *API) AddInterface(ctx context.Context, id string, opts AddInterfaceOpts
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -179,8 +230,10 @@ func (a *API) Get(ctx context.Context, id string) (*Router, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -229,8 +282,10 @@ func (a *API) ListL3Agents(ctx context.Context, id string) iter.Seq2[*L3Agent, e
 	})
 }
 
+// RemoveExternalGatewaysOption is a per-call option of API.RemoveExternalGateways.
 type RemoveExternalGatewaysOption = request.NativeFieldCall
 
+// WithRemoveExternalGatewaysOptions sets the whole RemoveExternalGatewaysOpts of API.RemoveExternalGateways.
 func WithRemoveExternalGatewaysOptions(value RemoveExternalGatewaysOpts) RemoveExternalGatewaysOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -269,8 +324,10 @@ func (a *API) RemoveExternalGateways(ctx context.Context, id string, opts Remove
 	return value0, err
 }
 
+// RemoveInterfaceOption is a per-call option of API.RemoveInterface.
 type RemoveInterfaceOption = request.NativeFieldCall
 
+// WithRemoveInterfaceOptions sets the whole RemoveInterfaceOpts of API.RemoveInterface.
 func WithRemoveInterfaceOptions(value RemoveInterfaceOpts) RemoveInterfaceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -309,8 +366,10 @@ func (a *API) RemoveInterface(ctx context.Context, id string, opts RemoveInterfa
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -350,8 +409,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdateExternalGatewaysOption is a per-call option of API.UpdateExternalGateways.
 type UpdateExternalGatewaysOption = request.NativeFieldCall
 
+// WithUpdateExternalGatewaysOptions sets the whole UpdateExternalGatewaysOpts of API.UpdateExternalGateways.
 func WithUpdateExternalGatewaysOptions(value UpdateExternalGatewaysOpts) UpdateExternalGatewaysOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -18,66 +18,155 @@ type API struct {
 	Resources *resource.Collection[Volume]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AttachMode is Gophercloud's openstack/blockstorage/v3/volumes.AttachMode.
 type AttachMode = upstream.AttachMode
+
+// AttachOpts is Gophercloud's openstack/blockstorage/v3/volumes.AttachOpts.
 type AttachOpts = upstream.AttachOpts
+
+// AttachResult is Gophercloud's openstack/blockstorage/v3/volumes.AttachResult.
 type AttachResult = upstream.AttachResult
+
+// Attachment is Gophercloud's openstack/blockstorage/v3/volumes.Attachment.
 type Attachment = upstream.Attachment
+
+// BeginDetachingResult is Gophercloud's openstack/blockstorage/v3/volumes.BeginDetachingResult.
 type BeginDetachingResult = upstream.BeginDetachingResult
+
+// BootableOpts is Gophercloud's openstack/blockstorage/v3/volumes.BootableOpts.
 type BootableOpts = upstream.BootableOpts
+
+// ChangeTypeOpts is Gophercloud's openstack/blockstorage/v3/volumes.ChangeTypeOpts.
 type ChangeTypeOpts = upstream.ChangeTypeOpts
+
+// ChangeTypeResult is Gophercloud's openstack/blockstorage/v3/volumes.ChangeTypeResult.
 type ChangeTypeResult = upstream.ChangeTypeResult
+
+// CreateOpts is Gophercloud's openstack/blockstorage/v3/volumes.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/blockstorage/v3/volumes.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteOpts is Gophercloud's openstack/blockstorage/v3/volumes.DeleteOpts.
 type DeleteOpts = upstream.DeleteOpts
+
+// DeleteResult is Gophercloud's openstack/blockstorage/v3/volumes.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DetachOpts is Gophercloud's openstack/blockstorage/v3/volumes.DetachOpts.
 type DetachOpts = upstream.DetachOpts
+
+// DetachResult is Gophercloud's openstack/blockstorage/v3/volumes.DetachResult.
 type DetachResult = upstream.DetachResult
+
+// ExtendSizeOpts is Gophercloud's openstack/blockstorage/v3/volumes.ExtendSizeOpts.
 type ExtendSizeOpts = upstream.ExtendSizeOpts
+
+// ExtendSizeResult is Gophercloud's openstack/blockstorage/v3/volumes.ExtendSizeResult.
 type ExtendSizeResult = upstream.ExtendSizeResult
+
+// ForceDeleteResult is Gophercloud's openstack/blockstorage/v3/volumes.ForceDeleteResult.
 type ForceDeleteResult = upstream.ForceDeleteResult
+
+// GetResult is Gophercloud's openstack/blockstorage/v3/volumes.GetResult.
 type GetResult = upstream.GetResult
+
+// ImageMetadataOpts is Gophercloud's openstack/blockstorage/v3/volumes.ImageMetadataOpts.
 type ImageMetadataOpts = upstream.ImageMetadataOpts
+
+// ImageVolumeType is Gophercloud's openstack/blockstorage/v3/volumes.ImageVolumeType.
 type ImageVolumeType = upstream.ImageVolumeType
+
+// InitializeConnectionOpts is Gophercloud's openstack/blockstorage/v3/volumes.InitializeConnectionOpts.
 type InitializeConnectionOpts = upstream.InitializeConnectionOpts
+
+// InitializeConnectionResult is Gophercloud's openstack/blockstorage/v3/volumes.InitializeConnectionResult.
 type InitializeConnectionResult = upstream.InitializeConnectionResult
+
+// ListOpts is Gophercloud's openstack/blockstorage/v3/volumes.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// MigrationPolicy is Gophercloud's openstack/blockstorage/v3/volumes.MigrationPolicy.
 type MigrationPolicy = upstream.MigrationPolicy
 
 const MigrationPolicyNever = upstream.MigrationPolicyNever
 const MigrationPolicyOnDemand = upstream.MigrationPolicyOnDemand
 
+// ReImageOpts is Gophercloud's openstack/blockstorage/v3/volumes.ReImageOpts.
 type ReImageOpts = upstream.ReImageOpts
+
+// ReImageResult is Gophercloud's openstack/blockstorage/v3/volumes.ReImageResult.
 type ReImageResult = upstream.ReImageResult
 
 const ReadOnly = upstream.ReadOnly
 const ReadWrite = upstream.ReadWrite
 
+// ReserveResult is Gophercloud's openstack/blockstorage/v3/volumes.ReserveResult.
 type ReserveResult = upstream.ReserveResult
+
+// ResetStatusOpts is Gophercloud's openstack/blockstorage/v3/volumes.ResetStatusOpts.
 type ResetStatusOpts = upstream.ResetStatusOpts
+
+// ResetStatusResult is Gophercloud's openstack/blockstorage/v3/volumes.ResetStatusResult.
 type ResetStatusResult = upstream.ResetStatusResult
+
+// SchedulerHintOpts is Gophercloud's openstack/blockstorage/v3/volumes.SchedulerHintOpts.
 type SchedulerHintOpts = upstream.SchedulerHintOpts
+
+// SetBootableResult is Gophercloud's openstack/blockstorage/v3/volumes.SetBootableResult.
 type SetBootableResult = upstream.SetBootableResult
+
+// SetImageMetadataResult is Gophercloud's openstack/blockstorage/v3/volumes.SetImageMetadataResult.
 type SetImageMetadataResult = upstream.SetImageMetadataResult
+
+// TerminateConnectionOpts is Gophercloud's openstack/blockstorage/v3/volumes.TerminateConnectionOpts.
 type TerminateConnectionOpts = upstream.TerminateConnectionOpts
+
+// TerminateConnectionResult is Gophercloud's openstack/blockstorage/v3/volumes.TerminateConnectionResult.
 type TerminateConnectionResult = upstream.TerminateConnectionResult
+
+// UnmanageResult is Gophercloud's openstack/blockstorage/v3/volumes.UnmanageResult.
 type UnmanageResult = upstream.UnmanageResult
+
+// UnreserveResult is Gophercloud's openstack/blockstorage/v3/volumes.UnreserveResult.
 type UnreserveResult = upstream.UnreserveResult
+
+// UpdateOpts is Gophercloud's openstack/blockstorage/v3/volumes.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/blockstorage/v3/volumes.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// UploadImageOpts is Gophercloud's openstack/blockstorage/v3/volumes.UploadImageOpts.
 type UploadImageOpts = upstream.UploadImageOpts
+
+// UploadImageResult is Gophercloud's openstack/blockstorage/v3/volumes.UploadImageResult.
 type UploadImageResult = upstream.UploadImageResult
+
+// Volume is Gophercloud's openstack/blockstorage/v3/volumes.Volume.
 type Volume = upstream.Volume
+
+// VolumeImage is Gophercloud's openstack/blockstorage/v3/volumes.VolumeImage.
 type VolumeImage = upstream.VolumeImage
+
+// VolumePage is Gophercloud's openstack/blockstorage/v3/volumes.VolumePage.
 type VolumePage = upstream.VolumePage
+
+// AttachOption is a per-call option of API.Attach.
 type AttachOption = request.NativeFieldCall
 
+// WithAttachOptions sets the whole AttachOpts of API.Attach.
 func WithAttachOptions(value AttachOpts) AttachOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -117,8 +206,10 @@ func (a *API) BeginDetaching(ctx context.Context, id string) error {
 	return request.Wrap("BeginDetaching", "volumes", upstream.BeginDetaching(ctx, a.client, id).ExtractErr())
 }
 
+// ChangeTypeOption is a per-call option of API.ChangeType.
 type ChangeTypeOption = request.NativeFieldCall
 
+// WithChangeTypeOptions sets the whole ChangeTypeOpts of API.ChangeType.
 func WithChangeTypeOptions(value ChangeTypeOpts) ChangeTypeOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -153,11 +244,15 @@ func (a *API) ChangeType(ctx context.Context, id string, opts ChangeTypeOpts, op
 	return request.Wrap("ChangeType", "volumes", upstream.ChangeType(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
+
+// WithCreateHintOpts sets the hintOpts argument of API.Create.
 func WithCreateHintOpts(value SchedulerHintOpts) CreateOption {
 	return request.Custom(request.WithArgument[CreateOpts]("hintOpts", value))
 }
@@ -227,8 +322,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// DeleteOption is a per-call option of API.Delete.
 type DeleteOption = request.NativeQueryCall
 
+// WithDeleteOptions sets the whole DeleteOpts of API.Delete.
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -264,8 +361,10 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) er
 	return request.Wrap("Delete", "volumes", upstream.Delete(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// DetachOption is a per-call option of API.Detach.
 type DetachOption = request.NativeFieldCall
 
+// WithDetachOptions sets the whole DetachOpts of API.Detach.
 func WithDetachOptions(value DetachOpts) DetachOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -300,8 +399,10 @@ func (a *API) Detach(ctx context.Context, id string, opts DetachOpts, options ..
 	return request.Wrap("Detach", "volumes", upstream.Detach(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// ExtendSizeOption is a per-call option of API.ExtendSize.
 type ExtendSizeOption = request.NativeFieldCall
 
+// WithExtendSizeOptions sets the whole ExtendSizeOpts of API.ExtendSize.
 func WithExtendSizeOptions(value ExtendSizeOpts) ExtendSizeOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -349,8 +450,10 @@ func (a *API) Get(ctx context.Context, id string) (*Volume, error) {
 	return value0, err
 }
 
+// InitializeConnectionOption is a per-call option of API.InitializeConnection.
 type InitializeConnectionOption = request.NativeFieldCall
 
+// WithInitializeConnectionOptions sets the whole InitializeConnectionOpts of API.InitializeConnection.
 func WithInitializeConnectionOptions(value InitializeConnectionOpts) InitializeConnectionOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -389,8 +492,10 @@ func (a *API) InitializeConnection(ctx context.Context, id string, opts Initiali
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -431,8 +536,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// ReImageOption is a per-call option of API.ReImage.
 type ReImageOption = request.NativeFieldCall
 
+// WithReImageOptions sets the whole ReImageOpts of API.ReImage.
 func WithReImageOptions(value ReImageOpts) ReImageOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -472,8 +579,10 @@ func (a *API) Reserve(ctx context.Context, id string) error {
 	return request.Wrap("Reserve", "volumes", upstream.Reserve(ctx, a.client, id).ExtractErr())
 }
 
+// ResetStatusOption is a per-call option of API.ResetStatus.
 type ResetStatusOption = request.NativeFieldCall
 
+// WithResetStatusOptions sets the whole ResetStatusOpts of API.ResetStatus.
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -508,8 +617,10 @@ func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, 
 	return request.Wrap("ResetStatus", "volumes", upstream.ResetStatus(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// SetBootableOption is a per-call option of API.SetBootable.
 type SetBootableOption = request.NativeFieldCall
 
+// WithSetBootableOptions sets the whole BootableOpts of API.SetBootable.
 func WithSetBootableOptions(value BootableOpts) SetBootableOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -544,8 +655,10 @@ func (a *API) SetBootable(ctx context.Context, id string, opts BootableOpts, opt
 	return request.Wrap("SetBootable", "volumes", upstream.SetBootable(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// SetImageMetadataOption is a per-call option of API.SetImageMetadata.
 type SetImageMetadataOption = request.NativeFieldCall
 
+// WithSetImageMetadataOptions sets the whole ImageMetadataOpts of API.SetImageMetadata.
 func WithSetImageMetadataOptions(value ImageMetadataOpts) SetImageMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -580,8 +693,10 @@ func (a *API) SetImageMetadata(ctx context.Context, id string, opts ImageMetadat
 	return request.Wrap("SetImageMetadata", "volumes", upstream.SetImageMetadata(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// TerminateConnectionOption is a per-call option of API.TerminateConnection.
 type TerminateConnectionOption = request.NativeFieldCall
 
+// WithTerminateConnectionOptions sets the whole TerminateConnectionOpts of API.TerminateConnection.
 func WithTerminateConnectionOptions(value TerminateConnectionOpts) TerminateConnectionOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -626,8 +741,10 @@ func (a *API) Unreserve(ctx context.Context, id string) error {
 	return request.Wrap("Unreserve", "volumes", upstream.Unreserve(ctx, a.client, id).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -666,8 +783,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UploadImageOption is a per-call option of API.UploadImage.
 type UploadImageOption = request.NativeFieldCall
 
+// WithUploadImageOptions sets the whole UploadImageOpts of API.UploadImage.
 func WithUploadImageOptions(value UploadImageOpts) UploadImageOption {
 	return request.Custom(request.WithOptions(value))
 }

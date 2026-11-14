@@ -18,44 +18,91 @@ type API struct {
 	Resources *resource.Collection[Flavor]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AccessPage is Gophercloud's openstack/compute/v2/flavors.AccessPage.
 type AccessPage = upstream.AccessPage
+
+// AccessType is Gophercloud's openstack/compute/v2/flavors.AccessType.
 type AccessType = upstream.AccessType
+
+// AddAccessOpts is Gophercloud's openstack/compute/v2/flavors.AddAccessOpts.
 type AddAccessOpts = upstream.AddAccessOpts
+
+// AddAccessResult is Gophercloud's openstack/compute/v2/flavors.AddAccessResult.
 type AddAccessResult = upstream.AddAccessResult
 
 const AllAccess = upstream.AllAccess
 
+// CreateExtraSpecsResult is Gophercloud's openstack/compute/v2/flavors.CreateExtraSpecsResult.
 type CreateExtraSpecsResult = upstream.CreateExtraSpecsResult
+
+// CreateOpts is Gophercloud's openstack/compute/v2/flavors.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/compute/v2/flavors.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteExtraSpecResult is Gophercloud's openstack/compute/v2/flavors.DeleteExtraSpecResult.
 type DeleteExtraSpecResult = upstream.DeleteExtraSpecResult
+
+// DeleteResult is Gophercloud's openstack/compute/v2/flavors.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ExtraSpecsOpts is Gophercloud's openstack/compute/v2/flavors.ExtraSpecsOpts.
 type ExtraSpecsOpts = upstream.ExtraSpecsOpts
+
+// Flavor is Gophercloud's openstack/compute/v2/flavors.Flavor.
 type Flavor = upstream.Flavor
+
+// FlavorAccess is Gophercloud's openstack/compute/v2/flavors.FlavorAccess.
 type FlavorAccess = upstream.FlavorAccess
+
+// FlavorPage is Gophercloud's openstack/compute/v2/flavors.FlavorPage.
 type FlavorPage = upstream.FlavorPage
+
+// GetExtraSpecResult is Gophercloud's openstack/compute/v2/flavors.GetExtraSpecResult.
 type GetExtraSpecResult = upstream.GetExtraSpecResult
+
+// GetResult is Gophercloud's openstack/compute/v2/flavors.GetResult.
 type GetResult = upstream.GetResult
+
+// ListExtraSpecsResult is Gophercloud's openstack/compute/v2/flavors.ListExtraSpecsResult.
 type ListExtraSpecsResult = upstream.ListExtraSpecsResult
+
+// ListOpts is Gophercloud's openstack/compute/v2/flavors.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const PrivateAccess = upstream.PrivateAccess
 const PublicAccess = upstream.PublicAccess
 
+// RemoveAccessOpts is Gophercloud's openstack/compute/v2/flavors.RemoveAccessOpts.
 type RemoveAccessOpts = upstream.RemoveAccessOpts
+
+// RemoveAccessResult is Gophercloud's openstack/compute/v2/flavors.RemoveAccessResult.
 type RemoveAccessResult = upstream.RemoveAccessResult
+
+// UpdateExtraSpecResult is Gophercloud's openstack/compute/v2/flavors.UpdateExtraSpecResult.
 type UpdateExtraSpecResult = upstream.UpdateExtraSpecResult
+
+// UpdateOpts is Gophercloud's openstack/compute/v2/flavors.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/compute/v2/flavors.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddAccessOption is a per-call option of API.AddAccess.
 type AddAccessOption = request.NativeFieldCall
 
+// WithAddAccessOptions sets the whole AddAccessOpts of API.AddAccess.
 func WithAddAccessOptions(value AddAccessOpts) AddAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -94,8 +141,10 @@ func (a *API) AddAccess(ctx context.Context, id string, opts AddAccessOpts, opti
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -134,8 +183,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateExtraSpecsOption is a per-call option of API.CreateExtraSpecs.
 type CreateExtraSpecsOption = request.NativeFieldCall
 
+// WithCreateExtraSpecsOptions sets the whole ExtraSpecsOpts of API.CreateExtraSpecs.
 func WithCreateExtraSpecsOptions(value ExtraSpecsOpts) CreateExtraSpecsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -208,8 +259,10 @@ func (a *API) ListAccesses(ctx context.Context, id string) iter.Seq2[*FlavorAcce
 	})
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -260,8 +313,10 @@ func (a *API) ListExtraSpecs(ctx context.Context, flavorID string) (map[string]s
 	return value0, err
 }
 
+// RemoveAccessOption is a per-call option of API.RemoveAccess.
 type RemoveAccessOption = request.NativeFieldCall
 
+// WithRemoveAccessOptions sets the whole RemoveAccessOpts of API.RemoveAccess.
 func WithRemoveAccessOptions(value RemoveAccessOpts) RemoveAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -300,8 +355,10 @@ func (a *API) RemoveAccess(ctx context.Context, id string, opts RemoveAccessOpts
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -340,8 +397,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdateExtraSpecOption is a per-call option of API.UpdateExtraSpec.
 type UpdateExtraSpecOption = request.NativeCall
 
+// WithUpdateExtraSpecOptions sets the whole ExtraSpecsOpts of API.UpdateExtraSpec.
 func WithUpdateExtraSpecOptions(value ExtraSpecsOpts) UpdateExtraSpecOption {
 	return request.Custom(request.WithOptions(value))
 }

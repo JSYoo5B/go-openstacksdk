@@ -18,37 +18,86 @@ type API struct {
 	Resources *resource.Collection[Backup]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Backup is Gophercloud's openstack/blockstorage/v2/backups.Backup.
 type Backup = upstream.Backup
+
+// BackupPage is Gophercloud's openstack/blockstorage/v2/backups.BackupPage.
 type BackupPage = upstream.BackupPage
+
+// BackupRecord is Gophercloud's openstack/blockstorage/v2/backups.BackupRecord.
 type BackupRecord = upstream.BackupRecord
+
+// CreateOpts is Gophercloud's openstack/blockstorage/v2/backups.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/blockstorage/v2/backups.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/blockstorage/v2/backups.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ExportResult is Gophercloud's openstack/blockstorage/v2/backups.ExportResult.
 type ExportResult = upstream.ExportResult
+
+// ForceDeleteResult is Gophercloud's openstack/blockstorage/v2/backups.ForceDeleteResult.
 type ForceDeleteResult = upstream.ForceDeleteResult
+
+// GetResult is Gophercloud's openstack/blockstorage/v2/backups.GetResult.
 type GetResult = upstream.GetResult
+
+// ImportBackup is Gophercloud's openstack/blockstorage/v2/backups.ImportBackup.
 type ImportBackup = upstream.ImportBackup
+
+// ImportOpts is Gophercloud's openstack/blockstorage/v2/backups.ImportOpts.
 type ImportOpts = upstream.ImportOpts
+
+// ImportResponse is Gophercloud's openstack/blockstorage/v2/backups.ImportResponse.
 type ImportResponse = upstream.ImportResponse
+
+// ImportResult is Gophercloud's openstack/blockstorage/v2/backups.ImportResult.
 type ImportResult = upstream.ImportResult
+
+// ListDetailOpts is Gophercloud's openstack/blockstorage/v2/backups.ListDetailOpts.
 type ListDetailOpts = upstream.ListDetailOpts
+
+// ListOpts is Gophercloud's openstack/blockstorage/v2/backups.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ResetStatusOpts is Gophercloud's openstack/blockstorage/v2/backups.ResetStatusOpts.
 type ResetStatusOpts = upstream.ResetStatusOpts
+
+// ResetStatusResult is Gophercloud's openstack/blockstorage/v2/backups.ResetStatusResult.
 type ResetStatusResult = upstream.ResetStatusResult
+
+// Restore is Gophercloud's openstack/blockstorage/v2/backups.Restore.
 type Restore = upstream.Restore
+
+// RestoreOpts is Gophercloud's openstack/blockstorage/v2/backups.RestoreOpts.
 type RestoreOpts = upstream.RestoreOpts
+
+// RestoreResult is Gophercloud's openstack/blockstorage/v2/backups.RestoreResult.
 type RestoreResult = upstream.RestoreResult
+
+// UpdateOpts is Gophercloud's openstack/blockstorage/v2/backups.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/blockstorage/v2/backups.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -113,8 +162,10 @@ func (a *API) Get(ctx context.Context, id string) (*Backup, error) {
 	return value0, err
 }
 
+// ImportOption is a per-call option of API.Import.
 type ImportOption = request.NativeFieldCall
 
+// WithImportOptions sets the whole ImportOpts of API.Import.
 func WithImportOptions(value ImportOpts) ImportOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -153,8 +204,10 @@ func (a *API) Import(ctx context.Context, opts ImportOpts, options ...ImportOpti
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -191,8 +244,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Backup
 	})
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListDetailOpts of API.ListDetail.
 func WithListDetailOptions(value ListDetailOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -235,8 +290,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
+// ResetStatusOption is a per-call option of API.ResetStatus.
 type ResetStatusOption = request.NativeFieldCall
 
+// WithResetStatusOptions sets the whole ResetStatusOpts of API.ResetStatus.
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -271,8 +328,10 @@ func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, 
 	return request.Wrap("ResetStatus", "backups", upstream.ResetStatus(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// RestoreFromBackupOption is a per-call option of API.RestoreFromBackup.
 type RestoreFromBackupOption = request.NativeFieldCall
 
+// WithRestoreFromBackupOptions sets the whole RestoreOpts of API.RestoreFromBackup.
 func WithRestoreFromBackupOptions(value RestoreOpts) RestoreFromBackupOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -311,8 +370,10 @@ func (a *API) RestoreFromBackup(ctx context.Context, id string, opts RestoreOpts
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -18,38 +18,78 @@ type API struct {
 	Resources *resource.Collection[QoS]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AssociateOpts is Gophercloud's openstack/blockstorage/v3/qos.AssociateOpts.
 type AssociateOpts = upstream.AssociateOpts
+
+// AssociateResult is Gophercloud's openstack/blockstorage/v3/qos.AssociateResult.
 type AssociateResult = upstream.AssociateResult
+
+// AssociationPage is Gophercloud's openstack/blockstorage/v3/qos.AssociationPage.
 type AssociationPage = upstream.AssociationPage
 
 const ConsumerBack = upstream.ConsumerBack
 const ConsumerBoth = upstream.ConsumerBoth
 const ConsumerFront = upstream.ConsumerFront
 
+// CreateOpts is Gophercloud's openstack/blockstorage/v3/qos.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/blockstorage/v3/qos.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteKeysOpts is Gophercloud's openstack/blockstorage/v3/qos.DeleteKeysOpts.
 type DeleteKeysOpts = upstream.DeleteKeysOpts
+
+// DeleteOpts is Gophercloud's openstack/blockstorage/v3/qos.DeleteOpts.
 type DeleteOpts = upstream.DeleteOpts
+
+// DeleteResult is Gophercloud's openstack/blockstorage/v3/qos.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DisassociateAllResult is Gophercloud's openstack/blockstorage/v3/qos.DisassociateAllResult.
 type DisassociateAllResult = upstream.DisassociateAllResult
+
+// DisassociateOpts is Gophercloud's openstack/blockstorage/v3/qos.DisassociateOpts.
 type DisassociateOpts = upstream.DisassociateOpts
+
+// DisassociateResult is Gophercloud's openstack/blockstorage/v3/qos.DisassociateResult.
 type DisassociateResult = upstream.DisassociateResult
+
+// GetResult is Gophercloud's openstack/blockstorage/v3/qos.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/blockstorage/v3/qos.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// QoS is Gophercloud's openstack/blockstorage/v3/qos.QoS.
 type QoS = upstream.QoS
+
+// QoSConsumer is Gophercloud's openstack/blockstorage/v3/qos.QoSConsumer.
 type QoSConsumer = upstream.QoSConsumer
+
+// QoSPage is Gophercloud's openstack/blockstorage/v3/qos.QoSPage.
 type QoSPage = upstream.QoSPage
+
+// QosAssociation is Gophercloud's openstack/blockstorage/v3/qos.QosAssociation.
 type QosAssociation = upstream.QosAssociation
+
+// UpdateOpts is Gophercloud's openstack/blockstorage/v3/qos.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// AssociateOption is a per-call option of API.Associate.
 type AssociateOption = request.NativeQueryCall
 
+// WithAssociateOptions sets the whole AssociateOpts of API.Associate.
 func WithAssociateOptions(value AssociateOpts) AssociateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -84,8 +124,10 @@ func (a *API) Associate(ctx context.Context, qosID string, opts AssociateOpts, o
 	return request.Wrap("Associate", "qos", upstream.Associate(ctx, a.client, qosID, _opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -124,8 +166,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// DeleteOption is a per-call option of API.Delete.
 type DeleteOption = request.NativeQueryCall
 
+// WithDeleteOptions sets the whole DeleteOpts of API.Delete.
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -161,8 +205,10 @@ func (a *API) Delete(ctx context.Context, id string, options ...DeleteOption) er
 	return request.Wrap("Delete", "qos", upstream.Delete(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// DeleteKeysOption is a per-call option of API.DeleteKeys.
 type DeleteKeysOption = request.NativeFieldCall
 
+// WithDeleteKeysOptions sets the whole DeleteKeysOpts of API.DeleteKeys.
 func WithDeleteKeysOptions(value DeleteKeysOpts) DeleteKeysOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -198,8 +244,10 @@ func (a *API) DeleteKeys(ctx context.Context, qosID string, options ...DeleteKey
 	return request.Wrap("DeleteKeys", "qos", upstream.DeleteKeys(ctx, a.client, qosID, _opts).ExtractErr())
 }
 
+// DisassociateOption is a per-call option of API.Disassociate.
 type DisassociateOption = request.NativeQueryCall
 
+// WithDisassociateOptions sets the whole DisassociateOpts of API.Disassociate.
 func WithDisassociateOptions(value DisassociateOpts) DisassociateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -247,8 +295,10 @@ func (a *API) Get(ctx context.Context, id string) (*QoS, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -297,8 +347,10 @@ func (a *API) ListAssociations(ctx context.Context, qosID string) iter.Seq2[*Qos
 	})
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

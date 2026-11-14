@@ -15,40 +15,97 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AbandonResult is Gophercloud's openstack/orchestration/v1/stacks.AbandonResult.
 type AbandonResult = upstream.AbandonResult
+
+// AbandonedStack is Gophercloud's openstack/orchestration/v1/stacks.AbandonedStack.
 type AbandonedStack = upstream.AbandonedStack
+
+// AdoptOpts is Gophercloud's openstack/orchestration/v1/stacks.AdoptOpts.
 type AdoptOpts = upstream.AdoptOpts
+
+// AdoptResult is Gophercloud's openstack/orchestration/v1/stacks.AdoptResult.
 type AdoptResult = upstream.AdoptResult
+
+// Client is Gophercloud's openstack/orchestration/v1/stacks.Client.
 type Client = upstream.Client
+
+// CreateOpts is Gophercloud's openstack/orchestration/v1/stacks.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/orchestration/v1/stacks.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CreatedStack is Gophercloud's openstack/orchestration/v1/stacks.CreatedStack.
 type CreatedStack = upstream.CreatedStack
+
+// DeleteResult is Gophercloud's openstack/orchestration/v1/stacks.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// Environment is Gophercloud's openstack/orchestration/v1/stacks.Environment.
 type Environment = upstream.Environment
+
+// ErrInvalidDataFormat is Gophercloud's openstack/orchestration/v1/stacks.ErrInvalidDataFormat.
 type ErrInvalidDataFormat = upstream.ErrInvalidDataFormat
+
+// ErrInvalidEnvironment is Gophercloud's openstack/orchestration/v1/stacks.ErrInvalidEnvironment.
 type ErrInvalidEnvironment = upstream.ErrInvalidEnvironment
+
+// ErrInvalidTemplateFormatVersion is Gophercloud's openstack/orchestration/v1/stacks.ErrInvalidTemplateFormatVersion.
 type ErrInvalidTemplateFormatVersion = upstream.ErrInvalidTemplateFormatVersion
+
+// ErrTemplateRequired is Gophercloud's openstack/orchestration/v1/stacks.ErrTemplateRequired.
 type ErrTemplateRequired = upstream.ErrTemplateRequired
+
+// GetResult is Gophercloud's openstack/orchestration/v1/stacks.GetResult.
 type GetResult = upstream.GetResult
 
 const InvalidEnvironment = upstream.InvalidEnvironment
 const InvalidTemplateNoVersion = upstream.InvalidTemplateNoVersion
 
+// ListOpts is Gophercloud's openstack/orchestration/v1/stacks.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListedStack is Gophercloud's openstack/orchestration/v1/stacks.ListedStack.
 type ListedStack = upstream.ListedStack
+
+// PreviewOpts is Gophercloud's openstack/orchestration/v1/stacks.PreviewOpts.
 type PreviewOpts = upstream.PreviewOpts
+
+// PreviewResult is Gophercloud's openstack/orchestration/v1/stacks.PreviewResult.
 type PreviewResult = upstream.PreviewResult
+
+// PreviewedStack is Gophercloud's openstack/orchestration/v1/stacks.PreviewedStack.
 type PreviewedStack = upstream.PreviewedStack
+
+// RetrievedStack is Gophercloud's openstack/orchestration/v1/stacks.RetrievedStack.
 type RetrievedStack = upstream.RetrievedStack
+
+// SortDir is Gophercloud's openstack/orchestration/v1/stacks.SortDir.
 type SortDir = upstream.SortDir
+
+// SortKey is Gophercloud's openstack/orchestration/v1/stacks.SortKey.
 type SortKey = upstream.SortKey
+
+// StackPage is Gophercloud's openstack/orchestration/v1/stacks.StackPage.
 type StackPage = upstream.StackPage
+
+// TE is Gophercloud's openstack/orchestration/v1/stacks.TE.
 type TE = upstream.TE
+
+// Template is Gophercloud's openstack/orchestration/v1/stacks.Template.
 type Template = upstream.Template
+
+// UpdateOpts is Gophercloud's openstack/orchestration/v1/stacks.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/orchestration/v1/stacks.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 const ValidJSONEnvironment = upstream.ValidJSONEnvironment
@@ -64,8 +121,10 @@ func (a *API) Abandon(ctx context.Context, stackName string, stackID string) (*A
 	return value0, err
 }
 
+// AdoptOption is a per-call option of API.Adopt.
 type AdoptOption = request.NativeFieldCall
 
+// WithAdoptOptions sets the whole AdoptOpts of API.Adopt.
 func WithAdoptOptions(value AdoptOpts) AdoptOption { return request.Custom(request.WithOptions(value)) }
 
 type adoptOptsBuilder struct {
@@ -102,8 +161,10 @@ func (a *API) Adopt(ctx context.Context, opts AdoptOpts, options ...AdoptOption)
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -163,8 +224,10 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string) (*Retri
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -201,8 +264,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Listed
 	})
 }
 
+// PreviewOption is a per-call option of API.Preview.
 type PreviewOption = request.NativeFieldCall
 
+// WithPreviewOptions sets the whole PreviewOpts of API.Preview.
 func WithPreviewOptions(value PreviewOpts) PreviewOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -241,8 +306,10 @@ func (a *API) Preview(ctx context.Context, opts PreviewOpts, options ...PreviewO
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -277,8 +344,10 @@ func (a *API) Update(ctx context.Context, stackName string, stackID string, opts
 	return request.Wrap("Update", "stacks", upstream.Update(ctx, a.client, stackName, stackID, _opts).ExtractErr())
 }
 
+// UpdatePatchOption is a per-call option of API.UpdatePatch.
 type UpdatePatchOption = request.NativeFieldCall
 
+// WithUpdatePatchOptions sets the whole UpdateOpts of API.UpdatePatch.
 func WithUpdatePatchOptions(value UpdateOpts) UpdatePatchOption {
 	return request.Custom(request.WithOptions(value))
 }

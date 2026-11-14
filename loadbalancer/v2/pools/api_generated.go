@@ -18,22 +18,44 @@ type API struct {
 	Resources *resource.Collection[Pool]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BatchUpdateMemberOpts is Gophercloud's openstack/loadbalancer/v2/pools.BatchUpdateMemberOpts.
 type BatchUpdateMemberOpts = upstream.BatchUpdateMemberOpts
+
+// CreateMemberOpts is Gophercloud's openstack/loadbalancer/v2/pools.CreateMemberOpts.
 type CreateMemberOpts = upstream.CreateMemberOpts
+
+// CreateMemberResult is Gophercloud's openstack/loadbalancer/v2/pools.CreateMemberResult.
 type CreateMemberResult = upstream.CreateMemberResult
+
+// CreateOpts is Gophercloud's openstack/loadbalancer/v2/pools.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/loadbalancer/v2/pools.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteMemberResult is Gophercloud's openstack/loadbalancer/v2/pools.DeleteMemberResult.
 type DeleteMemberResult = upstream.DeleteMemberResult
+
+// DeleteResult is Gophercloud's openstack/loadbalancer/v2/pools.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetMemberResult is Gophercloud's openstack/loadbalancer/v2/pools.GetMemberResult.
 type GetMemberResult = upstream.GetMemberResult
+
+// GetResult is Gophercloud's openstack/loadbalancer/v2/pools.GetResult.
 type GetResult = upstream.GetResult
+
+// LBMethod is Gophercloud's openstack/loadbalancer/v2/pools.LBMethod.
 type LBMethod = upstream.LBMethod
 
 const LBMethodLeastConnections = upstream.LBMethodLeastConnections
@@ -41,14 +63,31 @@ const LBMethodRoundRobin = upstream.LBMethodRoundRobin
 const LBMethodSourceIp = upstream.LBMethodSourceIp
 const LBMethodSourceIpPort = upstream.LBMethodSourceIpPort
 
+// ListMembersOpts is Gophercloud's openstack/loadbalancer/v2/pools.ListMembersOpts.
 type ListMembersOpts = upstream.ListMembersOpts
+
+// ListOpts is Gophercloud's openstack/loadbalancer/v2/pools.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListenerID is Gophercloud's openstack/loadbalancer/v2/pools.ListenerID.
 type ListenerID = upstream.ListenerID
+
+// LoadBalancerID is Gophercloud's openstack/loadbalancer/v2/pools.LoadBalancerID.
 type LoadBalancerID = upstream.LoadBalancerID
+
+// Member is Gophercloud's openstack/loadbalancer/v2/pools.Member.
 type Member = upstream.Member
+
+// MemberPage is Gophercloud's openstack/loadbalancer/v2/pools.MemberPage.
 type MemberPage = upstream.MemberPage
+
+// Pool is Gophercloud's openstack/loadbalancer/v2/pools.Pool.
 type Pool = upstream.Pool
+
+// PoolPage is Gophercloud's openstack/loadbalancer/v2/pools.PoolPage.
 type PoolPage = upstream.PoolPage
+
+// Protocol is Gophercloud's openstack/loadbalancer/v2/pools.Protocol.
 type Protocol = upstream.Protocol
 
 const ProtocolHTTP = upstream.ProtocolHTTP
@@ -59,7 +98,10 @@ const ProtocolSCTP = upstream.ProtocolSCTP
 const ProtocolTCP = upstream.ProtocolTCP
 const ProtocolUDP = upstream.ProtocolUDP
 
+// SessionPersistence is Gophercloud's openstack/loadbalancer/v2/pools.SessionPersistence.
 type SessionPersistence = upstream.SessionPersistence
+
+// TLSVersion is Gophercloud's openstack/loadbalancer/v2/pools.TLSVersion.
 type TLSVersion = upstream.TLSVersion
 
 const TLSVersionSSLv3 = upstream.TLSVersionSSLv3
@@ -68,10 +110,19 @@ const TLSVersionTLSv1_1 = upstream.TLSVersionTLSv1_1
 const TLSVersionTLSv1_2 = upstream.TLSVersionTLSv1_2
 const TLSVersionTLSv1_3 = upstream.TLSVersionTLSv1_3
 
+// UpdateMemberOpts is Gophercloud's openstack/loadbalancer/v2/pools.UpdateMemberOpts.
 type UpdateMemberOpts = upstream.UpdateMemberOpts
+
+// UpdateMemberResult is Gophercloud's openstack/loadbalancer/v2/pools.UpdateMemberResult.
 type UpdateMemberResult = upstream.UpdateMemberResult
+
+// UpdateMembersResult is Gophercloud's openstack/loadbalancer/v2/pools.UpdateMembersResult.
 type UpdateMembersResult = upstream.UpdateMembersResult
+
+// UpdateOpts is Gophercloud's openstack/loadbalancer/v2/pools.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/loadbalancer/v2/pools.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // BatchUpdateMembers invokes the upstream API with library-owned builders and result handling.
@@ -79,8 +130,10 @@ func (a *API) BatchUpdateMembers(ctx context.Context, poolID string, opts []Batc
 	return request.Wrap("BatchUpdateMembers", "pools", upstream.BatchUpdateMembers(ctx, a.client, poolID, opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -119,8 +172,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateMemberOption is a per-call option of API.CreateMember.
 type CreateMemberOption = request.NativeFieldCall
 
+// WithCreateMemberOptions sets the whole CreateMemberOpts of API.CreateMember.
 func WithCreateMemberOptions(value CreateMemberOpts) CreateMemberOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -185,8 +240,10 @@ func (a *API) GetMember(ctx context.Context, poolID string, memberID string) (*M
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -227,8 +284,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// ListMembersOption is a per-call option of API.ListMembers.
 type ListMembersOption = request.NativeQueryCall
 
+// WithListMembersOptions sets the whole ListMembersOpts of API.ListMembers.
 func WithListMembersOptions(value ListMembersOpts) ListMembersOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -271,8 +330,10 @@ func (a *API) listMembersWithControl(ctx context.Context, poolID string, control
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -311,8 +372,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdateMemberOption is a per-call option of API.UpdateMember.
 type UpdateMemberOption = request.NativeFieldCall
 
+// WithUpdateMemberOptions sets the whole UpdateMemberOpts of API.UpdateMember.
 func WithUpdateMemberOptions(value UpdateMemberOpts) UpdateMemberOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -18,30 +18,65 @@ type API struct {
 	Resources *resource.Collection[Zone]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/dns/v2/zones.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/dns/v2/zones.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/dns/v2/zones.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ErrResult is Gophercloud's openstack/dns/v2/zones.ErrResult.
 type ErrResult = upstream.ErrResult
+
+// GetResult is Gophercloud's openstack/dns/v2/zones.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/dns/v2/zones.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListSharesOpts is Gophercloud's openstack/dns/v2/zones.ListSharesOpts.
 type ListSharesOpts = upstream.ListSharesOpts
+
+// ShareZoneOpts is Gophercloud's openstack/dns/v2/zones.ShareZoneOpts.
 type ShareZoneOpts = upstream.ShareZoneOpts
+
+// UpdateOpts is Gophercloud's openstack/dns/v2/zones.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/dns/v2/zones.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// Zone is Gophercloud's openstack/dns/v2/zones.Zone.
 type Zone = upstream.Zone
+
+// ZonePage is Gophercloud's openstack/dns/v2/zones.ZonePage.
 type ZonePage = upstream.ZonePage
+
+// ZoneShare is Gophercloud's openstack/dns/v2/zones.ZoneShare.
 type ZoneShare = upstream.ZoneShare
+
+// ZoneSharePage is Gophercloud's openstack/dns/v2/zones.ZoneSharePage.
 type ZoneSharePage = upstream.ZoneSharePage
+
+// ZoneShareResult is Gophercloud's openstack/dns/v2/zones.ZoneShareResult.
 type ZoneShareResult = upstream.ZoneShareResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -104,8 +139,10 @@ func (a *API) GetShare(ctx context.Context, zoneID string, shareID string) (*Zon
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryHeaderCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -159,8 +196,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// ListSharesOption is a per-call option of API.ListShares.
 type ListSharesOption = request.NativeHeaderCall
 
+// WithListSharesOptions sets the whole ListSharesOpts of API.ListShares.
 func WithListSharesOptions(value ListSharesOpts) ListSharesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -199,8 +238,10 @@ func (a *API) ListShares(ctx context.Context, zoneID string, options ...ListShar
 	})
 }
 
+// ShareOption is a per-call option of API.Share.
 type ShareOption = request.NativeFieldCall
 
+// WithShareOptions sets the whole ShareZoneOpts of API.Share.
 func WithShareOptions(value ShareZoneOpts) ShareOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -244,8 +285,10 @@ func (a *API) Unshare(ctx context.Context, zoneID string, shareID string) error 
 	return request.Wrap("Unshare", "zones", upstream.Unshare(ctx, a.client, zoneID, shareID).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -12,23 +12,52 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AuthOptions is Gophercloud's openstack/identity/v2/tokens.AuthOptions.
 type AuthOptions = upstream.AuthOptions
+
+// AuthOptionsV2 is Gophercloud's openstack/identity/v2/tokens.AuthOptionsV2.
 type AuthOptionsV2 = upstream.AuthOptionsV2
+
+// CatalogEntry is Gophercloud's openstack/identity/v2/tokens.CatalogEntry.
 type CatalogEntry = upstream.CatalogEntry
+
+// CreateResult is Gophercloud's openstack/identity/v2/tokens.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// Endpoint is Gophercloud's openstack/identity/v2/tokens.Endpoint.
 type Endpoint = upstream.Endpoint
+
+// GetResult is Gophercloud's openstack/identity/v2/tokens.GetResult.
 type GetResult = upstream.GetResult
+
+// PasswordCredentialsV2 is Gophercloud's openstack/identity/v2/tokens.PasswordCredentialsV2.
 type PasswordCredentialsV2 = upstream.PasswordCredentialsV2
+
+// Role is Gophercloud's openstack/identity/v2/tokens.Role.
 type Role = upstream.Role
+
+// ServiceCatalog is Gophercloud's openstack/identity/v2/tokens.ServiceCatalog.
 type ServiceCatalog = upstream.ServiceCatalog
+
+// Token is Gophercloud's openstack/identity/v2/tokens.Token.
 type Token = upstream.Token
+
+// TokenCredentialsV2 is Gophercloud's openstack/identity/v2/tokens.TokenCredentialsV2.
 type TokenCredentialsV2 = upstream.TokenCredentialsV2
+
+// User is Gophercloud's openstack/identity/v2/tokens.User.
 type User = upstream.User
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole AuthOptions of API.Create.
 func WithCreateOptions(value AuthOptions) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

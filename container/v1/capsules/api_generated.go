@@ -15,23 +15,52 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Address is Gophercloud's openstack/container/v1/capsules.Address.
 type Address = upstream.Address
+
+// Capsule is Gophercloud's openstack/container/v1/capsules.Capsule.
 type Capsule = upstream.Capsule
+
+// CapsulePage is Gophercloud's openstack/container/v1/capsules.CapsulePage.
 type CapsulePage = upstream.CapsulePage
+
+// CapsuleV132 is Gophercloud's openstack/container/v1/capsules.CapsuleV132.
 type CapsuleV132 = upstream.CapsuleV132
+
+// Container is Gophercloud's openstack/container/v1/capsules.Container.
 type Container = upstream.Container
+
+// CreateOpts is Gophercloud's openstack/container/v1/capsules.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/container/v1/capsules.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/container/v1/capsules.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ErrInvalidDataFormat is Gophercloud's openstack/container/v1/capsules.ErrInvalidDataFormat.
 type ErrInvalidDataFormat = upstream.ErrInvalidDataFormat
+
+// GetResult is Gophercloud's openstack/container/v1/capsules.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/container/v1/capsules.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Template is Gophercloud's openstack/container/v1/capsules.Template.
 type Template = upstream.Template
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -83,8 +112,10 @@ func (a *API) Get(ctx context.Context, id string) (any, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

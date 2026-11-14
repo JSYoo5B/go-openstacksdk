@@ -12,13 +12,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Absolute is Gophercloud's openstack/blockstorage/v2/limits.Absolute.
 type Absolute = upstream.Absolute
+
+// GetResult is Gophercloud's openstack/blockstorage/v2/limits.GetResult.
 type GetResult = upstream.GetResult
+
+// Limit is Gophercloud's openstack/blockstorage/v2/limits.Limit.
 type Limit = upstream.Limit
+
+// Limits is Gophercloud's openstack/blockstorage/v2/limits.Limits.
 type Limits = upstream.Limits
+
+// Rate is Gophercloud's openstack/blockstorage/v2/limits.Rate.
 type Rate = upstream.Rate
 
 // Get invokes the upstream API with library-owned builders and result handling.

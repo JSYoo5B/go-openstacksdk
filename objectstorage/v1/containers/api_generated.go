@@ -18,28 +18,62 @@ type API struct {
 	Resources *resource.Collection[ContainerResource]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BulkDeleteResponse is Gophercloud's openstack/objectstorage/v1/containers.BulkDeleteResponse.
 type BulkDeleteResponse = upstream.BulkDeleteResponse
+
+// BulkDeleteResult is Gophercloud's openstack/objectstorage/v1/containers.BulkDeleteResult.
 type BulkDeleteResult = upstream.BulkDeleteResult
+
+// Container is Gophercloud's openstack/objectstorage/v1/containers.Container.
 type Container = upstream.Container
+
+// ContainerPage is Gophercloud's openstack/objectstorage/v1/containers.ContainerPage.
 type ContainerPage = upstream.ContainerPage
+
+// CreateHeader is Gophercloud's openstack/objectstorage/v1/containers.CreateHeader.
 type CreateHeader = upstream.CreateHeader
+
+// CreateOpts is Gophercloud's openstack/objectstorage/v1/containers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/objectstorage/v1/containers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteHeader is Gophercloud's openstack/objectstorage/v1/containers.DeleteHeader.
 type DeleteHeader = upstream.DeleteHeader
+
+// DeleteResult is Gophercloud's openstack/objectstorage/v1/containers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetHeader is Gophercloud's openstack/objectstorage/v1/containers.GetHeader.
 type GetHeader = upstream.GetHeader
+
+// GetOpts is Gophercloud's openstack/objectstorage/v1/containers.GetOpts.
 type GetOpts = upstream.GetOpts
+
+// GetResult is Gophercloud's openstack/objectstorage/v1/containers.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/objectstorage/v1/containers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// UpdateHeader is Gophercloud's openstack/objectstorage/v1/containers.UpdateHeader.
 type UpdateHeader = upstream.UpdateHeader
+
+// UpdateOpts is Gophercloud's openstack/objectstorage/v1/containers.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/objectstorage/v1/containers.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // BulkDelete invokes the upstream API with library-owned builders and result handling.
@@ -50,8 +84,10 @@ func (a *API) BulkDelete(ctx context.Context, containers []string) (*BulkDeleteR
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeHeaderCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -98,8 +134,10 @@ func (a *API) Delete(ctx context.Context, containerName string) (*DeleteHeader, 
 	return value0, err
 }
 
+// GetOption is a per-call option of API.Get.
 type GetOption = request.NativeHeaderCall
 
+// WithGetOptions sets the whole GetOpts of API.Get.
 func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {
@@ -137,8 +175,10 @@ func (a *API) Get(ctx context.Context, containerName string, options ...GetOptio
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -175,8 +215,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Contai
 	})
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeHeaderCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

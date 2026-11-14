@@ -15,17 +15,34 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/identity/v3/ec2credentials.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/ec2credentials.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// Credential is Gophercloud's openstack/identity/v3/ec2credentials.Credential.
 type Credential = upstream.Credential
+
+// CredentialPage is Gophercloud's openstack/identity/v3/ec2credentials.CredentialPage.
 type CredentialPage = upstream.CredentialPage
+
+// DeleteResult is Gophercloud's openstack/identity/v3/ec2credentials.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/identity/v3/ec2credentials.GetResult.
 type GetResult = upstream.GetResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

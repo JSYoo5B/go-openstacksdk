@@ -18,23 +18,47 @@ type API struct {
 	Resources *resource.Collection[Introspection]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AbortResult is Gophercloud's openstack/baremetalintrospection/v1/introspection.AbortResult.
 type AbortResult = upstream.AbortResult
+
+// ApplyDataResult is Gophercloud's openstack/baremetalintrospection/v1/introspection.ApplyDataResult.
 type ApplyDataResult = upstream.ApplyDataResult
+
+// BaseInterfaceType is Gophercloud's openstack/baremetalintrospection/v1/introspection.BaseInterfaceType.
 type BaseInterfaceType = upstream.BaseInterfaceType
+
+// Data is Gophercloud's openstack/baremetalintrospection/v1/introspection.Data.
 type Data = upstream.Data
+
+// DataResult is Gophercloud's openstack/baremetalintrospection/v1/introspection.DataResult.
 type DataResult = upstream.DataResult
+
+// GetIntrospectionStatusResult is Gophercloud's openstack/baremetalintrospection/v1/introspection.GetIntrospectionStatusResult.
 type GetIntrospectionStatusResult = upstream.GetIntrospectionStatusResult
+
+// Introspection is Gophercloud's openstack/baremetalintrospection/v1/introspection.Introspection.
 type Introspection = upstream.Introspection
+
+// IntrospectionPage is Gophercloud's openstack/baremetalintrospection/v1/introspection.IntrospectionPage.
 type IntrospectionPage = upstream.IntrospectionPage
+
+// ListIntrospectionsOpts is Gophercloud's openstack/baremetalintrospection/v1/introspection.ListIntrospectionsOpts.
 type ListIntrospectionsOpts = upstream.ListIntrospectionsOpts
+
+// StartOpts is Gophercloud's openstack/baremetalintrospection/v1/introspection.StartOpts.
 type StartOpts = upstream.StartOpts
+
+// StartResult is Gophercloud's openstack/baremetalintrospection/v1/introspection.StartResult.
 type StartResult = upstream.StartResult
 
 // AbortIntrospection invokes the upstream API with library-owned builders and result handling.
@@ -58,8 +82,10 @@ func (a *API) GetIntrospectionStatus(ctx context.Context, nodeID string) (*Intro
 	return value0, err
 }
 
+// ListIntrospectionsOption is a per-call option of API.ListIntrospections.
 type ListIntrospectionsOption = request.NativeQueryCall
 
+// WithListIntrospectionsOptions sets the whole ListIntrospectionsOpts of API.ListIntrospections.
 func WithListIntrospectionsOptions(value ListIntrospectionsOpts) ListIntrospectionsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -107,8 +133,10 @@ func (a *API) ReApplyIntrospection(ctx context.Context, nodeID string) error {
 	return request.Wrap("ReApplyIntrospection", "introspection", upstream.ReApplyIntrospection(ctx, a.client, nodeID).ExtractErr())
 }
 
+// StartIntrospectionOption is a per-call option of API.StartIntrospection.
 type StartIntrospectionOption = request.NativeQueryCall
 
+// WithStartIntrospectionOptions sets the whole StartOpts of API.StartIntrospection.
 func WithStartIntrospectionOptions(value StartOpts) StartIntrospectionOption {
 	return request.Custom(request.WithOptions(value))
 }

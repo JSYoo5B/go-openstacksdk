@@ -11,9 +11,13 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Status is Gophercloud's openstack/utils.Status.
 type Status = upstream.Status
 
 const StatusCurrent = upstream.StatusCurrent
@@ -22,8 +26,13 @@ const StatusExperimental = upstream.StatusExperimental
 const StatusSupported = upstream.StatusSupported
 const StatusUnknown = upstream.StatusUnknown
 
+// SupportedMicroversions is Gophercloud's openstack/utils.SupportedMicroversions.
 type SupportedMicroversions = upstream.SupportedMicroversions
+
+// SupportedVersion is Gophercloud's openstack/utils.SupportedVersion.
 type SupportedVersion = upstream.SupportedVersion
+
+// Version is Gophercloud's openstack/utils.Version.
 type Version = upstream.Version
 
 // ChooseVersion invokes the upstream API with library-owned builders and result handling.

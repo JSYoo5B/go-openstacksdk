@@ -18,58 +18,142 @@ type API struct {
 	Resources *resource.Collection[Role]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AssignOpts is Gophercloud's openstack/identity/v3/roles.AssignOpts.
 type AssignOpts = upstream.AssignOpts
+
+// AssignedRole is Gophercloud's openstack/identity/v3/roles.AssignedRole.
 type AssignedRole = upstream.AssignedRole
+
+// AssignmentResult is Gophercloud's openstack/identity/v3/roles.AssignmentResult.
 type AssignmentResult = upstream.AssignmentResult
+
+// CreateImpliedRoleResult is Gophercloud's openstack/identity/v3/roles.CreateImpliedRoleResult.
 type CreateImpliedRoleResult = upstream.CreateImpliedRoleResult
+
+// CreateOpts is Gophercloud's openstack/identity/v3/roles.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/roles.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteImpliedRoleResult is Gophercloud's openstack/identity/v3/roles.DeleteImpliedRoleResult.
 type DeleteImpliedRoleResult = upstream.DeleteImpliedRoleResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/roles.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// Domain is Gophercloud's openstack/identity/v3/roles.Domain.
 type Domain = upstream.Domain
+
+// GetImpliedRoleResult is Gophercloud's openstack/identity/v3/roles.GetImpliedRoleResult.
 type GetImpliedRoleResult = upstream.GetImpliedRoleResult
+
+// GetResult is Gophercloud's openstack/identity/v3/roles.GetResult.
 type GetResult = upstream.GetResult
+
+// Group is Gophercloud's openstack/identity/v3/roles.Group.
 type Group = upstream.Group
 
 const Immutable = upstream.Immutable
 
+// ImpliedRole is Gophercloud's openstack/identity/v3/roles.ImpliedRole.
 type ImpliedRole = upstream.ImpliedRole
+
+// ImpliedRoleObject is Gophercloud's openstack/identity/v3/roles.ImpliedRoleObject.
 type ImpliedRoleObject = upstream.ImpliedRoleObject
+
+// InvalidListFilter is Gophercloud's openstack/identity/v3/roles.InvalidListFilter.
 type InvalidListFilter = upstream.InvalidListFilter
+
+// ListAssignmentsOnResourceOpts is Gophercloud's openstack/identity/v3/roles.ListAssignmentsOnResourceOpts.
 type ListAssignmentsOnResourceOpts = upstream.ListAssignmentsOnResourceOpts
+
+// ListAssignmentsOpts is Gophercloud's openstack/identity/v3/roles.ListAssignmentsOpts.
 type ListAssignmentsOpts = upstream.ListAssignmentsOpts
+
+// ListImpliedRolesResult is Gophercloud's openstack/identity/v3/roles.ListImpliedRolesResult.
 type ListImpliedRolesResult = upstream.ListImpliedRolesResult
+
+// ListOpts is Gophercloud's openstack/identity/v3/roles.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Option is Gophercloud's openstack/identity/v3/roles.Option.
 type Option = upstream.Option
+
+// PriorRole is Gophercloud's openstack/identity/v3/roles.PriorRole.
 type PriorRole = upstream.PriorRole
+
+// PriorRoleObject is Gophercloud's openstack/identity/v3/roles.PriorRoleObject.
 type PriorRoleObject = upstream.PriorRoleObject
+
+// Project is Gophercloud's openstack/identity/v3/roles.Project.
 type Project = upstream.Project
+
+// Role is Gophercloud's openstack/identity/v3/roles.Role.
 type Role = upstream.Role
+
+// RoleAssignment is Gophercloud's openstack/identity/v3/roles.RoleAssignment.
 type RoleAssignment = upstream.RoleAssignment
+
+// RoleAssignmentPage is Gophercloud's openstack/identity/v3/roles.RoleAssignmentPage.
 type RoleAssignmentPage = upstream.RoleAssignmentPage
+
+// RoleInference is Gophercloud's openstack/identity/v3/roles.RoleInference.
 type RoleInference = upstream.RoleInference
+
+// RoleInferenceRule is Gophercloud's openstack/identity/v3/roles.RoleInferenceRule.
 type RoleInferenceRule = upstream.RoleInferenceRule
+
+// RoleInferenceRuleList is Gophercloud's openstack/identity/v3/roles.RoleInferenceRuleList.
 type RoleInferenceRuleList = upstream.RoleInferenceRuleList
+
+// RoleInferenceRules is Gophercloud's openstack/identity/v3/roles.RoleInferenceRules.
 type RoleInferenceRules = upstream.RoleInferenceRules
+
+// RolePage is Gophercloud's openstack/identity/v3/roles.RolePage.
 type RolePage = upstream.RolePage
+
+// Scope is Gophercloud's openstack/identity/v3/roles.Scope.
 type Scope = upstream.Scope
+
+// System is Gophercloud's openstack/identity/v3/roles.System.
 type System = upstream.System
+
+// UnassignOpts is Gophercloud's openstack/identity/v3/roles.UnassignOpts.
 type UnassignOpts = upstream.UnassignOpts
+
+// UnassignmentResult is Gophercloud's openstack/identity/v3/roles.UnassignmentResult.
 type UnassignmentResult = upstream.UnassignmentResult
+
+// UpdateOpts is Gophercloud's openstack/identity/v3/roles.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/identity/v3/roles.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// User is Gophercloud's openstack/identity/v3/roles.User.
 type User = upstream.User
+
+// ValidateOpts is Gophercloud's openstack/identity/v3/roles.ValidateOpts.
 type ValidateOpts = upstream.ValidateOpts
+
+// ValidateResult is Gophercloud's openstack/identity/v3/roles.ValidateResult.
 type ValidateResult = upstream.ValidateResult
+
+// AssignOption is a per-call option of API.Assign.
 type AssignOption = request.NativeCall
 
+// WithAssignOptions sets the whole AssignOpts of API.Assign.
 func WithAssignOptions(value AssignOpts) AssignOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -84,8 +168,10 @@ func (a *API) Assign(ctx context.Context, roleID string, opts AssignOpts, option
 	return request.Wrap("Assign", "roles", upstream.Assign(ctx, a.client, roleID, cfg.Options).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -158,8 +244,10 @@ func (a *API) GetRoleInferenceRule(ctx context.Context, priorRoleID string, impl
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -200,8 +288,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// ListAssignmentsOption is a per-call option of API.ListAssignments.
 type ListAssignmentsOption = request.NativeQueryCall
 
+// WithListAssignmentsOptions sets the whole ListAssignmentsOpts of API.ListAssignments.
 func WithListAssignmentsOptions(value ListAssignmentsOpts) ListAssignmentsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -240,8 +330,10 @@ func (a *API) ListAssignments(ctx context.Context, options ...ListAssignmentsOpt
 	})
 }
 
+// ListAssignmentsOnResourceOption is a per-call option of API.ListAssignmentsOnResource.
 type ListAssignmentsOnResourceOption = request.NativeCall
 
+// WithListAssignmentsOnResourceOptions sets the whole ListAssignmentsOnResourceOpts of API.ListAssignmentsOnResource.
 func WithListAssignmentsOnResourceOptions(value ListAssignmentsOnResourceOpts) ListAssignmentsOnResourceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -268,8 +360,10 @@ func (a *API) ListRoleInferenceRules(ctx context.Context) (*RoleInferenceRuleLis
 	return value0, err
 }
 
+// UnassignOption is a per-call option of API.Unassign.
 type UnassignOption = request.NativeCall
 
+// WithUnassignOptions sets the whole UnassignOpts of API.Unassign.
 func WithUnassignOptions(value UnassignOpts) UnassignOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -284,8 +378,10 @@ func (a *API) Unassign(ctx context.Context, roleID string, opts UnassignOpts, op
 	return request.Wrap("Unassign", "roles", upstream.Unassign(ctx, a.client, roleID, cfg.Options).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -324,8 +420,10 @@ func (a *API) Update(ctx context.Context, roleID string, opts UpdateOpts, option
 	return value0, err
 }
 
+// ValidateOption is a per-call option of API.Validate.
 type ValidateOption = request.NativeCall
 
+// WithValidateOptions sets the whole ValidateOpts of API.Validate.
 func WithValidateOptions(value ValidateOpts) ValidateOption {
 	return request.Custom(request.WithOptions(value))
 }

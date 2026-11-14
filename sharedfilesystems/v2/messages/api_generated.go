@@ -18,17 +18,29 @@ type API struct {
 	Resources *resource.Collection[Message]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// DeleteResult is Gophercloud's openstack/sharedfilesystems/v2/messages.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/v2/messages.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/sharedfilesystems/v2/messages.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Message is Gophercloud's openstack/sharedfilesystems/v2/messages.Message.
 type Message = upstream.Message
+
+// MessagePage is Gophercloud's openstack/sharedfilesystems/v2/messages.MessagePage.
 type MessagePage = upstream.MessagePage
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -44,8 +56,10 @@ func (a *API) Get(ctx context.Context, id string) (*Message, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

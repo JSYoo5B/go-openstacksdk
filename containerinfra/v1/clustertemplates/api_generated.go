@@ -18,31 +18,55 @@ type API struct {
 	Resources *resource.Collection[ClusterTemplate]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const AddOp = upstream.AddOp
 
+// ClusterTemplate is Gophercloud's openstack/containerinfra/v1/clustertemplates.ClusterTemplate.
 type ClusterTemplate = upstream.ClusterTemplate
+
+// ClusterTemplatePage is Gophercloud's openstack/containerinfra/v1/clustertemplates.ClusterTemplatePage.
 type ClusterTemplatePage = upstream.ClusterTemplatePage
+
+// CreateOpts is Gophercloud's openstack/containerinfra/v1/clustertemplates.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/containerinfra/v1/clustertemplates.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/containerinfra/v1/clustertemplates.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/containerinfra/v1/clustertemplates.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/containerinfra/v1/clustertemplates.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const RemoveOp = upstream.RemoveOp
 const ReplaceOp = upstream.ReplaceOp
 
+// UpdateOp is Gophercloud's openstack/containerinfra/v1/clustertemplates.UpdateOp.
 type UpdateOp = upstream.UpdateOp
+
+// UpdateOpts is Gophercloud's openstack/containerinfra/v1/clustertemplates.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/containerinfra/v1/clustertemplates.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -94,8 +118,10 @@ func (a *API) Get(ctx context.Context, id string) (*ClusterTemplate, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

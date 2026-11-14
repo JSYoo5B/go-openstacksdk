@@ -12,16 +12,34 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ACL is Gophercloud's openstack/keymanager/v1/acls.ACL.
 type ACL = upstream.ACL
+
+// ACLDetails is Gophercloud's openstack/keymanager/v1/acls.ACLDetails.
 type ACLDetails = upstream.ACLDetails
+
+// ACLRef is Gophercloud's openstack/keymanager/v1/acls.ACLRef.
 type ACLRef = upstream.ACLRef
+
+// ACLRefResult is Gophercloud's openstack/keymanager/v1/acls.ACLRefResult.
 type ACLRefResult = upstream.ACLRefResult
+
+// ACLResult is Gophercloud's openstack/keymanager/v1/acls.ACLResult.
 type ACLResult = upstream.ACLResult
+
+// DeleteResult is Gophercloud's openstack/keymanager/v1/acls.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// SetOpt is Gophercloud's openstack/keymanager/v1/acls.SetOpt.
 type SetOpt = upstream.SetOpt
+
+// SetOpts is Gophercloud's openstack/keymanager/v1/acls.SetOpts.
 type SetOpts = upstream.SetOpts
 
 // DeleteContainerACL invokes the upstream API with library-owned builders and result handling.
@@ -50,8 +68,10 @@ func (a *API) GetSecretACL(ctx context.Context, secretID string) (*ACL, error) {
 	return value0, err
 }
 
+// SetContainerACLOption is a per-call option of API.SetContainerACL.
 type SetContainerACLOption = request.NativeFieldCall
 
+// WithSetContainerACLOptions sets the whole SetOpts of API.SetContainerACL.
 func WithSetContainerACLOptions(value SetOpts) SetContainerACLOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -90,8 +110,10 @@ func (a *API) SetContainerACL(ctx context.Context, containerID string, opts SetO
 	return value0, err
 }
 
+// SetSecretACLOption is a per-call option of API.SetSecretACL.
 type SetSecretACLOption = request.NativeFieldCall
 
+// WithSetSecretACLOptions sets the whole SetOpts of API.SetSecretACL.
 func WithSetSecretACLOptions(value SetOpts) SetSecretACLOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -130,8 +152,10 @@ func (a *API) SetSecretACL(ctx context.Context, secretID string, opts SetOpts, o
 	return value0, err
 }
 
+// UpdateContainerACLOption is a per-call option of API.UpdateContainerACL.
 type UpdateContainerACLOption = request.NativeFieldCall
 
+// WithUpdateContainerACLOptions sets the whole SetOpts of API.UpdateContainerACL.
 func WithUpdateContainerACLOptions(value SetOpts) UpdateContainerACLOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -170,8 +194,10 @@ func (a *API) UpdateContainerACL(ctx context.Context, containerID string, opts S
 	return value0, err
 }
 
+// UpdateSecretACLOption is a per-call option of API.UpdateSecretACL.
 type UpdateSecretACLOption = request.NativeFieldCall
 
+// WithUpdateSecretACLOptions sets the whole SetOpts of API.UpdateSecretACL.
 func WithUpdateSecretACLOptions(value SetOpts) UpdateSecretACLOption {
 	return request.Custom(request.WithOptions(value))
 }

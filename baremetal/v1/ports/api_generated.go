@@ -18,33 +18,61 @@ type API struct {
 	Resources *resource.Collection[Port]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const AddOp = upstream.AddOp
 
+// CreateOpts is Gophercloud's openstack/baremetal/v1/ports.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/baremetal/v1/ports.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/baremetal/v1/ports.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/baremetal/v1/ports.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/baremetal/v1/ports.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Patch is Gophercloud's openstack/baremetal/v1/ports.Patch.
 type Patch = upstream.Patch
+
+// Port is Gophercloud's openstack/baremetal/v1/ports.Port.
 type Port = upstream.Port
+
+// PortPage is Gophercloud's openstack/baremetal/v1/ports.PortPage.
 type PortPage = upstream.PortPage
 
 const RemoveOp = upstream.RemoveOp
 const ReplaceOp = upstream.ReplaceOp
 
+// UpdateOp is Gophercloud's openstack/baremetal/v1/ports.UpdateOp.
 type UpdateOp = upstream.UpdateOp
+
+// UpdateOperation is Gophercloud's openstack/baremetal/v1/ports.UpdateOperation.
 type UpdateOperation = upstream.UpdateOperation
+
+// UpdateOpts is Gophercloud's openstack/baremetal/v1/ports.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/baremetal/v1/ports.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -96,8 +124,10 @@ func (a *API) Get(ctx context.Context, id string) (*Port, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -147,8 +177,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Port, 
 	})
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -204,8 +236,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

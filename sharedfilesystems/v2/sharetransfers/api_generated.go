@@ -18,24 +18,47 @@ type API struct {
 	Resources *resource.Collection[Transfer]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AcceptOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.AcceptOpts.
 type AcceptOpts = upstream.AcceptOpts
+
+// AcceptResult is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.AcceptResult.
 type AcceptResult = upstream.AcceptResult
+
+// CreateOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Transfer is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.Transfer.
 type Transfer = upstream.Transfer
+
+// TransferPage is Gophercloud's openstack/sharedfilesystems/v2/sharetransfers.TransferPage.
 type TransferPage = upstream.TransferPage
+
+// AcceptOption is a per-call option of API.Accept.
 type AcceptOption = request.NativeFieldCall
 
+// WithAcceptOptions sets the whole AcceptOpts of API.Accept.
 func WithAcceptOptions(value AcceptOpts) AcceptOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -70,8 +93,10 @@ func (a *API) Accept(ctx context.Context, id string, opts AcceptOpts, options ..
 	return request.Wrap("Accept", "sharetransfers", upstream.Accept(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -123,8 +148,10 @@ func (a *API) Get(ctx context.Context, id string) (*Transfer, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -161,8 +188,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Transf
 	})
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }

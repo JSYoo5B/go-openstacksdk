@@ -12,17 +12,37 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Allocations is Gophercloud's openstack/placement/v1/allocations.Allocations.
 type Allocations = upstream.Allocations
+
+// DeleteResult is Gophercloud's openstack/placement/v1/allocations.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/placement/v1/allocations.GetResult.
 type GetResult = upstream.GetResult
+
+// ManageOpts is Gophercloud's openstack/placement/v1/allocations.ManageOpts.
 type ManageOpts = upstream.ManageOpts
+
+// ManageResult is Gophercloud's openstack/placement/v1/allocations.ManageResult.
 type ManageResult = upstream.ManageResult
+
+// ProviderAllocations is Gophercloud's openstack/placement/v1/allocations.ProviderAllocations.
 type ProviderAllocations = upstream.ProviderAllocations
+
+// ProviderAllocationsOpts is Gophercloud's openstack/placement/v1/allocations.ProviderAllocationsOpts.
 type ProviderAllocationsOpts = upstream.ProviderAllocationsOpts
+
+// UpdateOpts is Gophercloud's openstack/placement/v1/allocations.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/placement/v1/allocations.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -38,8 +58,10 @@ func (a *API) Get(ctx context.Context, consumerUUID string) (*Allocations, error
 	return value0, err
 }
 
+// ManageOption is a per-call option of API.Manage.
 type ManageOption = request.NativeFieldCall
 
+// WithManageOptions sets the whole ManageOpts of API.Manage.
 func WithManageOptions(value ManageOpts) ManageOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -74,8 +96,10 @@ func (a *API) Manage(ctx context.Context, opts ManageOpts, options ...ManageOpti
 	return request.Wrap("Manage", "allocations", upstream.Manage(ctx, a.client, _opts).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

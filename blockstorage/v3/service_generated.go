@@ -59,6 +59,7 @@ type Service struct {
 	VolumeTypes               *resource23.API
 }
 
+// New returns a Service whose APIs share client.
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
 		Attachments:               resource0.New(client),
@@ -87,4 +88,6 @@ func New(client *gophercloud.ServiceClient) *Service {
 		VolumeTypes:               resource23.New(client),
 	}
 }
+
+// RawClient returns the shared Gophercloud service client.
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

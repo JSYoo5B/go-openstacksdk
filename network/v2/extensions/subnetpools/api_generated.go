@@ -18,26 +18,53 @@ type API struct {
 	Resources *resource.Collection[SubnetPool]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/subnetpools.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/subnetpools.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/subnetpools.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/subnetpools.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/subnetpools.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// PrefixesOpsOpts is Gophercloud's openstack/networking/v2/extensions/subnetpools.PrefixesOpsOpts.
 type PrefixesOpsOpts = upstream.PrefixesOpsOpts
+
+// PrefixesOpsResult is Gophercloud's openstack/networking/v2/extensions/subnetpools.PrefixesOpsResult.
 type PrefixesOpsResult = upstream.PrefixesOpsResult
+
+// SubnetPool is Gophercloud's openstack/networking/v2/extensions/subnetpools.SubnetPool.
 type SubnetPool = upstream.SubnetPool
+
+// SubnetPoolPage is Gophercloud's openstack/networking/v2/extensions/subnetpools.SubnetPoolPage.
 type SubnetPoolPage = upstream.SubnetPoolPage
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/subnetpools.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/subnetpools.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddPrefixesOption is a per-call option of API.AddPrefixes.
 type AddPrefixesOption = request.NativeFieldCall
 
+// WithAddPrefixesOptions sets the whole PrefixesOpsOpts of API.AddPrefixes.
 func WithAddPrefixesOptions(value PrefixesOpsOpts) AddPrefixesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -76,8 +103,10 @@ func (a *API) AddPrefixes(ctx context.Context, subnetPoolID string, opts Prefixe
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -129,8 +158,10 @@ func (a *API) Get(ctx context.Context, id string) (*SubnetPool, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -171,8 +202,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// RemovePrefixesOption is a per-call option of API.RemovePrefixes.
 type RemovePrefixesOption = request.NativeFieldCall
 
+// WithRemovePrefixesOptions sets the whole PrefixesOpsOpts of API.RemovePrefixes.
 func WithRemovePrefixesOptions(value PrefixesOpsOpts) RemovePrefixesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -211,8 +244,10 @@ func (a *API) RemovePrefixes(ctx context.Context, subnetPoolID string, opts Pref
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

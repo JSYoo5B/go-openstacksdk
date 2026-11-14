@@ -18,24 +18,50 @@ type API struct {
 	Resources *resource.Collection[Trust]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CheckRoleResult is Gophercloud's openstack/identity/v3/trusts.CheckRoleResult.
 type CheckRoleResult = upstream.CheckRoleResult
+
+// CreateOpts is Gophercloud's openstack/identity/v3/trusts.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/trusts.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/trusts.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/identity/v3/trusts.GetResult.
 type GetResult = upstream.GetResult
+
+// GetRoleResult is Gophercloud's openstack/identity/v3/trusts.GetRoleResult.
 type GetRoleResult = upstream.GetRoleResult
+
+// ListOpts is Gophercloud's openstack/identity/v3/trusts.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Role is Gophercloud's openstack/identity/v3/trusts.Role.
 type Role = upstream.Role
+
+// RolesPage is Gophercloud's openstack/identity/v3/trusts.RolesPage.
 type RolesPage = upstream.RolesPage
+
+// TokenExt is Gophercloud's openstack/identity/v3/trusts.TokenExt.
 type TokenExt = upstream.TokenExt
+
+// Trust is Gophercloud's openstack/identity/v3/trusts.Trust.
 type Trust = upstream.Trust
+
+// TrustPage is Gophercloud's openstack/identity/v3/trusts.TrustPage.
 type TrustPage = upstream.TrustPage
 
 // CheckRole invokes the upstream API with library-owned builders and result handling.
@@ -43,8 +69,10 @@ func (a *API) CheckRole(ctx context.Context, id string, roleID string) error {
 	return request.Wrap("CheckRole", "trusts", upstream.CheckRole(ctx, a.client, id, roleID).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -104,8 +132,10 @@ func (a *API) GetRole(ctx context.Context, id string, roleID string) (*Role, err
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

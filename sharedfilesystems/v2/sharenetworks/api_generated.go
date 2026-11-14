@@ -18,28 +18,59 @@ type API struct {
 	Resources *resource.Collection[ShareNetwork]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddSecurityServiceOpts is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.AddSecurityServiceOpts.
 type AddSecurityServiceOpts = upstream.AddSecurityServiceOpts
+
+// AddSecurityServiceResult is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.AddSecurityServiceResult.
 type AddSecurityServiceResult = upstream.AddSecurityServiceResult
+
+// CreateOpts is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RemoveSecurityServiceOpts is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.RemoveSecurityServiceOpts.
 type RemoveSecurityServiceOpts = upstream.RemoveSecurityServiceOpts
+
+// RemoveSecurityServiceResult is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.RemoveSecurityServiceResult.
 type RemoveSecurityServiceResult = upstream.RemoveSecurityServiceResult
+
+// ShareNetwork is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.ShareNetwork.
 type ShareNetwork = upstream.ShareNetwork
+
+// ShareNetworkPage is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.ShareNetworkPage.
 type ShareNetworkPage = upstream.ShareNetworkPage
+
+// UpdateOpts is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/sharedfilesystems/v2/sharenetworks.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddSecurityServiceOption is a per-call option of API.AddSecurityService.
 type AddSecurityServiceOption = request.NativeFieldCall
 
+// WithAddSecurityServiceOptions sets the whole AddSecurityServiceOpts of API.AddSecurityService.
 func WithAddSecurityServiceOptions(value AddSecurityServiceOpts) AddSecurityServiceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -78,8 +109,10 @@ func (a *API) AddSecurityService(ctx context.Context, id string, opts AddSecurit
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -131,8 +164,10 @@ func (a *API) Get(ctx context.Context, id string) (*ShareNetwork, error) {
 	return value0, err
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -175,8 +210,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
+// RemoveSecurityServiceOption is a per-call option of API.RemoveSecurityService.
 type RemoveSecurityServiceOption = request.NativeFieldCall
 
+// WithRemoveSecurityServiceOptions sets the whole RemoveSecurityServiceOpts of API.RemoveSecurityService.
 func WithRemoveSecurityServiceOptions(value RemoveSecurityServiceOpts) RemoveSecurityServiceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -215,8 +252,10 @@ func (a *API) RemoveSecurityService(ctx context.Context, id string, opts RemoveS
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

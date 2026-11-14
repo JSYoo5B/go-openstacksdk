@@ -18,19 +18,35 @@ type API struct {
 	Resources *resource.Collection[Task]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/image/v2/tasks.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/image/v2/tasks.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// GetResult is Gophercloud's openstack/image/v2/tasks.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/image/v2/tasks.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Task is Gophercloud's openstack/image/v2/tasks.Task.
 type Task = upstream.Task
+
+// TaskPage is Gophercloud's openstack/image/v2/tasks.TaskPage.
 type TaskPage = upstream.TaskPage
+
+// TaskStatus is Gophercloud's openstack/image/v2/tasks.TaskStatus.
 type TaskStatus = upstream.TaskStatus
 
 const TaskStatusFailure = upstream.TaskStatusFailure
@@ -38,8 +54,10 @@ const TaskStatusPending = upstream.TaskStatusPending
 const TaskStatusProcessing = upstream.TaskStatusProcessing
 const TaskStatusSuccess = upstream.TaskStatusSuccess
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -86,8 +104,10 @@ func (a *API) Get(ctx context.Context, taskID string) (*Task, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

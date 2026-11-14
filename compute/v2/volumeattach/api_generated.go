@@ -15,18 +15,37 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/compute/v2/volumeattach.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/compute/v2/volumeattach.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/compute/v2/volumeattach.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/compute/v2/volumeattach.GetResult.
 type GetResult = upstream.GetResult
+
+// VolumeAttachment is Gophercloud's openstack/compute/v2/volumeattach.VolumeAttachment.
 type VolumeAttachment = upstream.VolumeAttachment
+
+// VolumeAttachmentPage is Gophercloud's openstack/compute/v2/volumeattach.VolumeAttachmentPage.
 type VolumeAttachmentPage = upstream.VolumeAttachmentPage
+
+// VolumeAttachmentResult is Gophercloud's openstack/compute/v2/volumeattach.VolumeAttachmentResult.
 type VolumeAttachmentResult = upstream.VolumeAttachmentResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

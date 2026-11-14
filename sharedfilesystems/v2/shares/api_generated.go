@@ -18,49 +18,122 @@ type API struct {
 	Resources *resource.Collection[Share]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AccessRight is Gophercloud's openstack/sharedfilesystems/v2/shares.AccessRight.
 type AccessRight = upstream.AccessRight
+
+// CreateOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/sharedfilesystems/v2/shares.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteMetadatumResult is Gophercloud's openstack/sharedfilesystems/v2/shares.DeleteMetadatumResult.
 type DeleteMetadatumResult = upstream.DeleteMetadatumResult
+
+// DeleteResult is Gophercloud's openstack/sharedfilesystems/v2/shares.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ExportLocation is Gophercloud's openstack/sharedfilesystems/v2/shares.ExportLocation.
 type ExportLocation = upstream.ExportLocation
+
+// ExtendOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.ExtendOpts.
 type ExtendOpts = upstream.ExtendOpts
+
+// ExtendResult is Gophercloud's openstack/sharedfilesystems/v2/shares.ExtendResult.
 type ExtendResult = upstream.ExtendResult
+
+// ForceDeleteResult is Gophercloud's openstack/sharedfilesystems/v2/shares.ForceDeleteResult.
 type ForceDeleteResult = upstream.ForceDeleteResult
+
+// GetExportLocationResult is Gophercloud's openstack/sharedfilesystems/v2/shares.GetExportLocationResult.
 type GetExportLocationResult = upstream.GetExportLocationResult
+
+// GetMetadatumResult is Gophercloud's openstack/sharedfilesystems/v2/shares.GetMetadatumResult.
 type GetMetadatumResult = upstream.GetMetadatumResult
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/v2/shares.GetResult.
 type GetResult = upstream.GetResult
+
+// GrantAccessOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.GrantAccessOpts.
 type GrantAccessOpts = upstream.GrantAccessOpts
+
+// GrantAccessResult is Gophercloud's openstack/sharedfilesystems/v2/shares.GrantAccessResult.
 type GrantAccessResult = upstream.GrantAccessResult
+
+// ListAccessRightsResult is Gophercloud's openstack/sharedfilesystems/v2/shares.ListAccessRightsResult.
 type ListAccessRightsResult = upstream.ListAccessRightsResult
+
+// ListExportLocationsResult is Gophercloud's openstack/sharedfilesystems/v2/shares.ListExportLocationsResult.
 type ListExportLocationsResult = upstream.ListExportLocationsResult
+
+// ListOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// MetadataResult is Gophercloud's openstack/sharedfilesystems/v2/shares.MetadataResult.
 type MetadataResult = upstream.MetadataResult
+
+// ResetStatusOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.ResetStatusOpts.
 type ResetStatusOpts = upstream.ResetStatusOpts
+
+// ResetStatusResult is Gophercloud's openstack/sharedfilesystems/v2/shares.ResetStatusResult.
 type ResetStatusResult = upstream.ResetStatusResult
+
+// RevertOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.RevertOpts.
 type RevertOpts = upstream.RevertOpts
+
+// RevertResult is Gophercloud's openstack/sharedfilesystems/v2/shares.RevertResult.
 type RevertResult = upstream.RevertResult
+
+// RevokeAccessOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.RevokeAccessOpts.
 type RevokeAccessOpts = upstream.RevokeAccessOpts
+
+// RevokeAccessResult is Gophercloud's openstack/sharedfilesystems/v2/shares.RevokeAccessResult.
 type RevokeAccessResult = upstream.RevokeAccessResult
+
+// SchedulerHints is Gophercloud's openstack/sharedfilesystems/v2/shares.SchedulerHints.
 type SchedulerHints = upstream.SchedulerHints
+
+// SetMetadataOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.SetMetadataOpts.
 type SetMetadataOpts = upstream.SetMetadataOpts
+
+// Share is Gophercloud's openstack/sharedfilesystems/v2/shares.Share.
 type Share = upstream.Share
+
+// SharePage is Gophercloud's openstack/sharedfilesystems/v2/shares.SharePage.
 type SharePage = upstream.SharePage
+
+// ShrinkOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.ShrinkOpts.
 type ShrinkOpts = upstream.ShrinkOpts
+
+// ShrinkResult is Gophercloud's openstack/sharedfilesystems/v2/shares.ShrinkResult.
 type ShrinkResult = upstream.ShrinkResult
+
+// UnmanageResult is Gophercloud's openstack/sharedfilesystems/v2/shares.UnmanageResult.
 type UnmanageResult = upstream.UnmanageResult
+
+// UpdateMetadataOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.UpdateMetadataOpts.
 type UpdateMetadataOpts = upstream.UpdateMetadataOpts
+
+// UpdateOpts is Gophercloud's openstack/sharedfilesystems/v2/shares.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/sharedfilesystems/v2/shares.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -109,8 +182,10 @@ func (a *API) DeleteMetadatum(ctx context.Context, id string, key string) error 
 	return request.Wrap("DeleteMetadatum", "shares", upstream.DeleteMetadatum(ctx, a.client, id, key).ExtractErr())
 }
 
+// ExtendOption is a per-call option of API.Extend.
 type ExtendOption = request.NativeFieldCall
 
+// WithExtendOptions sets the whole ExtendOpts of API.Extend.
 func WithExtendOptions(value ExtendOpts) ExtendOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -182,8 +257,10 @@ func (a *API) GetMetadatum(ctx context.Context, id string, key string) (map[stri
 	return value0, err
 }
 
+// GrantAccessOption is a per-call option of API.GrantAccess.
 type GrantAccessOption = request.NativeFieldCall
 
+// WithGrantAccessOptions sets the whole GrantAccessOpts of API.GrantAccess.
 func WithGrantAccessOptions(value GrantAccessOpts) GrantAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -230,8 +307,10 @@ func (a *API) ListAccessRights(ctx context.Context, id string) ([]AccessRight, e
 	return value0, err
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -282,8 +361,10 @@ func (a *API) ListExportLocations(ctx context.Context, id string) ([]ExportLocat
 	return value0, err
 }
 
+// ResetStatusOption is a per-call option of API.ResetStatus.
 type ResetStatusOption = request.NativeFieldCall
 
+// WithResetStatusOptions sets the whole ResetStatusOpts of API.ResetStatus.
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -318,8 +399,10 @@ func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, 
 	return request.Wrap("ResetStatus", "shares", upstream.ResetStatus(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// RevertOption is a per-call option of API.Revert.
 type RevertOption = request.NativeFieldCall
 
+// WithRevertOptions sets the whole RevertOpts of API.Revert.
 func WithRevertOptions(value RevertOpts) RevertOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -354,8 +437,10 @@ func (a *API) Revert(ctx context.Context, id string, opts RevertOpts, options ..
 	return request.Wrap("Revert", "shares", upstream.Revert(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// RevokeAccessOption is a per-call option of API.RevokeAccess.
 type RevokeAccessOption = request.NativeFieldCall
 
+// WithRevokeAccessOptions sets the whole RevokeAccessOpts of API.RevokeAccess.
 func WithRevokeAccessOptions(value RevokeAccessOpts) RevokeAccessOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -390,8 +475,10 @@ func (a *API) RevokeAccess(ctx context.Context, id string, opts RevokeAccessOpts
 	return request.Wrap("RevokeAccess", "shares", upstream.RevokeAccess(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// SetMetadataOption is a per-call option of API.SetMetadata.
 type SetMetadataOption = request.NativeFieldCall
 
+// WithSetMetadataOptions sets the whole SetMetadataOpts of API.SetMetadata.
 func WithSetMetadataOptions(value SetMetadataOpts) SetMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -430,8 +517,10 @@ func (a *API) SetMetadata(ctx context.Context, id string, opts SetMetadataOpts, 
 	return value0, err
 }
 
+// ShrinkOption is a per-call option of API.Shrink.
 type ShrinkOption = request.NativeFieldCall
 
+// WithShrinkOptions sets the whole ShrinkOpts of API.Shrink.
 func WithShrinkOptions(value ShrinkOpts) ShrinkOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -471,8 +560,10 @@ func (a *API) Unmanage(ctx context.Context, id string) error {
 	return request.Wrap("Unmanage", "shares", upstream.Unmanage(ctx, a.client, id).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -511,8 +602,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdateMetadataOption is a per-call option of API.UpdateMetadata.
 type UpdateMetadataOption = request.NativeFieldCall
 
+// WithUpdateMetadataOptions sets the whole UpdateMetadataOpts of API.UpdateMetadata.
 func WithUpdateMetadataOptions(value UpdateMetadataOpts) UpdateMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }

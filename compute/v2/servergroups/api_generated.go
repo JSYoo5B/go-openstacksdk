@@ -18,24 +18,47 @@ type API struct {
 	Resources *resource.Collection[ServerGroup]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/compute/v2/servergroups.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/compute/v2/servergroups.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/compute/v2/servergroups.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/compute/v2/servergroups.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/compute/v2/servergroups.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Rules is Gophercloud's openstack/compute/v2/servergroups.Rules.
 type Rules = upstream.Rules
+
+// ServerGroup is Gophercloud's openstack/compute/v2/servergroups.ServerGroup.
 type ServerGroup = upstream.ServerGroup
+
+// ServerGroupPage is Gophercloud's openstack/compute/v2/servergroups.ServerGroupPage.
 type ServerGroupPage = upstream.ServerGroupPage
+
+// ServerGroupResult is Gophercloud's openstack/compute/v2/servergroups.ServerGroupResult.
 type ServerGroupResult = upstream.ServerGroupResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -87,8 +110,10 @@ func (a *API) Get(ctx context.Context, id string) (*ServerGroup, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

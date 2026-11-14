@@ -12,17 +12,37 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// DeleteResult is Gophercloud's openstack/compute/v2/quotasets.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetDetailResult is Gophercloud's openstack/compute/v2/quotasets.GetDetailResult.
 type GetDetailResult = upstream.GetDetailResult
+
+// GetResult is Gophercloud's openstack/compute/v2/quotasets.GetResult.
 type GetResult = upstream.GetResult
+
+// QuotaDetail is Gophercloud's openstack/compute/v2/quotasets.QuotaDetail.
 type QuotaDetail = upstream.QuotaDetail
+
+// QuotaDetailSet is Gophercloud's openstack/compute/v2/quotasets.QuotaDetailSet.
 type QuotaDetailSet = upstream.QuotaDetailSet
+
+// QuotaSet is Gophercloud's openstack/compute/v2/quotasets.QuotaSet.
 type QuotaSet = upstream.QuotaSet
+
+// QuotaSetPage is Gophercloud's openstack/compute/v2/quotasets.QuotaSetPage.
 type QuotaSetPage = upstream.QuotaSetPage
+
+// UpdateOpts is Gophercloud's openstack/compute/v2/quotasets.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/compute/v2/quotasets.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -49,8 +69,10 @@ func (a *API) GetDetail(ctx context.Context, tenantID string) (QuotaDetailSet, e
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

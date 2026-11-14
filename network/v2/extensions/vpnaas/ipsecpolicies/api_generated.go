@@ -18,13 +18,17 @@ type API struct {
 	Resources *resource.Collection[Policy]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AuthAlgorithm is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.AuthAlgorithm.
 type AuthAlgorithm = upstream.AuthAlgorithm
 
 const AuthAlgorithmAESCMAC = upstream.AuthAlgorithmAESCMAC
@@ -34,14 +38,22 @@ const AuthAlgorithmSHA256 = upstream.AuthAlgorithmSHA256
 const AuthAlgorithmSHA384 = upstream.AuthAlgorithmSHA384
 const AuthAlgorithmSHA512 = upstream.AuthAlgorithmSHA512
 
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// EncapsulationMode is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.EncapsulationMode.
 type EncapsulationMode = upstream.EncapsulationMode
 
 const EncapsulationModeTransport = upstream.EncapsulationModeTransport
 const EncapsulationModeTunnel = upstream.EncapsulationModeTunnel
 
+// EncryptionAlgorithm is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.EncryptionAlgorithm.
 type EncryptionAlgorithm = upstream.EncryptionAlgorithm
 
 const EncryptionAlgorithm3DES = upstream.EncryptionAlgorithm3DES
@@ -70,11 +82,22 @@ const EncryptionAlgorithmAES256GCM12 = upstream.EncryptionAlgorithmAES256GCM12
 const EncryptionAlgorithmAES256GCM16 = upstream.EncryptionAlgorithmAES256GCM16
 const EncryptionAlgorithmAES256GCM8 = upstream.EncryptionAlgorithmAES256GCM8
 
+// GetResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.GetResult.
 type GetResult = upstream.GetResult
+
+// Lifetime is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.Lifetime.
 type Lifetime = upstream.Lifetime
+
+// LifetimeCreateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.LifetimeCreateOpts.
 type LifetimeCreateOpts = upstream.LifetimeCreateOpts
+
+// LifetimeUpdateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.LifetimeUpdateOpts.
 type LifetimeUpdateOpts = upstream.LifetimeUpdateOpts
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// PFS is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.PFS.
 type PFS = upstream.PFS
 
 const PFSGroup14 = upstream.PFSGroup14
@@ -98,23 +121,35 @@ const PFSGroup30 = upstream.PFSGroup30
 const PFSGroup31 = upstream.PFSGroup31
 const PFSGroup5 = upstream.PFSGroup5
 
+// Policy is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.Policy.
 type Policy = upstream.Policy
+
+// PolicyPage is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.PolicyPage.
 type PolicyPage = upstream.PolicyPage
+
+// TransformProtocol is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.TransformProtocol.
 type TransformProtocol = upstream.TransformProtocol
 
 const TransformProtocolAH = upstream.TransformProtocolAH
 const TransformProtocolAHESP = upstream.TransformProtocolAHESP
 const TransformProtocolESP = upstream.TransformProtocolESP
 
+// Unit is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.Unit.
 type Unit = upstream.Unit
 
 const UnitKilobytes = upstream.UnitKilobytes
 const UnitSeconds = upstream.UnitSeconds
 
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/vpnaas/ipsecpolicies.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -166,8 +201,10 @@ func (a *API) Get(ctx context.Context, id string) (*Policy, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -208,8 +245,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

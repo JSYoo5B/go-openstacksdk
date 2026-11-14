@@ -15,17 +15,34 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AllTenantsOpts is Gophercloud's openstack/compute/v2/usage.AllTenantsOpts.
 type AllTenantsOpts = upstream.AllTenantsOpts
+
+// AllTenantsPage is Gophercloud's openstack/compute/v2/usage.AllTenantsPage.
 type AllTenantsPage = upstream.AllTenantsPage
+
+// ServerUsage is Gophercloud's openstack/compute/v2/usage.ServerUsage.
 type ServerUsage = upstream.ServerUsage
+
+// SingleTenantOpts is Gophercloud's openstack/compute/v2/usage.SingleTenantOpts.
 type SingleTenantOpts = upstream.SingleTenantOpts
+
+// SingleTenantPage is Gophercloud's openstack/compute/v2/usage.SingleTenantPage.
 type SingleTenantPage = upstream.SingleTenantPage
+
+// TenantUsage is Gophercloud's openstack/compute/v2/usage.TenantUsage.
 type TenantUsage = upstream.TenantUsage
+
+// AllTenantsOption is a per-call option of API.AllTenants.
 type AllTenantsOption = request.NativeQueryCall
 
+// WithAllTenantsOptions sets the whole AllTenantsOpts of API.AllTenants.
 func WithAllTenantsOptions(value AllTenantsOpts) AllTenantsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -63,8 +80,10 @@ func (a *API) AllTenants(ctx context.Context, opts AllTenantsOpts, options ...Al
 	})
 }
 
+// SingleTenantOption is a per-call option of API.SingleTenant.
 type SingleTenantOption = request.NativeQueryCall
 
+// WithSingleTenantOptions sets the whole SingleTenantOpts of API.SingleTenant.
 func WithSingleTenantOptions(value SingleTenantOpts) SingleTenantOption {
 	return request.Custom(request.WithOptions(value))
 }

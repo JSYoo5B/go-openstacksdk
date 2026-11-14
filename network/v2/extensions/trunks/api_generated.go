@@ -18,21 +18,41 @@ type API struct {
 	Resources *resource.Collection[Trunk]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddSubportsOpts is Gophercloud's openstack/networking/v2/extensions/trunks.AddSubportsOpts.
 type AddSubportsOpts = upstream.AddSubportsOpts
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/trunks.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/trunks.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/trunks.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/trunks.GetResult.
 type GetResult = upstream.GetResult
+
+// GetSubportsResult is Gophercloud's openstack/networking/v2/extensions/trunks.GetSubportsResult.
 type GetSubportsResult = upstream.GetSubportsResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/trunks.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RemoveSubport is Gophercloud's openstack/networking/v2/extensions/trunks.RemoveSubport.
 type RemoveSubport = upstream.RemoveSubport
+
+// RemoveSubportsOpts is Gophercloud's openstack/networking/v2/extensions/trunks.RemoveSubportsOpts.
 type RemoveSubportsOpts = upstream.RemoveSubportsOpts
 
 const StatusActive = upstream.StatusActive
@@ -41,14 +61,28 @@ const StatusDegraded = upstream.StatusDegraded
 const StatusDown = upstream.StatusDown
 const StatusError = upstream.StatusError
 
+// Subport is Gophercloud's openstack/networking/v2/extensions/trunks.Subport.
 type Subport = upstream.Subport
+
+// Trunk is Gophercloud's openstack/networking/v2/extensions/trunks.Trunk.
 type Trunk = upstream.Trunk
+
+// TrunkPage is Gophercloud's openstack/networking/v2/extensions/trunks.TrunkPage.
 type TrunkPage = upstream.TrunkPage
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/trunks.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/trunks.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// UpdateSubportsResult is Gophercloud's openstack/networking/v2/extensions/trunks.UpdateSubportsResult.
 type UpdateSubportsResult = upstream.UpdateSubportsResult
+
+// AddSubportsOption is a per-call option of API.AddSubports.
 type AddSubportsOption = request.NativeFieldCall
 
+// WithAddSubportsOptions sets the whole AddSubportsOpts of API.AddSubports.
 func WithAddSubportsOptions(value AddSubportsOpts) AddSubportsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -87,8 +121,10 @@ func (a *API) AddSubports(ctx context.Context, id string, opts AddSubportsOpts, 
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -148,8 +184,10 @@ func (a *API) GetSubports(ctx context.Context, id string) ([]Subport, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -190,8 +228,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// RemoveSubportsOption is a per-call option of API.RemoveSubports.
 type RemoveSubportsOption = request.NativeFieldCall
 
+// WithRemoveSubportsOptions sets the whole RemoveSubportsOpts of API.RemoveSubports.
 func WithRemoveSubportsOptions(value RemoveSubportsOpts) RemoveSubportsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -230,8 +270,10 @@ func (a *API) RemoveSubports(ctx context.Context, id string, opts RemoveSubports
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

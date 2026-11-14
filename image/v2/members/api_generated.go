@@ -15,15 +15,31 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateResult is Gophercloud's openstack/image/v2/members.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/image/v2/members.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DetailsResult is Gophercloud's openstack/image/v2/members.DetailsResult.
 type DetailsResult = upstream.DetailsResult
+
+// Member is Gophercloud's openstack/image/v2/members.Member.
 type Member = upstream.Member
+
+// MemberPage is Gophercloud's openstack/image/v2/members.MemberPage.
 type MemberPage = upstream.MemberPage
+
+// UpdateOpts is Gophercloud's openstack/image/v2/members.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/image/v2/members.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // Create invokes the upstream API with library-owned builders and result handling.
@@ -59,8 +75,10 @@ func (a *API) listWithControl(ctx context.Context, id string, control resource.L
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

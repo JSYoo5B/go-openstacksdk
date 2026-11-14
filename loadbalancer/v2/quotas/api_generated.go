@@ -12,13 +12,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// DeleteResult is Gophercloud's openstack/loadbalancer/v2/quotas.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/loadbalancer/v2/quotas.GetResult.
 type GetResult = upstream.GetResult
+
+// Quota is Gophercloud's openstack/loadbalancer/v2/quotas.Quota.
 type Quota = upstream.Quota
+
+// UpdateOpts is Gophercloud's openstack/loadbalancer/v2/quotas.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/loadbalancer/v2/quotas.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -34,8 +46,10 @@ func (a *API) Get(ctx context.Context, projectID string) (*Quota, error) {
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

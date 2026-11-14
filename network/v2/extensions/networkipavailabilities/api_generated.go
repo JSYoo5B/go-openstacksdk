@@ -15,13 +15,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// GetResult is Gophercloud's openstack/networking/v2/extensions/networkipavailabilities.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/networkipavailabilities.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// NetworkIPAvailability is Gophercloud's openstack/networking/v2/extensions/networkipavailabilities.NetworkIPAvailability.
 type NetworkIPAvailability = upstream.NetworkIPAvailability
+
+// NetworkIPAvailabilityPage is Gophercloud's openstack/networking/v2/extensions/networkipavailabilities.NetworkIPAvailabilityPage.
 type NetworkIPAvailabilityPage = upstream.NetworkIPAvailabilityPage
+
+// SubnetIPAvailability is Gophercloud's openstack/networking/v2/extensions/networkipavailabilities.SubnetIPAvailability.
 type SubnetIPAvailability = upstream.SubnetIPAvailability
 
 // Get invokes the upstream API with library-owned builders and result handling.
@@ -32,8 +44,10 @@ func (a *API) Get(ctx context.Context, id string) (*NetworkIPAvailability, error
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

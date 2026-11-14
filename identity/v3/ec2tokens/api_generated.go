@@ -13,9 +13,13 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AuthOptions is Gophercloud's openstack/identity/v3/ec2tokens.AuthOptions.
 type AuthOptions = upstream.AuthOptions
 
 const EC2CredentialsAwsHmacV4 = upstream.EC2CredentialsAwsHmacV4
@@ -25,8 +29,10 @@ const EC2CredentialsHmacSha1V2 = upstream.EC2CredentialsHmacSha1V2
 const EC2CredentialsHmacSha256V2 = upstream.EC2CredentialsHmacSha256V2
 const EC2CredentialsTimestampFormatV4 = upstream.EC2CredentialsTimestampFormatV4
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole *AuthOptions of API.Create.
 func WithCreateOptions(value *AuthOptions) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -84,8 +90,10 @@ func (a *API) Create(ctx context.Context, opts *AuthOptions, options ...CreateOp
 	return value0, err
 }
 
+// ValidateS3TokenOption is a per-call option of API.ValidateS3Token.
 type ValidateS3TokenOption = request.NativeFieldCall
 
+// WithValidateS3TokenOptions sets the whole *AuthOptions of API.ValidateS3Token.
 func WithValidateS3TokenOptions(value *AuthOptions) ValidateS3TokenOption {
 	return request.Custom(request.WithOptions(value))
 }

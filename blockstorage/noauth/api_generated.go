@@ -12,12 +12,19 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// EndpointOpts is Gophercloud's openstack/blockstorage/noauth.EndpointOpts.
 type EndpointOpts = upstream.EndpointOpts
+
+// NewBlockStorageNoAuthV2Option is a per-call option of API.NewBlockStorageNoAuthV2.
 type NewBlockStorageNoAuthV2Option = request.NativeCall
 
+// WithNewBlockStorageNoAuthV2Options sets the whole EndpointOpts of API.NewBlockStorageNoAuthV2.
 func WithNewBlockStorageNoAuthV2Options(value EndpointOpts) NewBlockStorageNoAuthV2Option {
 	return request.Custom(request.WithOptions(value))
 }
@@ -33,8 +40,10 @@ func (a *API) NewBlockStorageNoAuthV2(ctx context.Context, eo EndpointOpts, opti
 	return upstream.NewBlockStorageNoAuthV2(a.client.ProviderClient, cfg.Options)
 }
 
+// NewBlockStorageNoAuthV3Option is a per-call option of API.NewBlockStorageNoAuthV3.
 type NewBlockStorageNoAuthV3Option = request.NativeCall
 
+// WithNewBlockStorageNoAuthV3Options sets the whole EndpointOpts of API.NewBlockStorageNoAuthV3.
 func WithNewBlockStorageNoAuthV3Options(value EndpointOpts) NewBlockStorageNoAuthV3Option {
 	return request.Custom(request.WithOptions(value))
 }

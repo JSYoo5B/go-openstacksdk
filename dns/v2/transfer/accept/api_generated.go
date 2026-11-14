@@ -18,21 +18,38 @@ type API struct {
 	Resources *resource.Collection[TransferAccept]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/dns/v2/transfer/accept.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/dns/v2/transfer/accept.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// GetResult is Gophercloud's openstack/dns/v2/transfer/accept.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/dns/v2/transfer/accept.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// TransferAccept is Gophercloud's openstack/dns/v2/transfer/accept.TransferAccept.
 type TransferAccept = upstream.TransferAccept
+
+// TransferAcceptPage is Gophercloud's openstack/dns/v2/transfer/accept.TransferAcceptPage.
 type TransferAcceptPage = upstream.TransferAcceptPage
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -79,8 +96,10 @@ func (a *API) Get(ctx context.Context, transferAcceptID string) (*TransferAccept
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

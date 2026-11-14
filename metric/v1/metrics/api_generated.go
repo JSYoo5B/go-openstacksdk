@@ -12,30 +12,76 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ActiveTarget is Gophercloud's openstack/metric/v1/metrics.ActiveTarget.
 type ActiveTarget = upstream.ActiveTarget
+
+// CleanTombstonesResult is Gophercloud's openstack/metric/v1/metrics.CleanTombstonesResult.
 type CleanTombstonesResult = upstream.CleanTombstonesResult
+
+// DeleteSeriesOpts is Gophercloud's openstack/metric/v1/metrics.DeleteSeriesOpts.
 type DeleteSeriesOpts = upstream.DeleteSeriesOpts
+
+// DeleteSeriesResult is Gophercloud's openstack/metric/v1/metrics.DeleteSeriesResult.
 type DeleteSeriesResult = upstream.DeleteSeriesResult
+
+// DroppedTarget is Gophercloud's openstack/metric/v1/metrics.DroppedTarget.
 type DroppedTarget = upstream.DroppedTarget
+
+// LabelValuesOpts is Gophercloud's openstack/metric/v1/metrics.LabelValuesOpts.
 type LabelValuesOpts = upstream.LabelValuesOpts
+
+// LabelValuesResult is Gophercloud's openstack/metric/v1/metrics.LabelValuesResult.
 type LabelValuesResult = upstream.LabelValuesResult
+
+// LabelsOpts is Gophercloud's openstack/metric/v1/metrics.LabelsOpts.
 type LabelsOpts = upstream.LabelsOpts
+
+// LabelsResult is Gophercloud's openstack/metric/v1/metrics.LabelsResult.
 type LabelsResult = upstream.LabelsResult
+
+// MetricValue is Gophercloud's openstack/metric/v1/metrics.MetricValue.
 type MetricValue = upstream.MetricValue
+
+// QueryData is Gophercloud's openstack/metric/v1/metrics.QueryData.
 type QueryData = upstream.QueryData
+
+// QueryOpts is Gophercloud's openstack/metric/v1/metrics.QueryOpts.
 type QueryOpts = upstream.QueryOpts
+
+// QueryResult is Gophercloud's openstack/metric/v1/metrics.QueryResult.
 type QueryResult = upstream.QueryResult
+
+// RuntimeInfoData is Gophercloud's openstack/metric/v1/metrics.RuntimeInfoData.
 type RuntimeInfoData = upstream.RuntimeInfoData
+
+// RuntimeInfoResult is Gophercloud's openstack/metric/v1/metrics.RuntimeInfoResult.
 type RuntimeInfoResult = upstream.RuntimeInfoResult
+
+// SeriesOpts is Gophercloud's openstack/metric/v1/metrics.SeriesOpts.
 type SeriesOpts = upstream.SeriesOpts
+
+// SeriesResult is Gophercloud's openstack/metric/v1/metrics.SeriesResult.
 type SeriesResult = upstream.SeriesResult
+
+// SnapshotData is Gophercloud's openstack/metric/v1/metrics.SnapshotData.
 type SnapshotData = upstream.SnapshotData
+
+// SnapshotResult is Gophercloud's openstack/metric/v1/metrics.SnapshotResult.
 type SnapshotResult = upstream.SnapshotResult
+
+// TargetsData is Gophercloud's openstack/metric/v1/metrics.TargetsData.
 type TargetsData = upstream.TargetsData
+
+// TargetsOpts is Gophercloud's openstack/metric/v1/metrics.TargetsOpts.
 type TargetsOpts = upstream.TargetsOpts
+
+// TargetsResult is Gophercloud's openstack/metric/v1/metrics.TargetsResult.
 type TargetsResult = upstream.TargetsResult
 
 // CleanTombstones invokes the upstream API with library-owned builders and result handling.
@@ -43,8 +89,10 @@ func (a *API) CleanTombstones(ctx context.Context) error {
 	return request.Wrap("CleanTombstones", "metrics", upstream.CleanTombstones(ctx, a.client).ExtractErr())
 }
 
+// DeleteSeriesOption is a per-call option of API.DeleteSeries.
 type DeleteSeriesOption = request.NativeQueryCall
 
+// WithDeleteSeriesOptions sets the whole DeleteSeriesOpts of API.DeleteSeries.
 func WithDeleteSeriesOptions(value DeleteSeriesOpts) DeleteSeriesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -80,8 +128,10 @@ func (a *API) DeleteSeries(ctx context.Context, options ...DeleteSeriesOption) e
 	return request.Wrap("DeleteSeries", "metrics", upstream.DeleteSeries(ctx, a.client, _opts).ExtractErr())
 }
 
+// LabelValuesOption is a per-call option of API.LabelValues.
 type LabelValuesOption = request.NativeQueryCall
 
+// WithLabelValuesOptions sets the whole LabelValuesOpts of API.LabelValues.
 func WithLabelValuesOptions(value LabelValuesOpts) LabelValuesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -120,8 +170,10 @@ func (a *API) LabelValues(ctx context.Context, name string, opts LabelValuesOpts
 	return value0, err
 }
 
+// LabelsOption is a per-call option of API.Labels.
 type LabelsOption = request.NativeQueryCall
 
+// WithLabelsOptions sets the whole LabelsOpts of API.Labels.
 func WithLabelsOptions(value LabelsOpts) LabelsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -160,8 +212,10 @@ func (a *API) Labels(ctx context.Context, opts LabelsOpts, options ...LabelsOpti
 	return value0, err
 }
 
+// QueryOption is a per-call option of API.Query.
 type QueryOption = request.NativeQueryCall
 
+// WithQueryOptions sets the whole QueryOpts of API.Query.
 func WithQueryOptions(value QueryOpts) QueryOption { return request.Custom(request.WithOptions(value)) }
 
 type queryOptsBuilder struct {
@@ -206,8 +260,10 @@ func (a *API) RuntimeInfo(ctx context.Context) (*RuntimeInfoData, error) {
 	return value0, err
 }
 
+// SeriesOption is a per-call option of API.Series.
 type SeriesOption = request.NativeQueryCall
 
+// WithSeriesOptions sets the whole SeriesOpts of API.Series.
 func WithSeriesOptions(value SeriesOpts) SeriesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -254,8 +310,10 @@ func (a *API) Snapshot(ctx context.Context) (*SnapshotData, error) {
 	return value0, err
 }
 
+// TargetsOption is a per-call option of API.Targets.
 type TargetsOption = request.NativeQueryCall
 
+// WithTargetsOptions sets the whole TargetsOpts of API.Targets.
 func WithTargetsOptions(value TargetsOpts) TargetsOption {
 	return request.Custom(request.WithOptions(value))
 }

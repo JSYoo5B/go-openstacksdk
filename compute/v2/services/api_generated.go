@@ -15,19 +15,34 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// DeleteResult is Gophercloud's openstack/compute/v2/services.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ListOpts is Gophercloud's openstack/compute/v2/services.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Service is Gophercloud's openstack/compute/v2/services.Service.
 type Service = upstream.Service
 
 const ServiceDisabled = upstream.ServiceDisabled
 const ServiceEnabled = upstream.ServiceEnabled
 
+// ServicePage is Gophercloud's openstack/compute/v2/services.ServicePage.
 type ServicePage = upstream.ServicePage
+
+// ServiceStatus is Gophercloud's openstack/compute/v2/services.ServiceStatus.
 type ServiceStatus = upstream.ServiceStatus
+
+// UpdateOpts is Gophercloud's openstack/compute/v2/services.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/compute/v2/services.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -35,8 +50,10 @@ func (a *API) Delete(ctx context.Context, id string) error {
 	return request.Wrap("Delete", "services", upstream.Delete(ctx, a.client, id).ExtractErr())
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -73,8 +90,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Servic
 	})
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -71,7 +71,10 @@ import (
     "github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
+// DeleteOpts holds the conditional deletion settings of DeleteWithOptions.
 type DeleteOpts = request.NeutronDeleteOpts
+
+// DeleteOption is a per-call option of DeleteWithOptions.
 type DeleteOption = request.NeutronDeleteOption
 
 // DeleteWithOptions submits a conditional deletion. Build options with

@@ -15,13 +15,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateResult is Gophercloud's openstack/placement/v1/traits.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/placement/v1/traits.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/placement/v1/traits.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/placement/v1/traits.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// TraitsPage is Gophercloud's openstack/placement/v1/traits.TraitsPage.
 type TraitsPage = upstream.TraitsPage
 
 // Create invokes the upstream API with library-owned builders and result handling.
@@ -39,8 +51,10 @@ func (a *API) Get(ctx context.Context, traitName string) error {
 	return request.Wrap("Get", "traits", upstream.Get(ctx, a.client, traitName).ExtractErr())
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

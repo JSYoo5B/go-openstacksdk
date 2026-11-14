@@ -18,50 +18,125 @@ type API struct {
 	Resources *resource.Collection[BGPVPN]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// BGPVPN is Gophercloud's openstack/networking/v2/extensions/bgpvpns.BGPVPN.
 type BGPVPN = upstream.BGPVPN
+
+// BGPVPNPage is Gophercloud's openstack/networking/v2/extensions/bgpvpns.BGPVPNPage.
 type BGPVPNPage = upstream.BGPVPNPage
+
+// CreateNetworkAssociationOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreateNetworkAssociationOpts.
 type CreateNetworkAssociationOpts = upstream.CreateNetworkAssociationOpts
+
+// CreateNetworkAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreateNetworkAssociationResult.
 type CreateNetworkAssociationResult = upstream.CreateNetworkAssociationResult
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreatePortAssociationOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreatePortAssociationOpts.
 type CreatePortAssociationOpts = upstream.CreatePortAssociationOpts
+
+// CreatePortAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreatePortAssociationResult.
 type CreatePortAssociationResult = upstream.CreatePortAssociationResult
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CreateRouterAssociationOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreateRouterAssociationOpts.
 type CreateRouterAssociationOpts = upstream.CreateRouterAssociationOpts
+
+// CreateRouterAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.CreateRouterAssociationResult.
 type CreateRouterAssociationResult = upstream.CreateRouterAssociationResult
+
+// DeleteNetworkAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.DeleteNetworkAssociationResult.
 type DeleteNetworkAssociationResult = upstream.DeleteNetworkAssociationResult
+
+// DeletePortAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.DeletePortAssociationResult.
 type DeletePortAssociationResult = upstream.DeletePortAssociationResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DeleteRouterAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.DeleteRouterAssociationResult.
 type DeleteRouterAssociationResult = upstream.DeleteRouterAssociationResult
+
+// GetNetworkAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.GetNetworkAssociationResult.
 type GetNetworkAssociationResult = upstream.GetNetworkAssociationResult
+
+// GetPortAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.GetPortAssociationResult.
 type GetPortAssociationResult = upstream.GetPortAssociationResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.GetResult.
 type GetResult = upstream.GetResult
+
+// GetRouterAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.GetRouterAssociationResult.
 type GetRouterAssociationResult = upstream.GetRouterAssociationResult
+
+// ListNetworkAssociationsOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.ListNetworkAssociationsOpts.
 type ListNetworkAssociationsOpts = upstream.ListNetworkAssociationsOpts
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListPortAssociationsOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.ListPortAssociationsOpts.
 type ListPortAssociationsOpts = upstream.ListPortAssociationsOpts
+
+// ListRouterAssociationsOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.ListRouterAssociationsOpts.
 type ListRouterAssociationsOpts = upstream.ListRouterAssociationsOpts
+
+// NetworkAssociation is Gophercloud's openstack/networking/v2/extensions/bgpvpns.NetworkAssociation.
 type NetworkAssociation = upstream.NetworkAssociation
+
+// NetworkAssociationPage is Gophercloud's openstack/networking/v2/extensions/bgpvpns.NetworkAssociationPage.
 type NetworkAssociationPage = upstream.NetworkAssociationPage
+
+// PortAssociation is Gophercloud's openstack/networking/v2/extensions/bgpvpns.PortAssociation.
 type PortAssociation = upstream.PortAssociation
+
+// PortAssociationPage is Gophercloud's openstack/networking/v2/extensions/bgpvpns.PortAssociationPage.
 type PortAssociationPage = upstream.PortAssociationPage
+
+// PortRoutes is Gophercloud's openstack/networking/v2/extensions/bgpvpns.PortRoutes.
 type PortRoutes = upstream.PortRoutes
+
+// RouterAssociation is Gophercloud's openstack/networking/v2/extensions/bgpvpns.RouterAssociation.
 type RouterAssociation = upstream.RouterAssociation
+
+// RouterAssociationPage is Gophercloud's openstack/networking/v2/extensions/bgpvpns.RouterAssociationPage.
 type RouterAssociationPage = upstream.RouterAssociationPage
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdatePortAssociationOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.UpdatePortAssociationOpts.
 type UpdatePortAssociationOpts = upstream.UpdatePortAssociationOpts
+
+// UpdatePortAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.UpdatePortAssociationResult.
 type UpdatePortAssociationResult = upstream.UpdatePortAssociationResult
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// UpdateRouterAssociationOpts is Gophercloud's openstack/networking/v2/extensions/bgpvpns.UpdateRouterAssociationOpts.
 type UpdateRouterAssociationOpts = upstream.UpdateRouterAssociationOpts
+
+// UpdateRouterAssociationResult is Gophercloud's openstack/networking/v2/extensions/bgpvpns.UpdateRouterAssociationResult.
 type UpdateRouterAssociationResult = upstream.UpdateRouterAssociationResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -100,8 +175,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateNetworkAssociationOption is a per-call option of API.CreateNetworkAssociation.
 type CreateNetworkAssociationOption = request.NativeFieldCall
 
+// WithCreateNetworkAssociationOptions sets the whole CreateNetworkAssociationOpts of API.CreateNetworkAssociation.
 func WithCreateNetworkAssociationOptions(value CreateNetworkAssociationOpts) CreateNetworkAssociationOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -140,8 +217,10 @@ func (a *API) CreateNetworkAssociation(ctx context.Context, id string, opts Crea
 	return value0, err
 }
 
+// CreatePortAssociationOption is a per-call option of API.CreatePortAssociation.
 type CreatePortAssociationOption = request.NativeFieldCall
 
+// WithCreatePortAssociationOptions sets the whole CreatePortAssociationOpts of API.CreatePortAssociation.
 func WithCreatePortAssociationOptions(value CreatePortAssociationOpts) CreatePortAssociationOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -180,8 +259,10 @@ func (a *API) CreatePortAssociation(ctx context.Context, id string, opts CreateP
 	return value0, err
 }
 
+// CreateRouterAssociationOption is a per-call option of API.CreateRouterAssociation.
 type CreateRouterAssociationOption = request.NativeFieldCall
 
+// WithCreateRouterAssociationOptions sets the whole CreateRouterAssociationOpts of API.CreateRouterAssociation.
 func WithCreateRouterAssociationOptions(value CreateRouterAssociationOpts) CreateRouterAssociationOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -272,8 +353,10 @@ func (a *API) GetRouterAssociation(ctx context.Context, bgpVpnID string, id stri
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -314,8 +397,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// ListNetworkAssociationsOption is a per-call option of API.ListNetworkAssociations.
 type ListNetworkAssociationsOption = request.NativeQueryCall
 
+// WithListNetworkAssociationsOptions sets the whole ListNetworkAssociationsOpts of API.ListNetworkAssociations.
 func WithListNetworkAssociationsOptions(value ListNetworkAssociationsOpts) ListNetworkAssociationsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -354,8 +439,10 @@ func (a *API) ListNetworkAssociations(ctx context.Context, id string, options ..
 	})
 }
 
+// ListPortAssociationsOption is a per-call option of API.ListPortAssociations.
 type ListPortAssociationsOption = request.NativeQueryCall
 
+// WithListPortAssociationsOptions sets the whole ListPortAssociationsOpts of API.ListPortAssociations.
 func WithListPortAssociationsOptions(value ListPortAssociationsOpts) ListPortAssociationsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -394,8 +481,10 @@ func (a *API) ListPortAssociations(ctx context.Context, id string, options ...Li
 	})
 }
 
+// ListRouterAssociationsOption is a per-call option of API.ListRouterAssociations.
 type ListRouterAssociationsOption = request.NativeQueryCall
 
+// WithListRouterAssociationsOptions sets the whole ListRouterAssociationsOpts of API.ListRouterAssociations.
 func WithListRouterAssociationsOptions(value ListRouterAssociationsOpts) ListRouterAssociationsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -434,8 +523,10 @@ func (a *API) ListRouterAssociations(ctx context.Context, id string, options ...
 	})
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -474,8 +565,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return value0, err
 }
 
+// UpdatePortAssociationOption is a per-call option of API.UpdatePortAssociation.
 type UpdatePortAssociationOption = request.NativeFieldCall
 
+// WithUpdatePortAssociationOptions sets the whole UpdatePortAssociationOpts of API.UpdatePortAssociation.
 func WithUpdatePortAssociationOptions(value UpdatePortAssociationOpts) UpdatePortAssociationOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -514,8 +607,10 @@ func (a *API) UpdatePortAssociation(ctx context.Context, bgpVpnID string, id str
 	return value0, err
 }
 
+// UpdateRouterAssociationOption is a per-call option of API.UpdateRouterAssociation.
 type UpdateRouterAssociationOption = request.NativeFieldCall
 
+// WithUpdateRouterAssociationOptions sets the whole UpdateRouterAssociationOpts of API.UpdateRouterAssociation.
 func WithUpdateRouterAssociationOptions(value UpdateRouterAssociationOpts) UpdateRouterAssociationOption {
 	return request.Custom(request.WithOptions(value))
 }

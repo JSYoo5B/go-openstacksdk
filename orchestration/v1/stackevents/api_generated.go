@@ -15,18 +15,40 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Event is Gophercloud's openstack/orchestration/v1/stackevents.Event.
 type Event = upstream.Event
+
+// EventPage is Gophercloud's openstack/orchestration/v1/stackevents.EventPage.
 type EventPage = upstream.EventPage
+
+// FindResult is Gophercloud's openstack/orchestration/v1/stackevents.FindResult.
 type FindResult = upstream.FindResult
+
+// GetResult is Gophercloud's openstack/orchestration/v1/stackevents.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/orchestration/v1/stackevents.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListResourceEventsOpts is Gophercloud's openstack/orchestration/v1/stackevents.ListResourceEventsOpts.
 type ListResourceEventsOpts = upstream.ListResourceEventsOpts
+
+// ResourceAction is Gophercloud's openstack/orchestration/v1/stackevents.ResourceAction.
 type ResourceAction = upstream.ResourceAction
+
+// ResourceStatus is Gophercloud's openstack/orchestration/v1/stackevents.ResourceStatus.
 type ResourceStatus = upstream.ResourceStatus
+
+// SortDir is Gophercloud's openstack/orchestration/v1/stackevents.SortDir.
 type SortDir = upstream.SortDir
+
+// SortKey is Gophercloud's openstack/orchestration/v1/stackevents.SortKey.
 type SortKey = upstream.SortKey
 
 // Find invokes the upstream API with library-owned builders and result handling.
@@ -45,8 +67,10 @@ func (a *API) Get(ctx context.Context, stackName string, stackID string, resourc
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -83,8 +107,10 @@ func (a *API) List(ctx context.Context, stackName string, stackID string, option
 	})
 }
 
+// ListResourceEventsOption is a per-call option of API.ListResourceEvents.
 type ListResourceEventsOption = request.NativeQueryCall
 
+// WithListResourceEventsOptions sets the whole ListResourceEventsOpts of API.ListResourceEvents.
 func WithListResourceEventsOptions(value ListResourceEventsOpts) ListResourceEventsOption {
 	return request.Custom(request.WithOptions(value))
 }

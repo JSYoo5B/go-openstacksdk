@@ -14,14 +14,28 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AvailabilityZone is Gophercloud's openstack/compute/v2/availabilityzones.AvailabilityZone.
 type AvailabilityZone = upstream.AvailabilityZone
+
+// AvailabilityZonePage is Gophercloud's openstack/compute/v2/availabilityzones.AvailabilityZonePage.
 type AvailabilityZonePage = upstream.AvailabilityZonePage
+
+// Hosts is Gophercloud's openstack/compute/v2/availabilityzones.Hosts.
 type Hosts = upstream.Hosts
+
+// ServiceState is Gophercloud's openstack/compute/v2/availabilityzones.ServiceState.
 type ServiceState = upstream.ServiceState
+
+// Services is Gophercloud's openstack/compute/v2/availabilityzones.Services.
 type Services = upstream.Services
+
+// ZoneState is Gophercloud's openstack/compute/v2/availabilityzones.ZoneState.
 type ZoneState = upstream.ZoneState
 
 // List invokes the upstream API with library-owned builders and result handling.

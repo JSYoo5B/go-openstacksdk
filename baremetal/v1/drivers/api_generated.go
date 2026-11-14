@@ -18,27 +18,56 @@ type API struct {
 	Resources *resource.Collection[Driver]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CallVendorPassthruResult is Gophercloud's openstack/baremetal/v1/drivers.CallVendorPassthruResult.
 type CallVendorPassthruResult = upstream.CallVendorPassthruResult
+
+// DiskProperties is Gophercloud's openstack/baremetal/v1/drivers.DiskProperties.
 type DiskProperties = upstream.DiskProperties
+
+// Driver is Gophercloud's openstack/baremetal/v1/drivers.Driver.
 type Driver = upstream.Driver
+
+// DriverPage is Gophercloud's openstack/baremetal/v1/drivers.DriverPage.
 type DriverPage = upstream.DriverPage
+
+// DriverProperties is Gophercloud's openstack/baremetal/v1/drivers.DriverProperties.
 type DriverProperties = upstream.DriverProperties
+
+// GetDiskPropertiesResult is Gophercloud's openstack/baremetal/v1/drivers.GetDiskPropertiesResult.
 type GetDiskPropertiesResult = upstream.GetDiskPropertiesResult
+
+// GetDriverResult is Gophercloud's openstack/baremetal/v1/drivers.GetDriverResult.
 type GetDriverResult = upstream.GetDriverResult
+
+// GetPropertiesResult is Gophercloud's openstack/baremetal/v1/drivers.GetPropertiesResult.
 type GetPropertiesResult = upstream.GetPropertiesResult
+
+// ListDriversOpts is Gophercloud's openstack/baremetal/v1/drivers.ListDriversOpts.
 type ListDriversOpts = upstream.ListDriversOpts
+
+// ListVendorPassthruMethodsResult is Gophercloud's openstack/baremetal/v1/drivers.ListVendorPassthruMethodsResult.
 type ListVendorPassthruMethodsResult = upstream.ListVendorPassthruMethodsResult
+
+// VendorPassthruCallOpts is Gophercloud's openstack/baremetal/v1/drivers.VendorPassthruCallOpts.
 type VendorPassthruCallOpts = upstream.VendorPassthruCallOpts
+
+// VendorPassthruMethod is Gophercloud's openstack/baremetal/v1/drivers.VendorPassthruMethod.
 type VendorPassthruMethod = upstream.VendorPassthruMethod
+
+// CallVendorPassthruOption is a per-call option of API.CallVendorPassthru.
 type CallVendorPassthruOption = request.NativeCall
 
+// WithCallVendorPassthruOptions sets the whole VendorPassthruCallOpts of API.CallVendorPassthru.
 func WithCallVendorPassthruOptions(value VendorPassthruCallOpts) CallVendorPassthruOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -81,8 +110,10 @@ func (a *API) GetDriverProperties(ctx context.Context, driverName string) (*Driv
 	return value0, err
 }
 
+// ListDriversOption is a per-call option of API.ListDrivers.
 type ListDriversOption = request.NativeQueryCall
 
+// WithListDriversOptions sets the whole ListDriversOpts of API.ListDrivers.
 func WithListDriversOptions(value ListDriversOpts) ListDriversOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -18,26 +18,53 @@ type API struct {
 	Resources *resource.Collection[User]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CommonOpts is Gophercloud's openstack/identity/v2/users.CommonOpts.
 type CommonOpts = upstream.CommonOpts
+
+// CreateOpts is Gophercloud's openstack/identity/v2/users.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v2/users.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v2/users.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/identity/v2/users.GetResult.
 type GetResult = upstream.GetResult
+
+// Role is Gophercloud's openstack/identity/v2/users.Role.
 type Role = upstream.Role
+
+// RolePage is Gophercloud's openstack/identity/v2/users.RolePage.
 type RolePage = upstream.RolePage
+
+// UpdateOpts is Gophercloud's openstack/identity/v2/users.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/identity/v2/users.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// User is Gophercloud's openstack/identity/v2/users.User.
 type User = upstream.User
+
+// UserPage is Gophercloud's openstack/identity/v2/users.UserPage.
 type UserPage = upstream.UserPage
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -117,8 +144,10 @@ func (a *API) ResourceURL(ctx context.Context, id string) string {
 	return upstream.ResourceURL(a.client, id)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

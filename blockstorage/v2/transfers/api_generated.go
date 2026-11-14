@@ -18,23 +18,44 @@ type API struct {
 	Resources *resource.Collection[Transfer]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AcceptOpts is Gophercloud's openstack/blockstorage/v2/transfers.AcceptOpts.
 type AcceptOpts = upstream.AcceptOpts
+
+// CreateOpts is Gophercloud's openstack/blockstorage/v2/transfers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/blockstorage/v2/transfers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/blockstorage/v2/transfers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/blockstorage/v2/transfers.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/blockstorage/v2/transfers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Transfer is Gophercloud's openstack/blockstorage/v2/transfers.Transfer.
 type Transfer = upstream.Transfer
+
+// TransferPage is Gophercloud's openstack/blockstorage/v2/transfers.TransferPage.
 type TransferPage = upstream.TransferPage
+
+// AcceptOption is a per-call option of API.Accept.
 type AcceptOption = request.NativeFieldCall
 
+// WithAcceptOptions sets the whole AcceptOpts of API.Accept.
 func WithAcceptOptions(value AcceptOpts) AcceptOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -73,8 +94,10 @@ func (a *API) Accept(ctx context.Context, id string, opts AcceptOpts, options ..
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -126,8 +149,10 @@ func (a *API) Get(ctx context.Context, id string) (*Transfer, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

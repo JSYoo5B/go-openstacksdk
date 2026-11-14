@@ -521,9 +521,9 @@ func (g *generator) generate(path string) error {
 	if plan == nil {
 		if hasSpecialized && specialized.Scope == "" && specialized.Kind == "" {
 			e.use("github.com/JSYoo5B/go-openstacksdk/resource")
-			e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", specialized.Model)
+			e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\n// New returns an API that sends requests through client.\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", specialized.Model)
 		} else {
-			e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\n")
+			e.printf("// API owns the client and provides concrete inputs, optional extensions and normalized results.\ntype API struct { client *gophercloud.ServiceClient }\n// New returns an API that sends requests through client.\nfunc New(client *gophercloud.ServiceClient) *API { return &API{client:client} }\n")
 		}
 		if hasSpecialized {
 			g.collections = append(g.collections, specialized)
@@ -532,11 +532,11 @@ func (g *generator) generate(path string) error {
 		}
 	} else {
 		e.use("github.com/JSYoo5B/go-openstacksdk/resource")
-		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
+		e.printf("// API owns typed operations and their shared resource policies.\ntype API struct { client *gophercloud.ServiceClient; Resources *resource.Collection[%s] }\n// New returns an API that sends requests through client.\nfunc New(client *gophercloud.ServiceClient) *API { a:=&API{client:client};a.Resources=a.newResources();return a }\n", plan.modelName)
 		filter := g.pythonFilterFor(pkg, plan)
 		g.collections = append(g.collections, collectionRecord{Package: "github.com/JSYoo5B/go-openstacksdk/" + sdkPath(path), Model: plan.modelName, Find: plan.name != "", IdentityFind: identityCollectionEnabled(pkg, plan, 0), IdentityGetQuery: identityCollectionEnabled(pkg, plan, 0), IdentityMissingList: identityMissingListEnabled(pkg, plan, 0), IdentityListDefaults: identityFlavorEnabled(pkg, plan, 0), IdentityExtraSpecs: identityFlavorEnabled(pkg, plan, 0), IdentityDetails: identityListModeEnabled(pkg, plan), IdentityAllProjects: identityListModeEnabled(pkg, plan), BodyFilterFields: bodyFilterCollectionFields(pkg, plan, 0), SemanticQueryFilters: pythonFilterQueryFields(filter), SemanticBodyFilters: pythonFilterBodyFields(filter), SemanticReserved: pythonFilterReserved(filter), Delete: plan.deleter != nil, Wait: plan.status != "", MetadataScope: metadataScope, ServiceWait: serviceWait, TaskWait: taskWait})
 	}
-	e.printf("func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
+	e.printf("// RawClient returns the Gophercloud service client.\nfunc (a *API) RawClient() *gophercloud.ServiceClient { return a.client }\n\n")
 	for _, name := range pkg.Scope().Names() {
 		obj := pkg.Scope().Lookup(name)
 		if !obj.Exported() {
@@ -547,7 +547,7 @@ func (g *generator) generate(path string) error {
 			if strings.HasSuffix(name, "Builder") || name == "API" {
 				continue
 			}
-			e.printf("type %s = upstream.%s\n", name, name)
+			e.printf("// %s is Gophercloud's %s.%s.\ntype %s = upstream.%s\n", name, strings.TrimPrefix(pkg.Path(), upstreamModule+"/"), name, name, name)
 		case *types.Const:
 			e.printf("const %s = upstream.%s\n", name, name)
 		}
@@ -910,10 +910,10 @@ func emitOperation(e *emitter, fn *types.Func, decl *ast.FuncDecl, extractors ma
 		// extension mechanisms, so request.Field, request.Query and
 		// request.Header compile only where the operation can serialize them.
 		caps := capabilities(e.pkg, primary)
-		e.printf("type %sOption = %s.%s\n", op, requestAlias, caps.category())
-		e.printf("func With%sOptions(value %s) %sOption { return %s.Custom(%s.WithOptions(value)) }\n", op, base, op, requestAlias, requestAlias)
+		e.printf("// %sOption is a per-call option of API.%s.\ntype %sOption = %s.%s\n", op, op, op, requestAlias, caps.category())
+		e.printf("// With%sOptions sets the whole %s of API.%s.\nfunc With%sOptions(value %s) %sOption { return %s.Custom(%s.WithOptions(value)) }\n", op, base, op, op, base, op, requestAlias, requestAlias)
 		for _, b := range builders[1:] {
-			e.printf("func With%s%s(value %s) %sOption { return %s.Custom(%s.WithArgument[%s](%q,value)) }\n", op, title(b.name), e.typ(b.base), op, requestAlias, requestAlias, base, b.name)
+			e.printf("// With%s%s sets the %s argument of API.%s.\nfunc With%s%s(value %s) %sOption { return %s.Custom(%s.WithArgument[%s](%q,value)) }\n", op, title(b.name), b.name, op, op, title(b.name), e.typ(b.base), op, requestAlias, requestAlias, base, b.name)
 		}
 		params = append(params, "options ..."+op+"Option")
 		forwardArgs = append(forwardArgs, "options...")

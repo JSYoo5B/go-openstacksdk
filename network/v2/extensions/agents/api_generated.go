@@ -21,31 +21,71 @@ type API struct {
 	Resources *resource.Collection[Agent]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Agent is Gophercloud's openstack/networking/v2/extensions/agents.Agent.
 type Agent = upstream.Agent
+
+// AgentPage is Gophercloud's openstack/networking/v2/extensions/agents.AgentPage.
 type AgentPage = upstream.AgentPage
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/agents.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/agents.GetResult.
 type GetResult = upstream.GetResult
+
+// ListBGPSpeakersResult is Gophercloud's openstack/networking/v2/extensions/agents.ListBGPSpeakersResult.
 type ListBGPSpeakersResult = upstream.ListBGPSpeakersResult
+
+// ListDHCPNetworksResult is Gophercloud's openstack/networking/v2/extensions/agents.ListDHCPNetworksResult.
 type ListDHCPNetworksResult = upstream.ListDHCPNetworksResult
+
+// ListL3RoutersResult is Gophercloud's openstack/networking/v2/extensions/agents.ListL3RoutersResult.
 type ListL3RoutersResult = upstream.ListL3RoutersResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/agents.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// RemoveBGPSpeakerResult is Gophercloud's openstack/networking/v2/extensions/agents.RemoveBGPSpeakerResult.
 type RemoveBGPSpeakerResult = upstream.RemoveBGPSpeakerResult
+
+// RemoveDHCPNetworkResult is Gophercloud's openstack/networking/v2/extensions/agents.RemoveDHCPNetworkResult.
 type RemoveDHCPNetworkResult = upstream.RemoveDHCPNetworkResult
+
+// RemoveL3RouterResult is Gophercloud's openstack/networking/v2/extensions/agents.RemoveL3RouterResult.
 type RemoveL3RouterResult = upstream.RemoveL3RouterResult
+
+// ScheduleBGPSpeakerOpts is Gophercloud's openstack/networking/v2/extensions/agents.ScheduleBGPSpeakerOpts.
 type ScheduleBGPSpeakerOpts = upstream.ScheduleBGPSpeakerOpts
+
+// ScheduleBGPSpeakerResult is Gophercloud's openstack/networking/v2/extensions/agents.ScheduleBGPSpeakerResult.
 type ScheduleBGPSpeakerResult = upstream.ScheduleBGPSpeakerResult
+
+// ScheduleDHCPNetworkOpts is Gophercloud's openstack/networking/v2/extensions/agents.ScheduleDHCPNetworkOpts.
 type ScheduleDHCPNetworkOpts = upstream.ScheduleDHCPNetworkOpts
+
+// ScheduleDHCPNetworkResult is Gophercloud's openstack/networking/v2/extensions/agents.ScheduleDHCPNetworkResult.
 type ScheduleDHCPNetworkResult = upstream.ScheduleDHCPNetworkResult
+
+// ScheduleL3RouterOpts is Gophercloud's openstack/networking/v2/extensions/agents.ScheduleL3RouterOpts.
 type ScheduleL3RouterOpts = upstream.ScheduleL3RouterOpts
+
+// ScheduleL3RouterResult is Gophercloud's openstack/networking/v2/extensions/agents.ScheduleL3RouterResult.
 type ScheduleL3RouterResult = upstream.ScheduleL3RouterResult
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/agents.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/agents.UpdateResult.
 type UpdateResult = upstream.UpdateResult
 
 // Delete invokes the upstream API with library-owned builders and result handling.
@@ -61,8 +101,10 @@ func (a *API) Get(ctx context.Context, id string) (*Agent, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -150,8 +192,10 @@ func (a *API) RemoveL3Router(ctx context.Context, id string, routerID string) er
 	return request.Wrap("RemoveL3Router", "agents", upstream.RemoveL3Router(ctx, a.client, id, routerID).ExtractErr())
 }
 
+// ScheduleBGPSpeakerOption is a per-call option of API.ScheduleBGPSpeaker.
 type ScheduleBGPSpeakerOption = request.NativeFieldCall
 
+// WithScheduleBGPSpeakerOptions sets the whole ScheduleBGPSpeakerOpts of API.ScheduleBGPSpeaker.
 func WithScheduleBGPSpeakerOptions(value ScheduleBGPSpeakerOpts) ScheduleBGPSpeakerOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -186,8 +230,10 @@ func (a *API) ScheduleBGPSpeaker(ctx context.Context, agentID string, opts Sched
 	return request.Wrap("ScheduleBGPSpeaker", "agents", upstream.ScheduleBGPSpeaker(ctx, a.client, agentID, _opts).ExtractErr())
 }
 
+// ScheduleDHCPNetworkOption is a per-call option of API.ScheduleDHCPNetwork.
 type ScheduleDHCPNetworkOption = request.NativeFieldCall
 
+// WithScheduleDHCPNetworkOptions sets the whole ScheduleDHCPNetworkOpts of API.ScheduleDHCPNetwork.
 func WithScheduleDHCPNetworkOptions(value ScheduleDHCPNetworkOpts) ScheduleDHCPNetworkOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -222,8 +268,10 @@ func (a *API) ScheduleDHCPNetwork(ctx context.Context, id string, opts ScheduleD
 	return request.Wrap("ScheduleDHCPNetwork", "agents", upstream.ScheduleDHCPNetwork(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// ScheduleL3RouterOption is a per-call option of API.ScheduleL3Router.
 type ScheduleL3RouterOption = request.NativeFieldCall
 
+// WithScheduleL3RouterOptions sets the whole ScheduleL3RouterOpts of API.ScheduleL3Router.
 func WithScheduleL3RouterOptions(value ScheduleL3RouterOpts) ScheduleL3RouterOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -258,8 +306,10 @@ func (a *API) ScheduleL3Router(ctx context.Context, id string, opts ScheduleL3Ro
 	return request.Wrap("ScheduleL3Router", "agents", upstream.ScheduleL3Router(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

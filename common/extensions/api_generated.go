@@ -18,15 +18,23 @@ type API struct {
 	Resources *resource.Collection[Extension]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Extension is Gophercloud's openstack/common/extensions.Extension.
 type Extension = upstream.Extension
+
+// ExtensionPage is Gophercloud's openstack/common/extensions.ExtensionPage.
 type ExtensionPage = upstream.ExtensionPage
+
+// GetResult is Gophercloud's openstack/common/extensions.GetResult.
 type GetResult = upstream.GetResult
 
 // ExtensionURL invokes the upstream API with library-owned builders and result handling.

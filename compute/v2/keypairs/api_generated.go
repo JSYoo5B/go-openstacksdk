@@ -18,25 +18,50 @@ type API struct {
 	Resources *resource.Collection[KeyPair]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/compute/v2/keypairs.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateOptsExt is Gophercloud's openstack/compute/v2/keypairs.CreateOptsExt.
 type CreateOptsExt = upstream.CreateOptsExt
+
+// CreateResult is Gophercloud's openstack/compute/v2/keypairs.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteOpts is Gophercloud's openstack/compute/v2/keypairs.DeleteOpts.
 type DeleteOpts = upstream.DeleteOpts
+
+// DeleteResult is Gophercloud's openstack/compute/v2/keypairs.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetOpts is Gophercloud's openstack/compute/v2/keypairs.GetOpts.
 type GetOpts = upstream.GetOpts
+
+// GetResult is Gophercloud's openstack/compute/v2/keypairs.GetResult.
 type GetResult = upstream.GetResult
+
+// KeyPair is Gophercloud's openstack/compute/v2/keypairs.KeyPair.
 type KeyPair = upstream.KeyPair
+
+// KeyPairPage is Gophercloud's openstack/compute/v2/keypairs.KeyPairPage.
 type KeyPairPage = upstream.KeyPairPage
+
+// ListOpts is Gophercloud's openstack/compute/v2/keypairs.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -75,8 +100,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// DeleteOption is a per-call option of API.Delete.
 type DeleteOption = request.NativeQueryCall
 
+// WithDeleteOptions sets the whole DeleteOpts of API.Delete.
 func WithDeleteOptions(value DeleteOpts) DeleteOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -112,8 +139,10 @@ func (a *API) Delete(ctx context.Context, name string, options ...DeleteOption) 
 	return request.Wrap("Delete", "keypairs", upstream.Delete(ctx, a.client, name, _opts).ExtractErr())
 }
 
+// GetOption is a per-call option of API.Get.
 type GetOption = request.NativeQueryCall
 
+// WithGetOptions sets the whole GetOpts of API.Get.
 func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {
@@ -151,8 +180,10 @@ func (a *API) Get(ctx context.Context, name string, options ...GetOption) (*KeyP
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

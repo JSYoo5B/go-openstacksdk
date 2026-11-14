@@ -278,17 +278,22 @@ func (g *generator) emitCollection(pkg *types.Package, plan *collectionPlan) err
 		e.printf("}\n")
 	}
 	emitBodyFilterList(&e, plan)
+	e.printf("// Find looks up one %s by ID or name through Resources.\n", plan.modelName)
 	e.printf("func(a *API)Find(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)(*%s,error){return a.Resources.Find(ctx,ref,options...)}\n", plan.modelName)
 	if identityCollectionEnabled(pkg, plan, 0) {
 		emitIdentityFind(&e, "a *API", "a.Resources", plan.modelName)
 	}
+	e.printf("// All lists every row through Resources.\n")
 	e.printf("func(a *API)All(ctx context.Context,options ...resource.ListOption)([]*%s,error){return a.Resources.All(ctx,options...)}\n", plan.modelName)
+	e.printf("// Remove deletes a resource by ID or name through Resources.\n")
 	if keyManagerOwnedDeleteCollection(pkg, plan, 0) {
 		e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.removeOwned(ctx,ref,options...)}\n")
 	} else {
 		e.printf("func(a *API)Remove(ctx context.Context,ref resource.Ref,options ...resource.LookupOption)error{return a.Resources.Delete(ctx,ref,options...)}\n")
 	}
+	e.printf("// WaitFor polls Resources until the resource reaches status.\n")
 	e.printf("func(a *API)WaitFor(ctx context.Context,ref resource.Ref,status string,options ...resource.WaitOption)(*%s,error){return a.Resources.Wait(ctx,ref,status,options...)}\n", plan.modelName)
+	e.printf("// WaitForDeletion polls Resources until the resource is deleted.\n")
 	e.printf("func(a *API)WaitForDeletion(ctx context.Context,ref resource.Ref,options ...resource.WaitOption)error{return a.Resources.WaitDeleted(ctx,ref,options...)}\n")
 	source, err := e.source()
 	if err != nil {

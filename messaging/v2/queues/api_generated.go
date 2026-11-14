@@ -15,16 +15,30 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const AddOp = upstream.AddOp
 
+// BatchUpdateOpts is Gophercloud's openstack/messaging/v2/queues.BatchUpdateOpts.
 type BatchUpdateOpts = upstream.BatchUpdateOpts
+
+// CreateOpts is Gophercloud's openstack/messaging/v2/queues.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/messaging/v2/queues.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/messaging/v2/queues.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/messaging/v2/queues.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/messaging/v2/queues.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const MethodGet = upstream.MethodGet
@@ -35,12 +49,25 @@ const PathClaims = upstream.PathClaims
 const PathMessages = upstream.PathMessages
 const PathSubscriptions = upstream.PathSubscriptions
 
+// PurgeOpts is Gophercloud's openstack/messaging/v2/queues.PurgeOpts.
 type PurgeOpts = upstream.PurgeOpts
+
+// PurgeResource is Gophercloud's openstack/messaging/v2/queues.PurgeResource.
 type PurgeResource = upstream.PurgeResource
+
+// PurgeResult is Gophercloud's openstack/messaging/v2/queues.PurgeResult.
 type PurgeResult = upstream.PurgeResult
+
+// Queue is Gophercloud's openstack/messaging/v2/queues.Queue.
 type Queue = upstream.Queue
+
+// QueueDetails is Gophercloud's openstack/messaging/v2/queues.QueueDetails.
 type QueueDetails = upstream.QueueDetails
+
+// QueuePage is Gophercloud's openstack/messaging/v2/queues.QueuePage.
 type QueuePage = upstream.QueuePage
+
+// QueueShare is Gophercloud's openstack/messaging/v2/queues.QueueShare.
 type QueueShare = upstream.QueueShare
 
 const RemoveOp = upstream.RemoveOp
@@ -48,17 +75,37 @@ const ReplaceOp = upstream.ReplaceOp
 const ResourceMessages = upstream.ResourceMessages
 const ResourceSubscriptions = upstream.ResourceSubscriptions
 
+// ShareMethod is Gophercloud's openstack/messaging/v2/queues.ShareMethod.
 type ShareMethod = upstream.ShareMethod
+
+// ShareOpts is Gophercloud's openstack/messaging/v2/queues.ShareOpts.
 type ShareOpts = upstream.ShareOpts
+
+// SharePath is Gophercloud's openstack/messaging/v2/queues.SharePath.
 type SharePath = upstream.SharePath
+
+// ShareResult is Gophercloud's openstack/messaging/v2/queues.ShareResult.
 type ShareResult = upstream.ShareResult
+
+// StatResult is Gophercloud's openstack/messaging/v2/queues.StatResult.
 type StatResult = upstream.StatResult
+
+// Stats is Gophercloud's openstack/messaging/v2/queues.Stats.
 type Stats = upstream.Stats
+
+// UpdateOp is Gophercloud's openstack/messaging/v2/queues.UpdateOp.
 type UpdateOp = upstream.UpdateOp
+
+// UpdateOpts is Gophercloud's openstack/messaging/v2/queues.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/messaging/v2/queues.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -114,8 +161,10 @@ func (a *API) GetStats(ctx context.Context, queueName string) (Stats, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -152,8 +201,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Queue,
 	})
 }
 
+// PurgeOption is a per-call option of API.Purge.
 type PurgeOption = request.NativeFieldCall
 
+// WithPurgeOptions sets the whole PurgeOpts of API.Purge.
 func WithPurgeOptions(value PurgeOpts) PurgeOption { return request.Custom(request.WithOptions(value)) }
 
 type purgeOptsBuilder struct {
@@ -186,8 +237,10 @@ func (a *API) Purge(ctx context.Context, queueName string, opts PurgeOpts, optio
 	return request.Wrap("Purge", "queues", upstream.Purge(ctx, a.client, queueName, _opts).ExtractErr())
 }
 
+// ShareOption is a per-call option of API.Share.
 type ShareOption = request.NativeFieldCall
 
+// WithShareOptions sets the whole ShareOpts of API.Share.
 func WithShareOptions(value ShareOpts) ShareOption { return request.Custom(request.WithOptions(value)) }
 
 type shareOptsBuilder struct {
@@ -224,8 +277,10 @@ func (a *API) Share(ctx context.Context, queueName string, opts ShareOpts, optio
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeCall
 
+// WithUpdateOptions sets the whole BatchUpdateOpts of API.Update.
 func WithUpdateOptions(value BatchUpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

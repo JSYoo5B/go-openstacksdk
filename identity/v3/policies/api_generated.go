@@ -18,26 +18,53 @@ type API struct {
 	Resources *resource.Collection[Policy]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/identity/v3/policies.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/policies.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/policies.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/identity/v3/policies.GetResult.
 type GetResult = upstream.GetResult
+
+// InvalidListFilter is Gophercloud's openstack/identity/v3/policies.InvalidListFilter.
 type InvalidListFilter = upstream.InvalidListFilter
+
+// ListOpts is Gophercloud's openstack/identity/v3/policies.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Policy is Gophercloud's openstack/identity/v3/policies.Policy.
 type Policy = upstream.Policy
+
+// PolicyPage is Gophercloud's openstack/identity/v3/policies.PolicyPage.
 type PolicyPage = upstream.PolicyPage
+
+// StringFieldLengthExceedsLimit is Gophercloud's openstack/identity/v3/policies.StringFieldLengthExceedsLimit.
 type StringFieldLengthExceedsLimit = upstream.StringFieldLengthExceedsLimit
+
+// UpdateOpts is Gophercloud's openstack/identity/v3/policies.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/identity/v3/policies.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -89,8 +116,10 @@ func (a *API) Get(ctx context.Context, policyID string) (*Policy, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -131,8 +160,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -15,13 +15,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Driver is Gophercloud's openstack/networking/v2/extensions/qos/ruletypes.Driver.
 type Driver = upstream.Driver
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/qos/ruletypes.GetResult.
 type GetResult = upstream.GetResult
+
+// ListRuleTypesPage is Gophercloud's openstack/networking/v2/extensions/qos/ruletypes.ListRuleTypesPage.
 type ListRuleTypesPage = upstream.ListRuleTypesPage
+
+// RuleType is Gophercloud's openstack/networking/v2/extensions/qos/ruletypes.RuleType.
 type RuleType = upstream.RuleType
+
+// SupportedParameter is Gophercloud's openstack/networking/v2/extensions/qos/ruletypes.SupportedParameter.
 type SupportedParameter = upstream.SupportedParameter
 
 // GetRuleType invokes the upstream API with library-owned builders and result handling.

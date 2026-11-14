@@ -18,27 +18,56 @@ type API struct {
 	Resources *resource.Collection[Snapshot]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/sharedfilesystems/v2/snapshots.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/sharedfilesystems/v2/snapshots.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/sharedfilesystems/v2/snapshots.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// ForceDeleteResult is Gophercloud's openstack/sharedfilesystems/v2/snapshots.ForceDeleteResult.
 type ForceDeleteResult = upstream.ForceDeleteResult
+
+// GetResult is Gophercloud's openstack/sharedfilesystems/v2/snapshots.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/sharedfilesystems/v2/snapshots.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ResetStatusOpts is Gophercloud's openstack/sharedfilesystems/v2/snapshots.ResetStatusOpts.
 type ResetStatusOpts = upstream.ResetStatusOpts
+
+// ResetStatusResult is Gophercloud's openstack/sharedfilesystems/v2/snapshots.ResetStatusResult.
 type ResetStatusResult = upstream.ResetStatusResult
+
+// Snapshot is Gophercloud's openstack/sharedfilesystems/v2/snapshots.Snapshot.
 type Snapshot = upstream.Snapshot
+
+// SnapshotPage is Gophercloud's openstack/sharedfilesystems/v2/snapshots.SnapshotPage.
 type SnapshotPage = upstream.SnapshotPage
+
+// UpdateOpts is Gophercloud's openstack/sharedfilesystems/v2/snapshots.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/sharedfilesystems/v2/snapshots.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -95,8 +124,10 @@ func (a *API) Get(ctx context.Context, id string) (*Snapshot, error) {
 	return value0, err
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -139,8 +170,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
+// ResetStatusOption is a per-call option of API.ResetStatus.
 type ResetStatusOption = request.NativeFieldCall
 
+// WithResetStatusOptions sets the whole ResetStatusOpts of API.ResetStatus.
 func WithResetStatusOptions(value ResetStatusOpts) ResetStatusOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -175,8 +208,10 @@ func (a *API) ResetStatus(ctx context.Context, id string, opts ResetStatusOpts, 
 	return request.Wrap("ResetStatus", "snapshots", upstream.ResetStatus(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

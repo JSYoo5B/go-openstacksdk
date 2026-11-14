@@ -20,37 +20,69 @@ type API struct {
 	Resources *resource.Collection[User]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddToGroupResult is Gophercloud's openstack/identity/v3/users.AddToGroupResult.
 type AddToGroupResult = upstream.AddToGroupResult
+
+// ChangePasswordOpts is Gophercloud's openstack/identity/v3/users.ChangePasswordOpts.
 type ChangePasswordOpts = upstream.ChangePasswordOpts
+
+// ChangePasswordResult is Gophercloud's openstack/identity/v3/users.ChangePasswordResult.
 type ChangePasswordResult = upstream.ChangePasswordResult
+
+// CreateOpts is Gophercloud's openstack/identity/v3/users.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/users.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/users.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/identity/v3/users.GetResult.
 type GetResult = upstream.GetResult
 
 const IgnoreChangePasswordUponFirstUse = upstream.IgnoreChangePasswordUponFirstUse
 const IgnoreLockoutFailureAttempts = upstream.IgnoreLockoutFailureAttempts
 const IgnorePasswordExpiry = upstream.IgnorePasswordExpiry
 
+// InvalidListFilter is Gophercloud's openstack/identity/v3/users.InvalidListFilter.
 type InvalidListFilter = upstream.InvalidListFilter
+
+// IsMemberOfGroupResult is Gophercloud's openstack/identity/v3/users.IsMemberOfGroupResult.
 type IsMemberOfGroupResult = upstream.IsMemberOfGroupResult
+
+// ListOpts is Gophercloud's openstack/identity/v3/users.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const MultiFactorAuthEnabled = upstream.MultiFactorAuthEnabled
 const MultiFactorAuthRules = upstream.MultiFactorAuthRules
 
+// Option is Gophercloud's openstack/identity/v3/users.Option.
 type Option = upstream.Option
+
+// RemoveFromGroupResult is Gophercloud's openstack/identity/v3/users.RemoveFromGroupResult.
 type RemoveFromGroupResult = upstream.RemoveFromGroupResult
+
+// UpdateOpts is Gophercloud's openstack/identity/v3/users.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/identity/v3/users.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// User is Gophercloud's openstack/identity/v3/users.User.
 type User = upstream.User
+
+// UserPage is Gophercloud's openstack/identity/v3/users.UserPage.
 type UserPage = upstream.UserPage
 
 // AddToGroup invokes the upstream API with library-owned builders and result handling.
@@ -58,8 +90,10 @@ func (a *API) AddToGroup(ctx context.Context, groupID string, userID string) err
 	return request.Wrap("AddToGroup", "users", upstream.AddToGroup(ctx, a.client, groupID, userID).ExtractErr())
 }
 
+// ChangePasswordOption is a per-call option of API.ChangePassword.
 type ChangePasswordOption = request.NativeFieldCall
 
+// WithChangePasswordOptions sets the whole ChangePasswordOpts of API.ChangePassword.
 func WithChangePasswordOptions(value ChangePasswordOpts) ChangePasswordOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -94,8 +128,10 @@ func (a *API) ChangePassword(ctx context.Context, userID string, opts ChangePass
 	return request.Wrap("ChangePassword", "users", upstream.ChangePassword(ctx, a.client, userID, _opts).ExtractErr())
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -155,8 +191,10 @@ func (a *API) IsMemberOfGroup(ctx context.Context, groupID string, userID string
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -205,8 +243,10 @@ func (a *API) ListGroups(ctx context.Context, userID string) iter.Seq2[*groups.G
 	})
 }
 
+// ListInGroupOption is a per-call option of API.ListInGroup.
 type ListInGroupOption = request.NativeQueryCall
 
+// WithListInGroupOptions sets the whole ListOpts of API.ListInGroup.
 func WithListInGroupOptions(value ListOpts) ListInGroupOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -258,8 +298,10 @@ func (a *API) RemoveFromGroup(ctx context.Context, groupID string, userID string
 	return request.Wrap("RemoveFromGroup", "users", upstream.RemoveFromGroup(ctx, a.client, groupID, userID).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

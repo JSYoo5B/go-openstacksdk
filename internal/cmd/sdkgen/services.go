@@ -191,14 +191,14 @@ func (g *generator) generateServices() error {
 		for j, path := range paths {
 			fmt.Fprintf(&registry, "%s *resource%d.API\n", registryField(path), j)
 		}
-		registry.WriteString("}\nfunc New(client *gophercloud.ServiceClient)*Service{return &Service{client:client,\n")
+		registry.WriteString("}\n// New returns a Service whose APIs share client.\nfunc New(client *gophercloud.ServiceClient)*Service{return &Service{client:client,\n")
 		if key == "objectstorage/v1" {
 			registry.WriteString("Cloud:cloud.New(client),\n")
 		}
 		for j, path := range paths {
 			fmt.Fprintf(&registry, "%s:resource%d.New(client),\n", registryField(path), j)
 		}
-		registry.WriteString("}}\nfunc(s *Service)RawClient()*gophercloud.ServiceClient{return s.client}\n")
+		registry.WriteString("}}\n// RawClient returns the shared Gophercloud service client.\nfunc(s *Service)RawClient()*gophercloud.ServiceClient{return s.client}\n")
 		if err := writeGo(g.root, key+"/service_generated.go", registry.Bytes()); err != nil {
 			return err
 		}

@@ -19,28 +19,59 @@ type API struct {
 	Resources *resource.Collection[Config]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Config is Gophercloud's openstack/db/v1/configurations.Config.
 type Config = upstream.Config
+
+// ConfigPage is Gophercloud's openstack/db/v1/configurations.ConfigPage.
 type ConfigPage = upstream.ConfigPage
+
+// CreateOpts is Gophercloud's openstack/db/v1/configurations.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/db/v1/configurations.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DatastoreOpts is Gophercloud's openstack/db/v1/configurations.DatastoreOpts.
 type DatastoreOpts = upstream.DatastoreOpts
+
+// DeleteResult is Gophercloud's openstack/db/v1/configurations.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/db/v1/configurations.GetResult.
 type GetResult = upstream.GetResult
+
+// Param is Gophercloud's openstack/db/v1/configurations.Param.
 type Param = upstream.Param
+
+// ParamPage is Gophercloud's openstack/db/v1/configurations.ParamPage.
 type ParamPage = upstream.ParamPage
+
+// ParamResult is Gophercloud's openstack/db/v1/configurations.ParamResult.
 type ParamResult = upstream.ParamResult
+
+// ReplaceResult is Gophercloud's openstack/db/v1/configurations.ReplaceResult.
 type ReplaceResult = upstream.ReplaceResult
+
+// UpdateOpts is Gophercloud's openstack/db/v1/configurations.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/db/v1/configurations.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -144,8 +175,10 @@ func (a *API) ListInstances(ctx context.Context, configID string) iter.Seq2[*ins
 	})
 }
 
+// ReplaceOption is a per-call option of API.Replace.
 type ReplaceOption = request.NativeFieldCall
 
+// WithReplaceOptions sets the whole UpdateOpts of API.Replace.
 func WithReplaceOptions(value UpdateOpts) ReplaceOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -180,8 +213,10 @@ func (a *API) Replace(ctx context.Context, configID string, opts UpdateOpts, opt
 	return request.Wrap("Replace", "configurations", upstream.Replace(ctx, a.client, configID, _opts).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

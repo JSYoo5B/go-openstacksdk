@@ -15,20 +15,43 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Capability is Gophercloud's openstack/loadbalancer/v2/providers.Capability.
 type Capability = upstream.Capability
+
+// GetResult is Gophercloud's openstack/loadbalancer/v2/providers.GetResult.
 type GetResult = upstream.GetResult
+
+// ListAvailabilityZoneCapabilitiesOpts is Gophercloud's openstack/loadbalancer/v2/providers.ListAvailabilityZoneCapabilitiesOpts.
 type ListAvailabilityZoneCapabilitiesOpts = upstream.ListAvailabilityZoneCapabilitiesOpts
+
+// ListAvailabilityZoneCapabilitiesResult is Gophercloud's openstack/loadbalancer/v2/providers.ListAvailabilityZoneCapabilitiesResult.
 type ListAvailabilityZoneCapabilitiesResult = upstream.ListAvailabilityZoneCapabilitiesResult
+
+// ListFlavorCapabilitiesOpts is Gophercloud's openstack/loadbalancer/v2/providers.ListFlavorCapabilitiesOpts.
 type ListFlavorCapabilitiesOpts = upstream.ListFlavorCapabilitiesOpts
+
+// ListFlavorCapabilitiesResult is Gophercloud's openstack/loadbalancer/v2/providers.ListFlavorCapabilitiesResult.
 type ListFlavorCapabilitiesResult = upstream.ListFlavorCapabilitiesResult
+
+// ListOpts is Gophercloud's openstack/loadbalancer/v2/providers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Provider is Gophercloud's openstack/loadbalancer/v2/providers.Provider.
 type Provider = upstream.Provider
+
+// ProviderPage is Gophercloud's openstack/loadbalancer/v2/providers.ProviderPage.
 type ProviderPage = upstream.ProviderPage
+
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -65,8 +88,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Provid
 	})
 }
 
+// ListAvailabilityZoneCapabilitiesOption is a per-call option of API.ListAvailabilityZoneCapabilities.
 type ListAvailabilityZoneCapabilitiesOption = request.NativeQueryCall
 
+// WithListAvailabilityZoneCapabilitiesOptions sets the whole ListAvailabilityZoneCapabilitiesOpts of API.ListAvailabilityZoneCapabilities.
 func WithListAvailabilityZoneCapabilitiesOptions(value ListAvailabilityZoneCapabilitiesOpts) ListAvailabilityZoneCapabilitiesOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -106,8 +131,10 @@ func (a *API) ListAvailabilityZoneCapabilities(ctx context.Context, provider str
 	return value0, err
 }
 
+// ListFlavorCapabilitiesOption is a per-call option of API.ListFlavorCapabilities.
 type ListFlavorCapabilitiesOption = request.NativeQueryCall
 
+// WithListFlavorCapabilitiesOptions sets the whole ListFlavorCapabilitiesOpts of API.ListFlavorCapabilities.
 func WithListFlavorCapabilitiesOptions(value ListFlavorCapabilitiesOpts) ListFlavorCapabilitiesOption {
 	return request.Custom(request.WithOptions(value))
 }

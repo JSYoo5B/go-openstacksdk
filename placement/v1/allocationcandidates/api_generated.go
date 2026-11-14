@@ -14,24 +14,55 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AllocationCandidates is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationCandidates.
 type AllocationCandidates = upstream.AllocationCandidates
+
+// AllocationCandidates110 is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationCandidates110.
 type AllocationCandidates110 = upstream.AllocationCandidates110
+
+// AllocationCandidatesPage is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationCandidatesPage.
 type AllocationCandidatesPage = upstream.AllocationCandidatesPage
+
+// AllocationRequest is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationRequest.
 type AllocationRequest = upstream.AllocationRequest
+
+// AllocationRequest110 is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationRequest110.
 type AllocationRequest110 = upstream.AllocationRequest110
+
+// AllocationRequest110Resource is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationRequest110Resource.
 type AllocationRequest110Resource = upstream.AllocationRequest110Resource
+
+// AllocationRequest110ResourceProvider is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationRequest110ResourceProvider.
 type AllocationRequest110ResourceProvider = upstream.AllocationRequest110ResourceProvider
+
+// AllocationRequestResource is Gophercloud's openstack/placement/v1/allocationcandidates.AllocationRequestResource.
 type AllocationRequestResource = upstream.AllocationRequestResource
+
+// ListOpts is Gophercloud's openstack/placement/v1/allocationcandidates.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ProviderSummary is Gophercloud's openstack/placement/v1/allocationcandidates.ProviderSummary.
 type ProviderSummary = upstream.ProviderSummary
+
+// ProviderSummary110 is Gophercloud's openstack/placement/v1/allocationcandidates.ProviderSummary110.
 type ProviderSummary110 = upstream.ProviderSummary110
+
+// ProviderSummaryResource is Gophercloud's openstack/placement/v1/allocationcandidates.ProviderSummaryResource.
 type ProviderSummaryResource = upstream.ProviderSummaryResource
+
+// ResourceGroup is Gophercloud's openstack/placement/v1/allocationcandidates.ResourceGroup.
 type ResourceGroup = upstream.ResourceGroup
+
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

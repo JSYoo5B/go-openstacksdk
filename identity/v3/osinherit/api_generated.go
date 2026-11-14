@@ -12,17 +12,34 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AssignOpts is Gophercloud's openstack/identity/v3/osinherit.AssignOpts.
 type AssignOpts = upstream.AssignOpts
+
+// AssignmentResult is Gophercloud's openstack/identity/v3/osinherit.AssignmentResult.
 type AssignmentResult = upstream.AssignmentResult
+
+// UnassignOpts is Gophercloud's openstack/identity/v3/osinherit.UnassignOpts.
 type UnassignOpts = upstream.UnassignOpts
+
+// UnassignmentResult is Gophercloud's openstack/identity/v3/osinherit.UnassignmentResult.
 type UnassignmentResult = upstream.UnassignmentResult
+
+// ValidateOpts is Gophercloud's openstack/identity/v3/osinherit.ValidateOpts.
 type ValidateOpts = upstream.ValidateOpts
+
+// ValidateResult is Gophercloud's openstack/identity/v3/osinherit.ValidateResult.
 type ValidateResult = upstream.ValidateResult
+
+// AssignOption is a per-call option of API.Assign.
 type AssignOption = request.NativeCall
 
+// WithAssignOptions sets the whole AssignOpts of API.Assign.
 func WithAssignOptions(value AssignOpts) AssignOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -37,8 +54,10 @@ func (a *API) Assign(ctx context.Context, roleID string, opts AssignOpts, option
 	return request.Wrap("Assign", "osinherit", upstream.Assign(ctx, a.client, roleID, cfg.Options).ExtractErr())
 }
 
+// UnassignOption is a per-call option of API.Unassign.
 type UnassignOption = request.NativeCall
 
+// WithUnassignOptions sets the whole UnassignOpts of API.Unassign.
 func WithUnassignOptions(value UnassignOpts) UnassignOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -53,8 +72,10 @@ func (a *API) Unassign(ctx context.Context, roleID string, opts UnassignOpts, op
 	return request.Wrap("Unassign", "osinherit", upstream.Unassign(ctx, a.client, roleID, cfg.Options).ExtractErr())
 }
 
+// ValidateOption is a per-call option of API.Validate.
 type ValidateOption = request.NativeCall
 
+// WithValidateOptions sets the whole ValidateOpts of API.Validate.
 func WithValidateOptions(value ValidateOpts) ValidateOption {
 	return request.Custom(request.WithOptions(value))
 }

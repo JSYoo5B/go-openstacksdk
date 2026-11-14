@@ -21,6 +21,7 @@ type Service struct {
 	Swauth     *resource3.API
 }
 
+// New returns a Service whose APIs share client.
 func New(client *gophercloud.ServiceClient) *Service {
 	return &Service{client: client,
 		Cloud:      cloud.New(client),
@@ -30,4 +31,6 @@ func New(client *gophercloud.ServiceClient) *Service {
 		Swauth:     resource3.New(client),
 	}
 }
+
+// RawClient returns the shared Gophercloud service client.
 func (s *Service) RawClient() *gophercloud.ServiceClient { return s.client }

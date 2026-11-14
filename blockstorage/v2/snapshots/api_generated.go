@@ -19,24 +19,47 @@ type API struct {
 	Resources *resource.Collection[Snapshot]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/blockstorage/v2/snapshots.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/blockstorage/v2/snapshots.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/blockstorage/v2/snapshots.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/blockstorage/v2/snapshots.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/blockstorage/v2/snapshots.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Snapshot is Gophercloud's openstack/blockstorage/v2/snapshots.Snapshot.
 type Snapshot = upstream.Snapshot
+
+// SnapshotPage is Gophercloud's openstack/blockstorage/v2/snapshots.SnapshotPage.
 type SnapshotPage = upstream.SnapshotPage
+
+// UpdateMetadataOpts is Gophercloud's openstack/blockstorage/v2/snapshots.UpdateMetadataOpts.
 type UpdateMetadataOpts = upstream.UpdateMetadataOpts
+
+// UpdateMetadataResult is Gophercloud's openstack/blockstorage/v2/snapshots.UpdateMetadataResult.
 type UpdateMetadataResult = upstream.UpdateMetadataResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -88,8 +111,10 @@ func (a *API) Get(ctx context.Context, id string) (*Snapshot, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -130,8 +155,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateMetadataOption is a per-call option of API.UpdateMetadata.
 type UpdateMetadataOption = request.NativeFieldCall
 
+// WithUpdateMetadataOptions sets the whole UpdateMetadataOpts of API.UpdateMetadata.
 func WithUpdateMetadataOptions(value UpdateMetadataOpts) UpdateMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }

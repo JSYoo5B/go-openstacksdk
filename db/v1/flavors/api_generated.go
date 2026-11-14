@@ -18,15 +18,23 @@ type API struct {
 	Resources *resource.Collection[Flavor]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Flavor is Gophercloud's openstack/db/v1/flavors.Flavor.
 type Flavor = upstream.Flavor
+
+// FlavorPage is Gophercloud's openstack/db/v1/flavors.FlavorPage.
 type FlavorPage = upstream.FlavorPage
+
+// GetResult is Gophercloud's openstack/db/v1/flavors.GetResult.
 type GetResult = upstream.GetResult
 
 // Get invokes the upstream API with library-owned builders and result handling.

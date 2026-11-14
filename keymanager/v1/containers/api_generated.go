@@ -18,42 +18,83 @@ type API struct {
 	Resources *resource.Collection[Container]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const CertificateContainer = upstream.CertificateContainer
 
+// Consumer is Gophercloud's openstack/keymanager/v1/containers.Consumer.
 type Consumer = upstream.Consumer
+
+// ConsumerPage is Gophercloud's openstack/keymanager/v1/containers.ConsumerPage.
 type ConsumerPage = upstream.ConsumerPage
+
+// ConsumerRef is Gophercloud's openstack/keymanager/v1/containers.ConsumerRef.
 type ConsumerRef = upstream.ConsumerRef
+
+// Container is Gophercloud's openstack/keymanager/v1/containers.Container.
 type Container = upstream.Container
+
+// ContainerPage is Gophercloud's openstack/keymanager/v1/containers.ContainerPage.
 type ContainerPage = upstream.ContainerPage
+
+// ContainerType is Gophercloud's openstack/keymanager/v1/containers.ContainerType.
 type ContainerType = upstream.ContainerType
+
+// CreateConsumerOpts is Gophercloud's openstack/keymanager/v1/containers.CreateConsumerOpts.
 type CreateConsumerOpts = upstream.CreateConsumerOpts
+
+// CreateConsumerResult is Gophercloud's openstack/keymanager/v1/containers.CreateConsumerResult.
 type CreateConsumerResult = upstream.CreateConsumerResult
+
+// CreateOpts is Gophercloud's openstack/keymanager/v1/containers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/keymanager/v1/containers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CreateSecretRefResult is Gophercloud's openstack/keymanager/v1/containers.CreateSecretRefResult.
 type CreateSecretRefResult = upstream.CreateSecretRefResult
+
+// DeleteConsumerOpts is Gophercloud's openstack/keymanager/v1/containers.DeleteConsumerOpts.
 type DeleteConsumerOpts = upstream.DeleteConsumerOpts
+
+// DeleteConsumerResult is Gophercloud's openstack/keymanager/v1/containers.DeleteConsumerResult.
 type DeleteConsumerResult = upstream.DeleteConsumerResult
+
+// DeleteResult is Gophercloud's openstack/keymanager/v1/containers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DeleteSecretRefResult is Gophercloud's openstack/keymanager/v1/containers.DeleteSecretRefResult.
 type DeleteSecretRefResult = upstream.DeleteSecretRefResult
 
 const GenericContainer = upstream.GenericContainer
 
+// GetResult is Gophercloud's openstack/keymanager/v1/containers.GetResult.
 type GetResult = upstream.GetResult
+
+// ListConsumersOpts is Gophercloud's openstack/keymanager/v1/containers.ListConsumersOpts.
 type ListConsumersOpts = upstream.ListConsumersOpts
+
+// ListOpts is Gophercloud's openstack/keymanager/v1/containers.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const RSAContainer = upstream.RSAContainer
 
+// SecretRef is Gophercloud's openstack/keymanager/v1/containers.SecretRef.
 type SecretRef = upstream.SecretRef
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -92,8 +133,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateConsumerOption is a per-call option of API.CreateConsumer.
 type CreateConsumerOption = request.NativeFieldCall
 
+// WithCreateConsumerOptions sets the whole CreateConsumerOpts of API.CreateConsumer.
 func WithCreateConsumerOptions(value CreateConsumerOpts) CreateConsumerOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -132,8 +175,10 @@ func (a *API) CreateConsumer(ctx context.Context, containerID string, opts Creat
 	return value0, err
 }
 
+// CreateSecretRefOption is a per-call option of API.CreateSecretRef.
 type CreateSecretRefOption = request.NativeFieldCall
 
+// WithCreateSecretRefOptions sets the whole SecretRef of API.CreateSecretRef.
 func WithCreateSecretRefOptions(value SecretRef) CreateSecretRefOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -177,8 +222,10 @@ func (a *API) Delete(ctx context.Context, id string) error {
 	return request.Wrap("Delete", "containers", upstream.Delete(ctx, a.client, id).ExtractErr())
 }
 
+// DeleteConsumerOption is a per-call option of API.DeleteConsumer.
 type DeleteConsumerOption = request.NativeFieldCall
 
+// WithDeleteConsumerOptions sets the whole DeleteConsumerOpts of API.DeleteConsumer.
 func WithDeleteConsumerOptions(value DeleteConsumerOpts) DeleteConsumerOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -218,8 +265,10 @@ func (a *API) DeleteConsumer(ctx context.Context, containerID string, options ..
 	return value0, err
 }
 
+// DeleteSecretRefOption is a per-call option of API.DeleteSecretRef.
 type DeleteSecretRefOption = request.NativeFieldCall
 
+// WithDeleteSecretRefOptions sets the whole SecretRef of API.DeleteSecretRef.
 func WithDeleteSecretRefOptions(value SecretRef) DeleteSecretRefOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -263,8 +312,10 @@ func (a *API) Get(ctx context.Context, id string) (*Container, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -305,8 +356,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// ListConsumersOption is a per-call option of API.ListConsumers.
 type ListConsumersOption = request.NativeQueryCall
 
+// WithListConsumersOptions sets the whole ListOpts of API.ListConsumers.
 func WithListConsumersOptions(value ListOpts) ListConsumersOption {
 	return request.Custom(request.WithOptions(value))
 }

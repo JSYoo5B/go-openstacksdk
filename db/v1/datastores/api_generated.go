@@ -18,19 +18,35 @@ type API struct {
 	Resources *resource.Collection[Datastore]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Datastore is Gophercloud's openstack/db/v1/datastores.Datastore.
 type Datastore = upstream.Datastore
+
+// DatastorePage is Gophercloud's openstack/db/v1/datastores.DatastorePage.
 type DatastorePage = upstream.DatastorePage
+
+// DatastorePartial is Gophercloud's openstack/db/v1/datastores.DatastorePartial.
 type DatastorePartial = upstream.DatastorePartial
+
+// GetResult is Gophercloud's openstack/db/v1/datastores.GetResult.
 type GetResult = upstream.GetResult
+
+// GetVersionResult is Gophercloud's openstack/db/v1/datastores.GetVersionResult.
 type GetVersionResult = upstream.GetVersionResult
+
+// Version is Gophercloud's openstack/db/v1/datastores.Version.
 type Version = upstream.Version
+
+// VersionPage is Gophercloud's openstack/db/v1/datastores.VersionPage.
 type VersionPage = upstream.VersionPage
 
 // Get invokes the upstream API with library-owned builders and result handling.

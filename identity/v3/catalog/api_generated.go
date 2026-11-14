@@ -15,9 +15,13 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ServiceCatalogPage is Gophercloud's openstack/identity/v3/catalog.ServiceCatalogPage.
 type ServiceCatalogPage = upstream.ServiceCatalogPage
 
 // List invokes the upstream API with library-owned builders and result handling.

@@ -18,17 +18,25 @@ type API struct {
 	Resources *resource.Collection[Secret]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const CertificateSecret = upstream.CertificateSecret
 
+// CreateOpts is Gophercloud's openstack/keymanager/v1/secrets.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/keymanager/v1/secrets.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DateFilter is Gophercloud's openstack/keymanager/v1/secrets.DateFilter.
 type DateFilter = upstream.DateFilter
 
 const DateFilterGT = upstream.DateFilterGT
@@ -36,38 +44,75 @@ const DateFilterGTE = upstream.DateFilterGTE
 const DateFilterLT = upstream.DateFilterLT
 const DateFilterLTE = upstream.DateFilterLTE
 
+// DateQuery is Gophercloud's openstack/keymanager/v1/secrets.DateQuery.
 type DateQuery = upstream.DateQuery
+
+// DeleteResult is Gophercloud's openstack/keymanager/v1/secrets.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetPayloadOpts is Gophercloud's openstack/keymanager/v1/secrets.GetPayloadOpts.
 type GetPayloadOpts = upstream.GetPayloadOpts
+
+// GetResult is Gophercloud's openstack/keymanager/v1/secrets.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/keymanager/v1/secrets.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// MetadataCreateResult is Gophercloud's openstack/keymanager/v1/secrets.MetadataCreateResult.
 type MetadataCreateResult = upstream.MetadataCreateResult
+
+// MetadataOpts is Gophercloud's openstack/keymanager/v1/secrets.MetadataOpts.
 type MetadataOpts = upstream.MetadataOpts
+
+// MetadataResult is Gophercloud's openstack/keymanager/v1/secrets.MetadataResult.
 type MetadataResult = upstream.MetadataResult
+
+// Metadatum is Gophercloud's openstack/keymanager/v1/secrets.Metadatum.
 type Metadatum = upstream.Metadatum
+
+// MetadatumCreateResult is Gophercloud's openstack/keymanager/v1/secrets.MetadatumCreateResult.
 type MetadatumCreateResult = upstream.MetadatumCreateResult
+
+// MetadatumDeleteResult is Gophercloud's openstack/keymanager/v1/secrets.MetadatumDeleteResult.
 type MetadatumDeleteResult = upstream.MetadatumDeleteResult
+
+// MetadatumOpts is Gophercloud's openstack/keymanager/v1/secrets.MetadatumOpts.
 type MetadatumOpts = upstream.MetadatumOpts
+
+// MetadatumResult is Gophercloud's openstack/keymanager/v1/secrets.MetadatumResult.
 type MetadatumResult = upstream.MetadatumResult
 
 const OpaqueSecret = upstream.OpaqueSecret
 const PassphraseSecret = upstream.PassphraseSecret
 
+// PayloadResult is Gophercloud's openstack/keymanager/v1/secrets.PayloadResult.
 type PayloadResult = upstream.PayloadResult
 
 const PrivateSecret = upstream.PrivateSecret
 const PublicSecret = upstream.PublicSecret
 
+// Secret is Gophercloud's openstack/keymanager/v1/secrets.Secret.
 type Secret = upstream.Secret
+
+// SecretPage is Gophercloud's openstack/keymanager/v1/secrets.SecretPage.
 type SecretPage = upstream.SecretPage
+
+// SecretType is Gophercloud's openstack/keymanager/v1/secrets.SecretType.
 type SecretType = upstream.SecretType
 
 const SymmetricSecret = upstream.SymmetricSecret
 
+// UpdateOpts is Gophercloud's openstack/keymanager/v1/secrets.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/keymanager/v1/secrets.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -106,8 +151,10 @@ func (a *API) Create(ctx context.Context, opts CreateOpts, options ...CreateOpti
 	return value0, err
 }
 
+// CreateMetadataOption is a per-call option of API.CreateMetadata.
 type CreateMetadataOption = request.NativeFieldCall
 
+// WithCreateMetadataOptions sets the whole MetadataOpts of API.CreateMetadata.
 func WithCreateMetadataOptions(value MetadataOpts) CreateMetadataOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -146,8 +193,10 @@ func (a *API) CreateMetadata(ctx context.Context, secretID string, opts Metadata
 	return value0, err
 }
 
+// CreateMetadatumOption is a per-call option of API.CreateMetadatum.
 type CreateMetadatumOption = request.NativeFieldCall
 
+// WithCreateMetadatumOptions sets the whole MetadatumOpts of API.CreateMetadatum.
 func WithCreateMetadatumOptions(value MetadatumOpts) CreateMetadatumOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -216,8 +265,10 @@ func (a *API) GetMetadatum(ctx context.Context, secretID string, key string) (*M
 	return value0, err
 }
 
+// GetPayloadOption is a per-call option of API.GetPayload.
 type GetPayloadOption = request.NativeHeaderCall
 
+// WithGetPayloadOptions sets the whole GetPayloadOpts of API.GetPayload.
 func WithGetPayloadOptions(value GetPayloadOpts) GetPayloadOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -257,8 +308,10 @@ func (a *API) GetPayload(ctx context.Context, id string, options ...GetPayloadOp
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -299,8 +352,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeHeaderCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -337,8 +392,10 @@ func (a *API) Update(ctx context.Context, id string, opts UpdateOpts, options ..
 	return request.Wrap("Update", "secrets", upstream.Update(ctx, a.client, id, _opts).ExtractErr())
 }
 
+// UpdateMetadatumOption is a per-call option of API.UpdateMetadatum.
 type UpdateMetadatumOption = request.NativeFieldCall
 
+// WithUpdateMetadatumOptions sets the whole MetadatumOpts of API.UpdateMetadatum.
 func WithUpdateMetadatumOptions(value MetadatumOpts) UpdateMetadatumOption {
 	return request.Custom(request.WithOptions(value))
 }

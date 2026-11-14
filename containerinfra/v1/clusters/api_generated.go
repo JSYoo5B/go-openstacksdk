@@ -18,35 +18,67 @@ type API struct {
 	Resources *resource.Collection[Cluster]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
 const AddOp = upstream.AddOp
 
+// Cluster is Gophercloud's openstack/containerinfra/v1/clusters.Cluster.
 type Cluster = upstream.Cluster
+
+// ClusterPage is Gophercloud's openstack/containerinfra/v1/clusters.ClusterPage.
 type ClusterPage = upstream.ClusterPage
+
+// CreateOpts is Gophercloud's openstack/containerinfra/v1/clusters.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/containerinfra/v1/clusters.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/containerinfra/v1/clusters.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/containerinfra/v1/clusters.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/containerinfra/v1/clusters.ListOpts.
 type ListOpts = upstream.ListOpts
 
 const RemoveOp = upstream.RemoveOp
 const ReplaceOp = upstream.ReplaceOp
 
+// ResizeOpts is Gophercloud's openstack/containerinfra/v1/clusters.ResizeOpts.
 type ResizeOpts = upstream.ResizeOpts
+
+// ResizeResult is Gophercloud's openstack/containerinfra/v1/clusters.ResizeResult.
 type ResizeResult = upstream.ResizeResult
+
+// UpdateOp is Gophercloud's openstack/containerinfra/v1/clusters.UpdateOp.
 type UpdateOp = upstream.UpdateOp
+
+// UpdateOpts is Gophercloud's openstack/containerinfra/v1/clusters.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/containerinfra/v1/clusters.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// UpgradeOpts is Gophercloud's openstack/containerinfra/v1/clusters.UpgradeOpts.
 type UpgradeOpts = upstream.UpgradeOpts
+
+// UpgradeResult is Gophercloud's openstack/containerinfra/v1/clusters.UpgradeResult.
 type UpgradeResult = upstream.UpgradeResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -98,8 +130,10 @@ func (a *API) Get(ctx context.Context, id string) (*Cluster, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -136,8 +170,10 @@ func (a *API) List(ctx context.Context, options ...ListOption) iter.Seq2[*Cluste
 	})
 }
 
+// ListDetailOption is a per-call option of API.ListDetail.
 type ListDetailOption = request.NativeQueryCall
 
+// WithListDetailOptions sets the whole ListOpts of API.ListDetail.
 func WithListDetailOptions(value ListOpts) ListDetailOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -180,8 +216,10 @@ func (a *API) listDetailWithControl(ctx context.Context, control resource.ListCo
 	}, control)
 }
 
+// ResizeOption is a per-call option of API.Resize.
 type ResizeOption = request.NativeFieldCall
 
+// WithResizeOptions sets the whole ResizeOpts of API.Resize.
 func WithResizeOptions(value ResizeOpts) ResizeOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -228,8 +266,10 @@ func (a *API) Update(ctx context.Context, id string, opts []UpdateOpts) (string,
 	return value0, err
 }
 
+// UpgradeOption is a per-call option of API.Upgrade.
 type UpgradeOption = request.NativeFieldCall
 
+// WithUpgradeOptions sets the whole UpgradeOpts of API.Upgrade.
 func WithUpgradeOptions(value UpgradeOpts) UpgradeOption {
 	return request.Custom(request.WithOptions(value))
 }

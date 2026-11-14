@@ -15,14 +15,25 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// ListOpts is Gophercloud's openstack/compute/v2/migrations.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Migration is Gophercloud's openstack/compute/v2/migrations.Migration.
 type Migration = upstream.Migration
+
+// MigrationPage is Gophercloud's openstack/compute/v2/migrations.MigrationPage.
 type MigrationPage = upstream.MigrationPage
+
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

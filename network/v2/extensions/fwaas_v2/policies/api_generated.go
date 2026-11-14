@@ -18,27 +18,56 @@ type API struct {
 	Resources *resource.Collection[Policy]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.GetResult.
 type GetResult = upstream.GetResult
+
+// InsertRuleOpts is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.InsertRuleOpts.
 type InsertRuleOpts = upstream.InsertRuleOpts
+
+// InsertRuleResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.InsertRuleResult.
 type InsertRuleResult = upstream.InsertRuleResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Policy is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.Policy.
 type Policy = upstream.Policy
+
+// PolicyPage is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.PolicyPage.
 type PolicyPage = upstream.PolicyPage
+
+// RemoveRuleResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.RemoveRuleResult.
 type RemoveRuleResult = upstream.RemoveRuleResult
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/policies.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -90,8 +119,10 @@ func (a *API) Get(ctx context.Context, id string) (*Policy, error) {
 	return value0, err
 }
 
+// InsertRuleOption is a per-call option of API.InsertRule.
 type InsertRuleOption = request.NativeFieldCall
 
+// WithInsertRuleOptions sets the whole InsertRuleOpts of API.InsertRule.
 func WithInsertRuleOptions(value InsertRuleOpts) InsertRuleOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -130,8 +161,10 @@ func (a *API) InsertRule(ctx context.Context, id string, opts InsertRuleOpts, op
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -180,8 +213,10 @@ func (a *API) RemoveRule(ctx context.Context, id string, ruleID string) (*Policy
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

@@ -12,15 +12,28 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Absolute is Gophercloud's openstack/compute/v2/limits.Absolute.
 type Absolute = upstream.Absolute
+
+// GetOpts is Gophercloud's openstack/compute/v2/limits.GetOpts.
 type GetOpts = upstream.GetOpts
+
+// GetResult is Gophercloud's openstack/compute/v2/limits.GetResult.
 type GetResult = upstream.GetResult
+
+// Limits is Gophercloud's openstack/compute/v2/limits.Limits.
 type Limits = upstream.Limits
+
+// GetOption is a per-call option of API.Get.
 type GetOption = request.NativeQueryCall
 
+// WithGetOptions sets the whole GetOpts of API.Get.
 func WithGetOptions(value GetOpts) GetOption { return request.Custom(request.WithOptions(value)) }
 
 type getOptsBuilder struct {

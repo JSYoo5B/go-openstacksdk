@@ -18,33 +18,74 @@ type API struct {
 	Resources *resource.Collection[BGPSpeaker]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// AddBGPPeerOpts is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.AddBGPPeerOpts.
 type AddBGPPeerOpts = upstream.AddBGPPeerOpts
+
+// AddBGPPeerResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.AddBGPPeerResult.
 type AddBGPPeerResult = upstream.AddBGPPeerResult
+
+// AddGatewayNetworkOpts is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.AddGatewayNetworkOpts.
 type AddGatewayNetworkOpts = upstream.AddGatewayNetworkOpts
+
+// AddGatewayNetworkResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.AddGatewayNetworkResult.
 type AddGatewayNetworkResult = upstream.AddGatewayNetworkResult
+
+// AdvertisedRoute is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.AdvertisedRoute.
 type AdvertisedRoute = upstream.AdvertisedRoute
+
+// AdvertisedRoutePage is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.AdvertisedRoutePage.
 type AdvertisedRoutePage = upstream.AdvertisedRoutePage
+
+// BGPSpeaker is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.BGPSpeaker.
 type BGPSpeaker = upstream.BGPSpeaker
+
+// BGPSpeakerPage is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.BGPSpeakerPage.
 type BGPSpeakerPage = upstream.BGPSpeakerPage
+
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.GetResult.
 type GetResult = upstream.GetResult
+
+// RemoveBGPPeerOpts is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.RemoveBGPPeerOpts.
 type RemoveBGPPeerOpts = upstream.RemoveBGPPeerOpts
+
+// RemoveBGPPeerResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.RemoveBGPPeerResult.
 type RemoveBGPPeerResult = upstream.RemoveBGPPeerResult
+
+// RemoveGatewayNetworkOpts is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.RemoveGatewayNetworkOpts.
 type RemoveGatewayNetworkOpts = upstream.RemoveGatewayNetworkOpts
+
+// RemoveGatewayNetworkResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.RemoveGatewayNetworkResult.
 type RemoveGatewayNetworkResult = upstream.RemoveGatewayNetworkResult
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/bgp/speakers.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// AddBGPPeerOption is a per-call option of API.AddBGPPeer.
 type AddBGPPeerOption = request.NativeFieldCall
 
+// WithAddBGPPeerOptions sets the whole AddBGPPeerOpts of API.AddBGPPeer.
 func WithAddBGPPeerOptions(value AddBGPPeerOpts) AddBGPPeerOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -83,8 +124,10 @@ func (a *API) AddBGPPeer(ctx context.Context, bgpSpeakerID string, opts AddBGPPe
 	return value0, err
 }
 
+// AddGatewayNetworkOption is a per-call option of API.AddGatewayNetwork.
 type AddGatewayNetworkOption = request.NativeFieldCall
 
+// WithAddGatewayNetworkOptions sets the whole AddGatewayNetworkOpts of API.AddGatewayNetwork.
 func WithAddGatewayNetworkOptions(value AddGatewayNetworkOpts) AddGatewayNetworkOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -123,8 +166,10 @@ func (a *API) AddGatewayNetwork(ctx context.Context, bgpSpeakerID string, opts A
 	return value0, err
 }
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -196,8 +241,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl)
 	}, control)
 }
 
+// RemoveBGPPeerOption is a per-call option of API.RemoveBGPPeer.
 type RemoveBGPPeerOption = request.NativeFieldCall
 
+// WithRemoveBGPPeerOptions sets the whole RemoveBGPPeerOpts of API.RemoveBGPPeer.
 func WithRemoveBGPPeerOptions(value RemoveBGPPeerOpts) RemoveBGPPeerOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -232,8 +279,10 @@ func (a *API) RemoveBGPPeer(ctx context.Context, bgpSpeakerID string, opts Remov
 	return request.Wrap("RemoveBGPPeer", "speakers", upstream.RemoveBGPPeer(ctx, a.client, bgpSpeakerID, _opts).ExtractErr())
 }
 
+// RemoveGatewayNetworkOption is a per-call option of API.RemoveGatewayNetwork.
 type RemoveGatewayNetworkOption = request.NativeFieldCall
 
+// WithRemoveGatewayNetworkOptions sets the whole RemoveGatewayNetworkOpts of API.RemoveGatewayNetwork.
 func WithRemoveGatewayNetworkOptions(value RemoveGatewayNetworkOpts) RemoveGatewayNetworkOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -268,8 +317,10 @@ func (a *API) RemoveGatewayNetwork(ctx context.Context, bgpSpeakerID string, opt
 	return request.Wrap("RemoveGatewayNetwork", "speakers", upstream.RemoveGatewayNetwork(ctx, a.client, bgpSpeakerID, _opts).ExtractErr())
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

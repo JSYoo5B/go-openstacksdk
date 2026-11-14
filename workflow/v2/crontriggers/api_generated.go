@@ -18,17 +18,29 @@ type API struct {
 	Resources *resource.Collection[CronTrigger]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/workflow/v2/crontriggers.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/workflow/v2/crontriggers.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// CronTrigger is Gophercloud's openstack/workflow/v2/crontriggers.CronTrigger.
 type CronTrigger = upstream.CronTrigger
+
+// CronTriggerPage is Gophercloud's openstack/workflow/v2/crontriggers.CronTriggerPage.
 type CronTriggerPage = upstream.CronTriggerPage
+
+// DeleteResult is Gophercloud's openstack/workflow/v2/crontriggers.DeleteResult.
 type DeleteResult = upstream.DeleteResult
 
 const FilterEQ = upstream.FilterEQ
@@ -41,14 +53,28 @@ const FilterLTE = upstream.FilterLTE
 const FilterNEQ = upstream.FilterNEQ
 const FilterNIN = upstream.FilterNIN
 
+// FilterType is Gophercloud's openstack/workflow/v2/crontriggers.FilterType.
 type FilterType = upstream.FilterType
+
+// GetResult is Gophercloud's openstack/workflow/v2/crontriggers.GetResult.
 type GetResult = upstream.GetResult
+
+// ListDateFilter is Gophercloud's openstack/workflow/v2/crontriggers.ListDateFilter.
 type ListDateFilter = upstream.ListDateFilter
+
+// ListFilter is Gophercloud's openstack/workflow/v2/crontriggers.ListFilter.
 type ListFilter = upstream.ListFilter
+
+// ListIntFilter is Gophercloud's openstack/workflow/v2/crontriggers.ListIntFilter.
 type ListIntFilter = upstream.ListIntFilter
+
+// ListOpts is Gophercloud's openstack/workflow/v2/crontriggers.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -100,8 +126,10 @@ func (a *API) Get(ctx context.Context, id string) (*CronTrigger, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {

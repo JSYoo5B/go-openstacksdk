@@ -12,23 +12,38 @@ import (
 // API owns the client and provides concrete inputs, optional extensions and normalized results.
 type API struct{ client *gophercloud.ServiceClient }
 
-func New(client *gophercloud.ServiceClient) *API     { return &API{client: client} }
+// New returns an API that sends requests through client.
+func New(client *gophercloud.ServiceClient) *API { return &API{client: client} }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/image/v2/imageimport.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/image/v2/imageimport.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// GetResult is Gophercloud's openstack/image/v2/imageimport.GetResult.
 type GetResult = upstream.GetResult
 
 const GlanceDirectMethod = upstream.GlanceDirectMethod
 
+// ImportInfo is Gophercloud's openstack/image/v2/imageimport.ImportInfo.
 type ImportInfo = upstream.ImportInfo
+
+// ImportMethod is Gophercloud's openstack/image/v2/imageimport.ImportMethod.
 type ImportMethod = upstream.ImportMethod
+
+// ImportMethods is Gophercloud's openstack/image/v2/imageimport.ImportMethods.
 type ImportMethods = upstream.ImportMethods
 
 const WebDownloadMethod = upstream.WebDownloadMethod
 
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }

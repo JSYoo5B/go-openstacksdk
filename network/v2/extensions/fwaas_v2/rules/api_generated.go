@@ -18,24 +18,39 @@ type API struct {
 	Resources *resource.Collection[Rule]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// Action is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.Action.
 type Action = upstream.Action
 
 const ActionAllow = upstream.ActionAllow
 const ActionDeny = upstream.ActionDeny
 const ActionReject = upstream.ActionReject
 
+// CreateOpts is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// GetResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.GetResult.
 type GetResult = upstream.GetResult
+
+// ListOpts is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// Protocol is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.Protocol.
 type Protocol = upstream.Protocol
 
 const ProtocolAny = upstream.ProtocolAny
@@ -43,12 +58,22 @@ const ProtocolICMP = upstream.ProtocolICMP
 const ProtocolTCP = upstream.ProtocolTCP
 const ProtocolUDP = upstream.ProtocolUDP
 
+// Rule is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.Rule.
 type Rule = upstream.Rule
+
+// RulePage is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.RulePage.
 type RulePage = upstream.RulePage
+
+// UpdateOpts is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/networking/v2/extensions/fwaas_v2/rules.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -100,8 +125,10 @@ func (a *API) Get(ctx context.Context, id string) (*Rule, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -142,8 +169,10 @@ func (a *API) listWithControl(ctx context.Context, control resource.ListControl,
 	}, control)
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }

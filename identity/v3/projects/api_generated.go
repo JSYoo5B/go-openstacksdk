@@ -18,35 +18,73 @@ type API struct {
 	Resources *resource.Collection[Project]
 }
 
+// New returns an API that sends requests through client.
 func New(client *gophercloud.ServiceClient) *API {
 	a := &API{client: client}
 	a.Resources = a.newResources()
 	return a
 }
+
+// RawClient returns the Gophercloud service client.
 func (a *API) RawClient() *gophercloud.ServiceClient { return a.client }
 
+// CreateOpts is Gophercloud's openstack/identity/v3/projects.CreateOpts.
 type CreateOpts = upstream.CreateOpts
+
+// CreateResult is Gophercloud's openstack/identity/v3/projects.CreateResult.
 type CreateResult = upstream.CreateResult
+
+// DeleteResult is Gophercloud's openstack/identity/v3/projects.DeleteResult.
 type DeleteResult = upstream.DeleteResult
+
+// DeleteTagsResult is Gophercloud's openstack/identity/v3/projects.DeleteTagsResult.
 type DeleteTagsResult = upstream.DeleteTagsResult
+
+// GetResult is Gophercloud's openstack/identity/v3/projects.GetResult.
 type GetResult = upstream.GetResult
 
 const Immutable = upstream.Immutable
 
+// InvalidListFilter is Gophercloud's openstack/identity/v3/projects.InvalidListFilter.
 type InvalidListFilter = upstream.InvalidListFilter
+
+// ListOpts is Gophercloud's openstack/identity/v3/projects.ListOpts.
 type ListOpts = upstream.ListOpts
+
+// ListTagsResult is Gophercloud's openstack/identity/v3/projects.ListTagsResult.
 type ListTagsResult = upstream.ListTagsResult
+
+// ModifyTagsOpts is Gophercloud's openstack/identity/v3/projects.ModifyTagsOpts.
 type ModifyTagsOpts = upstream.ModifyTagsOpts
+
+// ModifyTagsResult is Gophercloud's openstack/identity/v3/projects.ModifyTagsResult.
 type ModifyTagsResult = upstream.ModifyTagsResult
+
+// Option is Gophercloud's openstack/identity/v3/projects.Option.
 type Option = upstream.Option
+
+// Project is Gophercloud's openstack/identity/v3/projects.Project.
 type Project = upstream.Project
+
+// ProjectPage is Gophercloud's openstack/identity/v3/projects.ProjectPage.
 type ProjectPage = upstream.ProjectPage
+
+// ProjectTags is Gophercloud's openstack/identity/v3/projects.ProjectTags.
 type ProjectTags = upstream.ProjectTags
+
+// Tags is Gophercloud's openstack/identity/v3/projects.Tags.
 type Tags = upstream.Tags
+
+// UpdateOpts is Gophercloud's openstack/identity/v3/projects.UpdateOpts.
 type UpdateOpts = upstream.UpdateOpts
+
+// UpdateResult is Gophercloud's openstack/identity/v3/projects.UpdateResult.
 type UpdateResult = upstream.UpdateResult
+
+// CreateOption is a per-call option of API.Create.
 type CreateOption = request.NativeFieldCall
 
+// WithCreateOptions sets the whole CreateOpts of API.Create.
 func WithCreateOptions(value CreateOpts) CreateOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -103,8 +141,10 @@ func (a *API) Get(ctx context.Context, id string) (*Project, error) {
 	return value0, err
 }
 
+// ListOption is a per-call option of API.List.
 type ListOption = request.NativeQueryCall
 
+// WithListOptions sets the whole ListOpts of API.List.
 func WithListOptions(value ListOpts) ListOption { return request.Custom(request.WithOptions(value)) }
 
 type listOptsBuilder struct {
@@ -161,8 +201,10 @@ func (a *API) ListTags(ctx context.Context, projectID string) (*Tags, error) {
 	return value0, err
 }
 
+// ModifyTagsOption is a per-call option of API.ModifyTags.
 type ModifyTagsOption = request.NativeFieldCall
 
+// WithModifyTagsOptions sets the whole ModifyTagsOpts of API.ModifyTags.
 func WithModifyTagsOptions(value ModifyTagsOpts) ModifyTagsOption {
 	return request.Custom(request.WithOptions(value))
 }
@@ -201,8 +243,10 @@ func (a *API) ModifyTags(ctx context.Context, projectID string, opts ModifyTagsO
 	return value0, err
 }
 
+// UpdateOption is a per-call option of API.Update.
 type UpdateOption = request.NativeFieldCall
 
+// WithUpdateOptions sets the whole UpdateOpts of API.Update.
 func WithUpdateOptions(value UpdateOpts) UpdateOption {
 	return request.Custom(request.WithOptions(value))
 }
