@@ -12,6 +12,12 @@ import (
 // Schema preserves a discovery document and actual HTTP metadata. Name and all
 // schema keywords are passive data, never request identities or validation
 // gates. Embedded links and timestamps stay nil; their values remain in Body.
+//
+// The 16 `image.Service.Get*Schema` methods issue body/query-free GETs to fixed
+// schema paths. Concrete `GetSchemaOption` and SDK-owned `image.Schema`
+// preserve canonical fields, omitted/null values and exact raw JSON, including
+// bool/object additionalProperties. Names, links and URLs remain passive data,
+// without ID lookup, pagination, automatic validation or Resource cache.
 type Schema struct {
 	resource.Metadata
 	Name                 *string                    `json:"name"`

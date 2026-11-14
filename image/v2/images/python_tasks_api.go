@@ -38,6 +38,9 @@ func taskRecordProfile() microversions.Profile {
 
 // TaskRecords maps the image-scoped Source ImageTasks list, with literal parent
 // selector, Source default local image_id filter and independently owned rows.
+//
+// `Images.TaskRecords/AllTaskRecords` provides Source task listing scoped to an
+// image ID, local filters and owned options.
 func (a *API) TaskRecords(ctx context.Context, imageID string, options ...TaskRecordsOption) iter.Seq2[*ImageTaskRecord, error] {
 	options = slices.Clone(options)
 	return func(yield func(*ImageTaskRecord, error) bool) {

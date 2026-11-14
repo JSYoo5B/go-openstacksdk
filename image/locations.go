@@ -17,6 +17,13 @@ import (
 // asynchronous location task. Like Python Resource.create it accepts any actual
 // 200..399 response and returns the acknowledgement with an ImageLocation view;
 // the server owns storage, permissions and eventual content verification.
+//
+// `image.Service.AddImageLocation` submits a URL and optional validation hash
+// through a fixed POST, retaining actual202 acknowledgement.
+// `GetImageLocations` performs one body/query-free GET200 of a finite array and
+// returns URLs, metadata and original response. Native location-set PATCH
+// remains available; location IDs, pagination and completed hash verification
+// are not synthesized.
 func (s *Service) AddImageLocation(ctx context.Context, ref resource.Ref, locationURL string, options ...AddImageLocationOption) (*AddImageLocationResult, error) {
 	options = append([]AddImageLocationOption(nil), options...)
 	var body, validationJSON json.RawMessage

@@ -15,6 +15,11 @@ import (
 // UploadImage creates metadata and streams borrowed data through one file PUT.
 // It defaults to qcow2/bare/private, preserves actual phase evidence, never
 // closes or seeks Data, and does not refresh, wait, retry data or delete images.
+//
+// `image.Service.UploadImage` uses concrete `ImageUploadOpts` and raw metadata
+// fields for image POST201 followed by binary PUT204. It preserves the creation
+// ImageInfo and both stages' actual bodies, headers and statuses; the caller's
+// borrowed reader is sent once. Creation information survives a later error.
 func (s *Service) UploadImage(ctx context.Context, input UploadImageRequest, options ...ImageUploadOption) (*ImageUploadResult, error) {
 	wrap := func(err error) error { return wrapImageMutationError(ctx, "UploadImage", err) }
 	p, policy, body, err := s.prepareImageUpload(ctx, input, append([]ImageUploadOption(nil), options...))

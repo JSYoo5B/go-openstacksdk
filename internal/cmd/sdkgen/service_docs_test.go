@@ -1,6 +1,7 @@
 package main
 
 import (
+	"go/ast"
 	"go/parser"
 	"go/token"
 	"io/fs"
@@ -27,12 +28,24 @@ func serviceDocs(root, readmePath, packageDir string) ([]byte, error) {
 		if err != nil || entry.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") || strings.HasSuffix(path, "_generated.go") {
 			return err
 		}
-		file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.PackageClauseOnly|parser.ParseComments)
+		file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.ParseComments)
 		if err != nil {
 			return err
 		}
 		if file.Doc != nil {
 			text = append(text, file.Doc.Text())
+		}
+		for _, decl := range file.Decls {
+			switch decl := decl.(type) {
+			case *ast.FuncDecl:
+				if decl.Doc != nil {
+					text = append(text, decl.Doc.Text())
+				}
+			case *ast.GenDecl:
+				if decl.Doc != nil {
+					text = append(text, decl.Doc.Text())
+				}
+			}
 		}
 		return nil
 	})

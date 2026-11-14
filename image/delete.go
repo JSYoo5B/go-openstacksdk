@@ -21,6 +21,13 @@ import (
 // directly; names use an exact collection lookup. Absence is ignored by default.
 // Only an actual 204 creates a result, retained alongside body or context errors.
 // This workflow never discovers stores, polls or performs additional cleanup.
+//
+// `image.Service.DeleteImage(ctx, ref, options...)` deletes an image or the
+// store copy selected by `DeleteImageOpts.StoreID`. IDs issue a fixed DELETE
+// directly; names resolve exactly; missing resources are ignored by default. It
+// retains original actual204 response, headers and status without hiding
+// read/close/cancellation errors as absence. Native `Images.Delete` retains its
+// 202/204 contract and resource inventory.
 func (s *Service) DeleteImage(ctx context.Context, ref resource.Ref, options ...DeleteImageOption) (*DeleteImageResult, error) {
 	wrap := func(err error) error { return wrapDeleteImageError(ctx, err) }
 	var source *gophercloud.ServiceClient

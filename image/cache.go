@@ -11,6 +11,14 @@ import (
 )
 
 // GetImageCache reads one complete cache snapshot without paging or discovery.
+//
+// `image.Service.GetImageCache/QueueImage/CacheDeleteImage/ClearCache/CachedImageNodes/CleanCache/PruneCache`
+// uses fixed cache paths and concrete options. Delete defaults nil
+// IgnoreMissing to true, ignoring only an actual DELETE404 whose body is fully
+// read and closed. Clear's zero target means both cache and queue and omits the
+// header. Clean returns an actual200 opaque response; Prune returns actual200
+// counts. No discovery, active prefetch, automatic fanout or completion
+// inference is added.
 func (s *Service) GetImageCache(ctx context.Context, options ...CacheOption) (*ImageCache, error) {
 	prepared, err := s.prepareCommonCache(ctx, nil, options)
 	if err != nil {

@@ -21,6 +21,13 @@ import (
 
 // ImportImage resolves an explicit reference, fetches fresh image metadata and
 // submits one asynchronous import request. It does not stage or wait for data.
+//
+// `ImageImport.ImportImage(ctx, ref, options...)` fetches and validates
+// existing image formats before submitting default glance-direct import.
+// `ImportKnownImage` uses an existing native Image ID/format. Concrete options
+// support web/remote imports, root store lists and omitted versus false values,
+// returning the actual 202 response. Native Create/Get contracts remain
+// available.
 func (a *API) ImportImage(ctx context.Context, ref resource.Ref, options ...ImportOption) (*ImportResult, error) {
 	return a.importImage(ctx, ref, nil, append([]ImportOption(nil), options...))
 }

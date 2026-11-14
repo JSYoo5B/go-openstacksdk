@@ -16,6 +16,12 @@ import (
 // GetSchemaRecord reads one fixed schema using its pinned Schema/MetadefSchema
 // descriptor rules. HTTP 200..399 is accepted; JSON syntax errors leave bare
 // resource defaults, while a parsed nonobject remains an observable error.
+//
+// `image.Service.GetSchemaRecord` selects the same 16 fixed paths with
+// `SchemaKind`, applying ordinary Schema and MetadefSchema nullable
+// raw/dict/bool/list conversion. It separates Connection-location-enriched
+// `Resource` from actual `Wire`, `Envelope` and response evidence.
+// Empty/non-JSON HTTP200..399 responses retain bare defaults.
 func (s *Service) GetSchemaRecord(ctx context.Context, kind SchemaKind, options ...GetSchemaOption) (*SchemaRecord, error) {
 	const operation = "GetSchemaRecord"
 	fail := func(err error) (*SchemaRecord, error) {

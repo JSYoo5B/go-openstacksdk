@@ -10,6 +10,13 @@ import (
 // AddTag adds one literal tag through Glance's dedicated endpoint. An ID needs
 // no lookup; an explicit Name is resolved exactly before the fixed mutation.
 // The acknowledgement does not synthesize an image or replace its tag set.
+//
+// `image.Service.AddTag/RemoveTag` changes one tag through fixed PUT/DELETE
+// paths; `DeactivateImage/ReactivateImage` submits a bodyless POST action. IDs
+// bypass lookup; names resolve exactly. Missing resources are errors. Original
+// actual204 acknowledgement, headers and status are retained. Native
+// `ReplaceImageTags` and metadata Update remain available; these actions do not
+// automatically fetch or wait for state.
 func (s *Service) AddTag(ctx context.Context, ref resource.Ref, tag string, options ...ImageMutationOption) (*ImageTagResult, error) {
 	id, response, err := s.executeImageMutation(ctx, ref, &tag, "", http.MethodPut, append([]ImageMutationOption(nil), options...))
 	return imageTagResult(id, tag, response), wrapImageMutationError(ctx, "AddTag", err)

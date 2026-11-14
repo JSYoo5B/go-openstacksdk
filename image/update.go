@@ -12,6 +12,12 @@ import (
 
 // UpdateImage applies the owned ordered changes and returns fresh image JSON.
 // Empty changes still issue a PATCH; Glance returns metadata without saving.
+//
+// `image.Service.UpdateImage/SetImageProperties` provides ordered PATCH and
+// add-upsert through concrete `ImagePatch` and property options. The SDK
+// escapes JSON Pointer keys, submits
+// application/openstack-images-v2.1-json-patch once and returns actual200
+// `ImageInfo`. Empty changes submit [] and observe metadata.
 func (s *Service) UpdateImage(ctx context.Context, ref resource.Ref, options ...UpdateImageOption) (*ImageInfo, error) {
 	p, err := s.prepareImageUpdateReference(ctx, ref)
 	if err != nil {

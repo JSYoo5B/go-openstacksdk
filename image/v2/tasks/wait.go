@@ -25,6 +25,12 @@ const taskWaitImportError396 = "Image cannot be imported. Error code: '396'"
 // WaitForTask waits for success, recreating only a selected failed task whose
 // fetched message exactly identifies Glance import error396. It always starts
 // with a fresh GET of an explicit ID, rather than a cached Task resource.
+//
+// `Tasks.WaitForTask(ctx, resource.ID(id), options...)` defaults to
+// success/failure, a 120-second timeout and 2-second interval. It recreates
+// only when a selected failure state and the exact 396 message are observed,
+// using actual fetched type/input; the new ID shares the same context deadline.
+// Native Task Get/Create/List and common waits remain available.
 func (a *API) WaitForTask(ctx context.Context, ref resource.Ref, options ...TaskWaitOption) (*TaskWaitResult, error) {
 	return a.WaitForTaskState(ctx, ref, "success", options...)
 }

@@ -15,6 +15,11 @@ import (
 
 // ImageTasks lazily fetches the finite task list for one image. MaxItems limits
 // local consumption; links and paging hints are passive response data.
+//
+// `image.Service.ImageTasks/AllImageTasks` requires an image Ref and concrete
+// header/MaxItems options. IDs are used directly and names resolve exactly. One
+// GET returns a finite array of SDK-owned `ImageTaskInfo`, preserving nullable
+// deleted/deleted_at and raw JSON; MaxItems is local consumption.
 func (s *Service) ImageTasks(ctx context.Context, ref resource.Ref, options ...ListImageTasksOption) iter.Seq2[*ImageTaskInfo, error] {
 	options = append([]ListImageTasksOption(nil), options...)
 	return func(yield func(*ImageTaskInfo, error) bool) {

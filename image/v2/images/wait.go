@@ -16,6 +16,10 @@ func (a *API) waitResources() *resource.Collection[Image] {
 
 // WaitForState observes an explicit target with a two-second polling interval,
 // the service's exact ERROR failure state, and no SDK timeout. Options apply last.
+//
+// Images.WaitForState fails on the exact ERROR or error status with no SDK
+// timeout, and Images.WaitForDelete defaults to 120 seconds; both poll every
+// two seconds unless caller resource wait options say otherwise.
 func (a *API) WaitForState(ctx context.Context, ref resource.Ref, target string, options ...resource.WaitOption) (*Image, error) {
 	return servicewait.State(ctx, a.waitResources(), ref, target, "ERROR", options...)
 }

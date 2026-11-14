@@ -31,6 +31,12 @@ import (
 // Available canonical hashes are verified by default. The fixed request ID,
 // actual response headers and successful byte count survive partial failures.
 // It never closes, seeks or truncates output, and never replays written bytes.
+//
+// `image.Service.DownloadTo(ctx, ref, writer, options...)` fetches fresh
+// metadata, downloads to the writer in selected store order and checks
+// available checksums. It does not close the caller's writer. It preserves
+// actual metadata/binary responses, bytes written and integrity results. Native
+// `ImageData.Download` retains its stream-result contract.
 func (s *Service) DownloadTo(ctx context.Context, ref resource.Ref, output io.Writer, options ...DownloadImageOption) (*DownloadImageResult, error) {
 	wrap := func(err error) error { return wrapDownloadError(ctx, err) }
 	var source *gophercloud.ServiceClient

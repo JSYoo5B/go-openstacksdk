@@ -12,6 +12,12 @@ import (
 // CreateTask sends one asynchronous task request. Nil input becomes an owned
 // empty object unless WithCreateTaskNullInput selects JSON null;
 // task-specific requirements and execution remain server-owned.
+//
+// `image.Service.CreateTask/GetTask/Tasks/AllTasks` provides general Task
+// creation, fetch and listing using concrete options and SDK-owned `TaskInfo`.
+// Input defaults to {}; the type query reaches the request. Lists follow
+// canonical body next links; MaxItems/SinglePage are local. Native Task APIs
+// and the 396 wait workflow remain available.
 func (s *Service) CreateTask(ctx context.Context, taskType string, options ...CreateTaskOption) (*TaskInfo, error) {
 	p, err := s.captureTaskSource(ctx)
 	if err == nil && (taskType == "" || !utf8.ValidString(taskType)) {

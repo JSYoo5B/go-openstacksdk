@@ -26,6 +26,14 @@ import (
 
 // StageImage fetches fresh queued metadata, stages borrowed data once, then
 // fetches the same image again. It does not import, wait or close the reader.
+//
+// `ImageData.StageImage(ctx, ref, data, options...)` verifies fresh queued
+// state, sends the caller's Reader once and fetches the image again.
+// `StageKnownImage` uses an existing Image ID/status snapshot to skip the
+// initial GET. Optional Size is an image-size header, not inferred HTTP
+// Content-Length. Actual PUT204 acceptance is separate from the later GET200,
+// and acceptance evidence survives fetch failure. Native Stage/Upload/Download
+// remain available.
 func (a *API) StageImage(ctx context.Context, ref resource.Ref, data io.Reader, options ...StageOption) (*StageImageResult, error) {
 	return a.stageImage(ctx, ref, nil, data, append([]StageOption(nil), options...))
 }

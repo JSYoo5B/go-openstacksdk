@@ -13,6 +13,15 @@ import (
 
 // AddImageMember adds a literal member ID to an image. The server owns sharing
 // policy; no image-state prefetch or project-name lookup is performed.
+//
+// `image.Service.AddImageMember/GetImageMember/UpdateImageMember/RemoveImageMember/FindImageMember/ListImageMembers/AllImageMembers`
+// requires a parent image Ref, literal member ID and concrete
+// header/missing/MaxItems options. Find/Remove default nil IgnoreMissing to
+// true and return nil only after owned GET404/DELETE404 responses are handled
+// successfully. Find fetches an ID directly, without Python's 400/403/list
+// fallback. List is a lazy finite array; MaxItems is local. Native Member APIs
+// and Members.InImage remain available; member Name/project lookup and
+// automatic query/pagination are not synthesized.
 func (s *Service) AddImageMember(ctx context.Context, parent resource.Ref, memberID string, options ...ImageMemberOption) (*ImageMember, error) {
 	return s.requestImageMember(ctx, parent, memberID, nil, http.MethodPost, "AddImageMember", options)
 }

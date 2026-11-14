@@ -31,6 +31,12 @@ type CreateAndImportRequest struct {
 // CreateAndImport creates metadata, stages direct data, submits import and
 // optionally waits for active. All caller options are frozen before POST or
 // reader use. It retains completed phases on failure and never deletes images.
+//
+// `image.Service.CreateAndImport` validates concrete metadata/stage/import/wait
+// policy before HTTP, then connects create201, one staging204, fresh fetch200
+// and import acceptance202. Remote import skips staging; active-state waiting
+// is explicit. This workflow belongs to the higher-level service from
+// `conn.Image(ctx)` rather than additional versioned native operations.
 func (s *Service) CreateAndImport(ctx context.Context, input CreateAndImportRequest, options ...CreateImportOption) (*CreateImportResult, error) {
 	wrap := func(err error) error { return wrapCreateImportError(ctx, err) }
 	if s == nil || s.client == nil {

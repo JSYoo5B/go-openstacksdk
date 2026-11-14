@@ -12,6 +12,12 @@ import (
 
 // GetImage resolves an optional exact Name and then fetches fresh image JSON.
 // Returned identifiers, links and custom properties are passive response data.
+//
+// `image.Service.GetImage/ListImages/AllImages` uses concrete options and
+// SDK-owned `ImageInfo` for fetch/list. It resolves names or fetches IDs and
+// preserves nullable canonical fields, exact numbers and raw JSON extension
+// properties. Listing validates canonical body next links and retains repeated
+// filters. MaxItems and SinglePage are local consumption policies.
 func (s *Service) GetImage(ctx context.Context, ref resource.Ref, options ...GetImageOption) (*ImageInfo, error) {
 	p, id, err := s.prepareGetImage(ctx, ref, append([]GetImageOption(nil), options...))
 	if err != nil {

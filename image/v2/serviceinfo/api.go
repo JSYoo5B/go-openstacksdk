@@ -69,6 +69,15 @@ func (a *API) GetImportInfo(ctx context.Context, options ...GetImportInfoOption)
 // snapshot. Details selects the detail route locally; it is never a query key.
 // Only advertised continuations trigger another page; Glance's discovery
 // handlers return their complete store list and ignore pagination queries.
+//
+// `ServiceInfo.ListStores/AllStores(ctx, options...)` lists stores, optionally
+// requesting details with `ListStoresOpts.Details = true`. `GetImportInfo(ctx)`
+// reads available import methods and preserves original fields, actual headers
+// and status. Discovery is current server information, not import execution or
+// an automatic capability gate. Native `ImageImport.Get` remains available.
+// `GetUsageInfo(ctx)` fetches authenticated-project usage/limits once; usage
+// covers dynamic resources, exact int64, omitted/null and empty results when
+// server reporting is disabled.
 func (a *API) ListStores(ctx context.Context, options ...ListStoresOption) iter.Seq2[*Store, error] {
 	owned := append([]ListStoresOption(nil), options...)
 	return func(yield func(*Store, error) bool) {
