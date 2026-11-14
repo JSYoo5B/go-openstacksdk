@@ -60950,7 +60950,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-tokens.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
@@ -60975,7 +60975,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-tokens.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
@@ -61000,7 +61000,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-tokens.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
@@ -61025,7 +61025,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-tokens.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/tokens call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
@@ -61049,7 +61049,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-tokens.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/catalog call only; the Connection authentication flow and Python identity Resource parity are tracked separately.",
@@ -61076,7 +61076,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
@@ -61101,7 +61101,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
@@ -61128,7 +61128,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
@@ -61153,7 +61153,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
@@ -61178,7 +61178,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
@@ -61203,7 +61203,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
@@ -61228,7 +61228,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/applicationcredentials call only; Python identity Resource parity is tracked separately.",
@@ -61255,7 +61255,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
@@ -61280,7 +61280,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
@@ -61307,7 +61307,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
@@ -61334,7 +61334,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
@@ -61359,7 +61359,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/credentials call only; Python identity Resource parity is tracked separately.",
@@ -61386,7 +61386,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
@@ -61411,7 +61411,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
@@ -61436,7 +61436,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
@@ -61461,7 +61461,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-credentials.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2credentials call only; Python identity Resource parity is tracked separately.",
@@ -61488,7 +61488,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
@@ -61513,7 +61513,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
@@ -61540,7 +61540,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
@@ -61565,7 +61565,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
@@ -61590,7 +61590,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
@@ -61615,7 +61615,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
@@ -61640,7 +61640,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/trusts call only; Python identity Resource parity is tracked separately.",
@@ -61664,7 +61664,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python identity Resource parity is tracked separately.",
@@ -61690,7 +61690,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-trusts.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python identity Resource parity is tracked separately.",
@@ -66631,7 +66631,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
@@ -66656,7 +66656,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
@@ -66683,7 +66683,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
@@ -66710,7 +66710,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
@@ -66735,7 +66735,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/regions call only; Python identity Region resource parity is tracked separately.",
@@ -66762,7 +66762,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
@@ -66787,7 +66787,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
@@ -66814,7 +66814,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
@@ -66841,7 +66841,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
@@ -66866,7 +66866,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/services call only; Python identity Service resource parity is tracked separately.",
@@ -66893,7 +66893,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
@@ -66918,7 +66918,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
@@ -66951,7 +66951,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
@@ -66977,7 +66977,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
@@ -67002,7 +67002,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/endpoints call only; Python identity Endpoint resource parity is tracked separately.",
@@ -67029,7 +67029,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
@@ -67054,7 +67054,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
@@ -67081,7 +67081,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
@@ -67108,7 +67108,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
@@ -67133,7 +67133,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/policies call only; Python identity Policy resource parity is tracked separately.",
@@ -67160,7 +67160,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
@@ -67185,7 +67185,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
@@ -67210,7 +67210,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
@@ -67237,7 +67237,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
@@ -67264,7 +67264,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
@@ -67289,7 +67289,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/limits call only; Python identity Limit resource parity is tracked separately.",
@@ -67316,7 +67316,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
@@ -67341,7 +67341,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
@@ -67368,7 +67368,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
@@ -67395,7 +67395,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
@@ -67420,7 +67420,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/registeredlimits call only; Python identity RegisteredLimit resource parity is tracked separately.",
@@ -67445,7 +67445,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projectendpoints call only; Python identity project endpoint association parity is tracked separately.",
@@ -67470,7 +67470,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projectendpoints call only; Python identity project endpoint association parity is tracked separately.",
@@ -67495,7 +67495,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projectendpoints call only; Python identity project endpoint association parity is tracked separately.",
@@ -67522,7 +67522,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
@@ -67547,7 +67547,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
@@ -67572,7 +67572,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
@@ -67599,7 +67599,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
@@ -67624,7 +67624,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-b.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/federation call only; Python identity federation Mapping resource parity is tracked separately.",
@@ -67651,7 +67651,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
@@ -67676,7 +67676,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
@@ -67703,7 +67703,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
@@ -67728,7 +67728,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
@@ -67755,7 +67755,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
@@ -67780,7 +67780,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/domains call only; Python openstacksdk identity Domain proxy and Resource parity are tracked separately.",
@@ -67807,7 +67807,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
@@ -67832,7 +67832,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
@@ -67859,7 +67859,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
@@ -67884,7 +67884,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
@@ -67911,7 +67911,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/groups call only; Python openstacksdk identity Group proxy and Resource parity are tracked separately.",
@@ -67938,7 +67938,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -67963,7 +67963,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -67990,7 +67990,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -68015,7 +68015,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -68042,7 +68042,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -68067,7 +68067,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -68094,7 +68094,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -68119,7 +68119,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/projects call only; Python openstacksdk identity Project proxy and Resource parity are tracked separately.",
@@ -68146,7 +68146,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68171,7 +68171,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68198,7 +68198,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68223,7 +68223,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68250,7 +68250,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68277,7 +68277,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68302,7 +68302,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68327,7 +68327,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68352,7 +68352,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/users call only; Python openstacksdk identity User proxy and Resource parity are tracked separately.",
@@ -68379,7 +68379,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68404,7 +68404,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68431,7 +68431,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68456,7 +68456,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68483,7 +68483,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68509,7 +68509,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68535,7 +68535,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68561,7 +68561,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68587,7 +68587,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68614,7 +68614,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68639,7 +68639,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68664,7 +68664,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68689,7 +68689,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68714,7 +68714,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/roles call only; Python openstacksdk identity Role proxy and Resource parity are tracked separately.",
@@ -68740,7 +68740,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/osinherit call only; Python openstacksdk inherited role assignment helpers are tracked separately.",
@@ -68766,7 +68766,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/osinherit call only; Python openstacksdk inherited role assignment helpers are tracked separately.",
@@ -68792,7 +68792,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-admin-a.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/osinherit call only; Python openstacksdk inherited role assignment helpers are tracked separately.",
@@ -68817,7 +68817,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/extensions call only; Python openstacksdk identity v2 Extension resources and cloud helpers are tracked separately.",
@@ -68842,7 +68842,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/extensions call only; Python openstacksdk identity v2 Extension resources and cloud helpers are tracked separately.",
@@ -68867,7 +68867,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/roles call only; Python openstacksdk identity v2 Role resources and cloud role-assignment helpers are tracked separately.",
@@ -68892,7 +68892,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/roles call only; Python openstacksdk identity v2 Role resources and cloud role-assignment helpers are tracked separately.",
@@ -68917,7 +68917,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/roles call only; Python openstacksdk identity v2 Role resources and cloud role-assignment helpers are tracked separately.",
@@ -68944,7 +68944,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
@@ -68969,7 +68969,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
@@ -68994,7 +68994,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
@@ -69021,7 +69021,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
@@ -69048,7 +69048,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tenants call only; Python openstacksdk identity v2 Tenant resources and cloud project helpers are tracked separately.",
@@ -69075,7 +69075,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
@@ -69100,7 +69100,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
@@ -69125,7 +69125,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
@@ -69150,7 +69150,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/tokens call only; Python keystoneauth v2 password and token plugins and Connection session authentication are tracked separately.",
@@ -69177,7 +69177,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
@@ -69202,7 +69202,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
@@ -69227,7 +69227,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
@@ -69252,7 +69252,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
@@ -69277,7 +69277,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
@@ -69302,7 +69302,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
@@ -69329,7 +69329,7 @@
         }
       ],
       "documentation": [
-        "identity/v2/native-calls.md"
+        "identity/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v2/users call only; Python openstacksdk identity v2 User resources and cloud user helpers are tracked separately.",
@@ -69356,7 +69356,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69381,7 +69381,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69408,7 +69408,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69433,7 +69433,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69458,7 +69458,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69486,7 +69486,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69513,7 +69513,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69541,7 +69541,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69569,7 +69569,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource and keystoneauth OAuth1 plugin parity is tracked separately.",
@@ -69594,7 +69594,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69619,7 +69619,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69644,7 +69644,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69669,7 +69669,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69694,7 +69694,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/oauth1 call only; Python identity Resource parity is tracked separately.",
@@ -69723,7 +69723,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2tokens call only; Python identity Resource and keystoneauth EC2 plugin parity are tracked separately.",
@@ -69751,7 +69751,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/native-oauth1-ec2.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native identity/v3/ec2tokens call only; Python identity Resource and keystoneauth EC2 plugin parity are tracked separately.",
@@ -87328,7 +87328,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "Go requires non-empty type and a non-nil blob and rejects a type longer than 255 characters before HTTP; Python sends the request and Keystone rejects it with 400.",
@@ -87358,7 +87358,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.",
@@ -87440,7 +87440,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.",
@@ -87491,7 +87491,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md",
+        "identity/v3/README.md",
         "identity/v3/policies/README.md",
         "identity/v3/policies/python-list-records.md"
       ],
@@ -87518,7 +87518,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python skips the request when no attribute changed; Go always sends PATCH, with {\"policy\": {}} for empty options.",
@@ -87554,7 +87554,8 @@
       ],
       "documentation": [
         "identity/v3/federation/python-source-mapping.md",
-        "identity/v3/federation/README.md"
+        "identity/v3/federation/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "The additive SourceMappingRecord API preserves the existing native and MappingRecord APIs. It owns finite JSON attributes and safe string route IDs; arbitrary Python objects and mutable Resource dirty-baseline/recommit state are represented by a fresh Go operation instead.",
@@ -87580,7 +87581,7 @@
         }
       ],
       "documentation": [
-        "identity/v3/python-parity-federation.md"
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource instance or an ID string; Go takes the ID string or a resource.Ref.",
@@ -87608,7 +87609,8 @@
       ],
       "documentation": [
         "identity/v3/federation/python-source-mapping.md",
-        "identity/v3/federation/README.md"
+        "identity/v3/federation/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "The additive SourceMappingRecord API preserves the existing native and MappingRecord APIs. It owns finite JSON attributes and safe string route IDs; arbitrary Python objects and mutable Resource dirty-baseline/recommit state are represented by a fresh Go operation instead.",
@@ -87715,7 +87717,8 @@
       ],
       "documentation": [
         "identity/v3/federation/python-source-mapping.md",
-        "identity/v3/federation/README.md"
+        "identity/v3/federation/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "The additive SourceMappingRecord API preserves the existing native and MappingRecord APIs. It owns finite JSON attributes and safe string route IDs; arbitrary Python objects and mutable Resource dirty-baseline/recommit state are represented by a fresh Go operation instead.",
@@ -87745,7 +87748,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/identityproviders/README.md"
+        "identity/v3/identityproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -87775,7 +87779,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/identityproviders/README.md"
+        "identity/v3/identityproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -87802,7 +87807,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/identityproviders/README.md"
+        "identity/v3/identityproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -87831,7 +87837,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/identityproviders/README.md"
+        "identity/v3/identityproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -87867,7 +87874,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/identityproviders/README.md"
+        "identity/v3/identityproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -87899,7 +87907,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/identityproviders/README.md"
+        "identity/v3/identityproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -88115,7 +88124,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/serviceproviders/README.md"
+        "identity/v3/serviceproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -88145,7 +88155,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/serviceproviders/README.md"
+        "identity/v3/serviceproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -88172,7 +88183,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/serviceproviders/README.md"
+        "identity/v3/serviceproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -88201,7 +88213,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/serviceproviders/README.md"
+        "identity/v3/serviceproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -88237,7 +88250,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/serviceproviders/README.md"
+        "identity/v3/serviceproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",
@@ -88269,7 +88283,8 @@
         }
       ],
       "documentation": [
-        "identity/v3/serviceproviders/README.md"
+        "identity/v3/serviceproviders/README.md",
+        "identity/v3/README.md"
       ],
       "differences": [
         "Python accepts an ID string or a Resource and returns a mutable Resource; Go takes ID strings, escapes each as exactly one path segment (Python joins them unescaped), rejects blank, dot and control-character IDs before HTTP, and returns an owned typed model whose Body is the declared Body-key view without the Python location attribute.",

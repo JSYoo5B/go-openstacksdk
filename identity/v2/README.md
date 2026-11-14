@@ -8,7 +8,7 @@ Service access: `conn.IdentityV2(ctx)` (openstacksdk: `conn.identity`).
 
 `Tokens.Create/Get` returns the SDK-owned `Authentication`. It parses `Token`, `User`, and `Catalog` together and preserves `Header` and the JSON `Body`, including additional response fields. See [authentication responses](tokens/README.md).
 
-Keystone v2.0 was removed in Queens and works only on older deployments. [Native Keystone v2.0 calls](native-calls.md) describes request bodies, success statuses, and administrator-only extension, role, tenant, token, and user calls.
+Keystone v2.0 was removed in Queens and works only on older deployments.
 
 See [Python Proxy mappings](python-parity.md) for openstacksdk identity v2 methods.
 

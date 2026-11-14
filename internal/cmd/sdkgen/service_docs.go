@@ -86,7 +86,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("`Introspection.Resources` fetches and lists using the node UUID without assuming Name, Status, or Delete support. `Introspection.WaitUntilFinished(ctx, ref, waitOptions...)` waits for `Finished` and preserves the actual `Error` in `IntrospectionFailureError`. The SDK-owned `StartIntrospection` helper corrects query omission in the pinned native function, forwarding nil/false/true `ManageBoot` and extension queries. See [start, get, and completion waits](introspection/README.md).\n\n")
 	case "identity/v2":
 		out.WriteString("`Tokens.Create/Get` returns the SDK-owned `Authentication`. It parses `Token`, `User`, and `Catalog` together and preserves `Header` and the JSON `Body`, including additional response fields. See [authentication responses](tokens/README.md).\n\n")
-		out.WriteString("Keystone v2.0 was removed in Queens and works only on older deployments. [Native Keystone v2.0 calls](native-calls.md) describes request bodies, success statuses, and administrator-only extension, role, tenant, token, and user calls." + "\n\n")
+		out.WriteString("Keystone v2.0 was removed in Queens and works only on older deployments." + "\n\n")
 		out.WriteString("See [Python Proxy mappings](python-parity.md) for openstacksdk identity v2 methods." + "\n\n")
 	case "placement/v1":
 	case "identity/v3":

@@ -1,151 +1,6 @@
 # Python Records
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:identity/v3/domains`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.New`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.DomainRecord.Clone`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListQuery`
-- `github.com/JSYoo5B/go-openstacksdk/request.Limit`
-- `github.com/JSYoo5B/go-openstacksdk/request.Marker`
-- `github.com/JSYoo5B/go-openstacksdk/request.MaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/request.Paginated`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.BasePath`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.WithRecordListJMESPath`
-
-- List sends the single GET domains that Python domains() sends without arguments, maps the Python query names name and enabled through ListOpts or request.Query, sends a limit without a marker follow-up, and rejects local Body filters before HTTP.
-  Tests: `identity/v3/domains/python_parity_test.go:TestPythonDomainListRequests`.
-- Source Domain declares raw description/links/id/name, nullable CPython bool is_enabled from enabled and dict options (nonobject {}, null preserved), unknown Body discarded from declared view but complete Wire/Envelope/header/status retained; canonical server query alias is_enabled wins enabled presence and unknown kwargs are dropped before marshal.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsDeclaredDescriptorsQueryAliasesAndOwnedProof`.
-- Pinned root links dictionary is ignored with links-key presence precedence, explicit null links is an iterable error with actual page proof, and short limit pages continue by raw last ID until empty. Raw max_items precedes filtering; break stops lookahead.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsSourceDictionaryLinksAndPresence`, `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsFilteredMarkerRawCapAndBreak`.
-- Ordered recursive local filters use actual truthiness and CPython loaded float/bool/integer equality; early mismatch hides later bad shape and reached bad shape keeps physical proof.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsOrderedLoadedLocalEquality`.
-- Proxy expressions see an opaque unread generator, with HTTP0 null/type/literal results, identity/nested generator preservation, no invented JSON and typed InvalidOption cause for syntax/type failure; falsey/nonstrings remain lazy.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsProxyExpressionsRemainOpaqueUntilConsumed`.
-- Proxy formal headers/version/basepath and one-pass conflicting attrs normalization restore query/headers/version, retain original expression priority and unknown discard; bound control collisions remain HTTP0.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsProxyFormalRestorationAndBoundCollision`.
-- Explicit location is owned and ignores unknown wire project/location; new SourceStatusPolicy accepts valid HTTP100..399 without changing older profiles/native statuses or triggering discovery.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsLocationBeforeLocalFilterAndStatusPolicy`.
-- Captured options/Source/context guard each callback before and after; restoring callback cannot undo observed source mutation or custom cancellation and invalid preflight makes HTTP0/no proof.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsOwnedOptionsStickySourceAndCancellation`.
-- 28 accepted/rejected physical Read/Close/Source restored by Close/custom cancel lanes preserve actual proof, terminal sticky causes, Close once and no retry/backoff/reauth. Native pointer401 has separately inspected value ErrOriginal and ErrReauth; no nonexistent Unwrap is assumed.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsFaultedActualRejectionsNeverFallbackOrRetry`.
-- Clean native401/503/429/498 retries reuse live token and owned route/query/headers with bodyless GET, preserving successful HTTP203 proof.
-  Tests: `identity/v3/domains/python_records_test.go:TestPythonDomainRecordsCleanNativeRetryUsesLiveAuthAndCapturedHeaders`.
-
-Python/Go differences:
-
-- Python reads the Keystone links dict without a rel key and never follows links.next; the native pager follows links.next when Keystone sets it.
-- Python sends bool query values as True/False text; typed Go ListOpts send true/false, and request.Query reproduces the Python text.
-- Python drops unknown query names; Go sends every request.Query key to the server.
-- SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.
-- Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.
-- Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.
-- Go iter.Seq2 can be reused and repeats captured requests rather than sharing Python generator single-use state. Proxy expression has SDK Source/option preflight before pure result.
-- HTTP Link is deliberate Go interoperability for Source next[uri] versus ordinary Requests next[url] shape. JSON rootlink precedence/dict-ignore/null-error follows Source.
-- Object-valued Cloud Proxy literal iterates sorted Go keys rather than Python dictionary insertion order. Opaque/nested generator remains Value/ValueObjects and is not forcibly encoded.
-- Generic Connection/session GET response caching and arbitrary synchronized Resource lifecycle remain shared SDK-R1/C1 obligations; this finite Go mapping does not claim supported/full SDK parity. Connection.ListDomainRecords/SearchDomainRecords now supply cached service and explicit-or-default location.
-
-### `python:cloud/_identity/IdentityCloudMixin/list_domains`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-- `github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud`
-- `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
-- `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-
-- Cloud list_domains expands arbitrary keyword mapping into Source query/local filters; enabled aliases and nested options survive local processing and actual yielded inventory preserves response fields.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudListKeywordQueryAliasAndLocalFilters`.
-- Cloud eagerly consumes Source Proxy result by Python iterable kind. Literal list/string/object results and nested generators stay HTTP0; opaque generators are not forcibly encoded, JSON exists only for complete JSON data.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudListProxyPolymorphicResultIsUnread`.
-- Concrete already-v3 API factory captures Source/header state before callbacks, checks sticky selected API/source/custom cancel before and after options and prevents restore callbacks or fabricated preflight proof.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudOptionsStickySourceCancelAndHeaderSnapshot`.
-
-Python/Go differences:
-
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Python Resource.list sends one GET without a limit and ignores the Keystone links dict; Go All/List follows a non-null links.next URL.
-- Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).
-- SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.
-- Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.
-- Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.
-- Go iter.Seq2 can be reused and repeats captured requests rather than sharing Python generator single-use state. Proxy expression has SDK Source/option preflight before pure result.
-- HTTP Link is deliberate Go interoperability for Source next[uri] versus ordinary Requests next[url] shape. JSON rootlink precedence/dict-ignore/null-error follows Source.
-- Object-valued Cloud Proxy literal iterates sorted Go keys rather than Python dictionary insertion order. Opaque/nested generator remains Value/ValueObjects and is not forcibly encoded.
-- Generic Connection/session GET response caching and arbitrary synchronized Resource lifecycle remain shared SDK-R1/C1 obligations; this finite Go mapping does not claim supported/full SDK parity. Connection.ListDomainRecords/SearchDomainRecords now supply cached service and explicit-or-default location.
-
-### `python:cloud/_identity/IdentityCloudMixin/search_domains`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/domains.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/identity.NewDomainReadCloud`
-- `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.ListDomains`
-- `github.com/JSYoo5B/go-openstacksdk/identity.DomainReadCloud.SearchDomains`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadOpts`
-- `github.com/JSYoo5B/go-openstacksdk/identity.WithDomainReadFilters`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-
-- name_or_id presence is preserved with a pointer: nil forwards mapping filters to list_domains; explicit empty/nonempty first materializes unfiltered domains and applies local exact/glob identifier plus mapping/JMESPath. Name/filters stay absent from server in that branch.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudSearchIdentifierPresenceSelectsSourceBranch`.
-- Absent identifier kwargs expansion rejects string/false/zero/empty-string/array before HTTP; exactly None filters becomes {}. Identifier-present expression filters run on actual materialized rows and yield arbitrary scalar/null JSON with no fabricated records.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudSearchAbsentKeywordMappingVersusPresentJMESPath`.
-- Absent-identifier Proxy nested generator remains an iterable ValueObjects result without invented JSON; public records remain separate from opaque/literal data.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudListProxyPolymorphicResultIsUnread`.
-- Local loaded nested subset/glob selection keeps duplicates, CPython rounded float/bool/integer equality and selected record clones independent of physical inventory.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudLocalLoadedSubsetGlobAndIndependentRecord`.
-- Complete HTTP materialization precedes invalid local expression, so later503 wins and physical receipt/partial Inventory survives.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudLateHTTPPrecedesLocalFilterError`.
-- Explicit cloned location is applied before local selection and trusts configured current project rather than unknown wire extension.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudExplicitLocationOwnedBeforeLocalFiltering`.
-- Sticky Source/context options and source header snapshot stop restore callbacks and HTTP on invalid preflight.
-  Tests: `identity/domain_record_cloud_test.go:TestPythonDomainCloudOptionsStickySourceCancelAndHeaderSnapshot`.
-
-Python/Go differences:
-
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Without name_or_id Python passes filters to list_domains server-side and does not filter locally.
-- SDK-owned concrete record/options API preserves actual Wire/Envelope/metadata without builder interfaces; original native API is unchanged.
-- Already selected Keystone v3 API required; no implicit arbitrary-v2 ensure_service_version conversion or automatic Connection current-location bridge. Explicit CloudLocation is cloned and current project retained because Domain declares no project/zone.
-- Fixed origin/collection/query/headers/version bounds reject foreign route/traversal/cycles and malformed markers with actual receipt; amounts are nonnegative Go integers.
-- Go iter.Seq2 can be reused and repeats captured requests rather than sharing Python generator single-use state. Proxy expression has SDK Source/option preflight before pure result.
-- HTTP Link is deliberate Go interoperability for Source next[uri] versus ordinary Requests next[url] shape. JSON rootlink precedence/dict-ignore/null-error follows Source.
-- Object-valued Cloud Proxy literal iterates sorted Go keys rather than Python dictionary insertion order. Opaque/nested generator remains Value/ValueObjects and is not forcibly encoded.
-- Generic Connection/session GET response caching and arbitrary synchronized Resource lifecycle remain shared SDK-R1/C1 obligations; this finite Go mapping does not claim supported/full SDK parity. Connection.ListDomainRecords/SearchDomainRecords now supply cached service and explicit-or-default location.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -154,7 +9,6 @@ Examples use the surrounding guide's service object and context unless they decl
 ```python
 import json
 import openstack
-
 
 def main():
     conn = openstack.connect()
@@ -173,7 +27,6 @@ def main():
     )
     print(json.dumps([row.to_dict() for row in server_filtered], indent=2))
     print(json.dumps([row.to_dict() for row in locally_filtered], indent=2))
-
 
 if __name__ == "__main__":
     main()

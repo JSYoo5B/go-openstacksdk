@@ -1,64 +1,6 @@
 # Cloud Project Group Get Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:cloud/_identity/IdentityCloudMixin/get_group`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.FindIdentity`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk.Connection.GetGroupRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity.NewGroupReadCloud`
-- `github.com/JSYoo5B/go-openstacksdk/identity.GroupReadCloud.GetGroup`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/groups.API.ResolveRecord`
-
-- Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery("domain_id", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
-- Default/None uses a closed domain_id-only Source finder: literal GET, only clean400403404 fallback with name/domain hints, exact ID/name, default nil missing, duplicate error, GET-only per-call MV and actual descriptor/Wire/page/header/status evidence. Caller options/domain/header/location bytes snapshot before sticky API/client/provider/route/version/context/private outer guard; physical faults retain native401 ErrOriginal value and all causes with no fallback/auth/retry/backoff hiding. Group search forwards raw domain including None/false/zero and collects every Source row/page before ordered dict/loaded equality or materialized-list JMES; loaded truthiness/len/integer index0 retains false/0/empty selected values and reports duplicate/type errors without invented record receipt.
-  Tests: `identity/group_record_get_test.go:TestCloudGetGroupNoneVersusPresentFalseySearch`, `identity/group_record_get_test.go:TestCloudGetGroupLateNativeFailureBeforeLocalFilter`, `identity/group_record_get_test.go:TestCloudGetGroupStickyOptionsCancelAndOuterGuard`, `identity/group_record_get_test.go:TestCloudGetGroupPhysicalCloseSourceCancelKeepActualNativeEvidence`, `identity/group_record_get_test.go:TestCloudGetGroupJMESFirstTruthLenAndIndexKeepsActualInventory`, `identity/group_record_get_test.go:TestCloudGetGroupOwnedRawDomainLocationAndLoadedNestedFilter`, `identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupDomainSeedAndActualSourceEvidence`, `identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupFallbackVersionsExactIDNameAndDefaultMissing`, `identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupOwnedCallbacksRawDomainAndPreflight`, `identity/v3/groups/python_closed_lookup_test.go:TestClosedGroupPhysicalFaultKeepsNative401ValueAndAllCauses`.
-
-Python/Go differences:
-
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).
-- Generic raw Resource.fetch/header/session kwargs and mutable Resource/Connection/cache/version metadata remain SDK-R1/C1/S1. Full named Proxy find_project/find_group stays unresolved; closed ResolveRecord exposes only identity/domain_id and owned Go Header/MV/location conveniences.
-- Go result separates actual Inventory/record from local arbitrary JSON, with nil Value/record for missing and DeprecatedFilters marker instead of Python warning categories. Literal typed identity, safe route/cursor/blank guards and JSON-bounded operands are intentional Go bounds; no object passthrough or fabricated HTTP metadata.
-- Source Project truthy string JMES fails at dict(**filters) despite documentation; Group materialized JMES supports arbitrary JSON and Source First shape/errors. Private scalar wrapper is a local common-predicate adaptation and never an HTTP resource.
-- Verified Keystone28.0.0 Project member GET allows admin/system/domain reader and own-project user; fallback/list needs admin/system/domain reader. Group member/list allows admin/system reader or target Group domain reader. Deployment overrides and live acceptance are not established by fixtures.
-
-### `python:cloud/_identity/IdentityCloudMixin/get_project`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.FindIdentity`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithIdentityFindQuery`
-- `github.com/JSYoo5B/go-openstacksdk.Connection.GetProjectRecord`
-- `github.com/JSYoo5B/go-openstacksdk/identity.NewProjectReadCloud`
-- `github.com/JSYoo5B/go-openstacksdk/identity.ProjectReadCloud.GetProject`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/projects.API.ResolveRecord`
-
-- Projects, Users, Groups and Roles FindIdentity with WithIdentityFindQuery("domain_id", ...) send GET /<kind>/<name>?domain_id=... and then the list with domain_id and name, and Domains FindIdentity sends the GET then the name list, matching the Proxy.find_* requests behind the cloud get_* helpers.
-  Tests: `identity/v3/python_cloud_parity_test.go:TestPythonCloudIdentityUnresolvedPartialSequences`.
-- Default/None uses a closed domain_id-only Source finder: literal GET, only clean400403404 fallback with name/domain hints, exact ID/name, default nil missing, duplicate error, GET-only per-call MV and actual descriptor/Wire/page/header/status evidence. Caller options/domain/header/location bytes snapshot before sticky API/client/provider/route/version/context/private outer guard; physical faults retain native401 ErrOriginal value and all causes with no fallback/auth/retry/backoff hiding. Project actual list_projects kwargs-expansion precedes _filter_list: truthy nonmapping/string filters fail before HTTP; falsey filters still select deprecated branch. Truthy raw domain overrides only server domain and preserves original local filters. Private wrapper reuses common actual-truthiness-first mapping for scalar literal Proxy rows without invented metadata.
-  Tests: `identity/project_record_get_test.go:TestCloudGetProjectNoneVersusPresentFalseySearch`, `identity/project_record_get_test.go:TestCloudGetProjectLateNativeFailureBeforeLocalFilter`, `identity/project_record_get_test.go:TestCloudGetProjectStickyOptionsCancelAndOuterGuard`, `identity/project_record_get_test.go:TestCloudGetProjectPhysicalCloseSourceCancelKeepActualNativeEvidence`, `identity/project_record_get_test.go:TestCloudGetProjectTruthyFilterKwargsExpansionFailsBeforeHTTP`, `identity/project_record_get_test.go:TestCloudGetProjectProxyLiteralFalseyRowsFollowDictFilterBeforeShape`, `identity/project_record_get_test.go:TestCloudGetProjectRawDomainTruthyOverrideKeepsOriginalLocalFilters`, `identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectDomainSeedAndActualSourceEvidence`, `identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectFallbackVersionsExactIDNameAndDefaultMissing`, `identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectOwnedCallbacksRawDomainAndPreflight`, `identity/v3/projects/python_closed_lookup_test.go:TestClosedProjectPhysicalFaultKeepsNative401ValueAndAllCauses`.
-
-Python/Go differences:
-
-- Python first calls utils.ensure_service_version to require an identity v3 adapter; Go uses the identity v3 service from Connection.Identity without that check.
-- Python returns openstacksdk identity Resource objects; Go returns the Gophercloud identity v3 model pointers (enabled is Enabled, and unknown Keystone fields are only in Extra where the model declares it).
-- Generic raw Resource.fetch/header/session kwargs and mutable Resource/Connection/cache/version metadata remain SDK-R1/C1/S1. Full named Proxy find_project/find_group stays unresolved; closed ResolveRecord exposes only identity/domain_id and owned Go Header/MV/location conveniences.
-- Go result separates actual Inventory/record from local arbitrary JSON, with nil Value/record for missing and DeprecatedFilters marker instead of Python warning categories. Literal typed identity, safe route/cursor/blank guards and JSON-bounded operands are intentional Go bounds; no object passthrough or fabricated HTTP metadata.
-- Source Project truthy string JMES fails at dict(**filters) despite documentation; Group materialized JMES supports arbitrary JSON and Source First shape/errors. Private scalar wrapper is a local common-predicate adaptation and never an HTTP resource.
-- Verified Keystone28.0.0 Project member GET allows admin/system/domain reader and own-project user; fallback/list needs admin/system/domain reader. Group member/list allows admin/system reader or target Group domain reader. Deployment overrides and live acceptance are not established by fixtures.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -68,7 +10,6 @@ Examples use the surrounding guide's service object and context unless they decl
 import argparse
 import json
 import openstack
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -88,7 +29,6 @@ def main():
     if hasattr(value, "to_dict"):
         value = value.to_dict()
     print(json.dumps(value, indent=2, ensure_ascii=False))
-
 
 if __name__ == "__main__":
     main()

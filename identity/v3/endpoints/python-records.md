@@ -1,37 +1,6 @@
 # Python Records
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:identity/v3/endpoints`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.New`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.All`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.AllRecords`
-- `github.com/JSYoo5B/go-openstacksdk/identity/v3/endpoints.API.ProxyListRecords`
-
-- List with ListOpts sends GET endpoints?interface=&region_id=&service_id= like Python endpoints(interface=..., region_id=..., service_id=...), follows links.next, and the endpoints collection maps those query keys while rejecting limit and marker before HTTP.
-  Tests: `identity/v3/endpoints/python_parity_test.go:TestPythonEndpointListQueryAndPaging`.
-- Concrete Source Endpoint MRO owns eight Body descriptors, null defaults, bool enabled alias order, untyped links, unknown discard, separate Wire/page/header/status; query limit/marker/interface/region_id/service_id vs declared local Body filters. Python-loaded equality and raw cap precede local filtering. Source dict links ignored, root/plural/top/HTTP link precedence and limit-driven marker continue to empty page. Lazy opaque generator JMESPath preserves identity and zero HTTP until consumption. SDK-owned callback/header/microversion/route snapshots and source/context guards retain actual physical read/Close/rejection evidence without hiding faults in native auth/retry/backoff; clean retries and explicit Source status acceptance preserve old native API.
-  Tests: `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceMRODefaultsUntypedLinksAndActualEvidence`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsOrderedEnabledAliasesAndPythonBool`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsQueriesLocalBodyFiltersAndUnknownKwargs`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceDictionaryLinksAndMarkerFallback`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceLinkPrecedenceAndMalformedPageReceipt`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsRawCapLazyBreakAndCancellation`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsMalformedAndLaterErrorDiscardPartialCollection`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsOpaqueProxyJMESUsesActualGenerator`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsOwnOptionsFormalControlsAndIdentityVersion`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceGuardBeforeOptionsAndAfterGeneratorCapture`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsPhysicalFaultsRetainActualProofWithoutHooks`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsCleanNativeRetryKeepsScopeQueryAndHeaders`, `identity/v3/endpoints/python_records_contracts_test.go:TestEndpointRecordsSourceStatusOptInPreservesNativeBindings`.
-
-Python/Go differences:
-
-- Python takes an ID string or Resource and returns a mutable Resource; Go takes an ID string and returns the native Gophercloud model pointer.
-- Go concrete Source record splits defaults/projection from actual Wire/page/header/status; direct ServiceClient has SDK-owned location null. Optional HTTP cache and mutable Python Resource/Connection lifecycle remain shared SDK-R1/C1; no actual cloud acceptance claim.
-- Go safe owned route/origin/cursor/auth guards reject Source arbitrary session/origin movement and invalid marker with actual page receipt. Generic options expose Source formal kwargs but do not permit receiver/session/auth replacement; Go JSON cannot construct arbitrary Python object operands.
-- Opaque generator and serializable JSON are separate result carriers. Existing native API remains separate and unchanged; this named list is not full SDK parity.
-- Verified Keystone27.0.0 list_endpoints is admin_required or role:reader and system_scope:all with system/project scope declarations. This is a system-reader user read, not general project-reader permission; deployments may override policy.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -41,7 +10,6 @@ Examples use the surrounding guide's service object and context unless they decl
 import argparse
 import json
 import openstack
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -57,7 +25,6 @@ def main():
     conn = openstack.connect(cloud=args.cloud)
     for row in conn.identity.endpoints(**query):
         print(json.dumps(row.to_dict(), indent=2, ensure_ascii=False))
-
 
 if __name__ == "__main__":
     main()
