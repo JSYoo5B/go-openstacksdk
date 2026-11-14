@@ -11,29 +11,7 @@ policy = conn.network.update_qos_policy("policy-id", name="gold", is_shared=True
 print(policy.id, policy.is_shared)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "os"
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
-)
-func main() {
-    provider := &gophercloud.ProviderClient{}
-    provider.UseTokenLock()
-    provider.SetToken(os.Getenv("OS_TOKEN"))
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "network", Endpoint: os.Getenv("OS_NETWORK_ENDPOINT")}
-    row, err := policies.New(client).UpdateRecord(context.Background(), "policy-id",
-        request.Field("name", "gold"),
-        request.Field("is_shared", true),
-        request.Field("description", nil))
-    if err != nil { panic(err) }
-    fmt.Println(string(row.Resource.Body["id"]), string(row.Resource.Body["is_shared"]))
-}
-```
+See `Example_updateRecord` in [example_update_record_test.go](example_update_record_test.go), compiled by `go test`.
 
 `WithRecordUpdateOpts` snapshots raw attribute bytes, typed headers and a microversion. Bulk maps use sorted keys; individual attribute options retain insertion order. A scalar-ID `id` attribute and bound Proxy/Resource constructor arguments fail before HTTP. `if_revision` is consumed without generating If-Match because this class is not NetworkResource. Ordinary `if_match` remains a Body extension. The separate native update API keeps its explicit revision-header capability.
 

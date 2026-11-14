@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -26,56 +24,7 @@ with openstack.connect(cloud=args.cloud) as conn:
         print(json.dumps(None if value is None else value.to_dict(), indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network"
-)
-
-func printJSON(value any) {
-    data, err := json.MarshalIndent(value, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(data))
-}
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-    mode := flag.String("mode", "get", "get or delete")
-    identity := flag.String("identity", "", "literal ID or exact name")
-    filters := flag.String("filters", `{"skip_cache":true,"error_message":"QoS policy lookup failed"}`, "get-only JSON kwargs")
-    flag.Parse()
-    if *identity == "" { log.Fatal("identity is required") }
-    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-    if err != nil { log.Fatal(err) }
-    service, err := conn.Network(ctx)
-    if err != nil { log.Fatal(err) }
-    switch *mode {
-    case "get":
-        result, err := service.GetQoSPolicyRecord(
-            ctx, *identity, network.WithQoSPolicyFilters(json.RawMessage(*filters)),
-        )
-        if err != nil { log.Fatal(err) }
-        if result.Policy == nil { printJSON(nil); return }
-        printJSON(result.Policy.Resource)
-    case "delete":
-        result, err := service.DeleteQoSPolicyRecord(ctx, *identity)
-        if err != nil { log.Fatal(err) }
-        printJSON(result.Deleted)
-    default:
-        log.Fatal("mode must be get or delete")
-    }
-}
-```
+See `Example_cloudQosPolicyActions` in [example_cloud_qos_policy_actions_test.go](example_cloud_qos_policy_actions_test.go), compiled by `go test`.
 
 ## References
 

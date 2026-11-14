@@ -21,29 +21,7 @@ routers = list(conn.network.routers(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listRouters(ctx context.Context, client *gophercloud.ServiceClient) ([]*routers.Router, error) {
-    return routers.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "project_id": "project-one",
-            "fields": []string{"id", "name", "revision", "revision_number", "enable_ndp_proxy"},
-            "enable_ndp_proxy": true,
-            "revision_number": 7,
-        }),
-        resource.WithMaxItems(20),
-    )
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 Include each raw field needed by a local condition when using `fields`.
 The Python `revision_number` descriptor compares raw `revision`, while the
@@ -65,28 +43,7 @@ routers = list(conn.network.routers(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func firstPageRouters(ctx context.Context, client *gophercloud.ServiceClient) ([]*routers.Router, error) {
-    return routers.New(client).Resources.All(ctx,
-        resource.WithFilter("name", "server-condition"),
-        resource.WithFilter("external_gateway_info", map[string]any{
-            "network_id": "external-network",
-        }),
-        resource.WithFilter("created_at", "2025-01-02T03:04:05+00:00"),
-        resource.WithPaginated(false),
-    )
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 The same options work through cached
 `connection.Network(ctx).API.Routers.Resources`. This facade uses the existing

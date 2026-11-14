@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -26,56 +24,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps(result))
 ```
 
-```go
-package main
-
-import (
- "context"
- "encoding/json"
- "flag"
- "fmt"
- "os"
- "time"
-
- sdk "github.com/JSYoo5B/go-openstacksdk"
- "github.com/JSYoo5B/go-openstacksdk/network"
-)
-
-func run(ctx context.Context, cloud, router, subnetJSON, portJSON string) error {
- conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud))
- if err != nil { return err }
- service, err := conn.Network(ctx)
- if err != nil { return err }
- result, err := service.RemoveRouterInterface(ctx, router,
-  network.WithRouterInterfaceRemoveSubnetID(json.RawMessage(subnetJSON)),
-  network.WithRouterInterfaceRemovePortID(json.RawMessage(portJSON)))
- if result != nil {
-  fmt.Fprintf(os.Stderr, "PUT status=%d request-id=%q\n",
-   result.StatusCode, result.Header.Get("X-Request-Id"))
- }
- if err != nil { return err }
- _, err = fmt.Fprintln(os.Stdout, string(result.Value))
- return err
-}
-
-func main() {
- cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
- router := flag.String("router", "", "literal router ID, not a name lookup")
- subnet := flag.String("subnet-json", "null", "subnet_id as JSON")
- port := flag.String("port-json", "null", "port_id as JSON; a truthy port wins")
- flag.Parse()
- if *router == "" {
-  fmt.Fprintln(os.Stderr, "router is required")
-  os.Exit(2)
- }
- ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
- defer cancel()
- if err := run(ctx, *cloud, *router, *subnet, *port); err != nil {
-  fmt.Fprintln(os.Stderr, err)
-  os.Exit(1)
- }
-}
-```
+See `Example_cloudRouterInterfaceRemove` in [example_cloud_router_interface_remove_test.go](example_cloud_router_interface_remove_test.go), compiled by `go test`.
 
 ## References
 

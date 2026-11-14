@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -39,65 +37,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-	"github.com/JSYoo5B/go-openstacksdk/request"
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "os"
-
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/rules"
-)
-
-func main() {
-    cloud := flag.String("cloud", os.Getenv("OS_CLOUD"), "clouds.yaml cloud")
-    group := flag.String("group", "", "server security_group_id filter")
-    direction := flag.String("direction", "", "server direction filter")
-    name := flag.String("name", "", "local inherited name filter")
-    pageSize := flag.Int("page-size", -1, "server limit; -1 omits it")
-    maxItems := flag.Int("max-items", 0, "raw cap before local filtering")
-    single := flag.Bool("single-page", false, "read first page only")
-    flag.Parse()
-    if err := run(*cloud, *group, *direction, *name, *pageSize, *maxItems, *single); err != nil { log.Fatal(err) }
-}
-
-func run(cloud, group, direction, name string, pageSize, maxItems int, single bool) error {
-    if pageSize < -1 || maxItems < 0 { return fmt.Errorf("invalid page-size or max-items") }
-    ctx := context.Background()
-    conn, err := openstack.Connect(ctx, openstack.WithCloud(cloud))
-    if err != nil { return err }
-    network, err := conn.NetworkV2(ctx)
-    if err != nil { return err }
-    options := []rules.RecordListOption{
-        request.MaxItems(maxItems),
-        request.Paginated(!single),
-    }
-    if pageSize >= 0 { options = append(options, request.Limit(pageSize)) }
-    for _, filter := range []struct{ key, value string }{
-        {"security_group_id", group}, {"direction", direction}, {"name", name},
-    } {
-        if filter.value != "" { options = append(options, rules.WithRecordListQuery(filter.key, filter.value)) }
-    }
-    out := json.NewEncoder(os.Stdout)
-    for record, readErr := range network.SecurityRules.ListRecords(ctx, options...) {
-        if readErr != nil { return readErr }
-        if err := out.Encode(map[string]any{
-            "resource": record.Resource.Body,
-            "wire": record.Wire.Body,
-            "envelope": record.Envelope,
-            "headers": record.Header,
-            "status_code": record.StatusCode,
-        }); err != nil { return err }
-    }
-    return nil
-}
-```
+See `Example_securityGroupRuleList` in [example_security_group_rule_list_test.go](example_security_group_rule_list_test.go), compiled by `go test`.
 
 ## References
 

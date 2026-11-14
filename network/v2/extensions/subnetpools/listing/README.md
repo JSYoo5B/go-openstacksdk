@@ -21,29 +21,7 @@ pools = list(conn.network.subnet_pools(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listPools(ctx context.Context, client *gophercloud.ServiceClient) ([]*subnetpools.SubnetPool, error) {
-    return subnetpools.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "is_shared": false,
-            "fields": []string{"id", "name", "prefixes", "default_prefixlen", "min_prefixlen", "max_prefixlen"},
-            "prefixes": []string{"192.0.2.1/24"},
-            "default_prefix_length": 24,
-        }),
-        resource.WithMaxItems(20),
-    )
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 The native decoder requires all three prefix-length fields even when a caller
 uses a `fields` projection. Include them, as in this example, and include every
@@ -68,26 +46,7 @@ pools = list(conn.network.subnet_pools(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/subnetpools"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listTenantPools(ctx context.Context, client *gophercloud.ServiceClient) ([]*subnetpools.SubnetPool, error) {
-    return subnetpools.New(client).Resources.All(ctx,
-        resource.WithFilter("tenant_id", "legacy-tenant"),
-        resource.WithFilter("created_at", "2025-01-02T03:04:05+00:00"),
-        resource.WithBodyFilter("minimum_prefix_length", 16),
-        resource.WithPaginated(false),
-    )
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 The same options work through the cached
 `connection.Network(ctx).API.SubnetPools.Resources` collection. Configure the

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -19,51 +17,7 @@ for row in rows:
     print(row.to_dict())
 ```
 
-```go
-package main
-
-import (
-	"github.com/JSYoo5B/go-openstacksdk/request"
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
-)
-
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-    project := flag.String("project", "", "optional server project filter")
-    address := flag.String("address", "", "optional exact one-address list filter")
-    cap := flag.Int("max-items", 20, "raw row cap; zero is unbounded")
-    flag.Parse()
-    ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-    if err != nil { log.Fatal(err) }
-    network, err := conn.NetworkV2(ctx)
-    if err != nil { log.Fatal(err) }
-    options := []addressgroups.RecordListOption{
-        request.MaxItems(*cap),
-    }
-    if *project != "" {
-        options = append(options, addressgroups.WithRecordListQuery("project_id", *project))
-    }
-    if *address != "" {
-        options = append(options, addressgroups.WithRecordListQuery("addresses", []string{*address}))
-    }
-    for row, err := range network.SecurityAddressGroups.ListRecords(ctx, options...) {
-        if err != nil { log.Fatal(err) }
-        raw, err := json.MarshalIndent(row.Resource.Body, "", "  ")
-        if err != nil { log.Fatal(err) }
-        fmt.Printf("HTTP %d\n%s\n", row.StatusCode, raw)
-    }
-}
-```
+See `Example_addressGroupList` in [example_address_group_list_test.go](example_address_group_list_test.go), compiled by `go test`.
 
 ## References
 

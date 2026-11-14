@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -22,54 +20,7 @@ server = conn.add_ips_to_server(
 print(server.interface_ip)
 ```
 
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-	"time"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/network"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-	defer cancel()
-	if err := run(ctx); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func run(ctx context.Context) error {
-	conn, err := sdk.Connect(ctx, sdk.WithCloud("dev"))
-	if err != nil {
-		return err
-	}
-	service, err := conn.Network(ctx)
-	if err != nil {
-		return err
-	}
-	assignment, err := service.FloatingIPs.Ensure(ctx, network.EnsureFloatingIPRequest{
-		Server: resource.Name("web-01"), Network: resource.Name("public"),
-	}, network.WithEnsureNATDestination(resource.Name("private")),
-		network.WithEnsureWait(resource.WithTimeout(time.Minute)))
-	if err != nil {
-		if assignment != nil && assignment.FloatingIP != nil {
-			log.Printf("floating IP remains: id=%s reused=%t allocated=%t",
-				assignment.FloatingIP.ID, assignment.Reused, assignment.Allocated)
-		}
-		return err
-	}
-	floating := assignment.FloatingIP
-	fmt.Println(floating.ID, floating.FloatingIP, floating.PortID, floating.FixedIP, floating.Status)
-	fmt.Println("reused", assignment.Reused, "allocated", assignment.Allocated)
-	return nil
-}
-```
+See `Example_floatingIpEnsure` in [example_floating_ip_ensure_test.go](example_floating_ip_ensure_test.go), compiled by `go test`.
 
 ## References
 

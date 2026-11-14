@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -30,46 +28,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "os"
-    "time"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/vpnaas/ipsecpolicies"
-)
-
-func run(ctx context.Context, cloud, name, units string) error {
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud))
-    if err != nil { return err }
-    service, err := conn.NetworkV2(ctx)
-    if err != nil { return err }
-    var options []ipsecpolicies.RecordListOption
-    if name != "" { options = append(options, request.Query("name", name)) }
-    if units != "" { options = append(options, request.Query("units", units)) }
-    for record, err := range service.VPNIPsecPolicies.ListRecords(ctx, options...) {
-        if err != nil { return err }
-        if err := json.NewEncoder(os.Stdout).Encode(record.Resource.Body); err != nil { return err }
-    }
-    return nil
-}
-
-func main() {
-    cloud := flag.String("cloud", "devstack", "clouds.yaml cloud")
-    name := flag.String("name", "", "server-side policy name filter")
-    units := flag.String("units", "", "local top-level units Body filter")
-    timeout := flag.Duration("timeout", time.Minute, "whole operation deadline")
-    flag.Parse()
-    ctx, cancel := context.WithTimeout(context.Background(), *timeout)
-    defer cancel()
-    if err := run(ctx, *cloud, *name, *units); err != nil { fmt.Fprintln(os.Stderr, err); os.Exit(1) }
-}
-```
+See `Example_records` in [example_records_test.go](example_records_test.go), compiled by `go test`.
 
 ```sh
 python main.py --cloud devstack --name policy

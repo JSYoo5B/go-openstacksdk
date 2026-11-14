@@ -17,8 +17,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -30,99 +28,9 @@ print(conn.get_nat_destination())
 print(conn.get_default_network())
 ```
 
-```go
-package main
+See `Example_networkRoles1` in [example_network_roles1_test.go](example_network_roles1_test.go), compiled by `go test`.
 
-import (
-    "context"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network"
-)
-
-func main() {
-    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-    defer cancel()
-    if err := run(ctx); err != nil {
-        log.Fatal(err)
-    }
-}
-
-func run(ctx context.Context) error {
-    conn, err := sdk.Connect(ctx,
-        sdk.WithCloud("dev"),
-        sdk.WithNetworkRoles(
-            network.WithConfiguredNetworks(
-                network.ConfiguredNetwork{
-                    Name: "public",
-                    RoutesIPv4Externally: true,
-                    RoutesIPv6Externally: true,
-                    NATSource: true,
-                },
-                network.ConfiguredNetwork{
-                    Name: "private",
-                    NATDestination: true,
-                    DefaultInterface: true,
-                },
-            ),
-        ),
-    )
-    if err != nil {
-        return err
-    }
-    fmt.Printf("external=%t internal=%t\n",
-        conn.UseExternalNetwork(), conn.UseInternalNetwork())
-
-    roles, err := conn.GetNetworkRoles(ctx)
-    if err != nil {
-        return err
-    }
-    for _, net := range roles.ExternalIPv4 {
-        fmt.Printf("external IPv4: %s %s router_external=%t provider=%q\n",
-            net.ID, net.Name, net.RouterExternal, net.ProviderPhysicalNetwork)
-    }
-    printNetwork("NAT source", roles.NATSource)
-    printNetwork("NAT destination", roles.NATDestination)
-
-    defaultNetwork, err := conn.GetDefaultNetwork(ctx)
-    if err != nil {
-        return err
-    }
-    printNetwork("default", defaultNetwork)
-
-    conn.ResetNetworkRoles()
-    fresh, err := conn.GetNetworkRoles(ctx)
-    if err != nil {
-        return err
-    }
-    fmt.Printf("fresh external IPv4 networks: %d\n", len(fresh.ExternalIPv4))
-    return nil
-}
-
-func printNetwork(label string, net *network.RoleNetwork) {
-    if net == nil {
-        fmt.Printf("%s: none\n", label)
-        return
-    }
-    fmt.Printf("%s: %s %s\n", label, net.ID, net.Name)
-}
-```
-
-```go
-service, err := conn.Network(ctx)
-if err != nil {
-    return err
-}
-roles, err := service.Roles.Discover(ctx)
-if err != nil {
-    return err
-}
-_ = roles
-service.Roles.Reset()
-```
+See `Example_networkRolesFragment1` in [example_network_roles_fragment1_test.go](example_network_roles_fragment1_test.go), compiled by `go test`.
 
 ```python
 import openstack
@@ -135,67 +43,7 @@ server = conn.create_server(
 print(server.id)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/compute"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func main() {
-    ctx, cancel := context.WithTimeout(context.Background(), 5*time.Minute)
-    defer cancel()
-    if err := run(ctx); err != nil {
-        log.Fatal(err)
-    }
-}
-
-func run(ctx context.Context) error {
-    conn, err := sdk.Connect(ctx, sdk.WithCloud("dev"))
-    if err != nil {
-        return err
-    }
-    roles, err := conn.GetNetworkRoles(ctx)
-    if err != nil {
-        return err
-    }
-    if roles.DefaultNetwork != nil {
-        fmt.Printf("default NIC: %s\n", roles.DefaultNetwork.ID)
-    }
-    service, err := conn.Compute(ctx)
-    if err != nil {
-        return err
-    }
-    result, err := service.Servers.CreateWithFloatingIP(ctx,
-        compute.CreateServerWithFloatingIPRequest{
-            Server: compute.CreateServerRequest{
-                Name: "web",
-                Image: resource.Name("ubuntu"),
-                Flavor: resource.Name("c2"),
-            },
-        },
-    )
-    if err != nil {
-        if result != nil && result.Server != nil {
-            fmt.Printf("known server: %s\n", result.Server.ID)
-        }
-        if result != nil && result.Assignment != nil && result.Assignment.FloatingIP != nil {
-            fmt.Printf("known floating IP: %s\n", result.Assignment.FloatingIP.ID)
-        }
-        return err
-    }
-    fmt.Printf("server=%s floating IPv4=%s\n",
-        result.Server.ID, result.Assignment.FloatingIP.FloatingIP)
-    return nil
-}
-```
+See `Example_networkRoles2` in [example_network_roles2_test.go](example_network_roles2_test.go), compiled by `go test`.
 
 ## References
 

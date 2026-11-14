@@ -12,19 +12,7 @@ for network in conn.network.networks(is_router_external=True):
     print(network.id)
 ```
 
-```go
-service, err := conn.Network(ctx)
-if err != nil { return err }
-network, err := service.Networks.Find(ctx, resource.Name("private"))
-if err != nil { return err }
-fmt.Println(network.ID)
-
-for network, err := range service.Networks.List(ctx,
-    resource.WithQuery("router:external", "true"), resource.WithPageSize(100)) {
-    if err != nil { return err }
-    fmt.Println(network.ID)
-}
-```
+See `Example_networkFragment1` in [example_network_fragment1_test.go](example_network_fragment1_test.go), compiled by `go test`.
 
 ```go
 ready, err := service.Networks.Wait(ctx, resource.ID(network.ID), "ACTIVE")

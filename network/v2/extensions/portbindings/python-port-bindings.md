@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -34,56 +32,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps(value, indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/portbindings"
-)
-
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-    port := flag.String("port", "", "Port ID")
-    host := flag.String("host", "", "Binding host")
-    mode := flag.String("mode", "", "create, list, activate or delete")
-    flag.Parse()
-    if *port == "" || *host == "" { log.Fatal("port and host are required") }
-    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-    if err != nil { log.Fatal(err) }
-    network, err := conn.NetworkV2(ctx)
-    if err != nil { log.Fatal(err) }
-    api := network.PortBindings
-    var value any
-    switch *mode {
-    case "create":
-        value, err = api.Create(ctx, *port,
-            portbindings.WithAttribute("host", *host),
-            portbindings.WithAttribute("profile", map[string]any{"capabilities": []string{"switchdev"}}))
-    case "list":
-        value, err = api.All(ctx, *port, request.Query("host", *host))
-    case "activate":
-        value, err = api.Activate(ctx, *port, *host)
-    case "delete":
-        value, err = api.Delete(ctx, *port, *host)
-    default:
-        log.Fatal("mode must be create, list, activate or delete")
-    }
-    if err != nil { log.Fatal(err) }
-    encoded, err := json.MarshalIndent(value, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(encoded))
-}
-```
+See `Example_portBindings` in [example_port_bindings_test.go](example_port_bindings_test.go), compiled by `go test`.
 
 ## References
 

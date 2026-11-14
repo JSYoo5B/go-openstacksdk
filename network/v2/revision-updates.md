@@ -4,44 +4,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 network = conn.network.update_network(network_id, if_revision=0, name="renamed")
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "errors"
-    "fmt"
-
-    "github.com/gophercloud/gophercloud/v2"
-    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/networks"
-)
-
-func renameNetwork(ctx context.Context, service *networkv2.Service, id, name string, revision int) (*networks.Network, error) {
-    options := networks.UpdateOpts{
-        Name: &name,
-        RevisionNumber: &revision,
-    }
-    updated, err := service.Networks.Update(ctx, id, networks.UpdateOpts{},
-        networks.WithUpdateOptions(options))
-    if err != nil {
-        var response gophercloud.ErrUnexpectedResponseCode
-        if errors.As(err, &response) {
-            fmt.Printf("HTTP%d body=%q headers=%v\n",
-                response.Actual, response.Body, response.ResponseHeader)
-        }
-    }
-    return updated, err
-}
-
-func main() {}
-```
+See `Example_revisionUpdates` in [example_revision_updates_test.go](example_revision_updates_test.go), compiled by `go test`.
 
 ## References
 

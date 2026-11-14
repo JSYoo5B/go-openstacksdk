@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -23,32 +21,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps([value.to_dict() for value in ports], ensure_ascii=False, indent=2))
 ```
 
-```go
-package main
-import (
- "context"
- "encoding/json"
- "flag"
- "fmt"
- "log"
- "os"
- "time"
- sdk "github.com/JSYoo5B/go-openstacksdk"
- "github.com/JSYoo5B/go-openstacksdk/network"
-)
-func main(){
- cloud:=flag.String("cloud",os.Getenv("OS_CLOUD"),"clouds.yaml cloud")
- router:=flag.String("router","","Source router dictionary JSON")
- kind:=flag.String("interface-type","null","JSON discriminator")
- flag.Parse();if *router==""{log.Fatal("-router required")}
- ctx,cancel:=context.WithTimeout(context.Background(),30*time.Second);defer cancel()
- var connect []sdk.ConnectionOption;if *cloud!=""{connect=append(connect,sdk.WithCloud(*cloud))}
- conn,err:=sdk.Connect(ctx,connect...);if err!=nil{log.Fatal(err)}
- result,err:=conn.ListRouterInterfaces(ctx,json.RawMessage(*router),network.WithRouterInterfaceTypeJSON(json.RawMessage(*kind)))
- if err!=nil{if result!=nil{fmt.Fprintf(os.Stderr,"observed ports=%d\n",len(result.Inventory))};log.Fatal(err)}
- fmt.Println(string(result.Value))
-}
-```
+See `Example_cloudRouterInterfaces` in [example_cloud_router_interfaces_test.go](example_cloud_router_interfaces_test.go), compiled by `go test`.
 
 ## References
 

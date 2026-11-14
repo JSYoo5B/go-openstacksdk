@@ -4,28 +4,7 @@
 
 For a server query plus an exact local address list:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listAddressGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*addressgroups.AddressGroup, error) {
-    return addressgroups.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "project_id": "project-alpha",
-            "name": "server-name-filter",
-            "addresses": []string{"192.0.2.1", "198.51.100.0/24"},
-        }),
-        resource.WithMaxItems(20),
-    )
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 The corresponding Python call is:
 
@@ -40,25 +19,7 @@ groups = list(conn.network.address_groups(
 
 To keep the deprecated tenant attribute distinct from the server project query, use its local condition. Explicit `WithBodyFilter` is also available for the three audited local fields:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/addressgroups"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listTenantAddressGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*addressgroups.AddressGroup, error) {
-    return addressgroups.New(client).Resources.All(ctx,
-        resource.WithFilter("tenant_id", "legacy-tenant"),
-        resource.WithBodyFilter("addresses", []string{}),
-        resource.WithPaginated(false),
-    )
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 ```python
 groups = list(conn.network.address_groups(

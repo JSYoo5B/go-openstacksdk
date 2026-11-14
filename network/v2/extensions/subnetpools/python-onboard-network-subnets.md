@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -20,31 +18,7 @@ with openstack.connect() as conn:
     print(json.dumps(result, indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "flag"
-    "fmt"
-    "log"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-)
-
-func main() {
-    pool := flag.String("pool", "", "subnet pool ID")
-    network := flag.String("network", "", "network ID")
-    flag.Parse()
-    ctx := context.Background()
-    conn, err := sdk.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.Network(ctx)
-    if err != nil { log.Fatal(err) }
-    result, err := service.API.SubnetPools.OnboardNetworkSubnetsRecord(ctx, *pool, *network)
-    if err != nil { log.Fatal(err) }
-    fmt.Printf("HTTP %d\n%s\n", result.StatusCode, result.Value)
-}
-```
+See `Example_onboardNetworkSubnets` in [example_onboard_network_subnets_test.go](example_onboard_network_subnets_test.go), compiled by `go test`.
 
 ## References
 

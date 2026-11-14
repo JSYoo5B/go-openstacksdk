@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -23,44 +21,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps(router.to_dict(), indent=2))
 ```
 
-```go
-package main
-
-import (
-	"context"
-	"encoding/json"
-	"flag"
-	"fmt"
-	"log"
-	"time"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/network"
-)
-
-func main() {
-	cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-	kwargs := flag.String("kwargs", "{}", "JSON create_router kwargs")
-	flag.Parse()
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-	if err != nil {
-		log.Fatal(err)
-	}
-	result, err := conn.CreateRouterRecord(ctx,
-		network.WithRouterCreateJSON(json.RawMessage(*kwargs)),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-	data, err := json.MarshalIndent(result.Router, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(data))
-}
-```
+See `Example_cloudRouterCreate` in [example_cloud_router_create_test.go](example_cloud_router_create_test.go), compiled by `go test`.
 
 ## References
 

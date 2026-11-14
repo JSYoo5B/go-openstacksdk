@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -22,38 +20,7 @@ with openstack.connect() as conn:
     print(json.dumps(row.to_dict(), indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgpvpns"
-)
-
-func main() {
-    vpn := flag.String("vpn", "", "parent BGPVPN ID")
-    association := flag.String("association", "", "association ID or name")
-    port := flag.String("port", "", "port ID filter")
-    flag.Parse()
-    ctx := context.Background()
-    conn, err := sdk.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.Network(ctx)
-    if err != nil { log.Fatal(err) }
-    row, err := service.API.BGPVPNs.FindPortAssociationRecord(ctx, *vpn, *association,
-        request.IgnoreMissing(false),
-        request.Query("port_id", *port))
-    if err != nil { log.Fatal(err) }
-    data, err := json.MarshalIndent(row.Resource, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(data))
-}
-```
+See `Example_portAssociationFind` in [example_port_association_find_test.go](example_port_association_find_test.go), compiled by `go test`.
 
 ## References
 

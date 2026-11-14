@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -15,32 +13,7 @@ for zone in zones:
     print(zone.name, zone.resource, zone.state)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "log"
-
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/availabilityzones"
-)
-
-func main() {
-    ctx := context.Background()
-    conn, err := openstack.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.NetworkV2(ctx)
-    if err != nil { log.Fatal(err) }
-    api := availabilityzones.New(service.RawClient())
-    zones, err := api.AllRecords(ctx, availabilityzones.WithProxyQuery("name", "az-a"))
-    if err != nil { log.Fatal(err) }
-    for _, zone := range zones {
-        fmt.Println(string(zone.Resource.Body["name"]), string(zone.Resource.Body["resource"]), string(zone.Resource.Body["state"]))
-    }
-}
-```
+See `Example_availabilityzones` in [example_availabilityzones_test.go](example_availabilityzones_test.go), compiled by `go test`.
 
 ## References
 

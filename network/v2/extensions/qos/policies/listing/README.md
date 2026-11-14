@@ -4,28 +4,7 @@
 
 For non-shared policies with an empty rule array, use the semantic fields and a local raw-row cap:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    qospolicies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listPoliciesWithoutRules(ctx context.Context, client *gophercloud.ServiceClient) ([]*qospolicies.Policy, error) {
-    return qospolicies.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "is_shared": false,
-            "fields": []string{"id", "name", "rules", "shared"},
-            "rules": []any{},
-        }),
-        resource.WithMaxItems(20),
-    )
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 ```python
 policies = list(conn.network.qos_policies(
@@ -38,26 +17,7 @@ policies = list(conn.network.qos_policies(
 
 The deprecated tenant field is a local condition, distinct from a server project query. An explicit Body option can compare an expected complete rule array without constructing an upstream builder or predicate:
 
-```go
-package example
-
-import (
-    "context"
-    "encoding/json"
-
-    "github.com/gophercloud/gophercloud/v2"
-    qospolicies "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/qos/policies"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listTenantPolicies(ctx context.Context, client *gophercloud.ServiceClient, expectedRules json.RawMessage) ([]*qospolicies.Policy, error) {
-    return qospolicies.New(client).Resources.All(ctx,
-        resource.WithFilter("tenant_id", "legacy-tenant"),
-        resource.WithBodyFilter("rules", expectedRules),
-        resource.WithPaginated(false),
-    )
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 ```python
 def list_tenant_policies(conn, expected_rules):

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -26,52 +24,4 @@ with openstack.connect() as conn:
         print(json.dumps(value, indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/agents"
-)
-
-func printJSON(value any) {
-    data, err := json.MarshalIndent(value, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(data))
-}
-
-func main() {
-    mode := flag.String("mode", "list", "list or update")
-    networkID := flag.String("network", "", "network ID for list")
-    agentID := flag.String("agent", "", "L3 agent ID for update")
-    routerID := flag.String("router", "", "router ID for update")
-    flag.Parse()
-    ctx := context.Background()
-    conn, err := sdk.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.Network(ctx)
-    if err != nil { log.Fatal(err) }
-    api := service.API.Agents
-    switch *mode {
-    case "list":
-        for row, err := range api.ListDHCPHostRecords(ctx, *networkID,
-            request.Query("is_alive", true), request.MaxItems(20)) {
-            if err != nil { log.Fatal(err) }
-            printJSON(row.Resource)
-        }
-    case "update":
-        result, err := api.UpdateRouterInAgent(ctx, *agentID, *routerID,
-            agents.WithRouterAssignmentPriority(0))
-        if err != nil { log.Fatal(err) }
-        fmt.Printf("HTTP %d\n", result.StatusCode)
-        printJSON(result.Value)
-    default:
-        log.Fatal("mode must be list or update")
-    }
-}
-```
+See `Example_routerAssignmentDhcpHosts` in [example_router_assignment_dhcp_hosts_test.go](example_router_assignment_dhcp_hosts_test.go), compiled by `go test`.

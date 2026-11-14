@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -37,67 +35,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-	"context"
-	"encoding/json"
-	"flag"
-	"fmt"
-	"log"
-	"os"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/network"
-)
-
-func main() {
-	cloud := flag.String("cloud", os.Getenv("OS_CLOUD"), "clouds.yaml cloud")
-	policy := flag.String("policy", "", "QoS policy ID or name")
-	rule := flag.String("rule", "", "rule ID or search pattern")
-	mode := flag.String("mode", "list", "list, search or get")
-	filters := flag.String("filters", "null", "Source cloud filters JSON")
-	flag.Parse()
-	if *policy == "" {
-		log.Fatal("--policy required")
-	}
-	ctx := context.Background()
-	conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-	if err != nil {
-		log.Fatal(err)
-	}
-	service, err := conn.Network(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var result *network.QoSBandwidthLimitResult
-	switch *mode {
-	case "list":
-		result, err = service.ListQoSBandwidthLimitRules(ctx, *policy, network.WithQoSBandwidthLimitFilters(json.RawMessage(*filters)))
-	case "search":
-		result, err = service.SearchQoSBandwidthLimitRules(ctx, *policy, *rule, network.WithQoSBandwidthLimitFilters(json.RawMessage(*filters)))
-	case "get":
-		if *rule == "" {
-			log.Fatal("--rule required for get")
-		}
-		result, err = service.GetQoSBandwidthLimitRule(ctx, *policy, *rule)
-	default:
-		log.Fatal("--mode must be list, search or get")
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	if result.Value == nil {
-		log.Fatal("opaque result: consume QoSBandwidthLimitGenerator.Records explicitly")
-	}
-	output, err := json.MarshalIndent(result.Value, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(output))
-}
-```
+See `Example_cloudQosBandwidth` in [example_cloud_qos_bandwidth_test.go](example_cloud_qos_bandwidth_test.go), compiled by `go test`.
 
 ## References
 

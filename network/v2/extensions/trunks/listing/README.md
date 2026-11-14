@@ -22,30 +22,7 @@ trunks = list(conn.network.trunks(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listTrunks(ctx context.Context, client *gophercloud.ServiceClient) ([]*trunks.Trunk, error) {
-    return trunks.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "project_id": "project-one",
-            "is_admin_state_up": false,
-            "fields": []string{"id", "name", "project_id", "tenant_id"},
-            "id": "selected-trunk",
-            "tenant_id": "tenant-one",
-        }),
-        resource.WithMaxItems(20),
-    )
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 `id` and `tenant_id` are local conditions; `project_id` is a server condition.
 No current project or tenant filter is inferred. Include every local field
@@ -65,27 +42,7 @@ trunks = list(conn.network.trunks(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/trunks"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func firstPageTrunks(ctx context.Context, client *gophercloud.ServiceClient) ([]*trunks.Trunk, error) {
-    return trunks.New(client).Resources.All(ctx,
-        resource.WithFilter("name", "server-condition"),
-        resource.WithFilter("status", "BUILD"),
-        resource.WithFilter("tenant_id", nil),
-        resource.WithFilter("fields", []string{"id", "name", "status", "tenant_id"}),
-        resource.WithPaginated(false),
-    )
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 These options also work through cached
 `connection.Network(ctx).API.Trunks.Resources`. The API uses the existing

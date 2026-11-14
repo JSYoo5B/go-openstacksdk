@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 subnets = conn.network.subnets(
     network_id="network-a",
@@ -18,33 +16,7 @@ for subnet in subnets:
     print(subnet.id, subnet.cidr)
 ```
 
-```go
-package examples
-
-import (
-    "context"
-    "fmt"
-
-    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func ListSubnets(ctx context.Context, service *networkv2.Service) error {
-    for subnet, err := range service.Subnets.Resources.List(ctx,
-        resource.WithFilters(map[string]any{
-            "network_id": "network-a",
-            "is_dhcp_enabled": false,
-            "prefix_length": 24,
-            "dns_nameservers": []string{"192.0.2.53"},
-        }),
-        resource.WithMaxItems(100),
-    ) {
-        if err != nil { return err }
-        fmt.Println(subnet.ID, subnet.CIDR)
-    }
-    return nil
-}
-```
+See `example_subnets_test.go` in [example_subnets_test.go](example_subnets_test.go), compiled by `go test`.
 
 ## References
 

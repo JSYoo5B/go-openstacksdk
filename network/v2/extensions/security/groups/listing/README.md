@@ -23,30 +23,7 @@ groups = list(conn.network.security_groups(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listSecurityGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*groups.SecGroup, error) {
-    return groups.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "is_shared": false,
-            "project_id": "project-one",
-            "fields": []string{"id", "name", "created_at", "updated_at", "security_group_rules"},
-            "created_at": "2025-01-02T03:04:05+00:00",
-            "security_group_rules": []any{},
-        }),
-        resource.WithMaxItems(20),
-    )
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 Include every raw field needed by a local condition when using `fields`.
 `security_group_rules` compares the complete ordered array. It does not select
@@ -66,26 +43,7 @@ groups = list(conn.network.security_groups(
 
 Go:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/groups"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func firstPageSecurityGroups(ctx context.Context, client *gophercloud.ServiceClient) ([]*groups.SecGroup, error) {
-    return groups.New(client).Resources.All(ctx,
-        resource.WithFilter("name", "server-condition"),
-        resource.WithFilter("stateful", false),
-        resource.WithFilter("updated_at", "2025-01-03T03:04:05"),
-        resource.WithPaginated(false),
-    )
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 The same options work through cached
 `connection.Network(ctx).API.SecurityGroups.Resources`. This facade uses the

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -30,67 +28,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps(None if value is None else value.to_dict(), indent=2))
 ```
 
-```go
-package main
-
-import (
-	"context"
-	"encoding/json"
-	"flag"
-	"fmt"
-	"log"
-	"time"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/network"
-)
-
-func printJSON(value any) {
-	data, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Println(string(data))
-}
-func main() {
-	cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-	mode := flag.String("mode", "create", "create or update")
-	identity := flag.String("identity", "", "update: literal ID or exact name")
-	attrs := flag.String("attrs", "{}", "JSON cloud mutation kwargs")
-	flag.Parse()
-	if *mode != "create" && *mode != "update" {
-		log.Fatal("mode must be create or update")
-	}
-	if *mode == "update" && *identity == "" {
-		log.Fatal("update identity is required")
-	}
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-	if err != nil {
-		log.Fatal(err)
-	}
-	service, err := conn.Network(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	var result *network.QoSPolicyMutation
-	option := network.WithQoSPolicyMutationJSON(json.RawMessage(*attrs))
-	if *mode == "create" {
-		result, err = service.CreateQoSPolicyRecord(ctx, option)
-	} else {
-		result, err = service.UpdateQoSPolicyRecord(ctx, *identity, option)
-	}
-	if err != nil {
-		log.Fatal(err)
-	}
-	if result.Policy == nil {
-		printJSON(nil)
-		return
-	}
-	printJSON(result.Policy.Resource)
-}
-```
+See `Example_cloudQosPolicyMutations` in [example_cloud_qos_policy_mutations_test.go](example_cloud_qos_policy_mutations_test.go), compiled by `go test`.
 
 ## References
 

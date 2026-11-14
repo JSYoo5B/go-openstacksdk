@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -22,44 +20,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps(result.to_dict(), indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/network"
-)
-
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-    policy := flag.String("policy", "", "policy exact name or ID")
-    rule := flag.String("rule", "", "rule exact name or ID")
-    filters := flag.String("filters", "{}", "policy Find JSON filters")
-    flag.Parse()
-    if *policy == "" || *rule == "" { log.Fatal("policy and rule are required") }
-    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-    if err != nil { log.Fatal(err) }
-    service, err := conn.Network(ctx)
-    if err != nil { log.Fatal(err) }
-    result, err := service.RemoveRuleFromPolicyRecord(ctx, *policy, *rule,
-        network.WithFirewallPolicyRemoveRuleFilters(json.RawMessage(*filters)))
-    if err != nil { log.Fatal(err) }
-    var value any = result.Policy
-    if result.NoOp && result.Lookup != nil { value = result.Lookup.Resource }
-    data, err := json.MarshalIndent(value, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(data))
-}
-```
+See `Example_cloudFirewallPolicyRemoveRule` in [example_cloud_firewall_policy_remove_rule_test.go](example_cloud_firewall_policy_remove_rule_test.go), compiled by `go test`.
 
 ## References
 

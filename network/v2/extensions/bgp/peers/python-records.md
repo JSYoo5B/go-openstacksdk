@@ -14,29 +14,7 @@ row = conn.network.find_bgp_peer("routing", ignore_missing=False)
 print(len(rows), row.id)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "os"
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/bgp/peers"
-)
-func main() {
-    provider := &gophercloud.ProviderClient{}
-    provider.UseTokenLock()
-    provider.SetToken(os.Getenv("OS_TOKEN"))
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "network", Endpoint: os.Getenv("OS_NETWORK_ENDPOINT")}
-    api := peers.New(client)
-    rows, err := api.AllRecords(context.Background(), request.Query("name", "routing"), request.Query("project_id", "project"))
-    if err != nil { panic(err) }
-    row, err := api.FindRecord(context.Background(), "routing", request.IgnoreMissing(false))
-    if err != nil { panic(err) }
-    fmt.Println(len(rows), string(row.Resource.Body["id"]))
-}
-```
+See `Example_records` in [example_records_test.go](example_records_test.go), compiled by `go test`.
 
 `ProxyListRecords` reuses the shared Source-compatible JMESPath interpreter and opaque generator identity: `[*].name` returns null without HTTP; `@` preserves `*RecordListGenerator`; `length(@)` fails before iteration. Consume `Records` to perform physical requests. The fixed-row list API directs nonempty textual expressions to `ProxyListRecords`.
 
