@@ -7,26 +7,7 @@
 `poll_for_events`). The same workflows are available as `Connection` methods
 that select the cached orchestration v1 endpoint.
 
-```go
-result, err := conn.CreateStack(ctx, stackcloud.CreateRequest{
-    Name: "app",
-    StackRequest: stackcloud.StackRequest{
-        Template:   templateloader.StackInput{Template: templateloader.Source{File: "stack.yaml"}},
-        Parameters: map[string]any{"flavor": "m1.small"},
-        Wait:       true,
-    },
-})
-if err != nil && result != nil && result.Accepted != nil {
-    // Heat accepted the POST; the failure happened while waiting or reading
-    // the stack back. The stack may exist and is not rolled back.
-}
-if result != nil && result.WaitStatus == "CREATE_FAILED" {
-    // Like Python, a failed terminal status is reported, not raised.
-}
-
-found, err := conn.SearchStacks(ctx, stackcloud.SearchRequest{NameOrID: "app-*"})
-deleted, err := conn.DeleteStack(ctx, stackcloud.DeleteRequest{NameOrID: "app", Wait: true})
-```
+See `Example` in [example_test.go](example_test.go), compiled by `go test`.
 
 ## search_stacks
 

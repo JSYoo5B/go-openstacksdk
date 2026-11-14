@@ -4,16 +4,7 @@ Gophercloud v2.15.0 has no binding for `/software_configs`, so this package is
 SDK-owned. It corresponds to the pinned openstacksdk `create_software_config`,
 `get_software_config`, `delete_software_config` and `software_configs`.
 
-```go
-service, _ := conn.OrchestrationV1(ctx)
-api := service.SoftwareConfigs() // or softwareconfigs.New(client)
-config, err := api.Create(ctx, softwareconfigs.CreateOpts{Name: request.Present("boot")},
-    request.Custom(func(c *request.Config[softwareconfigs.CreateOpts]) error { c.Options.Group = request.Present("script"); return nil }),
-    softwareconfigs.WithCreateConfig("#!/bin/sh\necho hi\n"))
-got, err := api.Get(ctx, config.ID)
-for item, err := range api.List(ctx, request.Limit(50)) { ... }
-err = api.Delete(ctx, config.ID)
-```
+See `Example` in [example_test.go](example_test.go), compiled by `go test`.
 
 | Operation | Route | Success |
 |---|---|---|

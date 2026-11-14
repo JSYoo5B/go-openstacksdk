@@ -6,14 +6,7 @@ and `Proxy.read_env_and_templates`. The Python helpers derive from
 python-heatclient (Apache License 2.0, Copyright OpenStack Foundation); this Go
 code is an independent reimplementation of their observable behavior.
 
-```go
-loader, _ := templateloader.New()
-attrs, err := loader.ReadEnvAndTemplates(ctx, templateloader.StackInput{
-    Template: templateloader.Source{File: "stack.yaml"},
-    EnvironmentFiles: []string{"base-env.yaml", "site-env.yaml"},
-})
-// attrs.Template, attrs.Environment, attrs.Files feed a stack create/update.
-```
+See `ExampleLoader_ReadEnvAndTemplates` in [example_test.go](example_test.go), compiled by `go test`.
 
 Behavior kept from Python:
 
