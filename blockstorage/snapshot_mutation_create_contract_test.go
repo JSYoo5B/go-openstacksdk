@@ -118,7 +118,7 @@ func TestCreateVolumeSnapshotCachedReadySkipsUnusedWaitAndRouteControls(t *testi
 				smwRequest(t, r, http.MethodPost, smwCollection)
 				testcloud.JSON(w, 202, `{"snapshot":`+row+`}`)
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(0), PollInterval: smwDuration(-time.Second)}))
+			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithTimeout(time.Nanosecond), resource.WithPollInterval(time.Hour)))
 			if err != nil || result == nil || result.Value == nil || result.Ready == nil || result.ReadySnapshot == nil || calls.Load() != 1 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -145,7 +145,7 @@ func TestCreateVolumeSnapshotNoWaitKeepsArbitraryNullableIdentityAndStatus(t *te
 				smwRequest(t, r, http.MethodPost, smwCollection)
 				testcloud.JSON(w, 203, `{"snapshot":`+row+`}`)
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWait(false), blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(-time.Second), PollInterval: smwDuration(-time.Second)}))
+			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWait(false), blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithTimeout(time.Nanosecond), resource.WithPollInterval(time.Hour)))
 			if err != nil || result == nil || result.Value == nil || result.Snapshot == nil || result.Ready != nil || result.ReadySnapshot != nil || calls.Load() != 1 {
 				t.Fatal(result, err, calls.Load())
 			}

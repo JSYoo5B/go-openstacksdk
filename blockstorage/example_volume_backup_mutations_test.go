@@ -130,9 +130,7 @@ func ForceAndWaitVolumeBackupMutations(ctx context.Context, conn *sdk.Connection
 	policy, err := blockstorage.PrepareDeleteVolumeBackupOptions(ctx,
 		blockstorage.WithDeleteVolumeBackupForce(true),
 		blockstorage.WithDeleteVolumeBackupWait(true),
-		blockstorage.WithDeleteVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{
-			Timeout: &timeout,
-		}))
+		blockstorage.WithDeleteVolumeBackupWaitOptions(resource.WithTimeout(timeout)))
 	if err != nil {
 		return err
 	}

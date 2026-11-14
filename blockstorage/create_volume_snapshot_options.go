@@ -5,13 +5,13 @@ import (
 	"encoding/json"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudsnapshot"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type CreateVolumeSnapshotRequest struct{ VolumeID string }
 type CreateVolumeSnapshotAttributes = cloudsnapshot.CreateAttributes
 type CreateVolumeSnapshotOpts = cloudsnapshot.CreateOptions
 type CreateVolumeSnapshotOption = cloudsnapshot.CreateOption
-type SnapshotMutationWaitOpts = cloudsnapshot.MutationWaitOptions
 
 func WithCreateVolumeSnapshotOptions(value CreateVolumeSnapshotOpts) CreateVolumeSnapshotOption {
 	return cloudsnapshot.WithCreateOptions(value)
@@ -22,8 +22,15 @@ func WithCreateVolumeSnapshotForce(value bool) CreateVolumeSnapshotOption {
 func WithCreateVolumeSnapshotWait(value bool) CreateVolumeSnapshotOption {
 	return cloudsnapshot.WithCreateWait(value)
 }
-func WithCreateVolumeSnapshotWaitPolicy(value SnapshotMutationWaitOpts) CreateVolumeSnapshotOption {
-	return cloudsnapshot.WithCreateWaitPolicy(value)
+
+// WithCreateVolumeSnapshotWaitOptions appends shared wait options for the snapshot creation wait;
+// repeated calls append and the later option wins per control. The wait
+// defaults to unlimited with two-second polling and honors resource.WithTimeout,
+// resource.WithUnlimitedWait, resource.WithPollInterval and
+// resource.WithWaitStrategy. A zero or negative timeout or interval and other
+// controls fail with resource.ErrInvalidOption before any request.
+func WithCreateVolumeSnapshotWaitOptions(options ...resource.WaitOption) CreateVolumeSnapshotOption {
+	return cloudsnapshot.WithCreateWaitOptions(options...)
 }
 func WithCreateVolumeSnapshotAttributes(value CreateVolumeSnapshotAttributes) CreateVolumeSnapshotOption {
 	return cloudsnapshot.WithCreateAttributes(value)

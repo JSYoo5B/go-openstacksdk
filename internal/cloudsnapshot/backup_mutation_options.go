@@ -2,6 +2,8 @@ package cloudsnapshot
 
 import (
 	"context"
+	"slices"
+
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
@@ -9,12 +11,12 @@ import (
 type BackupCreateOptions struct {
 	Name, Description, SnapshotID *string
 	Force, Incremental, Wait      *bool
-	WaitPolicy                    MutationWaitOptions
+	WaitOptions                   []resource.WaitOption
 	Location                      *resource.CloudLocation
 }
 type BackupDeleteOptions struct {
 	Force, Wait *bool
-	WaitPolicy  MutationWaitOptions
+	WaitOptions []resource.WaitOption
 	Location    *resource.CloudLocation
 }
 type BackupCreateOption = Option[BackupCreateOptions]
@@ -50,13 +52,19 @@ func WithBackupDeleteForce(value bool) BackupDeleteOption {
 func WithBackupDeleteWait(value bool) BackupDeleteOption {
 	return func(target *BackupDeleteOptions) error { target.Wait = clonePointer(&value); return nil }
 }
-func WithBackupCreateWaitPolicy(value MutationWaitOptions) BackupCreateOption {
-	owned := cloneMutationWait(value)
-	return func(target *BackupCreateOptions) error { target.WaitPolicy = cloneMutationWait(owned); return nil }
+func WithBackupCreateWaitOptions(options ...resource.WaitOption) BackupCreateOption {
+	owned := slices.Clone(options)
+	return func(target *BackupCreateOptions) error {
+		target.WaitOptions = append(slices.Clone(target.WaitOptions), owned...)
+		return nil
+	}
 }
-func WithBackupDeleteWaitPolicy(value MutationWaitOptions) BackupDeleteOption {
-	owned := cloneMutationWait(value)
-	return func(target *BackupDeleteOptions) error { target.WaitPolicy = cloneMutationWait(owned); return nil }
+func WithBackupDeleteWaitOptions(options ...resource.WaitOption) BackupDeleteOption {
+	owned := slices.Clone(options)
+	return func(target *BackupDeleteOptions) error {
+		target.WaitOptions = append(slices.Clone(target.WaitOptions), owned...)
+		return nil
+	}
 }
 
 func PrepareBackupCreate(ctx context.Context, options ...BackupCreateOption) (BackupCreateOptions, error) {
@@ -72,14 +80,14 @@ func cloneBackupCreate(value BackupCreateOptions) BackupCreateOptions {
 	value.Force = clonePointer(value.Force)
 	value.Incremental = clonePointer(value.Incremental)
 	value.Wait = clonePointer(value.Wait)
-	value.WaitPolicy = cloneMutationWait(value.WaitPolicy)
+	value.WaitOptions = slices.Clone(value.WaitOptions)
 	value.Location = cloneLocation(value.Location)
 	return value
 }
 func cloneBackupDelete(value BackupDeleteOptions) BackupDeleteOptions {
 	value.Force = clonePointer(value.Force)
 	value.Wait = clonePointer(value.Wait)
-	value.WaitPolicy = cloneMutationWait(value.WaitPolicy)
+	value.WaitOptions = slices.Clone(value.WaitOptions)
 	value.Location = cloneLocation(value.Location)
 	return value
 }

@@ -15,7 +15,7 @@ import (
 func TestBackupMutationOptionsPreserveOmissionAndExplicitEmptyFalseZero(t *testing.T) {
 	ctx := context.Background()
 	empty, err := blockstorage.PrepareCreateVolumeBackupOptions(ctx)
-	if err != nil || empty.Name != nil || empty.Description != nil || empty.SnapshotID != nil || empty.Force != nil || empty.Incremental != nil || empty.Wait != nil || empty.WaitPolicy.Timeout != nil || empty.Location != nil {
+	if err != nil || empty.Name != nil || empty.Description != nil || empty.SnapshotID != nil || empty.Force != nil || empty.Incremental != nil || empty.Wait != nil || empty.WaitOptions != nil || empty.Location != nil {
 		t.Fatal(empty, err)
 	}
 	zero := time.Duration(0)
@@ -23,34 +23,36 @@ func TestBackupMutationOptionsPreserveOmissionAndExplicitEmptyFalseZero(t *testi
 		blockstorage.WithCreateVolumeBackupName(""), blockstorage.WithCreateVolumeBackupDescription(""),
 		blockstorage.WithCreateVolumeBackupSnapshotID(""), blockstorage.WithCreateVolumeBackupForce(false),
 		blockstorage.WithCreateVolumeBackupIncremental(false), blockstorage.WithCreateVolumeBackupWait(false),
-		blockstorage.WithCreateVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{Timeout: &zero, PollInterval: &zero}))
-	if err != nil || policy.Name == nil || *policy.Name != "" || policy.Description == nil || *policy.Description != "" || policy.SnapshotID == nil || *policy.SnapshotID != "" || policy.Force == nil || *policy.Force || policy.Incremental == nil || *policy.Incremental || policy.Wait == nil || *policy.Wait || policy.WaitPolicy.Timeout == nil || *policy.WaitPolicy.Timeout != 0 || policy.WaitPolicy.PollInterval == nil {
+		blockstorage.WithCreateVolumeBackupWaitOptions(resource.WithTimeout(zero), resource.WithPollInterval(zero)))
+	if err != nil || policy.Name == nil || *policy.Name != "" || policy.Description == nil || *policy.Description != "" || policy.SnapshotID == nil || *policy.SnapshotID != "" || policy.Force == nil || *policy.Force || policy.Incremental == nil || *policy.Incremental || policy.Wait == nil || *policy.Wait || len(policy.WaitOptions) != 2 {
 		t.Fatal(policy, err)
 	}
-	del, err := blockstorage.PrepareDeleteVolumeBackupOptions(ctx, blockstorage.WithDeleteVolumeBackupForce(false), blockstorage.WithDeleteVolumeBackupWait(false), blockstorage.WithDeleteVolumeBackupWaitPolicy(policy.WaitPolicy))
-	if err != nil || del.Force == nil || *del.Force || del.Wait == nil || *del.Wait || del.WaitPolicy.Timeout == nil || *del.WaitPolicy.Timeout != 0 {
+	del, err := blockstorage.PrepareDeleteVolumeBackupOptions(ctx, blockstorage.WithDeleteVolumeBackupForce(false), blockstorage.WithDeleteVolumeBackupWait(false), blockstorage.WithDeleteVolumeBackupWaitOptions(policy.WaitOptions...))
+	if err != nil || del.Force == nil || *del.Force || del.Wait == nil || *del.Wait || len(del.WaitOptions) != 2 || mutationWaitShared(del.WaitOptions, policy.WaitOptions) {
 		t.Fatal(del, err)
 	}
 }
 
 func TestBackupMutationOptionsOwnFactoryInputsAndEveryPreparedTree(t *testing.T) {
 	name, description, snapshot, flag := "before", "description", "snapshot", true
-	timeout, interval := 3*time.Second, time.Millisecond
+	waitInput := []resource.WaitOption{resource.WithTimeout(3 * time.Second), resource.WithPollInterval(time.Millisecond)}
 	location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"project"`), Name: &name}}
-	create := blockstorage.WithCreateVolumeBackupOptions(blockstorage.CreateVolumeBackupOpts{Name: &name, Description: &description, SnapshotID: &snapshot, Force: &flag, Incremental: &flag, Wait: &flag, WaitPolicy: blockstorage.BackupMutationWaitOpts{Timeout: &timeout, PollInterval: &interval}, Location: &location})
-	deleteOption := blockstorage.WithDeleteVolumeBackupOptions(blockstorage.DeleteVolumeBackupOpts{Force: &flag, Wait: &flag, WaitPolicy: blockstorage.BackupMutationWaitOpts{Timeout: &timeout, PollInterval: &interval}, Location: &location})
-	name, description, snapshot, flag, timeout = "mutated", "changed", "changed", false, 0
+	create := blockstorage.WithCreateVolumeBackupOptions(blockstorage.CreateVolumeBackupOpts{Name: &name, Description: &description, SnapshotID: &snapshot, Force: &flag, Incremental: &flag, Wait: &flag, WaitOptions: waitInput, Location: &location})
+	deleteOption := blockstorage.WithDeleteVolumeBackupOptions(blockstorage.DeleteVolumeBackupOpts{Force: &flag, Wait: &flag, WaitOptions: waitInput, Location: &location})
+	name, description, snapshot, flag = "mutated", "changed", "changed", false
+	mutationWaitDamage(waitInput)
 	location.Project.ID[1] = '!'
 	first, err := blockstorage.PrepareCreateVolumeBackupOptions(context.Background(), create)
 	second, secondErr := blockstorage.PrepareCreateVolumeBackupOptions(context.Background(), create)
 	del, delErr := blockstorage.PrepareDeleteVolumeBackupOptions(context.Background(), deleteOption)
-	if err != nil || secondErr != nil || delErr != nil || *first.Name != "before" || *first.Description != "description" || *first.SnapshotID != "snapshot" || !*first.Force || !*first.Incremental || !*first.Wait || *first.WaitPolicy.Timeout != 3*time.Second || string(first.Location.Project.ID) != `"project"` || *first.Location.Project.Name != "before" {
+	if err != nil || secondErr != nil || delErr != nil || *first.Name != "before" || *first.Description != "description" || *first.SnapshotID != "snapshot" || !*first.Force || !*first.Incremental || !*first.Wait || !mutationWaitResolved(first.WaitOptions, 3*time.Second, time.Millisecond) || string(first.Location.Project.ID) != `"project"` || *first.Location.Project.Name != "before" {
 		t.Fatal(first, err, secondErr, delErr)
 	}
-	*first.Name, *first.Force, *first.WaitPolicy.Timeout = "first", false, 0
+	*first.Name, *first.Force = "first", false
+	mutationWaitDamage(first.WaitOptions)
 	first.Location.Project.ID[1] = '!'
 	*first.Location.Project.Name = "first"
-	if *second.Name != "before" || !*second.Force || *second.WaitPolicy.Timeout != 3*time.Second || string(second.Location.Project.ID) != `"project"` || *second.Location.Project.Name != "before" || !*del.Force || !*del.Wait || *del.WaitPolicy.Timeout != 3*time.Second || string(del.Location.Project.ID) != `"project"` || *del.Location.Project.Name != "before" {
+	if *second.Name != "before" || !*second.Force || !mutationWaitResolved(second.WaitOptions, 3*time.Second, time.Millisecond) || string(second.Location.Project.ID) != `"project"` || *second.Location.Project.Name != "before" || !*del.Force || !*del.Wait || !mutationWaitResolved(del.WaitOptions, 3*time.Second, time.Millisecond) || string(del.Location.Project.ID) != `"project"` || *del.Location.Project.Name != "before" {
 		t.Fatal("prepared policies share caller or sibling storage", second, del)
 	}
 }

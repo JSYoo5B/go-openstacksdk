@@ -126,7 +126,7 @@ func TestCreateVolumeBackupConcreteOptionsPreserveEmptyFalseAndLiteralSnapshot(t
 		}
 		testcloud.JSON(w, 399, `{"backup":{"id":false,"status":false}}`)
 	})
-	result, err := blockstorage.CreateVolumeBackup(bmwContext(t), client, blockstorage.CreateVolumeBackupRequest{}, blockstorage.WithCreateVolumeBackupName(""), blockstorage.WithCreateVolumeBackupDescription(""), blockstorage.WithCreateVolumeBackupForce(true), blockstorage.WithCreateVolumeBackupIncremental(true), blockstorage.WithCreateVolumeBackupSnapshotID("literal/snapshot % value"), blockstorage.WithCreateVolumeBackupWait(false), blockstorage.WithCreateVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{Timeout: smwDuration(-time.Second), PollInterval: smwDuration(-time.Second)}))
+	result, err := blockstorage.CreateVolumeBackup(bmwContext(t), client, blockstorage.CreateVolumeBackupRequest{}, blockstorage.WithCreateVolumeBackupName(""), blockstorage.WithCreateVolumeBackupDescription(""), blockstorage.WithCreateVolumeBackupForce(true), blockstorage.WithCreateVolumeBackupIncremental(true), blockstorage.WithCreateVolumeBackupSnapshotID("literal/snapshot % value"), blockstorage.WithCreateVolumeBackupWait(false), blockstorage.WithCreateVolumeBackupWaitOptions(resource.WithTimeout(time.Nanosecond), resource.WithPollInterval(time.Hour)))
 	if err != nil || result == nil || result.Value == nil || result.Ready != nil || result.ReadyBackup != nil || string(result.BackupID) != "false" || calls.Load() != 1 {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -337,7 +337,7 @@ func TestDeleteVolumeBackupDefaultWaitOffUsesActualIDAndOpaqueAcknowledgement(t 
 					w.WriteHeader(500)
 				}
 			})
-			result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{Timeout: smwDuration(-time.Second), PollInterval: smwDuration(-time.Second)}))
+			result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWaitOptions(resource.WithTimeout(time.Nanosecond), resource.WithPollInterval(time.Hour)))
 			if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Resolved == nil || result.Resolved.Backup == nil || result.Resolved.Observed == nil || len(result.Resolved.Pages) != 0 || string(result.BackupID) != `"actual"` || result.Ready != nil || result.Absent != nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -397,7 +397,7 @@ func TestDeleteVolumeBackupForceActionUsesNullAnd364WithoutChangingPollVersion(t
 						w.WriteHeader(500)
 					}
 				})
-				result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupForce(true), blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+				result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupForce(true), blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitOptions(resource.WithPollInterval(time.Millisecond)))
 				if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.ReadyBackup == nil || result.Ready == nil || result.Absent != nil || calls.Load() != 3 || client.Microversion != version || !reflect.DeepEqual(client.MoreHeaders, originalHeaders) {
 					t.Fatal(result, err, calls.Load(), client)
 				}

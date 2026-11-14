@@ -4,30 +4,19 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"slices"
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-// MutationWaitOptions keeps omission distinct from an explicit zero timeout.
-// Timeout nil means unlimited; a nonpositive explicit timeout permits no poll.
-// PollInterval nil selects two seconds. Interval is an SDK convenience option.
-// WaitStrategy replaces the fixed interval with a resource.WaitStrategy (a
-// Go-only extension); setting both PollInterval and WaitStrategy, or an
-// invalid strategy, is rejected before any request.
-type MutationWaitOptions struct {
-	Timeout, PollInterval *time.Duration
-	WaitStrategy          *resource.WaitStrategy
-}
-
-func (value MutationWaitOptions) validate() error {
-	if value.WaitStrategy == nil {
-		return nil
-	}
-	if value.PollInterval != nil {
-		return invalid("PollInterval and WaitStrategy are mutually exclusive")
-	}
-	return value.WaitStrategy.Validate()
+// resolveMutationWait resolves the shared wait options of a snapshot or backup
+// mutation: unlimited by default with two-second polling. Only the timeout,
+// unlimited, poll interval and wait strategy controls are supported; a zero or
+// negative timeout or interval and any other control fail with
+// resource.ErrInvalidOption before any request.
+func resolveMutationWait(options []resource.WaitOption) (resource.WaitSettings, error) {
+	return resource.ResolveWait(resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(2 * time.Second)}, options...)
 }
 
 // CreateAttributes supplies the four cloud-helper name/description aliases.
@@ -40,15 +29,15 @@ type CreateAttributes struct {
 
 type CreateOptions struct {
 	Force, Wait *bool
-	WaitPolicy  MutationWaitOptions
+	WaitOptions []resource.WaitOption
 	Attributes  CreateAttributes
 	Location    *resource.CloudLocation
 }
 
 type DeleteOptions struct {
-	Wait       *bool
-	WaitPolicy MutationWaitOptions
-	Location   *resource.CloudLocation
+	Wait        *bool
+	WaitOptions []resource.WaitOption
+	Location    *resource.CloudLocation
 }
 
 type CreateOption = Option[CreateOptions]
@@ -69,13 +58,19 @@ func WithCreateWait(value bool) CreateOption {
 func WithDeleteWait(value bool) DeleteOption {
 	return func(target *DeleteOptions) error { target.Wait = clonePointer(&value); return nil }
 }
-func WithCreateWaitPolicy(value MutationWaitOptions) CreateOption {
-	owned := cloneMutationWait(value)
-	return func(target *CreateOptions) error { target.WaitPolicy = cloneMutationWait(owned); return nil }
+func WithCreateWaitOptions(options ...resource.WaitOption) CreateOption {
+	owned := slices.Clone(options)
+	return func(target *CreateOptions) error {
+		target.WaitOptions = append(slices.Clone(target.WaitOptions), owned...)
+		return nil
+	}
 }
-func WithDeleteWaitPolicy(value MutationWaitOptions) DeleteOption {
-	owned := cloneMutationWait(value)
-	return func(target *DeleteOptions) error { target.WaitPolicy = cloneMutationWait(owned); return nil }
+func WithDeleteWaitOptions(options ...resource.WaitOption) DeleteOption {
+	owned := slices.Clone(options)
+	return func(target *DeleteOptions) error {
+		target.WaitOptions = append(slices.Clone(target.WaitOptions), owned...)
+		return nil
+	}
 }
 func WithCreateAttributes(value CreateAttributes) CreateOption {
 	owned := cloneCreateAttributes(value)
@@ -110,12 +105,6 @@ func PrepareDelete(ctx context.Context, options ...DeleteOption) (DeleteOptions,
 	return prepare(ctx, options, cloneDeleteOptions, nil)
 }
 
-func cloneMutationWait(value MutationWaitOptions) MutationWaitOptions {
-	value.Timeout = clonePointer(value.Timeout)
-	value.PollInterval = clonePointer(value.PollInterval)
-	value.WaitStrategy = clonePointer(value.WaitStrategy)
-	return value
-}
 func cloneMutationFields(value map[string]json.RawMessage) map[string]json.RawMessage {
 	if value == nil {
 		return nil
@@ -137,14 +126,14 @@ func cloneCreateAttributes(value CreateAttributes) CreateAttributes {
 func cloneCreateOptions(value CreateOptions) CreateOptions {
 	value.Force = clonePointer(value.Force)
 	value.Wait = clonePointer(value.Wait)
-	value.WaitPolicy = cloneMutationWait(value.WaitPolicy)
+	value.WaitOptions = slices.Clone(value.WaitOptions)
 	value.Attributes = cloneCreateAttributes(value.Attributes)
 	value.Location = cloneLocation(value.Location)
 	return value
 }
 func cloneDeleteOptions(value DeleteOptions) DeleteOptions {
 	value.Wait = clonePointer(value.Wait)
-	value.WaitPolicy = cloneMutationWait(value.WaitPolicy)
+	value.WaitOptions = slices.Clone(value.WaitOptions)
 	value.Location = cloneLocation(value.Location)
 	return value
 }

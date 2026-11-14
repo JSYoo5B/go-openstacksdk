@@ -10,6 +10,7 @@ import (
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/cloudread"
 	"github.com/JSYoo5B/go-openstacksdk/internal/rest"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 	"github.com/gophercloud/gophercloud/v2"
 )
 
@@ -32,7 +33,7 @@ func DeleteBackup(ctx context.Context, client *gophercloud.ServiceClient, nameOr
 	}
 	policy, err := prepare(ctx, options, cloneBackupDelete, func() error { return p.source.Guard(ctx) })
 	if err == nil {
-		err = policy.WaitPolicy.validate()
+		_, err = resolveMutationWait(policy.WaitOptions)
 	}
 	if err == nil {
 		err = p.ownLocation(ctx, policy.Location)
@@ -91,7 +92,7 @@ func DeleteBackup(ctx context.Context, client *gophercloud.ServiceClient, nameOr
 		return result, wrapRead(ctx, backupReadSchema(), "DeleteVolumeBackup", err)
 	}
 	if policy.Wait != nil && *policy.Wait {
-		if err := p.waitBackupDelete(ctx, &state, policy.WaitPolicy, result); err != nil {
+		if err := p.waitBackupDelete(ctx, &state, policy.WaitOptions, result); err != nil {
 			return result, wrapRead(ctx, backupReadSchema(), "DeleteVolumeBackup", err)
 		}
 	}
@@ -103,7 +104,7 @@ func DeleteBackup(ctx context.Context, client *gophercloud.ServiceClient, nameOr
 	return result, nil
 }
 
-func (p *reader) waitBackupDelete(ctx context.Context, state *backupMutationState, policy MutationWaitOptions, result *BackupDeleteResult) error {
+func (p *reader) waitBackupDelete(ctx context.Context, state *backupMutationState, policy []resource.WaitOption, result *BackupDeleteResult) error {
 	wait := newMutationWait(policy)
 	for {
 		if err := wait.boundary(ctx, p); err != nil {

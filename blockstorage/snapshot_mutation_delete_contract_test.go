@@ -53,7 +53,7 @@ func TestDeleteVolumeSnapshotDefaultWaitOffDeletesActualResolvedIDWithOpaqueAckn
 					w.WriteHeader(500)
 				}
 			})
-			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(-time.Second), PollInterval: smwDuration(-time.Second)}))
+			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithTimeout(time.Nanosecond), resource.WithPollInterval(time.Hour)))
 			if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Resolved == nil || result.Resolved.Snapshot == nil || result.Resolved.Observed == nil || len(result.Resolved.Pages) != 0 || string(result.SnapshotID) != `"actual"` || result.Ready != nil || result.Absent != nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -98,7 +98,7 @@ func TestDeleteVolumeSnapshotEmptyInputRunsOriginalsOnceWithoutConsumingServiceO
 				callbacks++
 				o.Location = &resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage{}}}
 				o.Wait = smwBool(true)
-				o.WaitPolicy = blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(-time.Second), PollInterval: smwDuration(-time.Second)}
+				o.WaitOptions = []resource.WaitOption{resource.WithTimeout(-time.Second), resource.WithPollInterval(-time.Second)}
 				if kind == "callback error" {
 					return cause
 				}
@@ -296,7 +296,7 @@ func TestDeleteVolumeSnapshotWaitAlwaysFetchesFreshAndToleratesMalformedBodyByMe
 					w.WriteHeader(500)
 				}
 			})
-			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Ready == nil || result.Absent != nil || calls.Load() != 3 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -337,7 +337,7 @@ func TestDeleteVolumeSnapshotFreshNullOrNonstringStatusIsAnErrorAfterAcknowledge
 					w.WriteHeader(500)
 				}
 			})
-			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(time.Millisecond)}))
+			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			var physical *resource.ResponseError
 			if result == nil || !errors.Is(err, resource.ErrInvalidOption) || errors.As(err, &physical) || result.Deleted != nil || result.Ready != nil || result.Absent != nil || result.Resolved.Value == nil || calls.Load() != 3 {
 				t.Fatal(result, err, calls.Load())
@@ -374,7 +374,7 @@ func TestDeleteVolumeSnapshotErrorsAreNonterminalAndLatestMergedIDControlsNextPo
 			w.WriteHeader(500)
 		}
 	})
-	result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(time.Millisecond)}))
+	result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Ready == nil || string(result.SnapshotID) != "false" || calls.Load() != 4 {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -419,7 +419,7 @@ func TestDeleteVolumeSnapshotCleanPolling404CompletesWithSeparateAbsenceProof(t 
 			w.WriteHeader(500)
 		}
 	})
-	result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(time.Millisecond)}))
+	result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Ready != nil || result.ReadySnapshot != nil || calls.Load() != 4 {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -431,8 +431,8 @@ func TestDeleteVolumeSnapshotCleanPolling404CompletesWithSeparateAbsenceProof(t 
 	smwPage(t, result.LastAccepted, 203, fresh, "last admitted")
 }
 
-func TestDeleteVolumeSnapshotNonpositiveWaitTimeoutIsCheckedAfterDELETEBeforeEvenCachedDeletedGET(t *testing.T) {
-	for _, timeout := range []time.Duration{0, -time.Second} {
+func TestDeleteVolumeSnapshotElapsedWaitTimeoutIsCheckedAfterDELETEBeforeEvenCachedDeletedGET(t *testing.T) {
+	for _, timeout := range []time.Duration{time.Nanosecond} {
 		t.Run(timeout.String(), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := smwClient(cloud)
@@ -446,11 +446,11 @@ func TestDeleteVolumeSnapshotNonpositiveWaitTimeoutIsCheckedAfterDELETEBeforeEve
 					w.Header().Set("X-Proof", "ack")
 					w.WriteHeader(204)
 				default:
-					t.Error("nonpositive timeout permitted a GET", r.URL)
+					t.Error("elapsed timeout permitted a GET", r.URL)
 					w.WriteHeader(500)
 				}
 			})
-			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(timeout), PollInterval: smwDuration(-time.Second)}))
+			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithTimeout(timeout), resource.WithPollInterval(time.Hour)))
 			var expired *blockstorage.SnapshotWaitTimeoutError
 			if result == nil || !errors.As(err, &expired) || expired.Timeout != timeout || result.Deleted != nil || result.Ready != nil || result.Absent != nil || result.Resolved.Value == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
@@ -489,7 +489,7 @@ func TestDeleteVolumeSnapshotPositiveBudgetStartsAfterDELETEAndAcceptsSlowFreshD
 					w.WriteHeader(500)
 				}
 			})
-			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(250 * time.Millisecond), PollInterval: smwDuration(-time.Second)}))
+			result, err := smwDelete(t, client, "requested", blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithTimeout(250*time.Millisecond), resource.WithPollInterval(time.Millisecond)))
 			if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Ready == nil || calls.Load() != 3 {
 				t.Fatal(result, err, calls.Load())
 			}

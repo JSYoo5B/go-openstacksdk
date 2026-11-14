@@ -412,7 +412,7 @@ func TestConnectionBackupMutationEmptyDeleteIsServiceFreeEvenForNilConnection(t 
 			calls++
 			yes := true
 			next.Wait = &yes
-			next.WaitPolicy = blockstorage.BackupMutationWaitOpts{Timeout: &negative, PollInterval: &negative}
+			next.WaitOptions = []resource.WaitOption{resource.WithTimeout(negative), resource.WithPollInterval(negative)}
 			next.Location = &invalid
 			return nil
 		})

@@ -38745,7 +38745,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotForce",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotWaitPolicy",
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotWaitOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotAttributes",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotFields",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeSnapshotName",
@@ -38839,9 +38839,9 @@
           ]
         },
         {
-          "behavior": "Create SDK wait budget starts after POST/initial readiness check. Nil is unlimited, explicit nonpositive timeout fails before polling, and positive expiry is checked at loop boundaries without deriving an HTTP context deadline; a slow target GET succeeds. Interval defaults2s, zero normalizes100ms or a smaller positive timeout, and negative interval fails only at reached nonterminal sleep. Parent context cancellation still governs transport/sleep.",
+          "behavior": "Create SDK wait budget starts after POST/initial readiness check. The default is unlimited; a zero or negative resource.WithTimeout or resource.WithPollInterval, failure states, a status attribute and progress fail with resource.ErrInvalidOption before HTTP, even when the wait is off. Positive expiry is checked at loop boundaries without deriving an HTTP context deadline; a slow target GET succeeds. The interval defaults to 2s and is consumed only at a reached nonterminal sleep.",
           "tests": [
-            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotExplicitNonpositiveTimeoutIsPostCreateAndPrePoll",
+            "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotElapsedTimeoutIsPostCreateAndPrePoll",
             "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPositiveWaitBudgetBeginsAfterCreationAndDoesNotAbortSlowTargetGET",
             "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPositiveTimeoutIsNoticedAtNextLoopBoundary",
             "blockstorage/snapshot_mutation_wait_contract_test.go:TestCreateVolumeSnapshotPollIntervalsAreConsumedOnlyAtNonterminalSleep"
@@ -38854,9 +38854,9 @@
           ]
         },
         {
-          "behavior": "SnapshotMutationWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.",
+          "behavior": "resource.WithWaitStrategy in the wait options rejects an invalid or zero-value strategy with ErrInvalidOption before HTTP, paces polls by the strategy's pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it; a zero or negative resource.WithTimeout or resource.WithPollInterval, failure states, a status attribute and progress fail with resource.ErrInvalidOption before HTTP, even when the wait is off.",
           "tests": [
-            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitStrategyRejectedBeforeHTTP",
+            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitOptionsRejectedBeforeHTTP",
             "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotWaitStrategyPacesPolls"
           ]
         }
@@ -38874,7 +38874,7 @@
         "Go requires complete valid UTF8 for consumed JSON and safe unescaped UTF8 member route segments; arbitrary runtime/route-changing coercion is excluded. Request VolumeID is literal body data and does not require route validation. Only reached fields/status/route/wait controls are validated.",
         "Direct source capture, owned ordinary headers, sticky fixed-request/source/cause guards and atomic logical publication are Go safety/proof extensions. Native token/reauth/retry stays live; SDK orchestration adds no replay, rollback or cache invalidation.",
         "Configured/authenticated location is captured and recomputed from project descriptors with null snapshot zone; raw location/availability_zone cannot replace it. Explicit selected Cinder microversion is preserved without automatic3.65 discovery/cap/upgrade or v2 selection.",
-        "Wait timeout is a nullable Go duration checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. Configurable poll interval is a Go extension; default2s and source zero100ms/smaller-timeout behavior are preserved.",
+        "The wait timeout defaults to unlimited and is checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. A configurable poll interval or wait strategy is a Go extension with a two-second default. Python accepts a zero or negative timeout (no poll) and a zero interval (a 100ms pause); Go rejects them with resource.ErrInvalidOption before HTTP.",
         "Source creation default force=false/wait=true, four kwargs, merged request seed and initial available shortcut are preserved. No automatic native projection, generated names or metadata kwargs are added.",
         "Python waits use a fixed poll interval. SnapshotMutationWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP."
       ],
@@ -38890,7 +38890,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.PrepareDeleteVolumeSnapshotOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWaitPolicy"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeSnapshotWaitOptions"
       ],
       "contracts": [
         {
@@ -38971,10 +38971,10 @@
           ]
         },
         {
-          "behavior": "Delete wait budget starts after acknowledgement, overrides the standalone Proxy120-second default with cloud nil-unlimited behavior, and explicit nonpositive timeout fails before even a cached-deleted fresh GET. Positive SDK expiry is loop-only and does not abort a slow terminal GET; parent contexts still cancel HTTP/sleep. Nil-unlimited routing and multi-poll behavior are runtime fixtures; Python120-second default contrast is pinned source evidence, not a120-second live Go run.",
+          "behavior": "Delete wait budget starts after acknowledgement, overrides the standalone Proxy120-second default with cloud nil-unlimited behavior, and an elapsed timeout fails after acknowledgement before even a cached-deleted fresh GET; a zero or negative timeout or interval fails with resource.ErrInvalidOption before HTTP. Positive SDK expiry is loop-only and does not abort a slow terminal GET; parent contexts still cancel HTTP/sleep. Nil-unlimited routing and multi-poll behavior are runtime fixtures; Python120-second default contrast is pinned source evidence, not a120-second live Go run.",
           "tests": [
             "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotErrorsAreNonterminalAndLatestMergedIDControlsNextPoll",
-            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotNonpositiveWaitTimeoutIsCheckedAfterDELETEBeforeEvenCachedDeletedGET",
+            "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotElapsedWaitTimeoutIsCheckedAfterDELETEBeforeEvenCachedDeletedGET",
             "blockstorage/snapshot_mutation_delete_contract_test.go:TestDeleteVolumeSnapshotPositiveBudgetStartsAfterDELETEAndAcceptsSlowFreshDeleted",
             "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero",
             "blockstorage/snapshot_mutation_options_test.go:TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation"
@@ -38989,9 +38989,9 @@
           ]
         },
         {
-          "behavior": "SnapshotMutationWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.",
+          "behavior": "resource.WithWaitStrategy in the wait options rejects an invalid or zero-value strategy with ErrInvalidOption before HTTP, paces polls by the strategy's pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it; a zero or negative resource.WithTimeout or resource.WithPollInterval, failure states, a status attribute and progress fail with resource.ErrInvalidOption before HTTP, even when the wait is off.",
           "tests": [
-            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitStrategyRejectedBeforeHTTP",
+            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitOptionsRejectedBeforeHTTP",
             "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotWaitStrategyPacesPolls"
           ]
         }
@@ -39009,7 +39009,7 @@
         "Go requires complete valid UTF8 for consumed JSON and safe unescaped UTF8 member route segments; arbitrary runtime/route-changing coercion is excluded. Request VolumeID is literal body data and does not require route validation. Only reached fields/status/route/wait controls are validated.",
         "Direct source capture, owned ordinary headers, sticky fixed-request/source/cause guards and atomic logical publication are Go safety/proof extensions. Native token/reauth/retry stays live; SDK orchestration adds no replay, rollback or cache invalidation.",
         "Configured/authenticated location is captured and recomputed from project descriptors with null snapshot zone; raw location/availability_zone cannot replace it. Explicit selected Cinder microversion is preserved without automatic3.65 discovery/cap/upgrade or v2 selection.",
-        "Wait timeout is a nullable Go duration checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. Configurable poll interval is a Go extension; default2s and source zero100ms/smaller-timeout behavior are preserved.",
+        "The wait timeout defaults to unlimited and is checked at source loop boundaries without an HTTP-derived context deadline. Parent contexts supply transport/sleep cancellation. A configurable poll interval or wait strategy is a Go extension with a two-second default. Python accepts a zero or negative timeout (no poll) and a zero interval (a 100ms pause); Go rejects them with resource.ErrInvalidOption before HTTP.",
         "Source deletion default wait=false and empty input false are preserved with nullable bool Deleted. Mutation404 stays terminal; only a clean original concrete polling404 completes. Extra body-fault observation compensates for native ignored rejection Read/Close errors without bypassing native retry.",
         "Python waits use a fixed poll interval. SnapshotMutationWaitOpts.WaitStrategy accepts a resource.WaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and setting it together with the interval field fails with ErrInvalidOption before HTTP."
       ],
@@ -39390,7 +39390,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupIncremental",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupSnapshotID",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWaitPolicy"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithCreateVolumeBackupWaitOptions"
       ],
       "contracts": [
         {
@@ -39472,9 +39472,9 @@
           ]
         },
         {
-          "behavior": "Nil timeout is unlimited; explicitzero/negative fails before first usedpoll unless initialready/noWait. Positive budget begins after initial mutation/merge and checks loop boundaries without deriving HTTP deadline. Pollnil2s; zero100ms capped by a smaller explicit timeout, negative only errors on reachedsleep; parentctx interrupts HTTP/sleep and retains customcause.",
+          "behavior": "The default timeout is unlimited; an elapsed timeout fails before the first used poll unless initial ready/no wait, and a zero or negative resource.WithTimeout or resource.WithPollInterval, failure states, a status attribute and progress fail with resource.ErrInvalidOption before HTTP, even when the wait is off. Positive budget begins after initial mutation/merge and checks loop boundaries without deriving HTTP deadline. Poll default 2s, consumed only at a reached sleep; parent ctx interrupts HTTP/sleep and retains custom cause.",
           "tests": [
-            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationNonpositiveTimeoutRunsMutationButPreventsFirstPoll",
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationElapsedTimeoutRunsMutationButPreventsFirstPoll",
             "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveBudgetStartsAfterMutationAndAllowsSlowTerminalHTTP",
             "blockstorage/backup_mutation_wait_test.go:TestCreateVolumeBackupPollIntervalIsConsumedOnlyAfterNonterminalState",
             "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveTimeoutIsObservedAtLoopBoundaryWithoutBorrowingProof",
@@ -39510,9 +39510,9 @@
           ]
         },
         {
-          "behavior": "BackupMutationWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.",
+          "behavior": "resource.WithWaitStrategy in the wait options rejects an invalid or zero-value strategy with ErrInvalidOption before HTTP, paces polls by the strategy's pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it; a zero or negative resource.WithTimeout or resource.WithPollInterval, failure states, a status attribute and progress fail with resource.ErrInvalidOption before HTTP, even when the wait is off.",
           "tests": [
-            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitStrategyRejectedBeforeHTTP",
+            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitOptionsRejectedBeforeHTTP",
             "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotWaitStrategyPacesPolls"
           ]
         }
@@ -39530,7 +39530,7 @@
         "Nullable23Body+computedlocation model is independent of actual RawResource and admitted/rejected HTTP proof. Unknown actual fields/numeric spelling are preserved as Go evidence extension while only known fields overlay logical state; parsed JSON alias/duplicate insertion traversal is retained.",
         "Exact decimal truthiness/equality, arbitrary integer JSON, Go Unicode decimal runtime table and strict UTF8 are explicit boundaries from Python parsedfloat rounding/underflow/configurableintegerlimits. Nonnumeric integer containers normalize0; bool remainsbool; digit-but-nondecimal strings can fail.",
         "Captured current/explicit configured scope recomputes from Backup project alias and literal rowzone, separate from live provider authentication. Standalone/disconnected Resource location/runtime construction are independent capabilities.",
-        "Positive SDK timeout is loop-boundary only; parentcontext cancellation/deadline adds a Go interruption/cause contract. Nil alone unlimited; zero/negative remain used-loop timeout. PollInterval is a concrete Go convenience absent from the direct Python helper.",
+        "Positive SDK timeout is loop-boundary only; parent context cancellation/deadline adds a Go interruption/cause contract. The timeout defaults to unlimited. Python accepts a zero or negative timeout (no poll); Go rejects a zero or negative resource.WithTimeout or resource.WithPollInterval with resource.ErrInvalidOption before HTTP. The poll interval and wait strategy are Go conveniences absent from the direct Python helper.",
         "Accepted Read/Close/decode/context/source failures retain their actual phase evidence. Only ordinary member400403404 and deletionpoll404 have bounded rejection-body fault observation; rejected Lists, other member statuses and mutations retain native discarded-bodyIO policy. This is not universal rejection-IO preservation.",
         "Go errors retain operation/resource/custom context causes and independently owned partial phase results; Source probes use explicit AST/session/response/location stand-ins and are not authenticated Python/OpenStack runtime evidence. No orchestration replay or rollback is added.",
         "The fixed cloud signature has no Fields/display aliases/native extraCreate attributes. Omitted nullabletext serializesnull, explicitempty retained, force/incremental defaults serializefalse; Go typed bool/string domain replaces arbitrary Python arguments.",
@@ -39550,7 +39550,7 @@
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupOptions",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupForce",
         "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWait",
-        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWaitPolicy"
+        "github.com/JSYoo5B/go-openstacksdk/blockstorage.WithDeleteVolumeBackupWaitOptions"
       ],
       "contracts": [
         {
@@ -39637,9 +39637,9 @@
           ]
         },
         {
-          "behavior": "Nil cloud timeout overrides Proxy standalone120 with unlimited. Explicitzero/negative timeout fails after acknowledgement before firstfreshpoll. Positive loop budget does not derive HTTP deadline and may accept slowterminal response; parentctx/customcause separately interrupts request/sleep.",
+          "behavior": "Nil cloud timeout overrides Proxy standalone 120 with unlimited. An elapsed timeout fails after acknowledgement before the first fresh poll, and a zero or negative resource.WithTimeout or resource.WithPollInterval, failure states, a status attribute and progress fail with resource.ErrInvalidOption before HTTP, even when the wait is off. Positive loop budget does not derive HTTP deadline and may accept slow terminal response; parent ctx/custom cause separately interrupts request/sleep.",
           "tests": [
-            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationNonpositiveTimeoutRunsMutationButPreventsFirstPoll",
+            "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationElapsedTimeoutRunsMutationButPreventsFirstPoll",
             "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveBudgetStartsAfterMutationAndAllowsSlowTerminalHTTP",
             "blockstorage/backup_mutation_wait_test.go:TestVolumeBackupMutationPositiveTimeoutIsObservedAtLoopBoundaryWithoutBorrowingProof",
             "connectiontest/connection_volume_backup_mutations_test.go:TestConnectionBackupMutationsBlockedFreshPollPreservesEarlierProofAndCustomCause"
@@ -39689,9 +39689,9 @@
           ]
         },
         {
-          "behavior": "BackupMutationWaitOpts.WaitStrategy rejects an invalid or zero-value strategy, or one set together with the interval field, with ErrInvalidOption before HTTP and paces polls by the strategy's pause sequence.",
+          "behavior": "resource.WithWaitStrategy in the wait options rejects an invalid or zero-value strategy with ErrInvalidOption before HTTP, paces polls by the strategy's pause sequence and is replaced by, or replaces, a resource.WithPollInterval given before or after it; a zero or negative resource.WithTimeout or resource.WithPollInterval, failure states, a status attribute and progress fail with resource.ErrInvalidOption before HTTP, even when the wait is off.",
           "tests": [
-            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitStrategyRejectedBeforeHTTP",
+            "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotAndBackupWaitOptionsRejectedBeforeHTTP",
             "blockstorage/snapshot_wait_strategy_test.go:TestSnapshotWaitStrategyPacesPolls"
           ]
         }
@@ -39709,7 +39709,7 @@
         "Nullable23Body+computedlocation model is independent of actual RawResource and admitted/rejected HTTP proof. Unknown actual fields/numeric spelling are preserved as Go evidence extension while only known fields overlay logical state; parsed JSON alias/duplicate insertion traversal is retained.",
         "Exact decimal truthiness/equality, arbitrary integer JSON, Go Unicode decimal runtime table and strict UTF8 are explicit boundaries from Python parsedfloat rounding/underflow/configurableintegerlimits. Nonnumeric integer containers normalize0; bool remainsbool; digit-but-nondecimal strings can fail.",
         "Captured current/explicit configured scope recomputes from Backup project alias and literal rowzone, separate from live provider authentication. Standalone/disconnected Resource location/runtime construction are independent capabilities.",
-        "Positive SDK timeout is loop-boundary only; parentcontext cancellation/deadline adds a Go interruption/cause contract. Nil alone unlimited; zero/negative remain used-loop timeout. PollInterval is a concrete Go convenience absent from the direct Python helper.",
+        "Positive SDK timeout is loop-boundary only; parent context cancellation/deadline adds a Go interruption/cause contract. The timeout defaults to unlimited. Python accepts a zero or negative timeout (no poll); Go rejects a zero or negative resource.WithTimeout or resource.WithPollInterval with resource.ErrInvalidOption before HTTP. The poll interval and wait strategy are Go conveniences absent from the direct Python helper.",
         "Accepted Read/Close/decode/context/source failures retain their actual phase evidence. Only ordinary member400403404 and deletionpoll404 have bounded rejection-body fault observation; rejected Lists, other member statuses and mutations retain native discarded-bodyIO policy. This is not universal rejection-IO preservation.",
         "Go errors retain operation/resource/custom context causes and independently owned partial phase results; Source probes use explicit AST/session/response/location stand-ins and are not authenticated Python/OpenStack runtime evidence. No orchestration replay or rollback is added.",
         "Empty typed identity is a service-free Go no-op but still context/originalcallback checked. Actual Resource presence is not ID truthiness; member missingID seed is logical only, while changed/unusable responseID drives reached safe route policy.",

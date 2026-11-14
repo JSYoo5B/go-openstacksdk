@@ -26,21 +26,66 @@ func snapshotMutationOptionsDamageLocation(value *resource.CloudLocation) {
 }
 
 func snapshotMutationOptionsCreate() blockstorage.CreateVolumeSnapshotOpts {
-	force, wait, timeout, interval := false, false, time.Duration(0), time.Millisecond
+	force, wait := false, false
 	name, displayName, description, displayDescription := "canonical", "display", "canonical description", "display description"
 	location := snapshotMutationOptionsLocation()
-	return blockstorage.CreateVolumeSnapshotOpts{Force: &force, Wait: &wait, WaitPolicy: blockstorage.SnapshotMutationWaitOpts{Timeout: &timeout, PollInterval: &interval}, Attributes: blockstorage.CreateVolumeSnapshotAttributes{Name: &name, DisplayName: &displayName, Description: &description, DisplayDescription: &displayDescription, Fields: map[string]json.RawMessage{"name": json.RawMessage(`null`), "display_name": json.RawMessage(`{"number":900719925474099312345}`), "description": json.RawMessage(`false`), "display_description": json.RawMessage(` [null,true,"\u0061"] `)}}, Location: &location}
+	return blockstorage.CreateVolumeSnapshotOpts{Force: &force, Wait: &wait, WaitOptions: []resource.WaitOption{resource.WithTimeout(time.Second), resource.WithPollInterval(time.Millisecond)}, Attributes: blockstorage.CreateVolumeSnapshotAttributes{Name: &name, DisplayName: &displayName, Description: &description, DisplayDescription: &displayDescription, Fields: map[string]json.RawMessage{"name": json.RawMessage(`null`), "display_name": json.RawMessage(`{"number":900719925474099312345}`), "description": json.RawMessage(`false`), "display_description": json.RawMessage(` [null,true,"\u0061"] `)}}, Location: &location}
 }
 
 func snapshotMutationOptionsDelete() blockstorage.DeleteVolumeSnapshotOpts {
-	wait, timeout, interval := false, time.Duration(0), time.Millisecond
+	wait := false
 	location := snapshotMutationOptionsLocation()
-	return blockstorage.DeleteVolumeSnapshotOpts{Wait: &wait, WaitPolicy: blockstorage.SnapshotMutationWaitOpts{Timeout: &timeout, PollInterval: &interval}, Location: &location}
+	return blockstorage.DeleteVolumeSnapshotOpts{Wait: &wait, WaitOptions: []resource.WaitOption{resource.WithTimeout(time.Second), resource.WithPollInterval(time.Millisecond)}, Location: &location}
+}
+
+func mutationWaitDamage(options []resource.WaitOption) {
+	for i := range options {
+		options[i] = resource.WithTimeout(time.Hour)
+	}
+}
+
+func mutationWaitEqual(a, b []resource.WaitOption) bool {
+	if (a == nil) != (b == nil) || len(a) != len(b) {
+		return false
+	}
+	defaults := resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(2 * time.Second)}
+	left, leftErr := resource.ResolveWait(defaults, a...)
+	right, rightErr := resource.ResolveWait(defaults, b...)
+	return (leftErr == nil) == (rightErr == nil) && reflect.DeepEqual(left, right)
+}
+
+func mutationWaitShared(a, b []resource.WaitOption) bool {
+	return len(a) > 0 && len(b) > 0 && &a[0] == &b[0]
+}
+
+func mutationWaitResolved(options []resource.WaitOption, timeout, interval time.Duration) bool {
+	settings, err := resource.ResolveWait(resource.WaitDefaults{Unlimited: true, Strategy: resource.FixedWait(2 * time.Second)}, options...)
+	return err == nil && !settings.Unlimited && settings.Timeout == timeout && settings.Strategy.Delay(1) == interval
+}
+
+func snapshotMutationOptionsEqual(a, b any) bool {
+	switch left := a.(type) {
+	case blockstorage.CreateVolumeSnapshotOpts:
+		right, ok := b.(blockstorage.CreateVolumeSnapshotOpts)
+		if !ok || !mutationWaitEqual(left.WaitOptions, right.WaitOptions) {
+			return false
+		}
+		left.WaitOptions, right.WaitOptions = nil, nil
+		return reflect.DeepEqual(left, right)
+	case blockstorage.DeleteVolumeSnapshotOpts:
+		right, ok := b.(blockstorage.DeleteVolumeSnapshotOpts)
+		if !ok || !mutationWaitEqual(left.WaitOptions, right.WaitOptions) {
+			return false
+		}
+		left.WaitOptions, right.WaitOptions = nil, nil
+		return reflect.DeepEqual(left, right)
+	}
+	return reflect.DeepEqual(a, b)
 }
 
 func snapshotMutationOptionsDamageCreate(value *blockstorage.CreateVolumeSnapshotOpts) {
 	*value.Force, *value.Wait = true, true
-	*value.WaitPolicy.Timeout, *value.WaitPolicy.PollInterval = time.Hour, time.Hour
+	mutationWaitDamage(value.WaitOptions)
 	*value.Attributes.Name, *value.Attributes.DisplayName = "changed-name", "changed-display"
 	*value.Attributes.Description, *value.Attributes.DisplayDescription = "changed-description", "changed-display-description"
 	for key, raw := range value.Attributes.Fields {
@@ -55,7 +100,7 @@ func snapshotMutationOptionsDamageCreate(value *blockstorage.CreateVolumeSnapsho
 
 func snapshotMutationOptionsDamageDelete(value *blockstorage.DeleteVolumeSnapshotOpts) {
 	*value.Wait = true
-	*value.WaitPolicy.Timeout, *value.WaitPolicy.PollInterval = time.Hour, time.Hour
+	mutationWaitDamage(value.WaitOptions)
 	snapshotMutationOptionsDamageLocation(value.Location)
 }
 
@@ -103,8 +148,8 @@ func TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero(t *testing.
 		t.Fatalf("omitted delete policy=%+v error=%v", deleted, err)
 	}
 	zero := time.Duration(0)
-	create, err = blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), blockstorage.WithCreateVolumeSnapshotForce(false), blockstorage.WithCreateVolumeSnapshotWait(false), blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &zero, PollInterval: &zero}), blockstorage.WithCreateVolumeSnapshotName(""), blockstorage.WithCreateVolumeSnapshotDisplayName(""), blockstorage.WithCreateVolumeSnapshotDescription(""), blockstorage.WithCreateVolumeSnapshotDisplayDescription(""))
-	if err != nil || create.Force == nil || *create.Force || create.Wait == nil || *create.Wait || create.WaitPolicy.Timeout == nil || *create.WaitPolicy.Timeout != 0 || create.WaitPolicy.PollInterval == nil || *create.WaitPolicy.PollInterval != 0 {
+	create, err = blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), blockstorage.WithCreateVolumeSnapshotForce(false), blockstorage.WithCreateVolumeSnapshotWait(false), blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithTimeout(zero), resource.WithPollInterval(zero)), blockstorage.WithCreateVolumeSnapshotName(""), blockstorage.WithCreateVolumeSnapshotDisplayName(""), blockstorage.WithCreateVolumeSnapshotDescription(""), blockstorage.WithCreateVolumeSnapshotDisplayDescription(""))
+	if err != nil || create.Force == nil || *create.Force || create.Wait == nil || *create.Wait || len(create.WaitOptions) != 2 {
 		t.Fatalf("explicit create false/zero policy=%+v error=%v", create, err)
 	}
 	for _, field := range []*string{create.Attributes.Name, create.Attributes.DisplayName, create.Attributes.Description, create.Attributes.DisplayDescription} {
@@ -112,13 +157,13 @@ func TestSnapshotMutationOptionsPreserveOmissionAndExplicitFalseZero(t *testing.
 			t.Fatal("explicit empty alias pointer was discarded", create.Attributes)
 		}
 	}
-	deleted, err = blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), blockstorage.WithDeleteVolumeSnapshotWait(false), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &zero, PollInterval: &zero}))
-	if err != nil || deleted.Wait == nil || *deleted.Wait || deleted.WaitPolicy.Timeout == nil || *deleted.WaitPolicy.Timeout != 0 || deleted.WaitPolicy.PollInterval == nil || *deleted.WaitPolicy.PollInterval != 0 {
+	deleted, err = blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), blockstorage.WithDeleteVolumeSnapshotWait(false), blockstorage.WithDeleteVolumeSnapshotWaitOptions(resource.WithTimeout(zero), resource.WithPollInterval(zero)))
+	if err != nil || deleted.Wait == nil || *deleted.Wait || len(deleted.WaitOptions) != 2 {
 		t.Fatalf("explicit delete false/zero policy=%+v error=%v", deleted, err)
 	}
 	negative := -time.Second
-	create, err = blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &negative, PollInterval: &negative}))
-	if err != nil || create.Wait != nil || create.WaitPolicy.Timeout == nil || create.WaitPolicy.PollInterval == nil || *create.WaitPolicy.Timeout != negative || *create.WaitPolicy.PollInterval != negative {
+	create, err = blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithTimeout(negative), resource.WithPollInterval(negative)))
+	if err != nil || create.Wait != nil || len(create.WaitOptions) != 2 {
 		t.Fatal("pure preparation prematurely evaluated wait policy", create, err)
 	}
 }
@@ -129,12 +174,12 @@ func TestSnapshotMutationOptionsCompleteFactoriesOwnEverySubtreeAcrossReuses(t *
 		factory := blockstorage.WithCreateVolumeSnapshotOptions(input)
 		snapshotMutationOptionsDamageCreate(&input)
 		first, err := blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), factory)
-		if err != nil || !reflect.DeepEqual(first, expected) {
+		if err != nil || !snapshotMutationOptionsEqual(first, expected) {
 			t.Fatalf("caller input changed factory=%+v error=%v", first, err)
 		}
 		snapshotMutationOptionsDamageCreate(&first)
 		second, err := blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), factory)
-		if err != nil || !reflect.DeepEqual(second, expected) || second.Force == first.Force || second.WaitPolicy.Timeout == first.WaitPolicy.Timeout || second.Attributes.Name == first.Attributes.Name || second.Location == first.Location {
+		if err != nil || !snapshotMutationOptionsEqual(second, expected) || second.Force == first.Force || mutationWaitShared(second.WaitOptions, first.WaitOptions) || second.Attributes.Name == first.Attributes.Name || second.Location == first.Location {
 			t.Fatalf("prior result changed reusable factory=%+v error=%v", second, err)
 		}
 	})
@@ -143,12 +188,12 @@ func TestSnapshotMutationOptionsCompleteFactoriesOwnEverySubtreeAcrossReuses(t *
 		factory := blockstorage.WithDeleteVolumeSnapshotOptions(input)
 		snapshotMutationOptionsDamageDelete(&input)
 		first, err := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), factory)
-		if err != nil || !reflect.DeepEqual(first, expected) {
+		if err != nil || !snapshotMutationOptionsEqual(first, expected) {
 			t.Fatalf("caller input changed factory=%+v error=%v", first, err)
 		}
 		snapshotMutationOptionsDamageDelete(&first)
 		second, err := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), factory)
-		if err != nil || !reflect.DeepEqual(second, expected) || second.Wait == first.Wait || second.WaitPolicy.Timeout == first.WaitPolicy.Timeout || second.Location == first.Location {
+		if err != nil || !snapshotMutationOptionsEqual(second, expected) || second.Wait == first.Wait || mutationWaitShared(second.WaitOptions, first.WaitOptions) || second.Location == first.Location {
 			t.Fatalf("prior result changed reusable factory=%+v error=%v", second, err)
 		}
 	})
@@ -164,7 +209,7 @@ func TestSnapshotMutationOptionsFactoriesSupportConcurrentIndependentPreparedVal
 			defer workers.Done()
 			create, createErr := blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), createFactory)
 			deleted, deleteErr := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), deleteFactory)
-			if createErr != nil || deleteErr != nil || !reflect.DeepEqual(create, createExpected) || !reflect.DeepEqual(deleted, deleteExpected) {
+			if createErr != nil || deleteErr != nil || !snapshotMutationOptionsEqual(create, createExpected) || !snapshotMutationOptionsEqual(deleted, deleteExpected) {
 				t.Errorf("independent prepared policy create=%+v delete=%+v errors=%v/%v", create, deleted, createErr, deleteErr)
 				return
 			}
@@ -174,11 +219,11 @@ func TestSnapshotMutationOptionsFactoriesSupportConcurrentIndependentPreparedVal
 	}
 	workers.Wait()
 	create, err := blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), createFactory)
-	if err != nil || !reflect.DeepEqual(create, createExpected) {
+	if err != nil || !snapshotMutationOptionsEqual(create, createExpected) {
 		t.Fatal("concurrent result rewrote reusable create factory", create, err)
 	}
 	deleted, err := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), deleteFactory)
-	if err != nil || !reflect.DeepEqual(deleted, deleteExpected) {
+	if err != nil || !snapshotMutationOptionsEqual(deleted, deleteExpected) {
 		t.Fatal("concurrent result rewrote reusable delete factory", deleted, err)
 	}
 }
@@ -256,13 +301,13 @@ func TestSnapshotMutationOptionsRawFactoriesPreserveNilEmptyMapsAndExactByteShap
 }
 
 func TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees(t *testing.T) {
-	timeout, interval := time.Millisecond, 2*time.Millisecond
+	waitInput := []resource.WaitOption{resource.WithTimeout(time.Millisecond), resource.WithPollInterval(2 * time.Millisecond)}
 	location := snapshotMutationOptionsLocation()
 	ownedLocation := location.Clone()
 	fields := map[string]json.RawMessage{"name": json.RawMessage(`null`), "display_name": json.RawMessage(`"raw display"`)}
 	fieldsFactory := blockstorage.WithCreateVolumeSnapshotFields(fields)
-	createWaitFactory := blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &timeout, PollInterval: &interval})
-	deleteWaitFactory := blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &timeout, PollInterval: &interval})
+	createWaitFactory := blockstorage.WithCreateVolumeSnapshotWaitOptions(waitInput...)
+	deleteWaitFactory := blockstorage.WithDeleteVolumeSnapshotWaitOptions(waitInput...)
 	createLocation, deleteLocation := location.Clone(), location.Clone()
 	createLocationFactory, deleteLocationFactory := func(c *blockstorage.CreateVolumeSnapshotOpts) error {
 		loc := createLocation.Clone()
@@ -274,12 +319,12 @@ func TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees(
 		return nil
 	}
 	fields["display_name"][0] = '!'
-	timeout, interval = time.Hour, time.Hour
+	mutationWaitDamage(waitInput)
 	snapshotMutationOptionsDamageLocation(&location)
 	options := []blockstorage.CreateVolumeSnapshotOption{blockstorage.WithCreateVolumeSnapshotOptions(snapshotMutationOptionsCreate()), blockstorage.WithCreateVolumeSnapshotForce(true), blockstorage.WithCreateVolumeSnapshotForce(false), blockstorage.WithCreateVolumeSnapshotWait(true), createWaitFactory, fieldsFactory, blockstorage.WithCreateVolumeSnapshotName("later name"), blockstorage.WithCreateVolumeSnapshotDisplayName("later display"), blockstorage.WithCreateVolumeSnapshotDescription("later description"), blockstorage.WithCreateVolumeSnapshotDisplayDescription("later display description"), createLocationFactory}
 	checkCreate := func(value blockstorage.CreateVolumeSnapshotOpts, err error) {
 		t.Helper()
-		if err != nil || value.Force == nil || value.Wait == nil || value.WaitPolicy.Timeout == nil || value.WaitPolicy.PollInterval == nil || value.Attributes.Name == nil || value.Attributes.DisplayName == nil || value.Attributes.Description == nil || value.Attributes.DisplayDescription == nil || value.Location == nil || *value.Force || !*value.Wait || *value.WaitPolicy.Timeout != time.Millisecond || *value.WaitPolicy.PollInterval != 2*time.Millisecond || *value.Attributes.Name != "later name" || *value.Attributes.DisplayName != "later display" || *value.Attributes.Description != "later description" || *value.Attributes.DisplayDescription != "later display description" || string(value.Attributes.Fields["name"]) != `null` || string(value.Attributes.Fields["display_name"]) != `"raw display"` || len(value.Attributes.Fields) != 2 || !reflect.DeepEqual(*value.Location, ownedLocation) {
+		if err != nil || value.Force == nil || value.Wait == nil || len(value.WaitOptions) != 4 || value.Attributes.Name == nil || value.Attributes.DisplayName == nil || value.Attributes.Description == nil || value.Attributes.DisplayDescription == nil || value.Location == nil || *value.Force || !*value.Wait || !mutationWaitResolved(value.WaitOptions, time.Millisecond, 2*time.Millisecond) || *value.Attributes.Name != "later name" || *value.Attributes.DisplayName != "later display" || *value.Attributes.Description != "later description" || *value.Attributes.DisplayDescription != "later display description" || string(value.Attributes.Fields["name"]) != `null` || string(value.Attributes.Fields["display_name"]) != `"raw display"` || len(value.Attributes.Fields) != 2 || !reflect.DeepEqual(*value.Location, ownedLocation) {
 			t.Fatal("individual options changed another subtree or borrowed input", value, err)
 		}
 	}
@@ -289,12 +334,12 @@ func TestSnapshotMutationOptionsIndividualFactoriesOverrideOnlySelectedSubtrees(
 	second, err := blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), options...)
 	checkCreate(second, err)
 	deleted, err := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), blockstorage.WithDeleteVolumeSnapshotOptions(snapshotMutationOptionsDelete()), blockstorage.WithDeleteVolumeSnapshotWait(true), blockstorage.WithDeleteVolumeSnapshotWait(false), deleteWaitFactory, deleteLocationFactory)
-	if err != nil || deleted.Wait == nil || deleted.WaitPolicy.Timeout == nil || deleted.WaitPolicy.PollInterval == nil || deleted.Location == nil || *deleted.Wait || *deleted.WaitPolicy.Timeout != time.Millisecond || *deleted.WaitPolicy.PollInterval != 2*time.Millisecond || !reflect.DeepEqual(*deleted.Location, ownedLocation) {
+	if err != nil || deleted.Wait == nil || len(deleted.WaitOptions) != 4 || deleted.Location == nil || *deleted.Wait || !mutationWaitResolved(deleted.WaitOptions, time.Millisecond, 2*time.Millisecond) || !reflect.DeepEqual(*deleted.Location, ownedLocation) {
 		t.Fatal("delete individual factories changed or borrowed policy", deleted, err)
 	}
 	snapshotMutationOptionsDamageDelete(&deleted)
 	deleted, err = blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), deleteWaitFactory, deleteLocationFactory)
-	if err != nil || deleted.Wait != nil || deleted.WaitPolicy.Timeout == nil || deleted.WaitPolicy.PollInterval == nil || deleted.Location == nil || *deleted.WaitPolicy.Timeout != time.Millisecond || *deleted.WaitPolicy.PollInterval != 2*time.Millisecond || !reflect.DeepEqual(*deleted.Location, ownedLocation) {
+	if err != nil || deleted.Wait != nil || len(deleted.WaitOptions) != 2 || deleted.Location == nil || !mutationWaitResolved(deleted.WaitOptions, time.Millisecond, 2*time.Millisecond) || !reflect.DeepEqual(*deleted.Location, ownedLocation) {
 		t.Fatal("reusable individual delete policy/location changed", deleted, err)
 	}
 }
@@ -308,13 +353,13 @@ func TestSnapshotMutationOptionsCompleteReplacementClearsPriorPolicyAndSubtrees(
 	if err != nil || !reflect.DeepEqual(deleted, blockstorage.DeleteVolumeSnapshotOpts{}) {
 		t.Fatal("whole delete options merged earlier policy", deleted, err)
 	}
-	create, err = blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), blockstorage.WithCreateVolumeSnapshotOptions(snapshotMutationOptionsCreate()), blockstorage.WithCreateVolumeSnapshotAttributes(blockstorage.CreateVolumeSnapshotAttributes{}), blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{}))
-	if err != nil || !reflect.DeepEqual(create.Attributes, blockstorage.CreateVolumeSnapshotAttributes{}) || !reflect.DeepEqual(create.WaitPolicy, blockstorage.SnapshotMutationWaitOpts{}) || create.Force == nil || *create.Force || create.Wait == nil || *create.Wait || create.Location == nil {
+	create, err = blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), blockstorage.WithCreateVolumeSnapshotOptions(snapshotMutationOptionsCreate()), blockstorage.WithCreateVolumeSnapshotAttributes(blockstorage.CreateVolumeSnapshotAttributes{}), blockstorage.WithCreateVolumeSnapshotWaitOptions())
+	if err != nil || !reflect.DeepEqual(create.Attributes, blockstorage.CreateVolumeSnapshotAttributes{}) || !mutationWaitEqual(create.WaitOptions, snapshotMutationOptionsCreate().WaitOptions) || create.Force == nil || *create.Force || create.Wait == nil || *create.Wait || create.Location == nil {
 		t.Fatal("subtree replacement retained attributes or erased unrelated policy", create, err)
 	}
-	deleted, err = blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), blockstorage.WithDeleteVolumeSnapshotOptions(snapshotMutationOptionsDelete()), blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{}))
-	if err != nil || !reflect.DeepEqual(deleted.WaitPolicy, blockstorage.SnapshotMutationWaitOpts{}) || deleted.Wait == nil || *deleted.Wait || deleted.Location == nil {
-		t.Fatal("delete wait subtree replacement changed other fields", deleted, err)
+	deleted, err = blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), blockstorage.WithDeleteVolumeSnapshotOptions(snapshotMutationOptionsDelete()), blockstorage.WithDeleteVolumeSnapshotWaitOptions())
+	if err != nil || !mutationWaitEqual(deleted.WaitOptions, snapshotMutationOptionsDelete().WaitOptions) || deleted.Wait == nil || *deleted.Wait || deleted.Location == nil {
+		t.Fatal("empty delete wait append changed wait options or other fields", deleted, err)
 	}
 }
 
@@ -334,18 +379,18 @@ func TestSnapshotMutationOptionsCaptureOriginalSliceAndIsolateRetainedCallbacks(
 		options[1] = func(next *blockstorage.CreateVolumeSnapshotOpts) error {
 			order = append(order, 2)
 			snapshotMutationOptionsDamageCreate(retained)
-			if !reflect.DeepEqual(*next, expected) {
+			if !snapshotMutationOptionsEqual(*next, expected) {
 				t.Fatal("retained callback changed next owned policy", next)
 			}
 			last = next
 			return nil
 		}
 		value, err := blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), options...)
-		if err != nil || !reflect.DeepEqual(order, []int{1, 2}) || !reflect.DeepEqual(value, expected) {
+		if err != nil || !reflect.DeepEqual(order, []int{1, 2}) || !snapshotMutationOptionsEqual(value, expected) {
 			t.Fatal("original callbacks/order", value, err, order)
 		}
 		snapshotMutationOptionsDamageCreate(last)
-		if !reflect.DeepEqual(value, expected) {
+		if !snapshotMutationOptionsEqual(value, expected) {
 			t.Fatal("last callback handle changed result", value)
 		}
 	})
@@ -364,18 +409,18 @@ func TestSnapshotMutationOptionsCaptureOriginalSliceAndIsolateRetainedCallbacks(
 		options[1] = func(next *blockstorage.DeleteVolumeSnapshotOpts) error {
 			order = append(order, 2)
 			snapshotMutationOptionsDamageDelete(retained)
-			if !reflect.DeepEqual(*next, expected) {
+			if !snapshotMutationOptionsEqual(*next, expected) {
 				t.Fatal("retained callback changed next owned policy", next)
 			}
 			last = next
 			return nil
 		}
 		value, err := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), options...)
-		if err != nil || !reflect.DeepEqual(order, []int{1, 2}) || !reflect.DeepEqual(value, expected) {
+		if err != nil || !reflect.DeepEqual(order, []int{1, 2}) || !snapshotMutationOptionsEqual(value, expected) {
 			t.Fatal("original callbacks/order", value, err, order)
 		}
 		snapshotMutationOptionsDamageDelete(last)
-		if !reflect.DeepEqual(value, expected) {
+		if !snapshotMutationOptionsEqual(value, expected) {
 			t.Fatal("last callback handle changed result", value)
 		}
 	})
@@ -469,19 +514,19 @@ func TestSnapshotMutationOptionsPreparationIsPureAndDefersReachedValueValidation
 	badLocation := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`not-json`)}}
 	fields := map[string]json.RawMessage{"unknown-route-key": json.RawMessage(`{unfinished`), "name": nil, "description": json.RawMessage{}}
 	calls := 0
-	factory := blockstorage.WithCreateVolumeSnapshotOptions(blockstorage.CreateVolumeSnapshotOpts{Attributes: blockstorage.CreateVolumeSnapshotAttributes{Name: &badName, Fields: fields}, WaitPolicy: blockstorage.SnapshotMutationWaitOpts{Timeout: &negative, PollInterval: &negative}, Location: &badLocation})
+	factory := blockstorage.WithCreateVolumeSnapshotOptions(blockstorage.CreateVolumeSnapshotOpts{Attributes: blockstorage.CreateVolumeSnapshotAttributes{Name: &badName, Fields: fields}, WaitOptions: []resource.WaitOption{resource.WithTimeout(negative), resource.WithPollInterval(negative)}, Location: &badLocation})
 	// Pure preparation receives no service/client or route and executes only
 	// supplied callbacks. It owns even unusable reached values; workflow
 	// validation decides which of them must be consumed before HTTP/sleep.
 	value, err := blockstorage.PrepareCreateVolumeSnapshotOptions(context.Background(), factory, func(*blockstorage.CreateVolumeSnapshotOpts) error { calls++; return nil })
-	if err != nil || calls != 1 || value.Attributes.Name == nil || value.WaitPolicy.Timeout == nil || value.WaitPolicy.PollInterval == nil || value.Location == nil || *value.Attributes.Name != badName || !reflect.DeepEqual(value.Attributes.Fields, fields) || *value.WaitPolicy.Timeout != negative || *value.WaitPolicy.PollInterval != negative || !reflect.DeepEqual(*value.Location, badLocation) {
+	if err != nil || calls != 1 || value.Attributes.Name == nil || len(value.WaitOptions) != 2 || value.Location == nil || *value.Attributes.Name != badName || !reflect.DeepEqual(value.Attributes.Fields, fields) || !reflect.DeepEqual(*value.Location, badLocation) {
 		t.Fatal("pure preparer performed workflow validation", value, err, calls)
 	}
 	if value.Force != nil || value.Wait != nil {
 		t.Fatal("pure preparer invented operational defaults", value)
 	}
-	deleted, err := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), blockstorage.WithDeleteVolumeSnapshotOptions(blockstorage.DeleteVolumeSnapshotOpts{WaitPolicy: blockstorage.SnapshotMutationWaitOpts{Timeout: &negative, PollInterval: &negative}, Location: &badLocation}))
-	if err != nil || deleted.Wait != nil || deleted.WaitPolicy.Timeout == nil || deleted.WaitPolicy.PollInterval == nil || deleted.Location == nil || *deleted.WaitPolicy.Timeout != negative || *deleted.WaitPolicy.PollInterval != negative || !reflect.DeepEqual(*deleted.Location, badLocation) {
+	deleted, err := blockstorage.PrepareDeleteVolumeSnapshotOptions(context.Background(), blockstorage.WithDeleteVolumeSnapshotOptions(blockstorage.DeleteVolumeSnapshotOpts{WaitOptions: []resource.WaitOption{resource.WithTimeout(negative), resource.WithPollInterval(negative)}, Location: &badLocation}))
+	if err != nil || deleted.Wait != nil || len(deleted.WaitOptions) != 2 || deleted.Location == nil || !reflect.DeepEqual(*deleted.Location, badLocation) {
 		t.Fatal("pure delete preparation consumed unused policy", deleted, err)
 	}
 }

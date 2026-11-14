@@ -5,7 +5,6 @@ import (
 	"context"
 	"errors"
 	"net/http"
-	"strings"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -38,7 +37,7 @@ func TestCreateVolumeSnapshotFreshPollOverridesInitialErrorBeforeFailure(t *test
 					w.WriteHeader(500)
 				}
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if err != nil || result == nil || result.Ready == nil || result.ReadySnapshot == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -85,7 +84,7 @@ func TestCreateVolumeSnapshotFreshErrorOrInvalidStatusKeepsCreatedAndLastAccepte
 					testcloud.JSON(w, 200, fresh)
 				}
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if result == nil || err == nil || result.Value != nil || result.Snapshot != nil || result.Ready != nil || result.CreatedValue == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -152,7 +151,7 @@ func TestCreateVolumeSnapshotWaitRebindsLatestLogicalIDButDoesNotRouteTerminalUn
 			w.WriteHeader(500)
 		}
 	})
-	result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(time.Millisecond)}))
+	result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || result == nil || calls.Load() != 3 || string(result.SnapshotID) != `"bad/id"` {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -181,7 +180,7 @@ func TestCreateVolumeSnapshotNonterminalUnsafeIDFailsBeforeAnotherPhysicalPoll(t
 					testcloud.JSON(w, 200, fresh)
 				}
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(time.Millisecond)}))
+			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			var proof *resource.ResponseError
 			if result == nil || !errors.Is(err, resource.ErrInvalidOption) || result.Value != nil || result.CreatedValue == nil || string(result.SnapshotID) != id || calls.Load() != 2 || errors.As(err, &proof) {
 				t.Fatal(result, err, calls.Load())
@@ -191,8 +190,8 @@ func TestCreateVolumeSnapshotNonterminalUnsafeIDFailsBeforeAnotherPhysicalPoll(t
 	}
 }
 
-func TestCreateVolumeSnapshotExplicitNonpositiveTimeoutIsPostCreateAndPrePoll(t *testing.T) {
-	for _, timeout := range []time.Duration{0, -time.Second} {
+func TestCreateVolumeSnapshotElapsedTimeoutIsPostCreateAndPrePoll(t *testing.T) {
+	for _, timeout := range []time.Duration{time.Nanosecond} {
 		t.Run(timeout.String(), func(t *testing.T) {
 			cloud := testcloud.New(t)
 			client := smwClient(cloud)
@@ -204,7 +203,7 @@ func TestCreateVolumeSnapshotExplicitNonpositiveTimeoutIsPostCreateAndPrePoll(t 
 				w.Header().Set("X-Proof", "created")
 				testcloud.JSON(w, 202, body)
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(timeout), PollInterval: smwDuration(-time.Second)}))
+			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithTimeout(timeout), resource.WithPollInterval(time.Hour)))
 			var expired *blockstorage.SnapshotWaitTimeoutError
 			if result == nil || !errors.As(err, &expired) || expired.Timeout != timeout || !errors.Is(err, context.DeadlineExceeded) || errors.Is(err, resource.ErrInvalidOption) || result.CreatedValue == nil || result.Value != nil || calls.Load() != 1 {
 				t.Fatal(result, err, calls.Load())
@@ -240,7 +239,7 @@ func TestCreateVolumeSnapshotPositiveWaitBudgetBeginsAfterCreationAndDoesNotAbor
 					w.WriteHeader(500)
 				}
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(250 * time.Millisecond), PollInterval: smwDuration(-time.Second)}))
+			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithTimeout(250*time.Millisecond), resource.WithPollInterval(time.Millisecond)))
 			if err != nil || result == nil || result.Ready == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -266,7 +265,7 @@ func TestCreateVolumeSnapshotPositiveTimeoutIsNoticedAtNextLoopBoundary(t *testi
 			w.WriteHeader(500)
 		}
 	})
-	result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: smwDuration(250 * time.Millisecond), PollInterval: smwDuration(350 * time.Millisecond)}))
+	result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithTimeout(250*time.Millisecond), resource.WithPollInterval(350*time.Millisecond)))
 	var expired *blockstorage.SnapshotWaitTimeoutError
 	if result == nil || !errors.As(err, &expired) || result.Value != nil || result.Ready != nil || result.CreatedValue == nil || calls.Load() != 2 {
 		t.Fatal(result, err, calls.Load())
@@ -290,7 +289,9 @@ func TestCreateVolumeSnapshotPollIntervalsAreConsumedOnlyAtNonterminalSleep(t *t
 					testcloud.JSON(w, 200, fresh)
 				}
 			})
-			result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+			ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
+			defer cancel()
+			result, err := blockstorage.CreateVolumeSnapshot(ctx, client, blockstorage.CreateVolumeSnapshotRequest{VolumeID: "literal/volume % identifier"}, blockstorage.WithCreateVolumeSnapshotWaitOptions(resource.WithPollInterval(time.Hour)))
 			if result == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -305,43 +306,14 @@ func TestCreateVolumeSnapshotPollIntervalsAreConsumedOnlyAtNonterminalSleep(t *t
 					t.Fatal(err)
 				}
 			case "creating":
-				if !errors.Is(err, resource.ErrInvalidOption) || !strings.Contains(err.Error(), "interval") {
+				var expired *blockstorage.SnapshotWaitTimeoutError
+				if !errors.Is(err, context.DeadlineExceeded) || errors.As(err, &expired) || errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal(err)
 				}
 			}
 			smwPage(t, result.LastAccepted, 200, fresh, "fresh")
 		})
 	}
-	t.Run("zero normalizes to a pause", func(t *testing.T) {
-		cloud := testcloud.New(t)
-		client := smwClient(cloud)
-		var calls atomic.Int32
-		previous := make(chan time.Time, 1)
-		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			switch calls.Add(1) {
-			case 1:
-				testcloud.JSON(w, 202, `{"snapshot":{"id":"first","status":"creating"}}`)
-			case 2:
-				smwRequest(t, r, http.MethodGet, smwCollection+"/first")
-				previous <- time.Now()
-				testcloud.JSON(w, 200, `{"snapshot":{"status":"creating"}}`)
-			case 3:
-				smwRequest(t, r, http.MethodGet, smwCollection+"/first")
-				at := <-previous
-				if time.Since(at) < 75*time.Millisecond {
-					t.Error("explicit zero caused an immediate polling loop", time.Since(at))
-				}
-				testcloud.JSON(w, 200, `{"snapshot":{"status":"available"}}`)
-			default:
-				t.Error("zero interval replay", r.URL)
-				w.WriteHeader(500)
-			}
-		})
-		result, err := smwCreate(t, client, blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{PollInterval: smwDuration(0)}))
-		if err != nil || result == nil || result.Ready == nil || calls.Load() != 3 {
-			t.Fatal(result, err, calls.Load())
-		}
-	})
 }
 
 func TestCreateVolumeSnapshotToleratedPollBodiesMergePriorStateBeforeTerminalCheck(t *testing.T) {

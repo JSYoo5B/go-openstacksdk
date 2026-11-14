@@ -5,29 +5,22 @@ import (
 	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/pollschedule"
+	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
 type mutationWait struct {
-	started  time.Time
-	timeout  *time.Duration
-	interval time.Duration
-	pacer    *pollschedule.Pacer
+	started time.Time
+	timeout *time.Duration
+	pacer   *pollschedule.Pacer
 }
 
-func newMutationWait(policy MutationWaitOptions) mutationWait {
-	interval := 2 * time.Second
-	if policy.PollInterval != nil {
-		interval = *policy.PollInterval
-		if interval == 0 {
-			interval = 100 * time.Millisecond
-			if policy.Timeout != nil && *policy.Timeout < interval {
-				interval = *policy.Timeout
-			}
-		}
-	}
-	wait := mutationWait{started: time.Now(), timeout: clonePointer(policy.Timeout), interval: interval}
-	if policy.WaitStrategy != nil {
-		wait.pacer = pollschedule.NewPacer(policy.WaitStrategy.Delay)
+// newMutationWait builds the loop timer from options the mutation already
+// resolved without error.
+func newMutationWait(options []resource.WaitOption) mutationWait {
+	settings, _ := resolveMutationWait(options)
+	wait := mutationWait{started: time.Now(), pacer: pollschedule.NewPacer(settings.Strategy.Delay)}
+	if !settings.Unlimited {
+		wait.timeout = clonePointer(&settings.Timeout)
 	}
 	return wait
 }
@@ -36,7 +29,7 @@ func (w *mutationWait) boundary(ctx context.Context, p *reader) error {
 	if err := p.source.Guard(ctx); err != nil {
 		return err
 	}
-	if w.timeout != nil && (*w.timeout <= 0 || time.Since(w.started) >= *w.timeout) {
+	if w.timeout != nil && (time.Since(w.started) >= *w.timeout) {
 		if p.schema.singular == "backup" {
 			return &BackupWaitTimeoutError{Timeout: *w.timeout}
 		}
@@ -49,14 +42,7 @@ func (w *mutationWait) sleep(ctx context.Context, p *reader) error {
 	if err := p.source.Guard(ctx); err != nil {
 		return err
 	}
-	if w.interval < 0 {
-		return invalid("%s poll interval must be nonnegative when sleeping", p.schema.singular)
-	}
-	pause := w.interval
-	if w.pacer != nil {
-		pause = w.pacer.Next()
-	}
-	timer := time.NewTimer(pause)
+	timer := time.NewTimer(w.pacer.Next())
 	defer timer.Stop()
 	select {
 	case <-ctx.Done():

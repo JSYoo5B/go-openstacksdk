@@ -440,7 +440,7 @@ func TestConnectionSnapshotMutationEmptyDeleteIsServiceFreeEvenForNilConnection(
 			calls++
 			yes := true
 			next.Wait = &yes
-			next.WaitPolicy = blockstorage.SnapshotMutationWaitOpts{Timeout: &negative, PollInterval: &negative}
+			next.WaitOptions = []resource.WaitOption{resource.WithTimeout(negative), resource.WithPollInterval(negative)}
 			next.Location = &invalid
 			return nil
 		})

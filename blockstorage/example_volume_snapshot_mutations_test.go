@@ -125,22 +125,12 @@ func WaitForDeletionVolumeSnapshotMutations(ctx context.Context, conn *sdk.Conne
 	result, err := conn.DeleteVolumeSnapshot(ctx,
 		blockstorage.DeleteVolumeSnapshotRequest{NameOrID: nameOrID},
 		blockstorage.WithDeleteVolumeSnapshotWait(true),
-		blockstorage.WithDeleteVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{
-			Timeout: &budget, PollInterval: &interval,
-		}))
+		blockstorage.WithDeleteVolumeSnapshotWaitOptions(
+			resource.WithTimeout(budget), resource.WithPollInterval(interval),
+		))
 	InspectDeleteVolumeSnapshotMutations(result)
 	InspectErrorVolumeSnapshotMutations(err)
 	return err
-}
-
-func ZeroWaitBudgetVolumeSnapshotMutations(ctx context.Context, conn *sdk.Connection, volumeID string) (*blockstorage.CreateVolumeSnapshotResult, error) {
-	zero := time.Duration(0)
-	result, err := conn.CreateVolumeSnapshot(ctx,
-		blockstorage.CreateVolumeSnapshotRequest{VolumeID: volumeID},
-		blockstorage.WithCreateVolumeSnapshotWaitPolicy(blockstorage.SnapshotMutationWaitOpts{Timeout: &zero}))
-	InspectCreateVolumeSnapshotMutations(result) // POST occurs first; an initially available result may already succeed.
-	InspectErrorVolumeSnapshotMutations(err)
-	return result, err
 }
 
 func WithCallerDeadlineVolumeSnapshotMutations(ctx context.Context, conn *sdk.Connection, volumeID string) error {

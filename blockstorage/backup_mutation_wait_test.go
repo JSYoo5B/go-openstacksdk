@@ -17,7 +17,7 @@ import (
 
 func TestCreateVolumeBackupCachedAvailableSkipsTimeoutIntervalAndUnusableIdentity(t *testing.T) {
 	for _, row := range []string{`{"status":"available"}`, `{"id":null,"status":"AVAILABLE"}`, `{"id":false,"status":"available"}`, `{"id":"bad/id","status":"available"}`} {
-		for _, timeout := range []time.Duration{0, -time.Second} {
+		for _, timeout := range []time.Duration{time.Nanosecond} {
 			t.Run(row+timeout.String(), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				client := bmwClient(cloud)
@@ -27,7 +27,7 @@ func TestCreateVolumeBackupCachedAvailableSkipsTimeoutIntervalAndUnusableIdentit
 					bmwRequest(t, r, "POST", bmwCollection, "3.60", "test-token")
 					testcloud.JSON(w, 202, `{"backup":`+row+`}`)
 				})
-				result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{Timeout: smwDuration(timeout), PollInterval: smwDuration(-time.Second)}))
+				result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitOptions(resource.WithTimeout(timeout), resource.WithPollInterval(time.Hour)))
 				if err != nil || result == nil || result.Value == nil || result.Ready == nil || result.ReadyBackup == nil || calls.Load() != 1 {
 					t.Fatal(result, err, calls.Load())
 				}
@@ -67,7 +67,7 @@ func TestCreateVolumeBackupInitialErrorIsCheckedOnlyAfterFreshFetchAndMerge(t *t
 					w.WriteHeader(500)
 				}
 			})
-			result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+			result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if result == nil || result.CreatedValue == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -138,7 +138,7 @@ func TestCreateVolumeBackupNullablePollContinuesAndLatestIDIsUsedOnlyForNeededRo
 					w.WriteHeader(500)
 				}
 			})
-			result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{PollInterval: smwDuration(time.Millisecond)}))
+			result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if result == nil || calls.Load() != 3 || string(result.BackupID) != `"bad/id"` {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -157,9 +157,9 @@ func TestCreateVolumeBackupNullablePollContinuesAndLatestIDIsUsedOnlyForNeededRo
 	}
 }
 
-func TestVolumeBackupMutationNonpositiveTimeoutRunsMutationButPreventsFirstPoll(t *testing.T) {
+func TestVolumeBackupMutationElapsedTimeoutRunsMutationButPreventsFirstPoll(t *testing.T) {
 	for _, entry := range []string{"create", "delete", "force delete"} {
-		for _, timeout := range []time.Duration{0, -time.Second} {
+		for _, timeout := range []time.Duration{time.Nanosecond} {
 			t.Run(entry+timeout.String(), func(t *testing.T) {
 				cloud := testcloud.New(t)
 				client := bmwClient(cloud)
@@ -185,17 +185,17 @@ func TestVolumeBackupMutationNonpositiveTimeoutRunsMutationButPreventsFirstPoll(
 					w.Header().Set("X-Proof", "applied")
 					w.WriteHeader(204)
 				})
-				policy := blockstorage.BackupMutationWaitOpts{Timeout: smwDuration(timeout), PollInterval: smwDuration(-time.Second)}
+				policy := []resource.WaitOption{resource.WithTimeout(timeout), resource.WithPollInterval(time.Hour)}
 				var err error
 				if entry == "create" {
-					result, failed := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(policy))
+					result, failed := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitOptions(policy...))
 					err = failed
 					if result == nil || result.CreatedValue == nil || result.Value != nil || result.Ready != nil || calls.Load() != 1 {
 						t.Fatal(result, err, calls.Load())
 					}
 					bmwPage(t, result.LastAccepted, 202, `{"backup":{"id":false,"status":"creating"}}`, "applied")
 				} else {
-					result, failed := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupForce(entry == "force delete"), blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitPolicy(policy))
+					result, failed := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupForce(entry == "force delete"), blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitOptions(policy...))
 					err = failed
 					if result == nil || result.Resolved == nil || result.Resolved.Value == nil || result.Deleted != nil || result.Ready != nil || result.Absent != nil || calls.Load() != 2 {
 						t.Fatal(result, err, calls.Load())
@@ -262,14 +262,14 @@ func TestVolumeBackupMutationPositiveBudgetStartsAfterMutationAndAllowsSlowTermi
 					t.Error("budget caused workflow replay", entry, n, r.URL)
 					w.WriteHeader(500)
 				})
-				policy := blockstorage.BackupMutationWaitOpts{Timeout: smwDuration(250 * time.Millisecond), PollInterval: smwDuration(-time.Second)}
+				policy := []resource.WaitOption{resource.WithTimeout(250 * time.Millisecond), resource.WithPollInterval(time.Millisecond)}
 				if entry == "create" {
-					result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(policy))
+					result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitOptions(policy...))
 					if err != nil || result == nil || result.Ready == nil || calls.Load() != terminalStep {
 						t.Fatal(result, err, calls.Load())
 					}
 				} else {
-					result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupForce(entry == "force delete"), blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitPolicy(policy))
+					result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupForce(entry == "force delete"), blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitOptions(policy...))
 					if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Ready == nil || calls.Load() != terminalStep {
 						t.Fatal(result, err, calls.Load())
 					}
@@ -295,7 +295,9 @@ func TestCreateVolumeBackupPollIntervalIsConsumedOnlyAfterNonterminalState(t *te
 					testcloud.JSON(w, 200, reply)
 				}
 			})
-			result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+			ctx, cancel := context.WithTimeout(context.Background(), 250*time.Millisecond)
+			defer cancel()
+			result, err := blockstorage.CreateVolumeBackup(ctx, client, blockstorage.CreateVolumeBackupRequest{VolumeID: "literal/volume % identifier"}, blockstorage.WithCreateVolumeBackupWaitOptions(resource.WithPollInterval(time.Hour)))
 			if result == nil || calls.Load() != 2 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -311,40 +313,13 @@ func TestCreateVolumeBackupPollIntervalIsConsumedOnlyAfterNonterminalState(t *te
 					t.Fatal(err)
 				}
 			case "creating":
-				if !errors.Is(err, resource.ErrInvalidOption) || !strings.Contains(err.Error(), "interval") {
+				var expired *blockstorage.BackupWaitTimeoutError
+				if !errors.Is(err, context.DeadlineExceeded) || errors.As(err, &expired) || errors.Is(err, resource.ErrInvalidOption) {
 					t.Fatal(err)
 				}
 			}
 		})
 	}
-	t.Run("zero pauses rather than busy-looping", func(t *testing.T) {
-		cloud := testcloud.New(t)
-		client := bmwClient(cloud)
-		var calls atomic.Int32
-		previous := make(chan time.Time, 1)
-		cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			switch calls.Add(1) {
-			case 1:
-				testcloud.JSON(w, 202, `{"backup":{"id":"actual","status":"creating"}}`)
-			case 2:
-				previous <- time.Now()
-				testcloud.JSON(w, 200, `{"backup":{"status":"creating"}}`)
-			case 3:
-				at := <-previous
-				if time.Since(at) < 75*time.Millisecond {
-					t.Error("zero interval caused immediate poll", time.Since(at))
-				}
-				testcloud.JSON(w, 200, `{"backup":{"status":"available"}}`)
-			default:
-				t.Error("extra zero poll")
-				w.WriteHeader(500)
-			}
-		})
-		result, err := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{PollInterval: smwDuration(0)}))
-		if err != nil || result == nil || result.Ready == nil || calls.Load() != 3 {
-			t.Fatal(result, err, calls.Load())
-		}
-	})
 }
 
 func TestDeleteVolumeBackupFreshFetchMergesCachedDeletedButRejectsExplicitNullStatus(t *testing.T) {
@@ -371,7 +346,7 @@ func TestDeleteVolumeBackupFreshFetchMergesCachedDeletedButRejectsExplicitNullSt
 					w.WriteHeader(500)
 				}
 			})
-			result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{PollInterval: smwDuration(-time.Second)}))
+			result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if result == nil || result.Resolved == nil || calls.Load() != 3 {
 				t.Fatal(result, err, calls.Load())
 			}
@@ -424,7 +399,7 @@ func TestDeleteVolumeBackupErrorStatesContinueAndLatestIDDoesNotRouteTerminalFal
 			w.WriteHeader(500)
 		}
 	})
-	result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitPolicy(blockstorage.BackupMutationWaitOpts{PollInterval: smwDuration(time.Millisecond)}))
+	result, err := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitOptions(resource.WithPollInterval(time.Millisecond)))
 	if err != nil || result == nil || result.Deleted == nil || !*result.Deleted || result.Ready == nil || string(result.BackupID) != "false" || calls.Load() != 4 {
 		t.Fatal(result, err, calls.Load())
 	}
@@ -478,17 +453,17 @@ func TestVolumeBackupMutationPositiveTimeoutIsObservedAtLoopBoundaryWithoutBorro
 				t.Error("expired loop sent another request", r.URL)
 				w.WriteHeader(500)
 			})
-			policy := blockstorage.BackupMutationWaitOpts{Timeout: smwDuration(250 * time.Millisecond), PollInterval: smwDuration(350 * time.Millisecond)}
+			policy := []resource.WaitOption{resource.WithTimeout(250 * time.Millisecond), resource.WithPollInterval(350 * time.Millisecond)}
 			var err error
 			if entry == "create" {
-				result, failed := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitPolicy(policy))
+				result, failed := bmwCreate(t, client, blockstorage.WithCreateVolumeBackupWaitOptions(policy...))
 				err = failed
 				if result == nil || result.Value != nil || result.Ready != nil || result.CreatedValue == nil {
 					t.Fatal(result, err)
 				}
 				bmwPage(t, result.LastAccepted, 200, fresh, "nonterminal")
 			} else {
-				result, failed := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitPolicy(policy))
+				result, failed := bmwDelete(t, client, blockstorage.WithDeleteVolumeBackupWait(true), blockstorage.WithDeleteVolumeBackupWaitOptions(policy...))
 				err = failed
 				if result == nil || result.Deleted != nil || result.Ready != nil || result.Resolved == nil || result.Applied == nil || result.Absent != nil {
 					t.Fatal(result, err)

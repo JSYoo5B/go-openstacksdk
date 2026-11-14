@@ -21,7 +21,7 @@ func Create(ctx context.Context, client *gophercloud.ServiceClient, volumeID str
 	}
 	policy, err := prepare(ctx, options, cloneCreateOptions, func() error { return p.source.Guard(ctx) })
 	if err == nil {
-		err = policy.WaitPolicy.validate()
+		_, err = resolveMutationWait(policy.WaitOptions)
 	}
 	if err != nil {
 		return nil, wrap(ctx, "CreateVolumeSnapshot", err)
@@ -54,7 +54,7 @@ func Create(ctx context.Context, client *gophercloud.ServiceClient, volumeID str
 	result.CreatedValue = bytes.Clone(view)
 	wait := policy.Wait == nil || *policy.Wait
 	if wait {
-		view, actual, err = p.waitCreate(ctx, &state, view, actual, policy.WaitPolicy, result)
+		view, actual, err = p.waitCreate(ctx, &state, view, actual, policy.WaitOptions, result)
 		if err != nil {
 			return result, wrap(ctx, "CreateVolumeSnapshot", err)
 		}
@@ -66,7 +66,7 @@ func Create(ctx context.Context, client *gophercloud.ServiceClient, volumeID str
 	return result, nil
 }
 
-func (p *reader) waitCreate(ctx context.Context, state *mutationState, view json.RawMessage, actual *resource.RawResource, policy MutationWaitOptions, result *CreateResult) (json.RawMessage, *resource.RawResource, error) {
+func (p *reader) waitCreate(ctx context.Context, state *mutationState, view json.RawMessage, actual *resource.RawResource, policy []resource.WaitOption, result *CreateResult) (json.RawMessage, *resource.RawResource, error) {
 	status, err := state.status(true)
 	if err != nil {
 		return nil, nil, err
