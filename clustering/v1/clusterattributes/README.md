@@ -4,24 +4,12 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 for attr in conn.clustering.collect_cluster_attrs("CLUSTER_ID", "$.status"):
     print(attr.node_id, attr.attr_value)
 ```
 
-```go
-service, err := conn.ClusteringV1(ctx)
-if err != nil { return err }
-scope, err := service.ClusterAttributes.InCluster(ctx,
-    resource.ID("CLUSTER_NAME_OR_ID"), "$.status")
-if err != nil { return err }
-for attr, err := range scope.List(ctx) {
-    if err != nil { return err }
-    fmt.Println(attr.NodeID, string(attr.Value))
-}
-```
+See `Example_clusterattributesFragment1` in [example_clusterattributes_fragment1_test.go](example_clusterattributes_fragment1_test.go), compiled by `go test`.
 
 ## References
 

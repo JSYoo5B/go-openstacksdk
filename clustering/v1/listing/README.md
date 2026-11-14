@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 for profile in conn.clustering.profiles(
     limit=20, max_items=50, paginated=True, metadata={"team": "infra"},
@@ -13,57 +11,7 @@ for profile in conn.clustering.profiles(
     print(profile.id)
 ```
 
-```go
-package example
-
-import (
-    "context"
-    "fmt"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func ListProfiles(ctx context.Context, conn *sdk.Connection) error {
-    service, err := conn.ClusteringV1(ctx)
-    if err != nil { return err }
-    for profile, err := range service.Profiles.List(ctx,
-        profiles.WithListOptions(profiles.ListOpts{Limit: 20}),
-        request.MaxItems(50), request.Paginated(true),
-        profiles.WithListFilter("metadata", map[string]any{"team": "infra"})) {
-        if err != nil { return err }
-        fmt.Println(profile.ID)
-    }
-    return nil
-}
-
-func FirstProfilesPage(ctx context.Context, conn *sdk.Connection) error {
-    service, err := conn.ClusteringV1(ctx)
-    if err != nil { return err }
-    for profile, err := range service.Profiles.Resources.List(ctx,
-        resource.WithMaxItems(5), resource.WithPaginated(false)) {
-        if err != nil { return err }
-        fmt.Println(profile.ID)
-    }
-    return nil
-}
-
-func FirstClusterPoliciesPage(ctx context.Context, conn *sdk.Connection,
-    cluster resource.Ref) error {
-    service, err := conn.ClusteringV1(ctx)
-    if err != nil { return err }
-    scope, err := service.ClusterPolicies.InCluster(ctx, cluster)
-    if err != nil { return err }
-    for binding, err := range scope.List(ctx,
-        request.MaxItems(5), request.Paginated(false)) {
-        if err != nil { return err }
-        fmt.Println(binding.ID, binding.PolicyID)
-    }
-    return nil
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 ```python
 for service in conn.clustering.services(
@@ -72,30 +20,7 @@ for service in conn.clustering.services(
     print(service.id)
 ```
 
-```go
-package example
-
-import (
-    "context"
-    "fmt"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func ListServicesWithCallOptions(ctx context.Context, conn *sdk.Connection) error {
-    service, err := conn.ClusteringV1(ctx)
-    if err != nil { return err }
-    for engine, err := range service.Services.List(ctx,
-        request.Microversion("1.7"),
-        request.Header("X-Trace-ID", "engine-list"),
-        request.Paginated(false)) {
-        if err != nil { return err }
-        fmt.Println(engine.ID, engine.State)
-    }
-    return nil
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 ## References
 

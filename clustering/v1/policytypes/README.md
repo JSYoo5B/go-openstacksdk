@@ -4,66 +4,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `Example_policytypesFragment1` in [example_policytypes_fragment1_test.go](example_policytypes_fragment1_test.go), compiled by `go test`.
 
-```go
-api := policytypes.New(client)
-policy, err := api.Get(ctx, "senlin.policy.scaling-1.0")
-if err != nil {
-    return err
-}
-fmt.Println(policy.Name, policy.Schema)
+See `Example_policytypesFragment2` in [example_policytypes_fragment2_test.go](example_policytypes_fragment2_test.go), compiled by `go test`.
 
-for policy, err := range api.List(ctx) {
-    if err != nil {
-        return err
-    }
-    fmt.Println(policy.Name)
-}
-```
-
-```go
-listingAPI := policytypes.New(client)
-values, err := listingAPI.All(ctx,
-    policytypes.WithListOptions(policytypes.ListOpts{Limit: 20}),
-    request.MaxItems(50))
-if err != nil { return err }
-fmt.Println(len(values))
-for value, err := range listingAPI.List(ctx, request.Paginated(false)) {
-    if err != nil { return err }
-    fmt.Println(value.Name)
-}
-```
-
-```go
-package examples
-
-import (
-	"context"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/policytypes"
-	"github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func FilterPolicyTypes(ctx context.Context, conn *sdk.Connection, typeName string) error {
-	service, err := conn.ClusteringV1(ctx)
-	if err != nil {
-		return err
-	}
-	values, err := service.PolicyTypes.All(ctx,
-		policytypes.WithListFilter("name", typeName),
-		request.MaxItems(50), request.Paginated(false))
-	if err != nil {
-		return err
-	}
-	for _, policy := range values {
-		fmt.Println(policy.Name, policy.Version)
-	}
-	return nil
-}
-```
+See `example_policytypes1_test.go` in [example_policytypes1_test.go](example_policytypes1_test.go), compiled by `go test`.
 
 ## References
 

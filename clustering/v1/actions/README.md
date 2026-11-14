@@ -33,60 +33,11 @@ for action, err := range api.List(ctx,
 action = conn.clustering.update_action("ACTION_ID", status="CANCELLED")
 ```
 
-```go
-service, err := conn.ClusteringV1(ctx)
-if err != nil { return err }
-accepted, err := service.Actions.Cancel(ctx, resource.ID("ACTION_ID"),
-    request.Custom(func(c *request.Config[actions.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }))
-if err != nil { return err }
-fmt.Println(accepted.StatusCode, string(accepted.Body))
-action, err := service.Actions.Get(ctx, "ACTION_ID")
-if err != nil { return err }
-fmt.Println(action.ID, action.Status)
-```
+See `Example_actionsFragment2` in [example_actions_fragment2_test.go](example_actions_fragment2_test.go), compiled by `go test`.
 
-```go
-listingAPI := actions.New(client)
-values, err := listingAPI.All(ctx,
-    actions.WithListOptions(actions.ListOpts{Limit: 20}),
-    request.MaxItems(50))
-if err != nil { return err }
-fmt.Println(len(values))
-for value, err := range listingAPI.List(ctx, request.Paginated(false)) {
-    if err != nil { return err }
-    fmt.Println(value.ID)
-}
-```
+See `Example_actionsFragment3` in [example_actions_fragment3_test.go](example_actions_fragment3_test.go), compiled by `go test`.
 
-```go
-package examples
-
-import (
-	"context"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/actions"
-	"github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func FilterActions(ctx context.Context, conn *sdk.Connection, ownerID string) error {
-	service, err := conn.ClusteringV1(ctx)
-	if err != nil {
-		return err
-	}
-	for action, err := range service.Actions.List(ctx,
-		actions.WithListFilter("owner_id", ownerID),
-		actions.WithListFilter("inputs", map[string]any{"region": "region-one"}),
-		request.MaxItems(50), request.Paginated(false)) {
-		if err != nil {
-			return err
-		}
-		fmt.Println(action.ID, action.Status)
-	}
-	return nil
-}
-```
+See `example_actions1_test.go` in [example_actions1_test.go](example_actions1_test.go), compiled by `go test`.
 
 ## References
 

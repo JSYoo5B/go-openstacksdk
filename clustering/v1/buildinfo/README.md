@@ -4,17 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-info, err := buildinfo.New(client).Get(ctx)
-if err != nil {
-    return err
-}
-if info.API != nil && info.API.Revision != nil {
-    fmt.Println(*info.API.Revision)
-}
-```
+See `Example_buildinfoFragment1` in [example_buildinfo_fragment1_test.go](example_buildinfo_fragment1_test.go), compiled by `go test`.
 
 ## References
 

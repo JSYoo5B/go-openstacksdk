@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 cluster = conn.clustering.get_cluster("CLUSTER_ID")
 cluster = conn.clustering.wait_for_status(
@@ -13,48 +11,18 @@ cluster = conn.clustering.wait_for_status(
 )
 ```
 
-```go
-service, err := conn.ClusteringV1(ctx)
-if err != nil { return err }
-cluster, err := service.Clusters.WaitForStatus(ctx,
-    resource.ID("CLUSTER_ID"), "ACTIVE",
-    resource.WithTimeout(3*time.Minute))
-if err != nil { return err }
-fmt.Println(cluster.ID, cluster.Status, cluster.Header, cluster.Body)
-```
+See `Example_waitingFragment1` in [example_waiting_fragment1_test.go](../example_waiting_fragment1_test.go), compiled by `go test`.
 
-```go
-profile, err := service.Profiles.WaitForStatus(ctx,
-    resource.ID("PROFILE_ID"), "renamed-profile",
-    resource.WithStatusAttribute("name"),
-    resource.WithFailureStates(),
-    resource.WithTimeout(30*time.Second))
-if err != nil { return err }
-fmt.Println(profile.Name)
-```
+See `Example_waitingFragment2` in [example_waiting_fragment2_test.go](../example_waiting_fragment2_test.go), compiled by `go test`.
 
 ```python
 conn.clustering.delete_node(node)
 node = conn.clustering.wait_for_delete(node)
 ```
 
-```go
-submission, err := service.Nodes.Delete(ctx, resource.ID("NODE_ID"))
-if err != nil { return err }
-fmt.Println(submission.ActionID)
-if err := service.Nodes.WaitForDelete(ctx, resource.ID("NODE_ID")); err != nil {
-    return err
-}
-```
+See `Example_waitingFragment3` in [example_waiting_fragment3_test.go](../example_waiting_fragment3_test.go), compiled by `go test`.
 
-```go
-err = service.Nodes.WaitForDelete(ctx, resource.ID("NODE_ID"),
-    resource.WithTimeout(10*time.Minute),
-    resource.WithUnlimitedWait(),
-    resource.WithPollInterval(time.Second),
-    resource.WithProgressCallback(func(progress int) error { fmt.Println(progress); return nil }))
-if err != nil { return err }
-```
+See `Example_waitingFragment4` in [example_waiting_fragment4_test.go](../example_waiting_fragment4_test.go), compiled by `go test`.
 
 ## References
 

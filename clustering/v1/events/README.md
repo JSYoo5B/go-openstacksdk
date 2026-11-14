@@ -27,49 +27,9 @@ records, err := api.All(ctx, events.WithListOptions(events.ListOpts{
 }))
 ```
 
-```go
-listingAPI := events.New(client)
-values, err := listingAPI.All(ctx,
-    events.WithListOptions(events.ListOpts{Limit: 20}),
-    request.MaxItems(50))
-if err != nil { return err }
-fmt.Println(len(values))
-for value, err := range listingAPI.List(ctx, request.Paginated(false)) {
-    if err != nil { return err }
-    fmt.Println(value.ID)
-}
-```
+See `Example_eventsFragment2` in [example_events_fragment2_test.go](example_events_fragment2_test.go), compiled by `go test`.
 
-```go
-package examples
-
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/events"
-	"github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func FilterEvents(ctx context.Context, conn *sdk.Connection) error {
-	service, err := conn.ClusteringV1(ctx)
-	if err != nil {
-		return err
-	}
-	for event, err := range service.Events.List(ctx,
-		events.WithListFilter("status", "ERROR"),
-		events.WithListFilter("meta_data", json.RawMessage(`{"count":9007199254740993}`)),
-		request.MaxItems(50), request.Paginated(false)) {
-		if err != nil {
-			return err
-		}
-		fmt.Println(event.ID, event.Level, event.Status)
-	}
-	return nil
-}
-```
+See `example_events1_test.go` in [example_events1_test.go](example_events1_test.go), compiled by `go test`.
 
 ## References
 

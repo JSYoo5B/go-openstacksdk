@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 profile = conn.clustering.get_profile("PROFILE_ID")
 profile.name = "renamed-profile"
@@ -13,43 +11,11 @@ profile.metadata = {"team": "platform"}
 profile = conn.clustering.update_profile(profile)
 ```
 
-```go
-service, err := conn.ClusteringV1(ctx)
-if err != nil { return err }
-tracked, err := service.Profiles.Load(ctx, resource.ID("PROFILE_ID"))
-if err != nil { return err }
-if err := tracked.Edit(profiles.UpdateOpts{},
-    request.Custom(func(c *request.Config[profiles.UpdateOpts]) error { v := "renamed-profile"; c.Options.Name = &v; return nil }),
-    profiles.WithUpdateMetadata(map[string]any{"team": "platform"})); err != nil {
-    return err
-}
-profile, err := tracked.Commit(ctx, request.Header("X-Audit-Tag", "rename"))
-if err != nil { return err }
-fmt.Println(profile.Name, tracked.Dirty(), tracked.Response().Body)
-```
+See `Example_trackingFragment1` in [example_tracking_fragment1_test.go](../example_tracking_fragment1_test.go), compiled by `go test`.
 
-```go
-service, err := conn.ClusteringV1(ctx)
-if err != nil { return err }
-tracked, err := service.Policies.Load(ctx, resource.Name("existing-policy"))
-if err != nil { return err }
-current := tracked.Value().Name
-if err := tracked.Edit(policies.UpdateOpts{}, request.Custom(func(c *request.Config[policies.UpdateOpts]) error { v := current; c.Options.Name = &v; return nil })); err != nil {
-    return err
-}
-_, err = tracked.Commit(ctx)
-return err
-```
+See `Example_trackingFragment1` in [example_tracking_fragment1_test.go](../example_tracking_fragment1_test.go), compiled by `go test`.
 
-```go
-service, err := conn.ClusteringV1(ctx)
-if err != nil { return err }
-tracked, err := service.Profiles.Load(ctx, resource.ID("PROFILE_ID"))
-if err != nil { return err }
-if err := tracked.RemoveMetadata(); err != nil { return err }
-_, err = tracked.Commit(ctx)
-return err
-```
+See `Example_trackingFragment3` in [example_tracking_fragment3_test.go](../example_tracking_fragment3_test.go), compiled by `go test`.
 
 ## References
 

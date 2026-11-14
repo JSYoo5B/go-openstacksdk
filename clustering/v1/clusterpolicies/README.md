@@ -12,19 +12,7 @@ for binding in conn.clustering.cluster_policies("CLUSTER_NAME_OR_ID", is_enabled
     print(binding.id, binding.policy_id)
 ```
 
-```go
-api := clusterpolicies.New(client)
-scope, err := api.InCluster(ctx, resource.ID("CLUSTER_NAME_OR_ID"))
-if err != nil { return err }
-binding, err := scope.Get(ctx, "POLICY_NAME_OR_ID")
-if err != nil { return err }
-fmt.Println(binding.ID, binding.PolicyID, binding.ClusterID, binding.URIClusterID)
-
-for binding, err := range scope.List(ctx, request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { v := false; c.Options.Enabled = &v; return nil })) {
-    if err != nil { return err }
-    fmt.Println(binding.PolicyName, binding.IsEnabled)
-}
-```
+See `Example_clusterpoliciesFragment1` in [example_clusterpolicies_fragment1_test.go](example_clusterpolicies_fragment1_test.go), compiled by `go test`.
 
 ```go
 bindings, err := scope.All(ctx,
@@ -42,53 +30,9 @@ err = scope.WaitForDelete(ctx, resource.ID("POLICY_NAME_OR_ID"),
 if err != nil { return err }
 ```
 
-```go
-listingAPI := clusterpolicies.New(client)
-listingScope, err := listingAPI.InCluster(ctx, resource.ID("CLUSTER_ID"))
-if err != nil { return err }
-values, err := listingScope.All(ctx, request.MaxItems(50))
-if err != nil { return err }
-fmt.Println(len(values))
-for value, err := range listingScope.List(ctx, request.Paginated(false)) {
-    if err != nil { return err }
-    fmt.Println(value.PolicyID)
-}
-```
+See `Example_clusterpoliciesFragment4` in [example_clusterpolicies_fragment4_test.go](example_clusterpolicies_fragment4_test.go), compiled by `go test`.
 
-```go
-package examples
-
-import (
-	"context"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusterpolicies"
-	"github.com/JSYoo5B/go-openstacksdk/request"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FilterClusterPolicies(ctx context.Context, conn *sdk.Connection, cluster resource.Ref) error {
-	service, err := conn.ClusteringV1(ctx)
-	if err != nil {
-		return err
-	}
-	scope, err := service.ClusterPolicies.InCluster(ctx, cluster)
-	if err != nil {
-		return err
-	}
-	for binding, err := range scope.List(ctx,
-		clusterpolicies.WithListFilter("is_enabled", false),
-		clusterpolicies.WithListFilter("data", map[string]any{"team": "infra"}),
-		request.MaxItems(50), request.Paginated(false)) {
-		if err != nil {
-			return err
-		}
-		fmt.Println(binding.ID, binding.PolicyID, binding.URIClusterID)
-	}
-	return nil
-}
-```
+See `example_clusterpolicies1_test.go` in [example_clusterpolicies1_test.go](example_clusterpolicies1_test.go), compiled by `go test`.
 
 ## References
 

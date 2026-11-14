@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 profile = conn.clustering.find_profile("worker_template")
 policy = conn.clustering.find_policy("placement")
@@ -14,66 +12,9 @@ node = conn.clustering.find_node("worker_1")
 receiver = conn.clustering.find_receiver("scale_out")
 ```
 
-```go
-package example
+See `example_finding1_test.go` in [example_finding1_test.go](../example_finding1_test.go), compiled by `go test`.
 
-import (
-    "context"
-    "fmt"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-)
-
-func FindSenlinResources(ctx context.Context, conn *sdk.Connection) error {
-    service, err := conn.Clustering(ctx)
-    if err != nil { return err }
-    profile, err := service.Profiles.FindIdentity(ctx, "worker_template")
-    if err != nil { return err }
-    policy, err := service.Policies.FindIdentity(ctx, "placement")
-    if err != nil { return err }
-    cluster, err := service.Clusters.FindIdentity(ctx, "workers")
-    if err != nil { return err }
-    node, err := service.Nodes.FindIdentity(ctx, "worker_1")
-    if err != nil { return err }
-    receiver, err := service.Receivers.FindIdentity(ctx, "scale_out")
-    if err != nil { return err }
-    if profile != nil { fmt.Println("profile", profile.ID) }
-    if policy != nil { fmt.Println("policy", policy.ID) }
-    if cluster != nil { fmt.Println("cluster", cluster.ID) }
-    if node != nil { fmt.Println("node", node.ID) }
-    if receiver != nil { fmt.Println("receiver", receiver.ID) }
-    return nil
-}
-```
-
-```go
-package example
-
-import (
-    "context"
-    "errors"
-    "fmt"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/clustering/v1/clusters"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindClusterStrict(ctx context.Context, conn *sdk.Connection) error {
-    service, err := conn.Clustering(ctx)
-    if err != nil { return err }
-    value, err := service.Clusters.FindIdentity(ctx, "workers",
-        request.IgnoreMissing(false),
-        clusters.WithFindFallback(resource.FindFallbackNotFoundOnly),
-        request.Header("X-Vendor-Trace", "lookup"),
-        request.Microversion("1.7"))
-    if errors.Is(err, resource.ErrNotFound) { return fmt.Errorf("workers cluster: %w", err) }
-    if err != nil { return err }
-    fmt.Println(value.ID, value.Name, value.Header, value.StatusCode)
-    return nil
-}
-```
+See `example_finding2_test.go` in [example_finding2_test.go](../example_finding2_test.go), compiled by `go test`.
 
 ## References
 
