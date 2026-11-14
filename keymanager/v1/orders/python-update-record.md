@@ -1,37 +1,6 @@
 # Python Update Record
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:key_manager/v1/update_order`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.API.UpdateRecord`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordOpts`
-- `github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders.WithUpdateRecordAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-
-- String-ID Order commit removes id from dirty state; unknown-only/no attributes makes no HTTP or receipt, while known null/false attributes send one unwrapped PUT. Alias option and response member order use the last canonical value; meta request JSON stays raw and descriptor view is projected separately.
-  Tests: `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordNoop`, `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordDirtyAliasesAndOwnedReceipt`, `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordAliasPriority`.
-- Final 100..399 statuses commit the actual response; invalid/empty JSON retains seed, valid nonobject or invalid HREF reports a response error with physical body/status. Owned request/seed/resource/wire/header state is independent; configured literal route/header/microversion remain scoped to the selected client.
-  Tests: `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordResponseDomain`, `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordAcceptedStatusAndFault`, `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordOptionsOwnInputsAndLiteralPath`.
-- Preflight rejects unsafe dirty IDs, scalar-constructor collisions and selected-route mutation before HTTP. Bounded shared charset normalization decodes Latin1 into Resource/Wire while preserving original receipt/error bytes.
-  Tests: `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordPreflightAndClientGuard`, `keymanager/v1/orders/python_update_record_test.go:TestPythonOrderUpdateRecordCharsetKeepsPhysicalProof`.
-
-Python/Go differences:
-
-- The Go mapping deliberately accepts a newly seeded string ID plus closed finite JSON attributes, rather than mutable Python Resource/dictionary seeds, Python keyword binding or existing dirty/equality/recommit history. ID is not included in the PUT body; the previous remaining text incorrectly claimed it was.
-- Dirty PUT IDs must be nonblank UTF-8 literal segments without controls/dot segments; custom BasePath is a literal service-relative path rather than a Python URI printf template. Source dynamic constructor/binding collisions are represented by concrete Go options and preflight errors.
-- The explicit Go JSON profile preserves finite raw JSON number literals and supports UTF-8/Latin1 plus UTF-16/32 BOM or explicit endianness. Requests implicit charset guessing, other codec namespaces, BOM-less bare UTF-16/32 native-endian and permissive NaN/Infinity are outside this profile. Unknown attributes remain discarded; no caller builder is required.
-- Go returns independent input/resource/wire/raw HTTP observations rather than mutating and returning the same Python object. This operation mapping does not claim live Barbican PUT support or full SDK-R1/C1/S1 parity.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -41,7 +10,6 @@ Examples use the surrounding guide's service object and context unless they decl
 import argparse
 import json
 import openstack
-
 
 def main():
     parser = argparse.ArgumentParser()
@@ -53,7 +21,6 @@ def main():
     with openstack.connect(cloud=args.cloud) as conn:
         result = conn.key_manager.update_order(args.order, **attrs)
         print(json.dumps(result.to_dict(), ensure_ascii=False))
-
 
 if __name__ == "__main__":
     main()
