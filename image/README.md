@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 image = conn.image.find_image("ubuntu", ignore_missing=False)
 for image in conn.image.images(status="active"):
@@ -30,47 +28,11 @@ with open("ubuntu.qcow2", "rb") as data:
     )
 ```
 
-```go
-service, err := conn.Image(ctx)
-if err != nil { return err }
-data, err := os.Open("ubuntu.qcow2")
-if err != nil { return err }
-defer data.Close()
+See `ExampleService_Upload` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-uploaded, err := service.Upload(ctx, image.UploadImageRequest{
-    Name: "ubuntu",
-    Data: data,
-}, image.WithWait(resource.WithTimeout(5*time.Minute)))
-if err != nil {
-    if uploaded != nil { fmt.Println("created image:", uploaded.ID) }
-    return err
-}
-fmt.Println(uploaded.ID, uploaded.Status)
-```
+See `ExampleWithProperty` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-```go
-uploaded, err := service.Upload(ctx, image.UploadImageRequest{
-    Name: "arm-image",
-    Data: data,
-}, image.WithDiskFormat("raw"),
-   image.WithMinDisk(0), image.WithMinRAM(512),
-   image.WithVisibility(image.VisibilityShared),
-   image.WithProtected(false), image.WithHidden(false),
-   image.WithTags("linux", "arm64"),
-   image.WithProperty("hw_architecture", "aarch64"))
-if err != nil { return err }
-fmt.Println(uploaded.ID)
-```
-
-```go
-ready, err := service.Images.Wait(ctx, resource.ID(image.ID), "active")
-if err != nil { return err }
-fmt.Println(ready.Status)
-
-if err := service.Images.Delete(ctx, resource.ID(image.ID)); err != nil {
-    return err
-}
-```
+See `Example_waitAndDelete` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

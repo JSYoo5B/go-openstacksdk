@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -23,10 +21,7 @@ value = conn.image.get_metadef_property(
 )
 ```
 
-```go
-value, err := scope.Get(ctx, "hw_cpu_policy",
-    request.Custom(func(c *metadefproperties.GetOpts) error { v := "OS::Nova::Server"; c.ResourceType = &v; return nil }))
-```
+See `Example_metadefPropertyResourceType` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 See `Example_metadefProperty1` in [example_metadef_property1_test.go](example_metadef_property1_test.go), compiled by `go test`.
 

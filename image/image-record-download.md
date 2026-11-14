@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -43,21 +41,7 @@ go run . -cloud dev -id literal-image-id -mode stream -output ubuntu.qcow2 -time
 
 See `Example_imageRecordDownload1` in [example_image_record_download1_test.go](example_image_record_download1_test.go), compiled by `go test`.
 
-```go
-var seed resource.RawResource
-if err := json.Unmarshal([]byte(`{
-  "id": "literal-image-id",
-  "os_hash_algo": "sha256",
-  "os_hash_value": "expected-hex",
-  "properties": {"purpose": "download-example"}
-}`), &seed); err != nil {
-    return err
-}
-result, err := service.DownloadImageRecord(ctx, image.ImageRecordDownloadRequest{
-    Resource: &seed,
-    Filename: "ubuntu.qcow2",
-})
-```
+See `ExampleService_DownloadImageRecord` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

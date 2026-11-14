@@ -4,21 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 See `Example_deleteFragment1` in [example_delete_fragment1_test.go](example_delete_fragment1_test.go), compiled by `go test`.
 
-```go
-err := service.API.Images.Delete(ctx, imageID)
-if err != nil {
-    var native gophercloud.ErrUnexpectedResponseCode
-    if errors.As(err, &native) {
-        fmt.Printf("HTTP %d, expected=%v, response bytes=%d\n",
-            native.Actual, native.Expected, len(native.Body))
-    }
-    return err
-}
-```
+See `ExampleAPI_Delete` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 
