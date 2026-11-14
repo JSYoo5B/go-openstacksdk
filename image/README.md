@@ -10,7 +10,7 @@ for image in conn.image.images(status="active"):
     print(image.id, image.name)
 ```
 
-See `Example_imageFragment1` in [example_image_fragment1_test.go](example_image_fragment1_test.go), compiled by `go test`.
+See `Example_imagesFind` in [example_image_fragment1_test.go](example_image_fragment1_test.go), compiled by `go test`.
 
 ```python
 with open("ubuntu.qcow2", "rb") as data:

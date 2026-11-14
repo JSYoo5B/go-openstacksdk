@@ -4,11 +4,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-See `Example_profiletypesFragment1` in [example_profiletypes_fragment1_test.go](example_profiletypes_fragment1_test.go), compiled by `go test`.
+See `Example_get` in [example_profiletypes_fragment1_test.go](example_profiletypes_fragment1_test.go), compiled by `go test`.
 
 See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-See `Example_profiletypesFragment3` in [example_profiletypes_fragment3_test.go](example_profiletypes_fragment3_test.go), compiled by `go test`.
+See `Example_all` in [example_profiletypes_fragment3_test.go](example_profiletypes_fragment3_test.go), compiled by `go test`.
 
 See `example_profiletypes1_test.go` in [example_profiletypes1_test.go](example_profiletypes1_test.go), compiled by `go test`.
 

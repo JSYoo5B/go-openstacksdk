@@ -8,7 +8,7 @@ import (
 	svc "github.com/JSYoo5B/go-openstacksdk/image"
 )
 
-func Example_metadefPropertyFragment1() {
+func Example_get() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

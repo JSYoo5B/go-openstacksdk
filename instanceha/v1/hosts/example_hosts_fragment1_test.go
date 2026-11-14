@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_hostsFragment1() {
+func Example_create() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

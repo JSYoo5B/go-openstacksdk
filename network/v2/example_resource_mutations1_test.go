@@ -14,7 +14,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-func Example_resourceMutations1() {
+func Example_createWithAttributes() {
 	ctx := context.Background()
 	conn, err := sdk.Connect(ctx, sdk.WithCloud(os.Getenv("OS_CLOUD")))
 	if err != nil {

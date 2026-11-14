@@ -12,7 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_policiesFragment3() {
+func Example_policiesUpdate() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

@@ -11,7 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_trackingFragment1() {
+func Example_policiesLoad() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

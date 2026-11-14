@@ -16,7 +16,7 @@ stores = conn.key_manager.secret_stores(
 
 See `ExampleWithListFilter` in [example_test.go](example_test.go), compiled by `go test`.
 
-See `Example_secretstores3` in [example_secretstores3_test.go](example_secretstores3_test.go), compiled by `go test`.
+See `Example_string` in [example_secretstores3_test.go](example_secretstores3_test.go), compiled by `go test`.
 
 ## References
 

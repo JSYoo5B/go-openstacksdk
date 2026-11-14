@@ -13,7 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretstores"
 )
 
-func Example_secretstores3() {
+func Example_string() {
 	cloud := flag.String("cloud", "dev", "clouds.yaml entry")
 	name := flag.String("name", "", "server name query")
 	id := flag.String("id", "", "local secret_store_id condition")

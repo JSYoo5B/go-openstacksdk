@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/services"
 )
 
-func Example_servicesFragment1() {
+func Example_list() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

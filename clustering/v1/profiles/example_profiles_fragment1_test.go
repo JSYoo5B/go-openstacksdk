@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiles"
 )
 
-func Example_profilesFragment1() {
+func Example_profilesCreate() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

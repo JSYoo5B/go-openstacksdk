@@ -12,7 +12,7 @@ node = conn.clustering.create_node(
 node = conn.clustering.get_node(node.id, details=True)
 ```
 
-See `Example_nodesFragment1` in [example_nodes_fragment1_test.go](example_nodes_fragment1_test.go), compiled by `go test`.
+See `Example_nodesCreate` in [example_nodes_fragment1_test.go](example_nodes_fragment1_test.go), compiled by `go test`.
 
 ```python
 node = conn.clustering.update_node(
@@ -20,14 +20,14 @@ node = conn.clustering.update_node(
 )
 ```
 
-See `Example_nodesFragment2` in [example_nodes_fragment2_test.go](example_nodes_fragment2_test.go), compiled by `go test`.
+See `Example_update` in [example_nodes_fragment2_test.go](example_nodes_fragment2_test.go), compiled by `go test`.
 
 ```python
 nodes = conn.clustering.nodes(cluster_id="CLUSTER_ID", status="ACTIVE", limit=20)
 node = conn.clustering.find_node("worker_1", ignore_missing=True)
 ```
 
-See `Example_nodesFragment3` in [example_nodes_fragment3_test.go](example_nodes_fragment3_test.go), compiled by `go test`.
+See `Example_list` in [example_nodes_fragment3_test.go](example_nodes_fragment3_test.go), compiled by `go test`.
 
 ```python
 action = conn.clustering.delete_node("NODE_ID", force_delete=True)
@@ -44,7 +44,7 @@ recovered = conn.clustering.recover_node(
 performed = conn.clustering.perform_operation_on_node("NODE_ID", "reboot", type="SOFT")
 ```
 
-See `Example_nodesFragment5` in [example_nodes_fragment5_test.go](example_nodes_fragment5_test.go), compiled by `go test`.
+See `Example_check` in [example_nodes_fragment5_test.go](example_nodes_fragment5_test.go), compiled by `go test`.
 
 ```python
 node = conn.clustering.adopt_node(
@@ -56,9 +56,9 @@ preview = conn.clustering.adopt_node(
 )
 ```
 
-See `Example_nodesFragment6` in [example_nodes_fragment6_test.go](example_nodes_fragment6_test.go), compiled by `go test`.
+See `Example_adopt` in [example_nodes_fragment6_test.go](example_nodes_fragment6_test.go), compiled by `go test`.
 
-See `Example_nodesFragment7` in [example_nodes_fragment7_test.go](example_nodes_fragment7_test.go), compiled by `go test`.
+See `Example_all` in [example_nodes_fragment7_test.go](example_nodes_fragment7_test.go), compiled by `go test`.
 
 See `example_nodes1_test.go` in [example_nodes1_test.go](example_nodes1_test.go), compiled by `go test`.
 

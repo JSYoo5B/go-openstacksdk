@@ -33,9 +33,9 @@ if __name__ == "__main__":
     main()
 ```
 
-See `Example_groupFind1` in [example_group_find1_test.go](example_group_find1_test.go), compiled by `go test`.
+See `Example_groupsFindRecord` in [example_group_find1_test.go](example_group_find1_test.go), compiled by `go test`.
 
-See `Example_groupFindFragment1` in [example_group_find_fragment1_test.go](example_group_find_fragment1_test.go), compiled by `go test`.
+See `Example_groupsFindRecord2` in [example_group_find_fragment1_test.go](example_group_find_fragment1_test.go), compiled by `go test`.
 
 ## References
 

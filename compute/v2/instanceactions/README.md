@@ -4,7 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-See `Example_instanceactionsFragment1` in [example_instanceactions_fragment1_test.go](example_instanceactions_fragment1_test.go), compiled by `go test`.
+See `Example_instanceActionsInServer` in [example_instanceactions_fragment1_test.go](example_instanceactions_fragment1_test.go), compiled by `go test`.
 
 See `example_instanceactions1_test.go` in [example_instanceactions1_test.go](example_instanceactions1_test.go), compiled by `go test`.
 

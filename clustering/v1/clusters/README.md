@@ -13,7 +13,7 @@ cluster = conn.clustering.create_cluster(
 cluster = conn.clustering.get_cluster(cluster.id)
 ```
 
-See `Example_clustersFragment1` in [example_clusters_fragment1_test.go](example_clusters_fragment1_test.go), compiled by `go test`.
+See `Example_clustersCreate` in [example_clusters_fragment1_test.go](example_clusters_fragment1_test.go), compiled by `go test`.
 
 ```python
 cluster = conn.clustering.update_cluster(
@@ -21,14 +21,14 @@ cluster = conn.clustering.update_cluster(
 )
 ```
 
-See `Example_clustersFragment2` in [example_clusters_fragment2_test.go](example_clusters_fragment2_test.go), compiled by `go test`.
+See `Example_update` in [example_clusters_fragment2_test.go](example_clusters_fragment2_test.go), compiled by `go test`.
 
 ```python
 clusters = conn.clustering.clusters(status="ACTIVE", limit=20)
 cluster = conn.clustering.find_cluster("workers", ignore_missing=True)
 ```
 
-See `Example_clustersFragment3` in [example_clusters_fragment3_test.go](example_clusters_fragment3_test.go), compiled by `go test`.
+See `Example_list` in [example_clusters_fragment3_test.go](example_clusters_fragment3_test.go), compiled by `go test`.
 
 ```python
 action = conn.clustering.delete_cluster("CLUSTER_ID", force_delete=True)
@@ -44,7 +44,7 @@ action = conn.clustering.resize_cluster(
 )
 ```
 
-See `Example_clustersFragment5` in [example_clusters_fragment5_test.go](example_clusters_fragment5_test.go), compiled by `go test`.
+See `Example_scaleOut` in [example_clusters_fragment5_test.go](example_clusters_fragment5_test.go), compiled by `go test`.
 
 ```python
 action = conn.clustering.add_nodes_to_cluster("CLUSTER_ID", ["NODE_ID"])
@@ -54,7 +54,7 @@ action = conn.clustering.remove_nodes_from_cluster(
 action = conn.clustering.replace_nodes_in_cluster("CLUSTER_ID", {"OLD_NODE": "NEW_NODE"})
 ```
 
-See `Example_clustersFragment6` in [example_clusters_fragment6_test.go](example_clusters_fragment6_test.go), compiled by `go test`.
+See `Example_addNodes` in [example_clusters_fragment6_test.go](example_clusters_fragment6_test.go), compiled by `go test`.
 
 ```python
 checked = conn.clustering.check_cluster("CLUSTER_ID")
@@ -64,7 +64,7 @@ operated = conn.clustering.perform_operation_on_cluster(
 )
 ```
 
-See `Example_clustersFragment7` in [example_clusters_fragment7_test.go](example_clusters_fragment7_test.go), compiled by `go test`.
+See `Example_check` in [example_clusters_fragment7_test.go](example_clusters_fragment7_test.go), compiled by `go test`.
 
 ```python
 attached = conn.clustering.attach_policy_to_cluster("CLUSTER_ID", "POLICY_ID")
@@ -72,9 +72,9 @@ updated = conn.clustering.update_cluster_policy("CLUSTER_ID", "POLICY_ID", enabl
 detached = conn.clustering.detach_policy_from_cluster("CLUSTER_ID", "POLICY_ID")
 ```
 
-See `Example_clustersFragment8` in [example_clusters_fragment8_test.go](example_clusters_fragment8_test.go), compiled by `go test`.
+See `Example_attachPolicy` in [example_clusters_fragment8_test.go](example_clusters_fragment8_test.go), compiled by `go test`.
 
-See `Example_clustersFragment9` in [example_clusters_fragment9_test.go](example_clusters_fragment9_test.go), compiled by `go test`.
+See `Example_all` in [example_clusters_fragment9_test.go](example_clusters_fragment9_test.go), compiled by `go test`.
 
 See `example_clusters1_test.go` in [example_clusters1_test.go](example_clusters1_test.go), compiled by `go test`.
 

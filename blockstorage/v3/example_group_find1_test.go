@@ -13,7 +13,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-func Example_groupFind1() {
+func Example_groupsFindRecord() {
 	cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
 	identity := flag.String("identity", "", "group ID or exact name")
 	version := flag.String("microversion", "3.38", "selected Cinder default")

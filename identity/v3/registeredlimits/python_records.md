@@ -22,7 +22,7 @@ if __name__ == "__main__":
     main()
 ```
 
-See `Example_records1` in [example_records1_test.go](example_records1_test.go), compiled by `go test`.
+See `Example_registeredLimitsAllRecords` in [example_records1_test.go](example_records1_test.go), compiled by `go test`.
 
 See `ExampleAPI_ProxyListRecords` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 

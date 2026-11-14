@@ -11,7 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-func Example_receiversFragment3() {
+func Example_list() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

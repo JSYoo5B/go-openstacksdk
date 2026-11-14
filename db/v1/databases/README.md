@@ -13,7 +13,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-See `Example_databasesFragment1` in [example_databases_fragment1_test.go](example_databases_fragment1_test.go), compiled by `go test`.
+See `Example_databasesInInstance` in [example_databases_fragment1_test.go](example_databases_fragment1_test.go), compiled by `go test`.
 
 See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 

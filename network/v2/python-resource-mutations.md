@@ -23,7 +23,7 @@ conn.network.delete_address_scope(scope.id, ignore_missing=False)
 
 See `Example_deleteWithOptions` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-See `Example_resourceMutations1` in [example_resource_mutations1_test.go](example_resource_mutations1_test.go), compiled by `go test`.
+See `Example_createWithAttributes` in [example_resource_mutations1_test.go](example_resource_mutations1_test.go), compiled by `go test`.
 
 ## References
 

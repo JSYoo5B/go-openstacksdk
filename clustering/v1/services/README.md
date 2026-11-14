@@ -8,9 +8,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 services = conn.clustering.services()
 ```
 
-See `Example_servicesFragment1` in [example_services_fragment1_test.go](example_services_fragment1_test.go), compiled by `go test`.
+See `Example_list` in [example_services_fragment1_test.go](example_services_fragment1_test.go), compiled by `go test`.
 
-See `Example_servicesFragment2` in [example_services_fragment2_test.go](example_services_fragment2_test.go), compiled by `go test`.
+See `Example_all` in [example_services_fragment2_test.go](example_services_fragment2_test.go), compiled by `go test`.
 
 See `example_services1_test.go` in [example_services1_test.go](example_services1_test.go), compiled by `go test`.
 

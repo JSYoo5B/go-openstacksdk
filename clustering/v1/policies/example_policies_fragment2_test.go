@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/policies"
 )
 
-func Example_policiesFragment2() {
+func Example_policiesValidate() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

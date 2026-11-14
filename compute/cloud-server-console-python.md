@@ -26,7 +26,7 @@ if __name__ == "__main__":
     main()
 ```
 
-See `Example_cloudServerConsole1` in [example_cloud_server_console1_test.go](example_cloud_server_console1_test.go), compiled by `go test`.
+See `Example_string` in [example_cloud_server_console1_test.go](example_cloud_server_console1_test.go), compiled by `go test`.
 
 ```sh
 python main.py --cloud devstack --server vm --length-json 50

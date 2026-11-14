@@ -13,7 +13,7 @@ message = conn.clustering.create_receiver(name="events", type="message")
 receiver = conn.clustering.get_receiver(receiver.id)
 ```
 
-See `Example_receiversFragment1` in [example_receivers_fragment1_test.go](example_receivers_fragment1_test.go), compiled by `go test`.
+See `Example_create` in [example_receivers_fragment1_test.go](example_receivers_fragment1_test.go), compiled by `go test`.
 
 ```python
 receiver = conn.clustering.update_receiver(
@@ -21,22 +21,22 @@ receiver = conn.clustering.update_receiver(
 )
 ```
 
-See `Example_receiversFragment2` in [example_receivers_fragment2_test.go](example_receivers_fragment2_test.go), compiled by `go test`.
+See `Example_update` in [example_receivers_fragment2_test.go](example_receivers_fragment2_test.go), compiled by `go test`.
 
 ```python
 receivers = conn.clustering.receivers(type="message", user_id="USER_ID", limit=20)
 ```
 
-See `Example_receiversFragment3` in [example_receivers_fragment3_test.go](example_receivers_fragment3_test.go), compiled by `go test`.
+See `Example_list` in [example_receivers_fragment3_test.go](example_receivers_fragment3_test.go), compiled by `go test`.
 
 ```python
 receiver = conn.clustering.find_receiver("scale_out", ignore_missing=True)
 conn.clustering.delete_receiver("scale_out", ignore_missing=True)
 ```
 
-See `Example_receiversFragment4` in [example_receivers_fragment4_test.go](example_receivers_fragment4_test.go), compiled by `go test`.
+See `Example_find` in [example_receivers_fragment4_test.go](example_receivers_fragment4_test.go), compiled by `go test`.
 
-See `Example_receiversFragment5` in [example_receivers_fragment5_test.go](example_receivers_fragment5_test.go), compiled by `go test`.
+See `Example_all` in [example_receivers_fragment5_test.go](example_receivers_fragment5_test.go), compiled by `go test`.
 
 See `example_receivers1_test.go` in [example_receivers1_test.go](example_receivers1_test.go), compiled by `go test`.
 

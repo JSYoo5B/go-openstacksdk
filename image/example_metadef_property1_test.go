@@ -14,7 +14,7 @@ import (
 	"github.com/gophercloud/gophercloud/v2"
 )
 
-func Example_metadefProperty1() {
+func Example_string2() {
 	cloud := flag.String("cloud", "dev", "clouds.yaml cloud name")
 	namespace := flag.String("namespace", "OS::Compute::Libvirt", "literal namespace")
 	name := flag.String("name", "hw_cpu_policy", "literal property name")

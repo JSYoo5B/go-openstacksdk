@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_instanceactionsFragment1() {
+func Example_instanceActionsInServer() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

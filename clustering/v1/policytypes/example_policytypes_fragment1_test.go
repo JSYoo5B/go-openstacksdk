@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/policytypes"
 )
 
-func Example_policytypesFragment1() {
+func Example_get() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

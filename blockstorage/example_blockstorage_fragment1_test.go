@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_blockstorageFragment1() {
+func Example_volumesFind() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

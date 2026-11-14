@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/groups"
 )
 
-func Example_recordsFragment1() {
+func Example_groupsProxyListRecords() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

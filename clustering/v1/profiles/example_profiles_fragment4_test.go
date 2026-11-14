@@ -12,7 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_profilesFragment4() {
+func Example_profilesLoad() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/clustering/v1/profiletypes"
 )
 
-func Example_profiletypesFragment1() {
+func Example_get() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

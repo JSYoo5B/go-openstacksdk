@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func Example_devicesFragment1() {
+func Example_devicesAll() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

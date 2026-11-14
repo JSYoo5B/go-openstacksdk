@@ -3,7 +3,7 @@
 Python `conn.instance_ha.hosts(segment)`, `create_host`, `get_host`,
 `update_host` and `delete_host` correspond to a fixed Go Segment scope.
 
-See `Example_hostsFragment1` in [example_hosts_fragment1_test.go](example_hosts_fragment1_test.go), compiled by `go test`.
+See `Example_create` in [example_hosts_fragment1_test.go](example_hosts_fragment1_test.go), compiled by `go test`.
 
 An explicit Segment UUID binds without a GET; names resolve exactly once, with
 duplicate detection. The scope fixes the Segment UUID for every host request.

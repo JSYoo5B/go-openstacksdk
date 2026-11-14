@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-func Example_introspectionFragment2() {
+func Example_introspectionStartIntrospection() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

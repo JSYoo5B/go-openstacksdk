@@ -10,7 +10,7 @@ import (
 	"log"
 )
 
-func Example_acceleratorrequestsFragment1() {
+func Example_acceleratorRequestsCreate() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

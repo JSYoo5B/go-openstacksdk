@@ -11,7 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/shareaccessrules"
 )
 
-func Example_shareaccessrules1() {
+func Example_shareAccessRulesInShare() {
 	ctx := context.Background()
 	conn, err := sdk.Connect(ctx,
 		sdk.WithMicroversionRange(sdk.SharedFileSystem, "2.45", "2.82"),

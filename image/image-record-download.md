@@ -39,7 +39,7 @@ go run . -cloud dev -id literal-image-id -mode buffer -prefer fast -prefer archi
 go run . -cloud dev -id literal-image-id -mode stream -output ubuntu.qcow2 -timeout 10m
 ```
 
-See `Example_imageRecordDownload1` in [example_image_record_download1_test.go](example_image_record_download1_test.go), compiled by `go test`.
+See `Example_string` in [example_image_record_download1_test.go](example_image_record_download1_test.go), compiled by `go test`.
 
 See `ExampleService_DownloadImageRecord` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 

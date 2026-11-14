@@ -8,7 +8,7 @@ import (
 	"log"
 )
 
-func Example_deployablesFragment1() {
+func Example_deployablesAll() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

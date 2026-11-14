@@ -10,7 +10,7 @@ for volume in conn.block_storage.volumes(status="available"):
     print(volume.id, volume.size)
 ```
 
-See `Example_blockstorageFragment1` in [example_blockstorage_fragment1_test.go](example_blockstorage_fragment1_test.go), compiled by `go test`.
+See `Example_volumesFind` in [example_blockstorage_fragment1_test.go](example_blockstorage_fragment1_test.go), compiled by `go test`.
 
 See `Example_waitAndDelete` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 

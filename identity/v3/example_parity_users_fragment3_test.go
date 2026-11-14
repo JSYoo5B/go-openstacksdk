@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/identity/v3/roles"
 )
 
-func Example_parityUsersFragment3() {
+func Example_assign() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

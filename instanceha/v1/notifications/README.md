@@ -3,7 +3,7 @@
 Python `conn.instance_ha.notifications`, `get_notification` and
 `create_notification` correspond to Go `List`/typed `All`, `Get` and `Create`.
 
-See `Example_notificationsFragment1` in [example_notifications_fragment1_test.go](example_notifications_fragment1_test.go), compiled by `go test`.
+See `Example_create` in [example_notifications_fragment1_test.go](example_notifications_fragment1_test.go), compiled by `go test`.
 
 `UUID` maps to wire `notification_uuid`; `ID` retains the separate raw database
 ID. This resource has no name, update or delete endpoint. Name references and

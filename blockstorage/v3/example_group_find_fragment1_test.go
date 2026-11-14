@@ -9,7 +9,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/request"
 )
 
-func Example_groupFindFragment1() {
+func Example_groupsFindRecord2() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

@@ -20,7 +20,7 @@ func printJSONRecords1(value any) {
 	fmt.Printf("%s\n", encoded)
 }
 
-func Example_records1() {
+func Example_groupsFindRecord() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

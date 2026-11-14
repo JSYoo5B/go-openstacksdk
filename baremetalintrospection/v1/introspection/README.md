@@ -4,9 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-See `Example_introspectionFragment1` in [example_introspection_fragment1_test.go](example_introspection_fragment1_test.go), compiled by `go test`.
+See `Example_introspectionWaitUntilFinished` in [example_introspection_fragment1_test.go](example_introspection_fragment1_test.go), compiled by `go test`.
 
-See `Example_introspectionFragment2` in [example_introspection_fragment2_test.go](example_introspection_fragment2_test.go), compiled by `go test`.
+See `Example_introspectionStartIntrospection` in [example_introspection_fragment2_test.go](example_introspection_fragment2_test.go), compiled by `go test`.
 
 ## References
 

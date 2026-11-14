@@ -33,9 +33,9 @@ if __name__ == "__main__":
     main()
 ```
 
-See `Example_records1` in [example_records1_test.go](example_records1_test.go), compiled by `go test`.
+See `Example_groupsFindRecord` in [example_records1_test.go](example_records1_test.go), compiled by `go test`.
 
-See `Example_recordsFragment1` in [example_records_fragment1_test.go](example_records_fragment1_test.go), compiled by `go test`.
+See `Example_groupsProxyListRecords` in [example_records_fragment1_test.go](example_records_fragment1_test.go), compiled by `go test`.
 
 ## References
 

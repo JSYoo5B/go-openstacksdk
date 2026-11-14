@@ -11,18 +11,18 @@ cluster = conn.clustering.wait_for_status(
 )
 ```
 
-See `Example_waitingFragment1` in [example_waiting_fragment1_test.go](../example_waiting_fragment1_test.go), compiled by `go test`.
+See `Example_clustersWaitForStatus` in [example_waiting_fragment1_test.go](../example_waiting_fragment1_test.go), compiled by `go test`.
 
-See `Example_waitingFragment2` in [example_waiting_fragment2_test.go](../example_waiting_fragment2_test.go), compiled by `go test`.
+See `Example_profilesWaitForStatus` in [example_waiting_fragment2_test.go](../example_waiting_fragment2_test.go), compiled by `go test`.
 
 ```python
 conn.clustering.delete_node(node)
 node = conn.clustering.wait_for_delete(node)
 ```
 
-See `Example_waitingFragment3` in [example_waiting_fragment3_test.go](../example_waiting_fragment3_test.go), compiled by `go test`.
+See `Example_nodesDelete` in [example_waiting_fragment3_test.go](../example_waiting_fragment3_test.go), compiled by `go test`.
 
-See `Example_waitingFragment4` in [example_waiting_fragment4_test.go](../example_waiting_fragment4_test.go), compiled by `go test`.
+See `Example_nodesWaitForDelete` in [example_waiting_fragment4_test.go](../example_waiting_fragment4_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,7 +4,7 @@ Python `conn.instance_ha.segments()`, `get_segment`, `create_segment`,
 `update_segment` and `delete_segment` correspond to this API's `List`, `Get`,
 `Create`, `Update` and `Delete`. `conn.ha` is Python's alias for `instance_ha`.
 
-See `Example_segmentsFragment1` in [example_segments_fragment1_test.go](example_segments_fragment1_test.go), compiled by `go test`.
+See `Example_create` in [example_segments_fragment1_test.go](example_segments_fragment1_test.go), compiled by `go test`.
 
 The route identity is `UUID`. `ID` preserves the separate raw database ID;
 integer/string forms, large integers, null and omission remain available.

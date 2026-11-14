@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_waitingFragment3() {
+func Example_segmentsDelete() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

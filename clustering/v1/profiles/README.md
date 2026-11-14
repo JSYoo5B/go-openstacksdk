@@ -4,11 +4,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-See `Example_profilesFragment1` in [example_profiles_fragment1_test.go](example_profiles_fragment1_test.go), compiled by `go test`.
+See `Example_profilesCreate` in [example_profiles_fragment1_test.go](example_profiles_fragment1_test.go), compiled by `go test`.
 
-See `Example_profilesFragment2` in [example_profiles_fragment2_test.go](example_profiles_fragment2_test.go), compiled by `go test`.
+See `Example_profilesValidate` in [example_profiles_fragment2_test.go](example_profiles_fragment2_test.go), compiled by `go test`.
 
-See `Example_profilesFragment3` in [example_profiles_fragment3_test.go](example_profiles_fragment3_test.go), compiled by `go test`.
+See `Example_profilesUpdate` in [example_profiles_fragment3_test.go](example_profiles_fragment3_test.go), compiled by `go test`.
 
 ```python
 profile = conn.clustering.get_profile("PROFILE_ID")
@@ -17,11 +17,11 @@ profile.metadata = {"role": "worker"}
 profile = conn.clustering.update_profile(profile)
 ```
 
-See `Example_profilesFragment4` in [example_profiles_fragment4_test.go](example_profiles_fragment4_test.go), compiled by `go test`.
+See `Example_profilesLoad` in [example_profiles_fragment4_test.go](example_profiles_fragment4_test.go), compiled by `go test`.
 
-See `Example_profilesFragment5` in [example_profiles_fragment5_test.go](example_profiles_fragment5_test.go), compiled by `go test`.
+See `Example_profilesList` in [example_profiles_fragment5_test.go](example_profiles_fragment5_test.go), compiled by `go test`.
 
-See `Example_profilesFragment6` in [example_profiles_fragment6_test.go](example_profiles_fragment6_test.go), compiled by `go test`.
+See `Example_all` in [example_profiles_fragment6_test.go](example_profiles_fragment6_test.go), compiled by `go test`.
 
 See `example_profiles1_test.go` in [example_profiles1_test.go](example_profiles1_test.go), compiled by `go test`.
 

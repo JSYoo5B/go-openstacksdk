@@ -11,7 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_waitingFragment2() {
+func Example_profilesWaitForStatus() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

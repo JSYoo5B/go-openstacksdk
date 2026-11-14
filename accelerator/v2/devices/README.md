@@ -2,7 +2,7 @@
 
 `devices.API` lists and reads Cyborg physical accelerator devices. The SDK owns this model because pinned Gophercloud has no accelerator service.
 
-See `Example_devicesFragment1` in [example_devices_fragment1_test.go](example_devices_fragment1_test.go), compiled by `go test`.
+See `Example_devicesAll` in [example_devices_fragment1_test.go](example_devices_fragment1_test.go), compiled by `go test`.
 
 Behavior:
 

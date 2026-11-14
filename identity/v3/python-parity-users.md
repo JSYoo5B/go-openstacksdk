@@ -8,7 +8,7 @@ See `Example_parityUsersFragment1` in [example_parity_users_fragment1_test.go](e
 
 See `Example_parityUsersFragment2` in [example_parity_users_fragment2_test.go](example_parity_users_fragment2_test.go), compiled by `go test`.
 
-See `Example_parityUsersFragment3` in [example_parity_users_fragment3_test.go](example_parity_users_fragment3_test.go), compiled by `go test`.
+See `Example_assign` in [example_parity_users_fragment3_test.go](example_parity_users_fragment3_test.go), compiled by `go test`.
 
 ## References
 

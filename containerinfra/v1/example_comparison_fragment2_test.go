@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/clustertemplates"
 )
 
-func Example_comparisonFragment2() {
+func Example_deleteCOECluster() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

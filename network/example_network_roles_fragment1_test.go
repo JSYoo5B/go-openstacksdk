@@ -8,7 +8,7 @@ import (
 	svc "github.com/JSYoo5B/go-openstacksdk/network"
 )
 
-func Example_networkRolesFragment1() {
+func Example_rolesDiscover() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

@@ -39,7 +39,7 @@ func runCloudServerConsole1(ctx context.Context, cloud, server, suppliedServer, 
 	}{result.Value, result.HasOutput, result.Unsupported, result.Action.StatusCode})
 }
 
-func Example_cloudServerConsole1() {
+func Example_string() {
 	cloud := flag.String("cloud", "devstack", "clouds.yaml cloud")
 	server := flag.String("server", "vm", "literal name or ID; ignored when server-json is supplied")
 	suppliedServer := flag.String("server-json", "", "owned server dictionary, for example {\"id\":\"s1\"}")

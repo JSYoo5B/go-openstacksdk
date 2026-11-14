@@ -29,7 +29,7 @@ func printResourceFindCoreResources1(kind string, value *resource.RawResource) {
 	fmt.Println(string(body))
 }
 
-func Example_findCoreResources1() {
+func Example_networksFindRecord() {
 	cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
 	networkName := flag.String("network", "app-net", "network ID or exact name")
 	portName := flag.String("port", "", "optional port ID or exact name")

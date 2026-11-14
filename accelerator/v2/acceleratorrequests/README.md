@@ -4,7 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-See `Example_acceleratorrequestsFragment1` in [example_acceleratorrequests_fragment1_test.go](example_acceleratorrequests_fragment1_test.go), compiled by `go test`.
+See `Example_acceleratorRequestsCreate` in [example_acceleratorrequests_fragment1_test.go](example_acceleratorrequests_fragment1_test.go), compiled by `go test`.
 
 ## References
 

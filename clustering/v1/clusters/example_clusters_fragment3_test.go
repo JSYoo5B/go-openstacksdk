@@ -12,7 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_clustersFragment3() {
+func Example_list() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

@@ -9,7 +9,7 @@ import (
 	svc "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1"
 )
 
-func Example_comparisonFragment1() {
+func Example_listMagnumServices() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

@@ -10,7 +10,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_imageFragment1() {
+func Example_imagesFind() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

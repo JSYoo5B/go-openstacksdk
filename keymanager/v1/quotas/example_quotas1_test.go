@@ -12,7 +12,7 @@ import (
 	sdk "github.com/JSYoo5B/go-openstacksdk"
 )
 
-func Example_quotas1() {
+func Example_string() {
 	cloud := flag.String("cloud", "dev", "clouds.yaml entry")
 	timeout := flag.Duration("timeout", time.Minute, "authentication and quota query timeout")
 	flag.Parse()

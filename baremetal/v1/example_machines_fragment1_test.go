@@ -8,7 +8,7 @@ import (
 	svc "github.com/JSYoo5B/go-openstacksdk/baremetal/v1"
 )
 
-func Example_machinesFragment1() {
+func Example_getMachine() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

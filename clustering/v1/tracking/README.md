@@ -11,11 +11,11 @@ profile.metadata = {"team": "platform"}
 profile = conn.clustering.update_profile(profile)
 ```
 
-See `Example_trackingFragment1` in [example_tracking_fragment1_test.go](../example_tracking_fragment1_test.go), compiled by `go test`.
+See `Example_policiesLoad` in [example_tracking_fragment1_test.go](../example_tracking_fragment1_test.go), compiled by `go test`.
 
-See `Example_trackingFragment1` in [example_tracking_fragment1_test.go](../example_tracking_fragment1_test.go), compiled by `go test`.
+See `Example_policiesLoad` in [example_tracking_fragment1_test.go](../example_tracking_fragment1_test.go), compiled by `go test`.
 
-See `Example_trackingFragment3` in [example_tracking_fragment3_test.go](../example_tracking_fragment3_test.go), compiled by `go test`.
+See `Example_profilesLoad` in [example_tracking_fragment3_test.go](../example_tracking_fragment3_test.go), compiled by `go test`.
 
 ## References
 

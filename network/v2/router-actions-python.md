@@ -31,7 +31,7 @@ go run . -cloud dev -router ROUTER_ID -action add-gateways \
   -body '{"router":{"external_gateways":[{"network_id":"EXTERNAL_NETWORK_ID"}]}}'
 ```
 
-See `Example_routerActions1` in [example_router_actions1_test.go](example_router_actions1_test.go), compiled by `go test`.
+See `Example_addExtraRoutesRecord2` in [example_router_actions1_test.go](example_router_actions1_test.go), compiled by `go test`.
 
 See `Example_addExtraRoutesRecord` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 

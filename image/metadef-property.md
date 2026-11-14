@@ -12,7 +12,7 @@ value = conn.image.get_metadef_property("hw_cpu_policy", "OS::Compute::Libvirt")
 print(value.to_dict())
 ```
 
-See `Example_metadefPropertyFragment1` in [example_metadef_property_fragment1_test.go](example_metadef_property_fragment1_test.go), compiled by `go test`.
+See `Example_get` in [example_metadef_property_fragment1_test.go](example_metadef_property_fragment1_test.go), compiled by `go test`.
 
 ```python
 # TypeError before HTTP: Proxy._get already binds resource_type.
@@ -23,7 +23,7 @@ value = conn.image.get_metadef_property(
 
 See `Example_metadefPropertyResourceType` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-See `Example_metadefProperty1` in [example_metadef_property1_test.go](example_metadef_property1_test.go), compiled by `go test`.
+See `Example_string2` in [example_metadef_property1_test.go](example_metadef_property1_test.go), compiled by `go test`.
 
 ## References
 

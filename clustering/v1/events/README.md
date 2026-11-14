@@ -11,7 +11,7 @@ events = conn.clustering.events(obj_id=node_id, limit=20)
 
 See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-See `Example_eventsFragment2` in [example_events_fragment2_test.go](example_events_fragment2_test.go), compiled by `go test`.
+See `Example_all` in [example_events_fragment2_test.go](example_events_fragment2_test.go), compiled by `go test`.
 
 See `example_events1_test.go` in [example_events1_test.go](example_events1_test.go), compiled by `go test`.
 

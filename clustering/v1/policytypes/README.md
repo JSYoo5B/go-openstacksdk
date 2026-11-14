@@ -4,9 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-See `Example_policytypesFragment1` in [example_policytypes_fragment1_test.go](example_policytypes_fragment1_test.go), compiled by `go test`.
+See `Example_get` in [example_policytypes_fragment1_test.go](example_policytypes_fragment1_test.go), compiled by `go test`.
 
-See `Example_policytypesFragment2` in [example_policytypes_fragment2_test.go](example_policytypes_fragment2_test.go), compiled by `go test`.
+See `Example_all` in [example_policytypes_fragment2_test.go](example_policytypes_fragment2_test.go), compiled by `go test`.
 
 See `example_policytypes1_test.go` in [example_policytypes1_test.go](example_policytypes1_test.go), compiled by `go test`.
 

@@ -9,7 +9,7 @@ for attr in conn.clustering.collect_cluster_attrs("CLUSTER_ID", "$.status"):
     print(attr.node_id, attr.attr_value)
 ```
 
-See `Example_clusterattributesFragment1` in [example_clusterattributes_fragment1_test.go](example_clusterattributes_fragment1_test.go), compiled by `go test`.
+See `Example_clusterAttributesInCluster` in [example_clusterattributes_fragment1_test.go](example_clusterattributes_fragment1_test.go), compiled by `go test`.
 
 ## References
 

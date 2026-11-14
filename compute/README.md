@@ -10,7 +10,7 @@ for server in conn.compute.servers(status="ACTIVE"):
     print(server.id, server.name)
 ```
 
-See `Example_computeFragment1` in [example_compute_fragment1_test.go](example_compute_fragment1_test.go), compiled by `go test`.
+See `Example_serversFind` in [example_compute_fragment1_test.go](example_compute_fragment1_test.go), compiled by `go test`.
 
 See `ExampleServers_Create` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 

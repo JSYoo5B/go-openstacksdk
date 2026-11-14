@@ -36,6 +36,6 @@ Provision-state helpers (`node_set_provision_state`, `activate_node`, `deactivat
 
 ## Example
 
-See `Example_machinesFragment1` in [example_machines_fragment1_test.go](example_machines_fragment1_test.go), compiled by `go test`.
+See `Example_getMachine` in [example_machines_fragment1_test.go](example_machines_fragment1_test.go), compiled by `go test`.
 
 Tests: `api/py_cloud_ironic_machines_test.go`, `api/py_cloud_ironic_vifs_test.go`.

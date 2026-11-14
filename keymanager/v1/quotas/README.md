@@ -9,7 +9,7 @@ quota = conn.key_manager.get_quota()
 print(quota.secrets)
 ```
 
-See `Example_quotas1` in [example_quotas1_test.go](example_quotas1_test.go), compiled by `go test`.
+See `Example_string` in [example_quotas1_test.go](example_quotas1_test.go), compiled by `go test`.
 
 See `example_quotas2_test.go` in [example_quotas2_test.go](example_quotas2_test.go), compiled by `go test`.
 

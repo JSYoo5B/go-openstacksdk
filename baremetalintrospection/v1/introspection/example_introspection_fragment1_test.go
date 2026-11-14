@@ -11,7 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_introspectionFragment1() {
+func Example_introspectionWaitUntilFinished() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

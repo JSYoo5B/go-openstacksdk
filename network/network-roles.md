@@ -30,7 +30,7 @@ print(conn.get_default_network())
 
 See `Example_networkRoles1` in [example_network_roles1_test.go](example_network_roles1_test.go), compiled by `go test`.
 
-See `Example_networkRolesFragment1` in [example_network_roles_fragment1_test.go](example_network_roles_fragment1_test.go), compiled by `go test`.
+See `Example_rolesDiscover` in [example_network_roles_fragment1_test.go](example_network_roles_fragment1_test.go), compiled by `go test`.
 
 ```python
 import openstack

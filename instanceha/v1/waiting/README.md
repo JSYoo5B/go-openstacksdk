@@ -11,11 +11,11 @@ notification = conn.instance_ha.wait_for_status(
 )
 ```
 
-See `Example_waitingFragment1` in [example_waiting_fragment1_test.go](../example_waiting_fragment1_test.go), compiled by `go test`.
+See `Example_notificationsWaitForStatus` in [example_waiting_fragment1_test.go](../example_waiting_fragment1_test.go), compiled by `go test`.
 
-See `Example_waitingFragment2` in [example_waiting_fragment2_test.go](../example_waiting_fragment2_test.go), compiled by `go test`.
+See `Example_vMovesInNotification` in [example_waiting_fragment2_test.go](../example_waiting_fragment2_test.go), compiled by `go test`.
 
-See `Example_waitingFragment3` in [example_waiting_fragment3_test.go](../example_waiting_fragment3_test.go), compiled by `go test`.
+See `Example_segmentsDelete` in [example_waiting_fragment3_test.go](../example_waiting_fragment3_test.go), compiled by `go test`.
 
 ## References
 

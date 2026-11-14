@@ -10,7 +10,7 @@ for network in conn.network.networks(is_router_external=True):
     print(network.id)
 ```
 
-See `Example_networkFragment1` in [example_network_fragment1_test.go](example_network_fragment1_test.go), compiled by `go test`.
+See `Example_networksFind` in [example_network_fragment1_test.go](example_network_fragment1_test.go), compiled by `go test`.
 
 See `Example_waitAndDelete` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 

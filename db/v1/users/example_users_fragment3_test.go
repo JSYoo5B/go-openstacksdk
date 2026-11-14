@@ -11,7 +11,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/resource"
 )
 
-func Example_usersFragment3() {
+func Example_usersInInstance() {
 	ctx := context.Background()
 	conn, err := openstack.Connect(ctx)
 	if err != nil {

@@ -24,7 +24,7 @@ func (value *preferencesImageRecordDownload1) Set(store string) error {
 	return nil
 }
 
-func Example_imageRecordDownload1() {
+func Example_string() {
 	cloud := flag.String("cloud", "dev", "clouds.yaml cloud name")
 	id := flag.String("id", "", "required literal image ID")
 	mode := flag.String("mode", "file", "file, writer, buffer or stream")

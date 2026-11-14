@@ -13,7 +13,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-See `Example_driversFragment1` in [example_drivers_fragment1_test.go](example_drivers_fragment1_test.go), compiled by `go test`.
+See `Example_driversFind` in [example_drivers_fragment1_test.go](example_drivers_fragment1_test.go), compiled by `go test`.
 
 ## References
 

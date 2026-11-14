@@ -15,9 +15,9 @@ See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go
 action = conn.clustering.update_action("ACTION_ID", status="CANCELLED")
 ```
 
-See `Example_actionsFragment2` in [example_actions_fragment2_test.go](example_actions_fragment2_test.go), compiled by `go test`.
+See `Example_actionsCancel` in [example_actions_fragment2_test.go](example_actions_fragment2_test.go), compiled by `go test`.
 
-See `Example_actionsFragment3` in [example_actions_fragment3_test.go](example_actions_fragment3_test.go), compiled by `go test`.
+See `Example_all` in [example_actions_fragment3_test.go](example_actions_fragment3_test.go), compiled by `go test`.
 
 See `example_actions1_test.go` in [example_actions1_test.go](example_actions1_test.go), compiled by `go test`.
 

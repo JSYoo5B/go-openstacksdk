@@ -10,11 +10,11 @@ for binding in conn.clustering.cluster_policies("CLUSTER_NAME_OR_ID", is_enabled
     print(binding.id, binding.policy_id)
 ```
 
-See `Example_clusterpoliciesFragment1` in [example_clusterpolicies_fragment1_test.go](example_clusterpolicies_fragment1_test.go), compiled by `go test`.
+See `Example_scopeGet` in [example_scope_test.go](example_scope_test.go), compiled by `go test`.
 
 See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-See `Example_clusterpoliciesFragment4` in [example_clusterpolicies_fragment4_test.go](example_clusterpolicies_fragment4_test.go), compiled by `go test`.
+See `Example_inCluster` in [example_clusterpolicies_fragment4_test.go](example_clusterpolicies_fragment4_test.go), compiled by `go test`.
 
 See `example_clusterpolicies1_test.go` in [example_clusterpolicies1_test.go](example_clusterpolicies1_test.go), compiled by `go test`.
 

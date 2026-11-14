@@ -12,7 +12,7 @@ import (
 	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/layer3/routers"
 )
 
-func Example_routerActions1() {
+func Example_addExtraRoutesRecord2() {
 	cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
 	id := flag.String("router", "", "literal router ID")
 	action := flag.String("action", "", "add-routes, remove-routes, add-gateways, update-gateways, remove-gateways")

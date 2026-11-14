@@ -15,7 +15,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-See `Example_usersFragment3` in [example_users_fragment3_test.go](example_users_fragment3_test.go), compiled by `go test`.
+See `Example_usersInInstance` in [example_users_fragment3_test.go](example_users_fragment3_test.go), compiled by `go test`.
 
 See `example_users1_test.go` in [example_users1_test.go](example_users1_test.go), compiled by `go test`.
 

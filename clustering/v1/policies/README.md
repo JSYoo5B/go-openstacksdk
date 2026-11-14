@@ -4,11 +4,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-See `Example_policiesFragment1` in [example_policies_fragment1_test.go](example_policies_fragment1_test.go), compiled by `go test`.
+See `Example_policiesCreate` in [example_policies_fragment1_test.go](example_policies_fragment1_test.go), compiled by `go test`.
 
-See `Example_policiesFragment2` in [example_policies_fragment2_test.go](example_policies_fragment2_test.go), compiled by `go test`.
+See `Example_policiesValidate` in [example_policies_fragment2_test.go](example_policies_fragment2_test.go), compiled by `go test`.
 
-See `Example_policiesFragment3` in [example_policies_fragment3_test.go](example_policies_fragment3_test.go), compiled by `go test`.
+See `Example_policiesUpdate` in [example_policies_fragment3_test.go](example_policies_fragment3_test.go), compiled by `go test`.
 
 ```python
 policy = conn.clustering.get_policy("POLICY_ID")
@@ -16,11 +16,11 @@ policy.name = "scale_out_workers"
 policy = conn.clustering.update_policy(policy)
 ```
 
-See `Example_policiesFragment4` in [example_policies_fragment4_test.go](example_policies_fragment4_test.go), compiled by `go test`.
+See `Example_policiesLoad` in [example_policies_fragment4_test.go](example_policies_fragment4_test.go), compiled by `go test`.
 
-See `Example_policiesFragment5` in [example_policies_fragment5_test.go](example_policies_fragment5_test.go), compiled by `go test`.
+See `Example_policiesList` in [example_policies_fragment5_test.go](example_policies_fragment5_test.go), compiled by `go test`.
 
-See `Example_policiesFragment6` in [example_policies_fragment6_test.go](example_policies_fragment6_test.go), compiled by `go test`.
+See `Example_all` in [example_policies_fragment6_test.go](example_policies_fragment6_test.go), compiled by `go test`.
 
 See `example_policies1_test.go` in [example_policies1_test.go](example_policies1_test.go), compiled by `go test`.
 

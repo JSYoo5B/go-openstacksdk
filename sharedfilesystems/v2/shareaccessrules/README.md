@@ -10,7 +10,7 @@ The pinned native `List` appends the raw share ID after `?share_id=`, so an ID s
 
 ## Usage examples
 
-See `Example_shareaccessrules1` in [example_shareaccessrules1_test.go](example_shareaccessrules1_test.go), compiled by `go test`.
+See `Example_shareAccessRulesInShare` in [example_shareaccessrules1_test.go](example_shareaccessrules1_test.go), compiled by `go test`.
 
 See `example_shareaccessrules2_test.go` in [example_shareaccessrules2_test.go](example_shareaccessrules2_test.go), compiled by `go test`.
 

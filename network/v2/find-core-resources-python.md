@@ -37,7 +37,7 @@ if __name__ == "__main__":
     main()
 ```
 
-See `Example_findCoreResources1` in [example_find_core_resources1_test.go](example_find_core_resources1_test.go), compiled by `go test`.
+See `Example_networksFindRecord` in [example_find_core_resources1_test.go](example_find_core_resources1_test.go), compiled by `go test`.
 
 ```python
 port = conn.network.find_port(
