@@ -4,25 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `Example_introspectionFragment1` in [example_introspection_fragment1_test.go](example_introspection_fragment1_test.go), compiled by `go test`.
 
-```go
-service, err := conn.BareMetalIntrospectionV1(ctx)
-if err != nil { return err }
-value, err := service.Introspection.WaitUntilFinished(ctx, resource.ID("node-uuid"),
-    resource.WithTimeout(10*time.Minute),
-    resource.WithPollInterval(3*time.Second))
-if err != nil { return err }
-fmt.Println(value.UUID, value.Finished, value.State)
-```
-
-```go
-manageBoot := false
-err = service.Introspection.StartIntrospection(ctx, "node-uuid",
-    introspection.StartOpts{ManageBoot: &manageBoot},
-    request.Query("vendor", "a&b"))
-if err != nil { return err }
-```
+See `Example_introspectionFragment2` in [example_introspection_fragment2_test.go](example_introspection_fragment2_test.go), compiled by `go test`.
 
 ## References
 

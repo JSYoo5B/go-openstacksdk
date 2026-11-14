@@ -2,11 +2,7 @@
 
 `devices.API` lists and reads Cyborg physical accelerator devices. The SDK owns this model because pinned Gophercloud has no accelerator service.
 
-```go
-accel, err := conn.Accelerator(ctx)
-if err != nil { return err }
-values, err := accel.Devices.All(ctx, resource.WithQuery("hostname", "compute-1"))
-```
+See `Example_devicesFragment1` in [example_devices_fragment1_test.go](example_devices_fragment1_test.go), compiled by `go test`.
 
 Behavior:
 

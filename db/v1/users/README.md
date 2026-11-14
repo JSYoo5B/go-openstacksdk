@@ -36,51 +36,9 @@ if err := scope.CreateBatch(ctx, users.BatchCreateOpts{
 }); err != nil { return err }
 ```
 
-```go
-hostScope, err := service.Users.InInstance(ctx, resource.ID("instance-id"),
-    users.WithHost("192.0.2.10"))
-if err != nil { return err }
-id, err := hostScope.ResolveID(ctx, resource.Name("alice@office"))
-if err != nil { return err }
-user, err := hostScope.Get(ctx, id)
-if err != nil { return err }
-fmt.Println(user.Name, user.Host)
-if err := hostScope.Delete(ctx, resource.ID(id)); err != nil { return err }
-if err := hostScope.WaitDeleted(ctx, resource.ID(id)); err != nil { return err }
-```
+See `Example_usersFragment3` in [example_users_fragment3_test.go](example_users_fragment3_test.go), compiled by `go test`.
 
-```go
-package examples
-
-import (
-	"context"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/db/v1/users"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func ListUsers(ctx context.Context, conn *sdk.Connection, instanceID, host string) error {
-	service, err := conn.DatabaseV1(ctx)
-	if err != nil {
-		return err
-	}
-	scope, err := service.Users.InInstance(ctx,
-		resource.ID(instanceID), users.WithHost(host))
-	if err != nil {
-		return err
-	}
-	for user, err := range scope.List(ctx,
-		resource.WithMaxItems(20), resource.WithPaginated(false)) {
-		if err != nil {
-			return err
-		}
-		fmt.Println(user.Name, user.Host, user.Databases)
-	}
-	return nil
-}
-```
+See `example_users1_test.go` in [example_users1_test.go](example_users1_test.go), compiled by `go test`.
 
 ## References
 

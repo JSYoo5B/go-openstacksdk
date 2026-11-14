@@ -40,29 +40,13 @@ This page records how the pinned openstacksdk `container_infrastructure_manageme
 
 `Service.ListMagnumServices(ctx)` issues one `GET /mservices` and yields `MagnumService` records (`ID`, `Binary`, `Host`, `State`, `ReportCount`, `DisabledReason`, `CreatedAt`, `UpdatedAt`). Nullable fields are pointers so null and empty stay distinct. Only 200 is accepted, no query options exist, a continuation link is not followed and unknown response fields are not retained. The route is not part of Gophercloud v2.15.0, so this model is SDK-owned.
 
-```go
-service, err := conn.ContainerInfraV1(ctx)
-if err != nil { return err }
-for item, err := range service.ListMagnumServices(ctx) {
-    if err != nil { return err }
-    fmt.Println(item.Binary, item.Host, item.State)
-}
-```
+See `Example_comparisonFragment1` in [example_comparison_fragment1_test.go](example_comparison_fragment1_test.go), compiled by `go test`.
 
 ## Cloud helpers
 
 The cloud helpers resolve one string and then act on the selected UUID:
 
-```go
-deleted, err := service.DeleteCOECluster(ctx, "my-cluster") // false, nil when nothing matches
-id, err := service.UpdateCOECluster(ctx, "my-cluster", []clusters.UpdateOpts{
-    {Op: clusters.ReplaceOp, Path: "/node_count", Value: 3},
-})
-deleted, err = service.DeleteClusterTemplate(ctx, "my-template")
-template, err := service.UpdateClusterTemplate(ctx, "my-template", []clustertemplates.UpdateOpts{
-    {Op: clustertemplates.ReplaceOp, Path: "/public", Value: false},
-})
-```
+See `Example_comparisonFragment2` in [example_comparison_fragment2_test.go](example_comparison_fragment2_test.go), compiled by `go test`.
 
 - Cluster helpers list every cluster and select by UUID or name, including fnmatch-style globs. More than one match fails with `resource.ErrAmbiguous` and nothing is sent. A missing cluster is `false, nil` for delete and `resource.ErrNotFound` for update.
 - Template helpers try a GET by ID first, fall back to an exact ID or name match when that GET returns 400, 403 or 404 (other errors are returned), and do not expand globs.

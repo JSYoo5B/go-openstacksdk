@@ -2,11 +2,7 @@
 
 `deployables.API` lists and reads Cyborg deployables (logical acceleration units). The SDK owns this model because pinned Gophercloud has no accelerator service.
 
-```go
-accel, err := conn.Accelerator(ctx)
-if err != nil { return err }
-values, err := accel.Deployables.All(ctx, resource.WithQuery("name", "compute-1_FPGA"))
-```
+See `Example_deployablesFragment1` in [example_deployables_fragment1_test.go](example_deployables_fragment1_test.go), compiled by `go test`.
 
 Behavior:
 

@@ -36,13 +36,6 @@ Provision-state helpers (`node_set_provision_state`, `activate_node`, `deactivat
 
 ## Example
 
-```go
-service, err := conn.BareMetalV1(ctx)
-if err != nil { return err }
-record, err := service.GetMachine(ctx, "node-a")
-if err != nil || record == nil { return err }
-if err := service.SetMachinePowerOn(ctx, "node-a"); err != nil { return err }
-if err := conn.AttachPortToMachine(ctx, "node-a", "port-name"); err != nil { return err }
-```
+See `Example_machinesFragment1` in [example_machines_fragment1_test.go](example_machines_fragment1_test.go), compiled by `go test`.
 
 Tests: `api/py_cloud_ironic_machines_test.go`, `api/py_cloud_ironic_vifs_test.go`.

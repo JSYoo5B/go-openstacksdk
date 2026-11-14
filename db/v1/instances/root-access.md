@@ -4,25 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-	"context"
-
-	"github.com/JSYoo5B/go-openstacksdk"
-)
-
-func rootEnabled(ctx context.Context, conn *openstack.Connection, instanceID string) (bool, error) {
-	service, err := conn.DatabaseV1(ctx)
-	if err != nil {
-		return false, err
-	}
-	return service.Instances.IsRootEnabled(ctx, instanceID)
-}
-```
+See `example_root_access_test.go` in [example_root_access_test.go](example_root_access_test.go), compiled by `go test`.
 
 ```python
 from openstack.database.v1.instance import Instance

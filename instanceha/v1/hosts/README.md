@@ -3,19 +3,7 @@
 Python `conn.instance_ha.hosts(segment)`, `create_host`, `get_host`,
 `update_host` and `delete_host` correspond to a fixed Go Segment scope.
 
-```go
-scope, err := hosts.New(client).InSegment(ctx, resource.Name("compute-a"))
-if err != nil { return err }
-host, err := scope.Create(ctx, hosts.CreateOpts{
-    Name: "compute-01", Type: "COMPUTE", ControlAttributes: "SSH",
-})
-if err != nil { return err }
-maintenance := true
-host, err = scope.Update(ctx, resource.ID(host.UUID),
-    hosts.UpdateOpts{OnMaintenance: &maintenance})
-if err != nil { return err }
-err = scope.Delete(ctx, resource.ID(host.UUID))
-```
+See `Example_hostsFragment1` in [example_hosts_fragment1_test.go](example_hosts_fragment1_test.go), compiled by `go test`.
 
 An explicit Segment UUID binds without a GET; names resolve exactly once, with
 duplicate detection. The scope fixes the Segment UUID for every host request.

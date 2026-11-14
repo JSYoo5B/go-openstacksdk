@@ -13,15 +13,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-service, err := conn.BareMetalV1(ctx)
-if err != nil { return err }
-driver, err := service.Drivers.Find(ctx, resource.ID("redfish"))
-if err != nil { return err }
-fmt.Println(driver.Name, driver.Hosts)
-```
+See `Example_driversFragment1` in [example_drivers_fragment1_test.go](example_drivers_fragment1_test.go), compiled by `go test`.
 
 ## References
 

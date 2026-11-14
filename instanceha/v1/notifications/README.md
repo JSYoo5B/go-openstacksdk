@@ -3,18 +3,7 @@
 Python `conn.instance_ha.notifications`, `get_notification` and
 `create_notification` correspond to Go `List`/typed `All`, `Get` and `Create`.
 
-```go
-api := notifications.New(client)
-notification, err := api.Create(ctx, notifications.CreateOpts{
-    Type: "COMPUTE_HOST", Hostname: "compute-01",
-    GeneratedTime: time.Now().UTC().Format(time.RFC3339),
-}, notifications.WithCreatePayload(map[string]any{
-    "event": "STOPPED", "host_status": "UNKNOWN", "cluster_status": "OFFLINE",
-}))
-if err != nil { return err }
-notification, err = api.Wait(ctx, resource.ID(notification.UUID), "finished",
-    resource.WithUnlimitedWait(), resource.WithFailureStates("error", "failed"))
-```
+See `Example_notificationsFragment1` in [example_notifications_fragment1_test.go](example_notifications_fragment1_test.go), compiled by `go test`.
 
 `UUID` maps to wire `notification_uuid`; `ID` retains the separate raw database
 ID. This resource has no name, update or delete endpoint. Name references and

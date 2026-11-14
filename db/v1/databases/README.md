@@ -15,20 +15,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
 
-```go
-scope, err := service.Databases.InInstance(ctx, resource.Name("db-server"))
-if err != nil { return err }
-
-database, err := scope.Find(ctx, resource.Name("app"))
-if err != nil { return err }
-fmt.Println(database.Name, database.CharSet, database.Collate)
-
-if err := scope.Create(ctx, databases.CreateOpts{
-    Name: "logs",
-    CharSet: "utf8mb4",
-    Collate: "utf8mb4_unicode_ci",
-}); err != nil { return err }
-```
+See `Example_databasesFragment1` in [example_databases_fragment1_test.go](example_databases_fragment1_test.go), compiled by `go test`.
 
 ```go
 if err := scope.CreateBatch(ctx, databases.BatchCreateOpts{
@@ -42,37 +29,7 @@ if err := scope.Delete(ctx, resource.ID("app")); err != nil { return err }
 if err := scope.WaitDeleted(ctx, resource.ID("app")); err != nil { return err }
 ```
 
-```go
-package examples
-
-import (
-	"context"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func ListDatabases(ctx context.Context, conn *sdk.Connection, instanceID string) error {
-	service, err := conn.DatabaseV1(ctx)
-	if err != nil {
-		return err
-	}
-	scope, err := service.Databases.InInstance(ctx, resource.ID(instanceID))
-	if err != nil {
-		return err
-	}
-	databases, err := scope.All(ctx,
-		resource.WithMaxItems(20), resource.WithPaginated(false))
-	if err != nil {
-		return err
-	}
-	for _, database := range databases {
-		fmt.Println(database.Name, database.CharSet, database.Collate)
-	}
-	return nil
-}
-```
+See `example_databases1_test.go` in [example_databases1_test.go](example_databases1_test.go), compiled by `go test`.
 
 ## References
 
