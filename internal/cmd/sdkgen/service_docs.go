@@ -51,7 +51,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString(" Responses keep original fields, HTTP headers and status codes.")
 	}
 	out.WriteString("\n\n")
-	if key == "compute/v2" || key == "blockstorage/v2" || key == "blockstorage/v3" || key == "image/v2" {
+	if key == "compute/v2" || key == "blockstorage/v2" || key == "image/v2" {
 		out.WriteString("Selected stateful resources provide `WaitForState(ctx, ref, target, options...)` and `WaitForDelete(ctx, ref, options...)`. State waits use the service's exact ERROR/error failure defaults and no SDK timeout; deletion observation defaults to 120 seconds, with a 2-second interval. Compute Server `WaitForServer` defaults to ACTIVE and 120 seconds; Cinder Volume/Snapshot `WaitForAvailable` defaults to available. Caller `resource.With...` options apply last. Common `WaitFor/WaitForDeletion` retain their 5-minute default; native `WaitForStatus` has a separate contract. See [wait policies](../../docs/service-waits.md).\n\n")
 	}
 	if key == "image/v2" {
@@ -80,7 +80,6 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	}
 	identityFindAccess := map[string]string{
 		"compute/v2":      "`Servers/Flavors.FindIdentity(ctx, identity, options...)`",
-		"blockstorage/v3": "`Volumes.FindIdentity(ctx, identity, options...)`",
 		"network/v2":      "`Networks/Subnets/Ports/Routers/SecurityGroups/SubnetPools/Trunks/QoSPolicies/SecurityAddressGroups.FindIdentity(ctx, identity, options...)`",
 		"image/v2":        "`Images.FindIdentity(ctx, identity, options...)`",
 		"dns/v2":          "`FindIdentity` on the scope returned by `RecordSets.InZone(ctx, parent)`",
@@ -89,7 +88,7 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 	if access, ok := identityFindAccess[key]; ok {
 		fmt.Fprintf(&out, "%s resolves name/ID strings automatically, with list fallback after GET400/403/404, exact ID/name and duplicate checks, and a default missing result of `nil, nil`. Select strict handling with `resource.WithIdentityFindIgnoreMissing(false)`. Caller `WithIdentityFindQuery` filters survive GET and fallback listing; automatic name hints apply only to listing. Concrete options control query/fallback. See [identity finding](../../docs/finding-identities.md) for binding, fixed parents, domain filters and path policy.\n\n", access)
 	}
-	if key == "compute/v2" || key == "blockstorage/v3" {
+	if key == "compute/v2" {
 		out.WriteString("Server/volume identity finding can use summary fallback with `resource.WithIdentityFindDetails(false)` or cross-project listing with `resource.WithIdentityFindAllProjects(true)`. Defaults are details=true/all_projects=false, without changing GET. Explicit AllProjects conflicts with raw all_tenants query before HTTP.\n\n")
 	}
 	if key == "compute/v2" {
@@ -165,31 +164,13 @@ func (g *generator) writeServiceREADME(key string, spec serviceSpec, paths []str
 		out.WriteString("[Native administrative flavor and server calls](native-admin-flavors-servers.md) covers flavor create/update/access/extra specs and server administrator actions.\n\n")
 		out.WriteString("[Native Nova infrastructure administration](native-admin-infra.md) describes paths, fixed statuses, and microversion-specific decoding for hypervisors, aggregates, compute services, migrations, server diagnostics, availability-zone details, and all-project usage.\n\n")
 		out.WriteString("`InstanceActions.InServer(ctx, serverRef)` fetches details by requestID and paginates action history. SDK-owned `ActionResource` distinguishes list and detail results, preserving extra event information, raw JSON, and headers. See [action history, versions, and permissions](instanceactions/README.md).\n\n")
-	case "blockstorage/v2", "blockstorage/v3":
-		if key == "blockstorage/v3" {
-			out.WriteString("`Groups` [replication actions](group-replication-python.md), `ConsistencyGroups` [legacy group APIs](consistency-groups-python.md), and `ConsistencyGroupSnapshots` [legacy snapshot APIs](consistency-group-snapshots-python.md) expose concrete function options and actual response evidence. Each guide explains Source request defects, stock defaults, versions, and permissions.\n\n")
-		}
+	case "blockstorage/v2":
 		out.WriteString("`Volumes.MetadataIn(ctx, ref)` and `Snapshots.MetadataIn(ctx, ref)` resolve an ID or name once and expose the same Get, Merge, Replace, and DeleteKeys operations. Merge uses POST merge; Replace uses PUT full replacement. Nil/empty maps still send an explicit metadata object. Nil DeleteKeys deletes all keys, an empty slice makes no requests, and other slices delete in input order and return results before failure. Results contain actual metadata, raw bodies, headers, and success codes without a Resource cache. [Shared metadata](../metadata/README.md), [Volumes](volumes/README.md), and [Snapshots](snapshots/README.md) describe Python mappings, ETags, options, and partial success. Backup metadata child routes are outside this contract.\n\n")
-		if key == "blockstorage/v2" {
-			out.WriteString("[Native v2 calls](native-calls.md) documents only input, listing, and decoding differences between generated methods in the deprecated v2 package and native v3 calls.\n\n")
-			out.WriteString("[Cinder v2 Python Proxy mappings](python-parity-volumes.md) covers volume, snapshot, and consistency group snapshot methods and unresolved behavior.\n\n")
-			out.WriteString("[Cinder v2 resource mappings](python-parity-resources.md) covers backups, transfers, quotas, services, and other non-volume/snapshot resources, including unmapped methods.\n\n")
-			break
-		}
-		out.WriteString("`conn.BlockStorageProjectQuotas(ctx, project)` and `CurrentBlockStorageProjectQuotas(ctx)` expose Cinder quotas as fixed-project singletons. [Project quotas](quotasets/README.md) describes separate defaults/usage reads, volume-type quotas, DELETE200, and explicit force.\n\n")
-		out.WriteString("`Limits.Fetch(ctx)` preserves the current project's read-only limits response; `conn.BlockStorageProjectLimits(ctx, project)` fixes the project query. Project filters require actual request version 3.39 or later. [Limits](limits/README.md) describes version checks and typed/raw responses.\n\n")
-		out.WriteString("Native [volumes](native-volumes.md), [snapshots](native-snapshots.md), [attachments](native-attachments.md), [backups](native-backups.md), [transfers, availability zones, and versions](native-transfers.md), [volume types](native-volume-types.md), [QoS specs](native-qos.md), and [administration](native-admin.md) describe generated CRUD/actions/waits, paths, bodies, fixed statuses, scheduler hints, and timestamp decoding.\n\n")
-		out.WriteString("[Native noauth clients](../noauth/README.md) describes client construction for Cinder with `auth_strategy=noauth`, without Keystone." + "\n\n")
-		out.WriteString("`Volumes.FindRecord` and `Volumes/Snapshots.FetchMetadataRecord/GetMetadataRecord/SetMetadataRecord/DeleteMetadataRecord` expose lookup/metadata defaults and Source cache transitions. [Volume lookup](volume-find-python.md) and [metadata](metadata-python.md) describe concrete options, nil/empty inputs, sequential deletion, and partial responses.\n\n")
-		out.WriteString("SDK-owned `Groups/GroupSnapshots.FindRecord` handles ID/name lookup, missing defaults, phase-specific versions, and actual error evidence. [Group lookup](group-find-python.md) and [group snapshot lookup](group-snapshot-find-python.md) provide independent Python/Go usage.\n\n")
-		out.WriteString("`Groups` and `GroupSnapshots` expose generic group APIs with fixed Cinder v3 defaults and concrete function options. [Groups](groups-python.md) and [group snapshots](group-snapshots-python.md) describe Python/Go usage, versions, Create/Update/Delete, and list evidence.\n\n")
-		out.WriteString("`Messages.GetRecord/ListRecords/DeleteRecord` exposes SDK-owned Cinder message defaults and concrete options. [Python/Go mappings](messages-python.md) describes Source envelopes, stock compatibility, missing defaults, and list policies.\n\n")
-		out.WriteString("`Snapshots.FindRecord/Backups.FindRecord` provides GET-first lookup with name fallback, details/missing defaults, raw IDs/paging, and Cinder microversion selection. [Snapshots](snapshot-find-python.md) and [backups](backup-find-python.md) include standalone Go programs and Python comparisons.\n\n")
-		out.WriteString("`Volumes.ListSummary` exposes `/volumes` summary lists and local consumption policies. See [summary lists](volume-summary-python.md). The [explicit Python backup metadata profile](backup-metadata-python.md) remains unresolved because stock Cinder lacks the child route; it does not count as general stock metadata support.\n\n")
-		out.WriteString("`Attachments.CreateRecord/ListRecords` exposes Source service-internal attachment envelopes, mode discovery, and summary lists. Six owned `Transfers` Record methods select routes at 3.55 and provide missing defaults. [Attachments](attachments-python.md), [transfers](transfers-python.md), [type lookup and administrator encryption/QoS](type-encryption-python.md), and [raw connector actions](connector-python.md) describe permissions, versions, options, and actual responses.\n\n")
-		out.WriteString("[Python Proxy mappings](python-parity.md) covers volumes, snapshots, backups, attachments, transfers, volume types, QoS, and availability zones, including differences and unresolved methods." + "\n\n")
-		out.WriteString("[Cinder v3 administrative Python Proxy mappings](python-parity-admin.md) covers services, pools, extensions, volume import, clusters, group types, and related methods.\n\n")
-		out.WriteString("[Service actions](service-actions-python.md) covers enable, disable, freeze, thaw, failover, and log-level actions. [Group reset status](group-reset-status-python.md) covers groups and group snapshots. SDK-owned `GroupTypes`, `DefaultTypes`, and `Clusters` are described in their package READMEs.\n\n")
+		out.WriteString("[Native v2 calls](native-calls.md) documents only input, listing, and decoding differences between generated methods in the deprecated v2 package and native v3 calls.\n\n")
+		out.WriteString("[Cinder v2 Python Proxy mappings](python-parity-volumes.md) covers volume, snapshot, and consistency group snapshot methods and unresolved behavior.\n\n")
+		out.WriteString("[Cinder v2 resource mappings](python-parity-resources.md) covers backups, transfers, quotas, services, and other non-volume/snapshot resources, including unmapped methods.\n\n")
+	case "blockstorage/v3":
+		out.WriteString("Package docs describe the service and its resources (`go doc ./blockstorage/v3/...`). [Wait policies](../../docs/service-waits.md), [identity finding](../../docs/finding-identities.md), [shared metadata](../metadata/README.md), [project quotas](quotasets/README.md), [limits](limits/README.md) and [noauth clients](../noauth/README.md) cover shared behavior.\n\n")
 	case "network/v2":
 		out.WriteString("Owned QoS reads cover [minimum bandwidth](qos-minimum-bandwidth-records-python.md), [minimum packet rate](qos-minimum-packet-rate-records-python.md), [packet rate limits](qos-packet-rate-limit-records-python.md), and [rule types](qos-rule-types-python.md). [Security group lists](security-group-list-python.md), [security rule lists](security-group-rule-list-python.md), [router reads](router-read-records-python.md), and [RBAC mutations](rbac-policy-mutations-python.md) explain Python/Go defaults, concrete options, permissions, and response boundaries.\n\n")
 		out.WriteString("`RBACPolicies.GetRecord/FindRecord/ListRecords`, QoS `Get/Find/ListBandwidthLimitRecord` and `DSCPMarkingRecord`, and `Trunks/AddressGroups.ListRecords` expose concrete function options, Source views, and actual Wire evidence. [RBAC](rbac-policy-python.md), [bandwidth limits](qos-bandwidth-limit-records-python.md), [DSCP](extensions/qos/rules/dscp-marking-python.md), [trunk lists](trunk-list-python.md), and [address group lists](address-group-list-python.md) cover defaults, parent scopes, paging, and permissions.\n\n")

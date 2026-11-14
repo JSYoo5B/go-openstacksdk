@@ -6,43 +6,7 @@ Use Gophercloud v2.15.0's blockstorage/v3 API through one authenticated service 
 
 Service access: `conn.BlockStorageV3(ctx)` (openstacksdk: `conn.block_storage`).
 
-Selected stateful resources provide `WaitForState(ctx, ref, target, options...)` and `WaitForDelete(ctx, ref, options...)`. State waits use the service's exact ERROR/error failure defaults and no SDK timeout; deletion observation defaults to 120 seconds, with a 2-second interval. Compute Server `WaitForServer` defaults to ACTIVE and 120 seconds; Cinder Volume/Snapshot `WaitForAvailable` defaults to available. Caller `resource.With...` options apply last. Common `WaitFor/WaitForDeletion` retain their 5-minute default; native `WaitForStatus` has a separate contract. See [wait policies](../../docs/service-waits.md).
-
-`Volumes.FindIdentity(ctx, identity, options...)` resolves name/ID strings automatically, with list fallback after GET400/403/404, exact ID/name and duplicate checks, and a default missing result of `nil, nil`. Select strict handling with `resource.WithIdentityFindIgnoreMissing(false)`. Caller `WithIdentityFindQuery` filters survive GET and fallback listing; automatic name hints apply only to listing. Concrete options control query/fallback. See [identity finding](../../docs/finding-identities.md) for binding, fixed parents, domain filters and path policy.
-
-Server/volume identity finding can use summary fallback with `resource.WithIdentityFindDetails(false)` or cross-project listing with `resource.WithIdentityFindAllProjects(true)`. Defaults are details=true/all_projects=false, without changing GET. Explicit AllProjects conflicts with raw all_tenants query before HTTP.
-
-`Groups` [replication actions](group-replication-python.md), `ConsistencyGroups` [legacy group APIs](consistency-groups-python.md), and `ConsistencyGroupSnapshots` [legacy snapshot APIs](consistency-group-snapshots-python.md) expose concrete function options and actual response evidence. Each guide explains Source request defects, stock defaults, versions, and permissions.
-
-`Volumes.MetadataIn(ctx, ref)` and `Snapshots.MetadataIn(ctx, ref)` resolve an ID or name once and expose the same Get, Merge, Replace, and DeleteKeys operations. Merge uses POST merge; Replace uses PUT full replacement. Nil/empty maps still send an explicit metadata object. Nil DeleteKeys deletes all keys, an empty slice makes no requests, and other slices delete in input order and return results before failure. Results contain actual metadata, raw bodies, headers, and success codes without a Resource cache. [Shared metadata](../metadata/README.md), [Volumes](volumes/README.md), and [Snapshots](snapshots/README.md) describe Python mappings, ETags, options, and partial success. Backup metadata child routes are outside this contract.
-
-`conn.BlockStorageProjectQuotas(ctx, project)` and `CurrentBlockStorageProjectQuotas(ctx)` expose Cinder quotas as fixed-project singletons. [Project quotas](quotasets/README.md) describes separate defaults/usage reads, volume-type quotas, DELETE200, and explicit force.
-
-`Limits.Fetch(ctx)` preserves the current project's read-only limits response; `conn.BlockStorageProjectLimits(ctx, project)` fixes the project query. Project filters require actual request version 3.39 or later. [Limits](limits/README.md) describes version checks and typed/raw responses.
-
-Native [volumes](native-volumes.md), [snapshots](native-snapshots.md), [attachments](native-attachments.md), [backups](native-backups.md), [transfers, availability zones, and versions](native-transfers.md), [volume types](native-volume-types.md), [QoS specs](native-qos.md), and [administration](native-admin.md) describe generated CRUD/actions/waits, paths, bodies, fixed statuses, scheduler hints, and timestamp decoding.
-
-[Native noauth clients](../noauth/README.md) describes client construction for Cinder with `auth_strategy=noauth`, without Keystone.
-
-`Volumes.FindRecord` and `Volumes/Snapshots.FetchMetadataRecord/GetMetadataRecord/SetMetadataRecord/DeleteMetadataRecord` expose lookup/metadata defaults and Source cache transitions. [Volume lookup](volume-find-python.md) and [metadata](metadata-python.md) describe concrete options, nil/empty inputs, sequential deletion, and partial responses.
-
-SDK-owned `Groups/GroupSnapshots.FindRecord` handles ID/name lookup, missing defaults, phase-specific versions, and actual error evidence. [Group lookup](group-find-python.md) and [group snapshot lookup](group-snapshot-find-python.md) provide independent Python/Go usage.
-
-`Groups` and `GroupSnapshots` expose generic group APIs with fixed Cinder v3 defaults and concrete function options. [Groups](groups-python.md) and [group snapshots](group-snapshots-python.md) describe Python/Go usage, versions, Create/Update/Delete, and list evidence.
-
-`Messages.GetRecord/ListRecords/DeleteRecord` exposes SDK-owned Cinder message defaults and concrete options. [Python/Go mappings](messages-python.md) describes Source envelopes, stock compatibility, missing defaults, and list policies.
-
-`Snapshots.FindRecord/Backups.FindRecord` provides GET-first lookup with name fallback, details/missing defaults, raw IDs/paging, and Cinder microversion selection. [Snapshots](snapshot-find-python.md) and [backups](backup-find-python.md) include standalone Go programs and Python comparisons.
-
-`Volumes.ListSummary` exposes `/volumes` summary lists and local consumption policies. See [summary lists](volume-summary-python.md). The [explicit Python backup metadata profile](backup-metadata-python.md) remains unresolved because stock Cinder lacks the child route; it does not count as general stock metadata support.
-
-`Attachments.CreateRecord/ListRecords` exposes Source service-internal attachment envelopes, mode discovery, and summary lists. Six owned `Transfers` Record methods select routes at 3.55 and provide missing defaults. [Attachments](attachments-python.md), [transfers](transfers-python.md), [type lookup and administrator encryption/QoS](type-encryption-python.md), and [raw connector actions](connector-python.md) describe permissions, versions, options, and actual responses.
-
-[Python Proxy mappings](python-parity.md) covers volumes, snapshots, backups, attachments, transfers, volume types, QoS, and availability zones, including differences and unresolved methods.
-
-[Cinder v3 administrative Python Proxy mappings](python-parity-admin.md) covers services, pools, extensions, volume import, clusters, group types, and related methods.
-
-[Service actions](service-actions-python.md) covers enable, disable, freeze, thaw, failover, and log-level actions. [Group reset status](group-reset-status-python.md) covers groups and group snapshots. SDK-owned `GroupTypes`, `DefaultTypes`, and `Clusters` are described in their package READMEs.
+Package docs describe the service and its resources (`go doc ./blockstorage/v3/...`). [Wait policies](../../docs/service-waits.md), [identity finding](../../docs/finding-identities.md), [shared metadata](../metadata/README.md), [project quotas](quotasets/README.md), [limits](limits/README.md) and [noauth clients](../noauth/README.md) cover shared behavior.
 
 ## Go usage
 
