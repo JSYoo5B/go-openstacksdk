@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -21,43 +19,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps(None if value is None else value.to_dict(), indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions"
-)
-
-func main() {
-    cloud := flag.String("cloud", "devstack", "clouds.yaml cloud")
-    identity := flag.String("extension", "", "literal alias or exact name")
-    strict := flag.Bool("strict", false, "return missing errors")
-    flag.Parse()
-    if *identity == "" { log.Fatal("-extension is required") }
-    ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-    if err != nil { log.Fatal(err) }
-    compute, err := conn.ComputeV2(ctx)
-    if err != nil { log.Fatal(err) }
-    value, err := compute.Extensions.FindRecord(ctx, *identity,
-        request.IgnoreMissing(!*strict))
-    if err != nil { log.Fatal(err) }
-    var output any
-    if value != nil { output = value.Resource }
-    data, err := json.MarshalIndent(output, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(data))
-}
-```
+See `Example_recordFind` in [example_record_find_test.go](example_record_find_test.go), compiled by `go test`.
 
 ## References
 

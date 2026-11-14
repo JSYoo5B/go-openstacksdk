@@ -11,27 +11,7 @@ service = conn.compute.find_service("nova-compute", host="node", ignore_missing=
 print(service.id)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "os"
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/compute/v2/services"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-func main() {
-    provider := &gophercloud.ProviderClient{}
-    provider.UseTokenLock()
-    provider.SetToken(os.Getenv("OS_TOKEN"))
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "compute", Endpoint: os.Getenv("OS_COMPUTE_ENDPOINT")}
-    row, err := services.New(client).FindRecord(context.Background(), "nova-compute", request.Query("host", "node"), request.IgnoreMissing(false))
-    if err != nil { panic(err) }
-    fmt.Println(string(row.Resource.Body["id"]))
-}
-```
+See `Example_findRecord` in [example_find_record_test.go](example_find_record_test.go), compiled by `go test`.
 
 Go accepts explicit string identities and finite JSON options rather than Python Resource instances and arbitrary object equality. `RecordOptions.ListBasePath` selects a service-relative list path; route validation rejects external origins and traversal. This mapping leaves shared Resource/session/live-cloud parity contracts open.
 

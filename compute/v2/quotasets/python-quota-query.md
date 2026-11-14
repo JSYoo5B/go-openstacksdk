@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -16,37 +14,7 @@ quota = conn.compute.get_quota_set(
 print(quota.cores, quota.usage, quota.reservation)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "log"
-
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/compute/v2/quotasets"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func main() {
-    ctx := context.Background()
-    conn, err := openstack.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    scope, err := conn.ProjectQuotas(ctx, resource.ID("project-id"))
-    if err != nil { log.Fatal(err) }
-    user, err := scope.InUser(ctx, resource.ID("user-id"))
-    if err != nil { log.Fatal(err) }
-    quota, err := user.GetRecord(ctx,
-        quotasets.WithQuotaUsage(true),
-        request.Query("fields", []string{"cores", "ram"}),
-    )
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(quota.Resource.Body["cores"]))
-    fmt.Println(string(quota.Resource.Body["usage"]), string(quota.Resource.Body["reservation"]))
-    fmt.Println(quota.ProjectID, quota.UserID, quota.StatusCode)
-}
-```
+See `Example_quotaQuery` in [example_quota_query_test.go](example_quota_query_test.go), compiled by `go test`.
 
 ## References
 

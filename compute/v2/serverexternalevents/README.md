@@ -35,35 +35,7 @@ if __name__ == "__main__":
 
 Set `OS_COMPUTE_ENDPOINT` to the project-scoped Nova endpoint and `OS_TOKEN` to an authorized service token.
 
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "os"
-
-    compute "github.com/JSYoo5B/go-openstacksdk/compute/v2"
-    "github.com/JSYoo5B/go-openstacksdk/compute/v2/serverexternalevents"
-    "github.com/gophercloud/gophercloud/v2"
-)
-
-func main() {
-    endpoint := os.Getenv("OS_COMPUTE_ENDPOINT")
-    if endpoint == "" { log.Fatal("OS_COMPUTE_ENDPOINT is required") }
-    provider := &gophercloud.ProviderClient{TokenID: os.Getenv("OS_TOKEN")}
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: "compute"}
-    service := compute.New(client)
-    rows, err := service.ServerExternalEvents.CreateRecords(context.Background(), []serverexternalevents.Event{
-        {"name": "network-changed", "server_uuid": "server-id", "status": "completed"},
-    })
-    if err != nil { log.Fatal(err) }
-    for row, err := range rows {
-        if err != nil { log.Fatal(err) }
-        log.Printf("name=%s code=%s status=%d", row.Resource.Body["name"], row.Resource.Body["code"], row.StatusCode)
-    }
-}
-```
+See `Example_serverexternalevents` in [example_serverexternalevents_test.go](example_serverexternalevents_test.go), compiled by `go test`.
 
 ## Deliberate Go profile boundaries
 

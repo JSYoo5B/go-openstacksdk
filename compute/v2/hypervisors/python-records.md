@@ -12,30 +12,7 @@ node = conn.compute.find_hypervisor("node", ignore_missing=False)
 print(len(rows), node.name)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "os"
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/compute/v2/hypervisors"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-func main() {
-    provider := &gophercloud.ProviderClient{}
-    provider.UseTokenLock()
-    provider.SetToken(os.Getenv("OS_TOKEN"))
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Type: "compute", Endpoint: os.Getenv("OS_COMPUTE_ENDPOINT")}
-    api := hypervisors.New(client)
-    rows, err := api.AllRecords(context.Background(), request.Query("with_servers", true))
-    if err != nil { panic(err) }
-    node, err := api.FindRecord(context.Background(), "node", request.IgnoreMissing(false))
-    if err != nil { panic(err) }
-    fmt.Println(len(rows), string(node.Resource.Body["name"]))
-}
-```
+See `Example_records` in [example_records_test.go](example_records_test.go), compiled by `go test`.
 
 Go uses scalar string identities, JSON options and immutable response views rather than Python Resource instances. Unknown list kwargs are discarded by the declared profile; arbitrary Python objects are outside JSON options. `ProxyListRecords` preserves Source JMESPath evaluation against an opaque, unconsumed generator using the shared interpreter. `[*].name` returns JSON null, `length(@)` fails, and `@` preserves a `*RecordGenerator` whose `Records` performs HTTP only when iterated. `ListRecords` and `AllRecords` have fixed row result types; nonempty textual expressions direct callers to `ProxyListRecords`. This is an API mapping, not full SDK parity. Discovery/HTTP fixtures and example compilation do not establish live-cloud behavior.
 

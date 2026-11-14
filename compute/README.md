@@ -12,18 +12,7 @@ for server in conn.compute.servers(status="ACTIVE"):
     print(server.id, server.name)
 ```
 
-```go
-service, err := conn.Compute(ctx)
-if err != nil { return err }
-server, err := service.Servers.Find(ctx, resource.Name("web-01"))
-if err != nil { return err }
-fmt.Println(server.ID)
-
-for server, err := range service.Servers.List(ctx, resource.WithStatus("ACTIVE")) {
-    if err != nil { return err }
-    fmt.Println(server.ID, server.Name)
-}
-```
+See `Example_computeFragment1` in [example_compute_fragment1_test.go](example_compute_fragment1_test.go), compiled by `go test`.
 
 ```go
 server, err := service.Servers.Create(ctx, compute.CreateServerRequest{

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -21,51 +19,7 @@ server = conn.create_server(
 )
 ```
 
-```go
-package main
-
-import (
-	"context"
-	"fmt"
-	"log"
-	"time"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/compute"
-	"github.com/JSYoo5B/go-openstacksdk/request"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func main() {
-	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-	defer cancel()
-	if err := run(ctx); err != nil {
-		log.Fatal(err)
-	}
-}
-
-func run(ctx context.Context) error {
-	conn, err := sdk.Connect(ctx, sdk.WithMicroversion(sdk.Compute, "2.42"))
-	if err != nil {
-		return err
-	}
-	service, err := conn.Compute(ctx)
-	if err != nil {
-		return err
-	}
-	server, err := service.Servers.Create(ctx, compute.CreateServerRequest{
-		Name: "web-01", Image: resource.Name("ubuntu"), Flavor: resource.Name("small"),
-	}, compute.WithNetworkInterfaces(
-		compute.ServerNetworkInterface{Network: resource.Name("private"), FixedIP: "10.0.0.10", Tag: request.Present("app")},
-		compute.ServerNetworkInterface{Port: resource.Name("app-port"), Tag: request.Present("existing-port")},
-	))
-	if err != nil {
-		return err
-	}
-	fmt.Println(server.ID)
-	return nil
-}
-```
+See `Example_serverNetworkInterfaces` in [example_server_network_interfaces_test.go](example_server_network_interfaces_test.go), compiled by `go test`.
 
 ## References
 

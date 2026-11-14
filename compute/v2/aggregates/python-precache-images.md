@@ -25,28 +25,6 @@ if __name__ == "__main__":
 
 Set `OS_COMPUTE_ENDPOINT` to the authenticated project-scoped Nova v2.1 endpoint and `OS_TOKEN` to a token authorized for this action.
 
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "os"
-
-    compute "github.com/JSYoo5B/go-openstacksdk/compute/v2"
-    "github.com/gophercloud/gophercloud/v2"
-)
-
-func main() {
-    endpoint := os.Getenv("OS_COMPUTE_ENDPOINT")
-    if endpoint == "" { log.Fatal("OS_COMPUTE_ENDPOINT is required") }
-    provider := &gophercloud.ProviderClient{TokenID: os.Getenv("OS_TOKEN")}
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: "compute"}
-    service := compute.New(client)
-    if err := service.Aggregates.PrecacheImages(context.Background(), 7, []string{"image-one", "image-two"}); err != nil {
-        log.Fatal(err)
-    }
-}
-```
+See `Example_precacheImages` in [example_precache_images_test.go](example_precache_images_test.go), compiled by `go test`.
 
 Focused tests are in `python_precache_images_test.go`; HTTP fixtures reuse the existing Gophercloud testhelper-backed aggregate fixture. No example executes automatically and no live cloud result is claimed.

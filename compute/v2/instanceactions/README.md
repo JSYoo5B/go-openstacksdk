@@ -4,56 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `Example_instanceactionsFragment1` in [example_instanceactions_fragment1_test.go](example_instanceactions_fragment1_test.go), compiled by `go test`.
 
-```go
-service, err := conn.ComputeV2(ctx)
-if err != nil { return err }
-scope, err := service.InstanceActions.InServer(ctx, resource.Name("worker"))
-if err != nil { return err }
-for action, err := range scope.List(ctx, resource.WithPageSize(100)) {
-    if err != nil { return err }
-    fmt.Println(scope.ServerID(), action.RequestID, action.Action, action.UpdatedAt)
-}
-action, err := scope.Find(ctx, resource.ID("req-example"), resource.WithIgnoreMissing())
-if err != nil { return err }
-if action != nil && action.Events != nil {
-    for _, event := range *action.Events {
-        fmt.Println(event.Event, event.Result, event.Details)
-    }
-}
-```
-
-```go
-package examples
-
-import (
-	"context"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func ListServerActions(ctx context.Context, conn *sdk.Connection, serverID string) error {
-	service, err := conn.ComputeV2(ctx)
-	if err != nil {
-		return err
-	}
-	scope, err := service.InstanceActions.InServer(ctx, resource.ID(serverID))
-	if err != nil {
-		return err
-	}
-	for action, err := range scope.List(ctx,
-		resource.WithMaxItems(20), resource.WithPaginated(false)) {
-		if err != nil {
-			return err
-		}
-		fmt.Println(action.ServerID, action.RequestID, action.Action)
-	}
-	return nil
-}
-```
+See `example_instanceactions1_test.go` in [example_instanceactions1_test.go](example_instanceactions1_test.go), compiled by `go test`.
 
 ## References
 
