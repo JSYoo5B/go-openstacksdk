@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 ag = conn.network.create_address_group(name="web", addresses=[])
 scope = conn.network.create_address_scope(name="scope", ip_version=4, is_shared=False)
@@ -23,12 +21,7 @@ conn.network.delete_address_group(ag.id)
 conn.network.delete_address_scope(scope.id, ignore_missing=False)
 ```
 
-```go
-err := api.DeleteWithOptions(ctx, id)
-err = api.DeleteWithOptions(ctx, id, request.IgnoreMissing(false))
-strict := false
-option := addressgroups.WithDeleteOptions(addressgroups.DeleteOpts{IgnoreMissing: &strict})
-```
+See `Example_deleteWithOptions` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 See `Example_resourceMutations1` in [example_resource_mutations1_test.go](example_resource_mutations1_test.go), compiled by `go test`.
 

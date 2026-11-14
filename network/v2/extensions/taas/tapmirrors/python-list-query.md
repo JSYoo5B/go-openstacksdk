@@ -4,18 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-for mirror, err := range api.List(ctx,
-	request.Query("name", "mirror"),
-	request.Query("fields", []string{"id", "name"}),
-	request.Query("sort_key", []string{"name", "id"}),
-	request.Query("sort_dir", []string{"asc", "desc"}),
-) {
-	...
-}
-```
+See `Example_listQuery` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

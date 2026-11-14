@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 network = conn.network.find_network("private", ignore_missing=False)
 for network in conn.network.networks(is_router_external=True):
@@ -14,16 +12,7 @@ for network in conn.network.networks(is_router_external=True):
 
 See `Example_networkFragment1` in [example_network_fragment1_test.go](example_network_fragment1_test.go), compiled by `go test`.
 
-```go
-ready, err := service.Networks.Wait(ctx, resource.ID(network.ID), "ACTIVE")
-if err != nil { return err }
-fmt.Println(ready.Status)
-
-if err := service.Networks.Delete(ctx, resource.Name("private"),
-    resource.WithMissingError()); err != nil {
-    return err
-}
-```
+See `Example_waitAndDelete` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ```python
 server = conn.compute.find_server("web", ignore_missing=False)
@@ -31,32 +20,9 @@ floating_ip = conn.create_floating_ip(
     network="public", server=server, nat_destination="private", wait=True)
 ```
 
-```go
-service, err := conn.Network(ctx)
-if err != nil { return err }
-created, err := service.FloatingIPs.Create(ctx,
-    network.CreateFloatingIPRequest{Network: resource.Name("public")},
-    network.WithServer(resource.Name("web")),
-    network.WithNATDestination(resource.Name("private")),
-    network.WithWait(resource.WithTimeout(time.Minute)))
-if err != nil {
-    if created != nil {
-        fmt.Println("created floating IP remains:", created.ID)
-    }
-    return err
-}
-fmt.Println(created.FloatingIP, created.PortID, created.FixedIP)
-```
+See `Example_createFloatingIP` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-```go
-created, err := service.FloatingIPs.Create(ctx,
-    network.CreateFloatingIPRequest{Network: resource.ID("external-network-id")},
-    network.WithServer(resource.ID("server-id")),
-    network.WithPort(resource.ID("port-id")),
-    network.WithFixedAddress("10.0.0.10"),
-    network.WithDescription("web ingress"),
-    request.Field("vendor_enabled", false))
-```
+See `Example_createFloatingIPOnPort` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -46,11 +44,7 @@ port = conn.network.find_port(
     "app-port", binding_profile={"nested": {"enabled": True}})
 ```
 
-```go
-port, err := service.Ports.FindRecord(ctx, "app-port",
-    request.Query("binding_profile",
-        map[string]any{"nested": map[string]any{"enabled": true}}))
-```
+See `Example_findPortRecord` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

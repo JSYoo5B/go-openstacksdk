@@ -4,17 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-for row, err := range api.ListDHCPNetworkRecords(ctx, agentID,
-	request.Query("is_shared", true),
-	request.Query("fields", []string{"id", "name"}),
-	request.Query("mtu", 1450),
-) {
-	...
-}
-```
+See `Example_listDHCPNetworks` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

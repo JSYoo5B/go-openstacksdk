@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 label = conn.network.create_metering_label(name="web", is_shared=False)
 for item in conn.network.metering_labels(project_id=project_id):
@@ -13,18 +11,7 @@ for item in conn.network.metering_labels(project_id=project_id):
 conn.network.delete_metering_label(label)
 ```
 
-```go
-api := labels.New(networkClient)
-label, err := api.Create(ctx,
-    request.Field("name", "web"),
-    request.Field("is_shared", false))
-if err != nil { return err }
-for item, err := range api.List(ctx, request.Query("project_id", projectID)) {
-    if err != nil { return err }
-    fmt.Println(*item.Name, item.IsShared != nil && *item.IsShared)
-}
-_, err = api.Delete(ctx, label.ID)
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 rule = conn.network.create_metering_label_rule(
     metering_label_id=label.id, direction="egress",
@@ -15,20 +13,7 @@ for item in conn.network.metering_label_rules(metering_label_id=label.id):
 conn.network.delete_metering_label_rule(rule)
 ```
 
-```go
-api := rules.New(networkClient)
-rule, err := api.Create(ctx,
-    request.Field("metering_label_id", labelID),
-    request.Field("direction", "egress"),
-    request.Field("destination_ip_prefix", "0.0.0.0/0"),
-    request.Field("is_excluded", false))
-if err != nil { return err }
-for item, err := range api.List(ctx, request.Query("metering_label_id", labelID)) {
-    if err != nil { return err }
-    fmt.Println(*item.Direction, *item.DestinationIPPrefix)
-}
-_, err = api.Delete(ctx, rule.ID)
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

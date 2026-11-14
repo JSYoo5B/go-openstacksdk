@@ -4,22 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-net, err := conn.NetworkV2(ctx)
-if err != nil {
-	return err
-}
-err = resource.IgnoreMissing(net.QoSRules.DeleteBandwidthLimitRule(ctx, policyID, ruleID))
-```
-
-```go
-found, err := net.FirewallGroups.Find(ctx, resource.ID(v), resource.WithIgnoreMissing())
-if err == nil && found == nil {
-	found, err = net.FirewallGroups.Find(ctx, resource.Name(v), resource.WithIgnoreMissing())
-}
-```
+See `Example_deleteBandwidthLimitRule` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

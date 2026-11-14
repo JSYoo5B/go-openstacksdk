@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -25,37 +23,13 @@ print("deleted", deleted)
 
 See `Example_networkMutations1` in [example_network_mutations1_test.go](example_network_mutations1_test.go), compiled by `go test`.
 
-```go
-updated, err := service.UpdateNetwork(ctx, resource.ID(id),
-    network.WithNetworkDNSDomainValue(request.Null[string]()))
-```
+See `Example_clearNetworkDNSDomain` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-```go
-provider := network.ProviderNetwork{
-    NetworkType: request.Present("vlan"),
-    PhysicalNetwork: request.Present("physnet1"),
-    SegmentationID: request.Present[any](100),
-}
-created, err := service.CreateNetwork(ctx,
-    network.CreateNetworkRequest{Name: "provider-net"},
-    network.WithNetworkProvider(provider))
-```
+See `Example_createProviderNetwork` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 `CreateNetworkDetail` and `UpdateNetworkDetail` send the same requests and return `NetworkDetail`, which adds the extension properties that the native model omits. `Metadata.Body` keeps every response member.
 
-```go
-detail, err := service.CreateNetworkDetail(ctx,
-    network.CreateNetworkRequest{Name: "public"},
-    network.WithNetworkExternal(true),
-    network.WithNetworkMTU(1450))
-if err != nil {
-    return err
-}
-if detail.RouterExternal != nil && *detail.RouterExternal && detail.MTU != nil {
-    fmt.Println(detail.ID, "external, MTU", *detail.MTU)
-}
-fmt.Println(string(detail.Metadata.Body["provider:network_type"]))
-```
+See `Example_createExternalNetwork` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

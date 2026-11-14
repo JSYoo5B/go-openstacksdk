@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -35,15 +33,7 @@ go run . -cloud dev -router ROUTER_ID -action add-gateways \
 
 See `Example_routerActions1` in [example_router_actions1_test.go](example_router_actions1_test.go), compiled by `go test`.
 
-```go
-cached := &resource.RawResource{Metadata: resource.Metadata{Body: map[string]json.RawMessage{
-    "name": json.RawMessage(`"cached-edge"`),
-    "routes": json.RawMessage(`[]`),
-}}}
-row, err := api.AddExtraRoutesRecord(ctx, "ROUTER_ID", json.RawMessage(`{"router":{"routes":[]}}`),
-    routers.WithRouterActionSeed(cached),
-    request.Headers(map[string]string{"X-Client-Trace": "router-action"}))
-```
+See `Example_addExtraRoutesRecord` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,51 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-```go
-func manageQuotas(ctx context.Context, networkClient *gophercloud.ServiceClient) error {
-    api := quotas.New(networkClient)
-    scope, err := api.InProject(ctx, resource.ID("project-id"))
-    if err != nil { return err }
-
-    limits, err := scope.Get(ctx)
-    if err != nil { return err }
-    fmt.Println(scope.ProjectID(), limits.Network, limits.Port)
-
-    defaults, err := scope.Defaults(ctx)
-    if err != nil { return err }
-    fmt.Println(defaults.Network, defaults.Port)
-
-    usage, err := scope.Detail(ctx)
-    if err != nil { return err }
-    fmt.Println(usage.Network.Used, usage.Network.Reserved, usage.Network.Limit)
-
-    zero, unlimited := 0, -1
-    updated, err := scope.Update(ctx, quotas.UpdateOpts{
-        Port: &zero, Network: &unlimited,
-    }, quotas.WithUpdateCheckLimit(false))
-    if err != nil { return err }
-    fmt.Println(updated.Port, updated.Header.Get("X-Openstack-Request-Id"))
-
-    reset, err := scope.Delete(ctx)
-    if err != nil { return err }
-    fmt.Println(reset.StatusCode, reset.Header.Get("X-Openstack-Request-Id"))
-    return nil
-}
-```
-
-```go
-func listQuotaOverrides(ctx context.Context, networkClient *gophercloud.ServiceClient) error {
-    api := quotas.New(networkClient)
-    for quota, err := range api.ListProjects(ctx, quotas.WithListProjectID("project-id"), request.MaxItems(1)) {
-        if err != nil { return err }
-        fmt.Println(quota.ProjectID, quota.Network, quota.Port)
-        fmt.Println(quota.Header.Get("X-Openstack-Request-Id"), quota.StatusCode)
-    }
-    return nil
-}
-```
+See `Example_listProjects` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

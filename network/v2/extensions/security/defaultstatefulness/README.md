@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 setting = conn.network.create_security_groups_default_statefulness(
     project_id=project.id, stateful=False)
@@ -16,28 +14,4 @@ for item in conn.network.security_groups_default_statefulness(project_id=project
 conn.network.delete_security_groups_default_statefulness(setting)
 ```
 
-```go
-api := defaultstatefulness.New(networkClient)
-setting, err := api.Create(ctx,
-    request.Field("project_id", projectID),
-    request.Field("stateful", false))
-if err != nil {
-    return err
-}
-id := setting.Text("id")
-var revision int64
-_ = json.Unmarshal(setting.Resource.Body["revision_number"], &revision)
-if _, err := api.Update(ctx, id,
-    request.Field("stateful", true),
-    defaultstatefulness.WithUpdateRevision(revision)); err != nil {
-    return err
-}
-for item, err := range api.List(ctx, request.Query("project_id", projectID)) {
-    if err != nil {
-        return err
-    }
-    fmt.Println(item.Text("id"), string(item.Resource.Body["stateful"]))
-}
-_, err = api.Delete(ctx, id)
-return err
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.

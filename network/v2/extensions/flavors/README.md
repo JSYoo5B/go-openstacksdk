@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 flavor = conn.network.create_flavor(
     name="gold", service_type="L3_ROUTER_NAT", is_enabled=True)
@@ -15,20 +13,7 @@ for f in conn.network.flavors(service_type="L3_ROUTER_NAT"):
 conn.network.delete_flavor(flavor)
 ```
 
-```go
-api := flavors.New(networkClient)
-flavor, err := api.Create(ctx,
-    request.Field("name", "gold"),
-    request.Field("service_type", "L3_ROUTER_NAT"),
-    request.Field("is_enabled", true))
-if err != nil { return err }
-if _, err := api.AssociateServiceProfile(ctx, flavor.ID, profileID); err != nil { return err }
-for f, err := range api.List(ctx, request.Query("service_type", "L3_ROUTER_NAT")) {
-    if err != nil { return err }
-    fmt.Println(*f.Name, f.ServiceProfileIDs)
-}
-_, err = api.Delete(ctx, flavor.ID)
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 
