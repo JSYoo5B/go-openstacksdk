@@ -4,28 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-    "io"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
-)
-
-func createAndWait(ctx context.Context, client *gophercloud.ServiceClient, data io.Reader, size int64) (*image.CreateImportResult, error) {
-    return image.New(client).CreateAndImport(ctx,
-        image.CreateAndImportRequest{Name: "worker", Data: data},
-        image.WithCreateImportStage(imagedata.StageOpts{Size: &size}),
-        image.WithCreateImportWait(),
-    )
-}
-```
+See `example_create_import1_test.go` in [example_create_import1_test.go](example_create_import1_test.go), compiled by `go test`.
 
 ```python
 image = conn.image.create_image(
@@ -34,28 +13,7 @@ image = conn.image.create_image(
     allow_duplicates=True, disable_vendor_agent=False, size=size)
 ```
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/imageimport"
-)
-
-func createFromWeb(ctx context.Context, client *gophercloud.ServiceClient, uri string) (*image.CreateImportResult, error) {
-    requireAll := false
-    return image.New(client).CreateAndImport(ctx,
-        image.CreateAndImportRequest{Name: "worker-from-web"},
-        image.WithCreateImportImport(imageimport.ImportOpts{
-            Method: "web-download", URI: uri,
-            Stores: []string{"fast", "reliable"}, AllStoresMustSucceed: &requireAll,
-        }),
-    )
-}
-```
+See `example_create_import2_test.go` in [example_create_import2_test.go](example_create_import2_test.go), compiled by `go test`.
 
 ```python
 image = conn.image.create_image(

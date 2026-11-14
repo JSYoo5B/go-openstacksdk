@@ -4,50 +4,14 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-    "io"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func stageExistingImage(ctx context.Context, client *gophercloud.ServiceClient, id string, data io.Reader) (*imagedata.StageImageResult, error) {
-    return imagedata.New(client).StageImage(ctx, resource.ID(id), data)
-}
-```
+See `example_imagedata1_test.go` in [example_imagedata1_test.go](example_imagedata1_test.go), compiled by `go test`.
 
 ```python
 image = conn.image.get_image(image_id)
 image = conn.image.stage_image(image, data=data)
 ```
 
-```go
-package example
-
-import (
-    "context"
-    "io"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/imagedata"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/images"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func stageKnownImage(ctx context.Context, client *gophercloud.ServiceClient, image *images.Image, data io.Reader, remainingBytes int64) (*imagedata.StageImageResult, error) {
-    return imagedata.New(client).StageKnownImage(ctx, image, data,
-        request.Custom(func(c *imagedata.StageOpts) error { v := remainingBytes; c.Size = &v; return nil }),
-        request.Header("X-Trace", "stage-image"),
-    )
-}
-```
+See `example_imagedata2_test.go` in [example_imagedata2_test.go](example_imagedata2_test.go), compiled by `go test`.
 
 ```python
 image = conn.image.stage_image(image, data=data, size=remaining_bytes)

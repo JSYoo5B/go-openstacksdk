@@ -4,51 +4,14 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func discoverStores(ctx context.Context, conn *openstack.Connection) ([]*serviceinfo.Store, error) {
-    service, err := conn.ImageV2(ctx)
-    if err != nil {
-        return nil, err
-    }
-    return service.ServiceInfo.AllStores(ctx,
-        request.Custom(func(c *request.Config[serviceinfo.ListStoresOpts]) error { c.Options.Details = true; return nil }),
-        request.MaxItems(20),
-    )
-}
-```
+See `example_serviceinfo1_test.go` in [example_serviceinfo1_test.go](example_serviceinfo1_test.go), compiled by `go test`.
 
 ```python
 for store in conn.image.stores(details=True, max_items=20):
     print(store.id, store.description, store.is_default)
 ```
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
-)
-
-func discoverImportMethods(ctx context.Context, client *gophercloud.ServiceClient) (*serviceinfo.ImportInfo, error) {
-    return image.New(client).API.ServiceInfo.GetImportInfo(ctx)
-}
-```
+See `example_serviceinfo2_test.go` in [example_serviceinfo2_test.go](example_serviceinfo2_test.go), compiled by `go test`.
 
 ```python
 info = conn.image.get_import_info()

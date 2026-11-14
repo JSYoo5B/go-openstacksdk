@@ -12,18 +12,7 @@ for image in conn.image.images(status="active"):
     print(image.id, image.name)
 ```
 
-```go
-service, err := conn.Image(ctx)
-if err != nil { return err }
-image, err := service.Images.Find(ctx, resource.Name("ubuntu"))
-if err != nil { return err }
-fmt.Println(image.ID, image.SizeBytes)
-
-for image, err := range service.Images.List(ctx, resource.WithStatus("active")) {
-    if err != nil { return err }
-    fmt.Println(image.ID, image.Name)
-}
-```
+See `Example_imageFragment1` in [example_image_fragment1_test.go](example_image_fragment1_test.go), compiled by `go test`.
 
 ```python
 with open("ubuntu.qcow2", "rb") as data:

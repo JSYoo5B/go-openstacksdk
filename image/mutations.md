@@ -4,43 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/JSYoo5B/go-openstacksdk/image"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-type MutationProof struct {
-    Added       *image.ImageTagResult
-    Removed     *image.ImageTagResult
-    Deactivated *image.ImageActionResult
-    Reactivated *image.ImageActionResult
-}
-
-func mutateImage(ctx context.Context, service *image.Service, ref resource.Ref, tag string) (proof MutationProof, err error) {
-    option := request.Header("X-Request-Source", "example")
-    proof.Added, err = service.AddTag(ctx, ref, tag, option)
-    if err != nil {
-        return proof, err
-    }
-    proof.Removed, err = service.RemoveTag(ctx, ref, tag, option)
-    if err != nil {
-        return proof, err
-    }
-    proof.Deactivated, err = service.DeactivateImage(ctx, ref, option)
-    if err != nil {
-        return proof, err
-    }
-    proof.Reactivated, err = service.ReactivateImage(ctx, ref, option)
-    return proof, err
-}
-```
+See `example_mutations_test.go` in [example_mutations_test.go](example_mutations_test.go), compiled by `go test`.
 
 ```python
 def mutate_image(conn, image_id, tag):

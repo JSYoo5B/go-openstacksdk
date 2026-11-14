@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -18,33 +16,4 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "os"
-
-    image "github.com/JSYoo5B/go-openstacksdk/image/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/gophercloud/gophercloud/v2"
-)
-
-func main() {
-    endpoint := os.Getenv("OS_IMAGE_ENDPOINT")
-    if endpoint == "" { log.Fatal("OS_IMAGE_ENDPOINT is required") }
-    provider := &gophercloud.ProviderClient{TokenID: os.Getenv("OS_TOKEN")}
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: "image"}
-    service := image.New(client)
-    for row, err := range service.ServiceInfo.ListStoreRecords(context.Background(),
-        request.Custom(func(c *serviceinfo.StoreRecordListOpts) error { c.Details = true; return nil }),
-        request.Paginated(false),
-        serviceinfo.WithStoreRecordListFilter("is_default", true),
-    ) {
-        if err != nil { log.Fatal(err) }
-        log.Printf("id=%s properties=%s status=%d", row.Resource.Body["id"], row.Resource.Body["properties"], row.StatusCode)
-    }
-}
-```
+See `Example_storeDetails` in [example_store_details_test.go](example_store_details_test.go), compiled by `go test`.

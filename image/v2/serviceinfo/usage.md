@@ -25,26 +25,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"
-)
-
-func discoverUsage(ctx context.Context, conn *openstack.Connection) (*serviceinfo.UsageInfo, error) {
-    service, err := conn.ImageV2(ctx)
-    if err != nil {
-        return nil, err
-    }
-    return service.ServiceInfo.GetUsageInfo(ctx)
-}
-```
+See `example_usage_test.go` in [example_usage_test.go](example_usage_test.go), compiled by `go test`.
 
 ```python
 import json

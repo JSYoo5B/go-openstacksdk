@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -20,110 +18,7 @@ if image is not None:
     print(image.to_dict(), by_id.status)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "errors"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/image"
-)
-
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud name")
-    pattern := flag.String("pattern", "*", "image name or ID glob")
-    showAll := flag.Bool("show-all", false, "include shared images that are not accepted")
-    identity := flag.String("image", "", "optional image name or ID for Cloud get_image")
-    id := flag.String("id", "", "optional image ID for strict get_image_by_id")
-    flag.Parse()
-    ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-    defer cancel()
-    if err := run(ctx, *cloud, *pattern, *showAll, *identity, *id); err != nil {
-        log.Fatal(err)
-    }
-}
-
-func recordValue(record *image.ImageRecord) any {
-    if record == nil {
-        return nil
-    }
-    return map[string]any{
-        "resource": record.Resource, "wire": record.Wire,
-        "status_code": record.StatusCode, "import_methods": record.ImportMethods,
-    }
-}
-
-func printQuery(operation string, result *image.ImageRecordQueryResult) error {
-    if result == nil {
-        return nil
-    }
-    data, err := json.MarshalIndent(map[string]any{
-        "operation": operation, "value": result.Value,
-        "image_count": len(result.Images), "inventory_count": len(result.Inventory),
-    }, "", "  ")
-    if err != nil {
-        return err
-    }
-    fmt.Println(string(data))
-    return nil
-}
-
-func run(ctx context.Context, cloud, pattern string, showAll bool, identity, id string) error {
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud))
-    if err != nil {
-        return err
-    }
-    service, err := conn.Image(ctx)
-    if err != nil {
-        return err
-    }
-    all, err := service.AllCloudImageRecords(ctx, request.Custom(func(c *image.ImageRecordQueryOpts) error { v := showAll; c.ShowAll = &v; return nil }))
-    if printErr := printQuery("list_images", all); printErr != nil {
-        return errors.Join(err, printErr)
-    }
-    if err != nil {
-        return fmt.Errorf("list images: %w", err)
-    }
-    matched, err := service.SearchImageRecords(ctx, pattern)
-    if printErr := printQuery("search_images", matched); printErr != nil {
-        return errors.Join(err, printErr)
-    }
-    if err != nil {
-        return fmt.Errorf("search images: %w", err)
-    }
-    if identity != "" {
-        found, err := service.GetCloudImageRecord(ctx, identity)
-        if err != nil {
-            return fmt.Errorf("get image: %w", err)
-        }
-        data, err := json.MarshalIndent(map[string]any{"operation": "get_image", "value": found.Value, "record": recordValue(found.Image)}, "", "  ")
-        if err != nil {
-            return err
-        }
-        fmt.Println(string(data))
-    }
-    if id != "" {
-        record, err := service.GetImageRecordByID(ctx, id)
-        if err != nil {
-            return fmt.Errorf("get image by id: %w", err)
-        }
-        data, err := json.MarshalIndent(map[string]any{"operation": "get_image_by_id", "record": recordValue(record)}, "", "  ")
-        if err != nil {
-            return err
-        }
-        fmt.Println(string(data))
-    }
-    return nil
-}
-```
+See `Example_imageRecordCloud` in [example_image_record_cloud_test.go](example_image_record_cloud_test.go), compiled by `go test`.
 
 ## References
 

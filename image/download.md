@@ -4,53 +4,13 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-    "io"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func downloadTo(ctx context.Context, client *gophercloud.ServiceClient, id string, output io.Writer) (*image.DownloadImageResult, error) {
-    return image.New(client).DownloadTo(ctx, resource.ID(id), output)
-}
-```
+See `example_download1_test.go` in [example_download1_test.go](example_download1_test.go), compiled by `go test`.
 
 ```python
 response = conn.image.download_image(image_id, output=output, stream=True)
 ```
 
-```go
-package example
-
-import (
-    "bytes"
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/image"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func downloadByName(ctx context.Context, client *gophercloud.ServiceClient, name string) ([]byte, *image.DownloadImageResult, error) {
-    var output bytes.Buffer
-    chunk := 64 * 1024
-    result, err := image.New(client).DownloadTo(ctx, resource.Name(name), &output,
-        image.WithDownloadImageOpts(image.DownloadImageOpts{
-            ChunkSize: &chunk,
-            StorePreferences: []string{"fast", "archive", "fast"},
-        }),
-    )
-    return output.Bytes(), result, err
-}
-```
+See `example_download2_test.go` in [example_download2_test.go](example_download2_test.go), compiled by `go test`.
 
 ```python
 image = conn.image.find_image(name, ignore_missing=False)

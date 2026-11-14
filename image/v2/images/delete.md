@@ -6,10 +6,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
 
-```go
-api, err := conn.ImageV2(ctx)
-if err != nil { return err }
-```
+See `Example_deleteFragment1` in [example_delete_fragment1_test.go](example_delete_fragment1_test.go), compiled by `go test`.
 
 ```go
 err := service.API.Images.Delete(ctx, imageID)
