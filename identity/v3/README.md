@@ -6,39 +6,7 @@ Use Gophercloud v2.15.0's identity/v3 API through one authenticated service obje
 
 Service access: `conn.IdentityV3(ctx)` (openstacksdk: `conn.identity`).
 
-`Projects/Users/Groups/Domains/Roles.FindIdentity(ctx, identity, options...)` resolves name/ID strings automatically, with list fallback after GET400/403/404, exact ID/name and duplicate checks, and a default missing result of `nil, nil`. Select strict handling with `resource.WithIdentityFindIgnoreMissing(false)`. Caller `WithIdentityFindQuery` filters survive GET and fallback listing; automatic name hints apply only to listing. Concrete options control query/fallback. See [identity finding](../../docs/finding-identities.md) for binding, fixed parents, domain filters and path policy.
-
-`Tokens.ValidateToken/CheckToken/RevokeToken` fetches, HEAD-checks and revokes Python-style subject tokens. See [token APIs and standalone examples](python-token-actions.md) for true-only queries, raw Token records and checks that return true only for 200.
-
-`Users.ListProjectRecords(ctx, userID, options...)` and `Users.ListGroupRecords(ctx, userID)` return SDK-owned records for a fixed user ID with independent Resource/Wire responses. Project options apply pinned UserProject query aliases and four Body filters. UserGroup has no public query arguments, so no list options are added. See [memberships](users/memberships.md) for ownership, list controls and fixed paths. Native `Users.ListProjects` retains its Project alias, arguments and pager; `Users.ListGroups` retains its Group alias.
-
-`Credentials.UpdateRecord` accepts concrete options for declared fields, preserving omission/null and Source seed overlays. [Credential updates](credential-update-python.md) and [Trust CRUD and lookup](trusts-python.md) describe owned results and defaults.
-
-Owned credential/access-rule calls under `ApplicationCredentials.InUser` and `Credentials.CreateRecord/GetRecord/ListRecords/FindRecord/DeleteRecord` expose raw responses and default missing/list policies. [Application credentials and access rules](application-credentials-python.md) and [generic credentials](credentials-python.md) describe concrete options and distinctions from native EC2 routes.
-
-[Native token and catalog calls](native-tokens.md) describes paths, headers, statuses, and extension fields for generated `Tokens` create/get/validate/revoke and `Catalog.List`.
-
-[Native credential calls](native-credentials.md) covers user-owned application credentials, access rules, credentials, and EC2 credentials.
-
-[Native trust and user-self calls](native-trusts.md) covers trusts, accessible project listings, and password changes.
-
-[Native catalog, policy, limit, and mapping administration](native-admin-b.md) covers regions, services, endpoints, policies, limits, registered limits, project endpoints, and federation mappings under default administrator policies.
-
-[Native administrative calls](native-admin-a.md) covers domain/group/project/user/role CRUD, project tags, group membership, role assignments and inference rules, and OS-INHERIT assignments.
-
-[Native OAuth1 and EC2 token calls](native-oauth1-ec2.md) covers OAuth1 consumers, delegation flows, access tokens, and EC2/S3 tokens.
-
-[Python policy and federation mappings](python-parity-federation.md) explains `Policies` CRUD and federation mapping deletion, plus unresolved identity provider, protocol, and service provider routes.
-
-[Identity v3 catalog mappings](python-parity-catalog.md) covers endpoint, region, service, limit, registered limit, and project endpoint Proxy methods, plus unresolved endpoint groups and domain configuration.
-
-[Python/Go users and role assignments](python-parity-users.md) covers domain/group/project/user/role CRUD and listing, group membership, password changes, role assignments, and unresolved methods.
-
-[Identity cloud helpers](../python-cloud-parity.md) maps user, project, group, role, domain, service, and endpoint helpers such as `conn.create_user`, including unresolved behavior.
-
-SDK-owned [`EndpointGroups`](endpointgroups/README.md) covers Keystone OS-EP-FILTER endpoint group CRUD, list, find, and project/endpoint associations.
-
-SDK-owned [`IdentityProviders`](identityproviders/README.md), [`FederationProtocols`](federationprotocols/README.md), and [`ServiceProviders`](serviceproviders/README.md) cover Keystone OS-FEDERATION resources.
+Package docs describe the service and its resources (`go doc ./identity/v3/...`). SDK-owned [`EndpointGroups`](endpointgroups/README.md), [`IdentityProviders`](identityproviders/README.md), [`FederationProtocols`](federationprotocols/README.md) and [`ServiceProviders`](serviceproviders/README.md) cover OS-EP-FILTER and OS-FEDERATION. [Identity finding](../../docs/finding-identities.md) explains name and ID resolution.
 
 ## Go usage
 
