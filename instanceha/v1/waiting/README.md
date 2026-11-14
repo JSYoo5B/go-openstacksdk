@@ -1,62 +1,6 @@
 # Waiting
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:instance_ha/v1/wait_for_status`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/notifications.API.WaitForStatus`
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments.API.WaitForStatus`
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/hosts.SegmentScope.WaitForStatus`
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/vmoves.NotificationScope.WaitForStatus`
-
-- Four typed facades preserve fixed UUID routes, parent scopes and actual HTTP evidence. Notification and VMove use status, while Segment and Host require an explicit exported string attribute before status polling. Deletion observes404 or declared deleted status without submitting DELETE or following Location.
-  Tests: `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures`.
-- Instance-ha proxy status defaults are unlimited SDK time, ERROR-only failures and2-second intervals, with target precedence and caller replacement. Delete defaults to120seconds. Actual outgoing request deadlines prove parent/override policy while Resources.Wait keeps5minutes. VMove polling rechecks1.3 before every GET; callbacks and errors stop further requests.
-  Tests: `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures`.
-- Four facades preserve fixed routes; waits use real status, deadlines and configured failures.
-  Tests: `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP`.
-
-Python/Go differences:
-
-- Explicit Ref returns fresh typed models rather than mutating a cached Python Resource; WaitForDelete returns error instead of the original Resource pointer. Segment/Host names use exact lookup once, while Notification/VMove name lookup is unsupported.
-- Go uses notification_uuid/uuid route identities rather than database id, preserves fixed parent scope and never retargets polling from response IDs. Pinned inherited Python Resource identity behavior is documented separately.
-- Go requires nonempty status, positive intervals and exported typed string attributes. Nullable Python targets/attributes, interval None/zero, arbitrary Resource/custom attrs and falsy successful fetches have distinct semantics.
-- HTTP contexts carry deadlines and cancellation priority. Strict success-envelope decoding preserves ResponseError evidence and does not trigger an automatic resend; nested workflow progress is not synthesized as a top-level callback percentage.
-- Python wait helpers take a Resource and may return a cached target status without fetching; Go takes a fixed resource.Ref, always polls through the typed getter, and returns a fresh model (an error only for deletion). Defaults are five minutes and two seconds with context deadlines.
-
-### `python:instance_ha/v1/wait_for_delete`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/notifications.API.WaitForDelete`
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/segments.API.WaitForDelete`
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/hosts.SegmentScope.WaitForDelete`
-- `github.com/JSYoo5B/go-openstacksdk/instanceha/v1/vmoves.NotificationScope.WaitForDelete`
-
-- Four typed facades preserve fixed UUID routes, parent scopes and actual HTTP evidence. Notification and VMove use status, while Segment and Host require an explicit exported string attribute before status polling. Deletion observes404 or declared deleted status without submitting DELETE or following Location.
-  Tests: `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures`.
-- Instance-ha proxy status defaults are unlimited SDK time, ERROR-only failures and2-second intervals, with target precedence and caller replacement. Delete defaults to120seconds. Actual outgoing request deadlines prove parent/override policy while Resources.Wait keeps5minutes. VMove polling rechecks1.3 before every GET; callbacks and errors stop further requests.
-  Tests: `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitFourFacadesPreserveFixedRoutesAndHTTPBody`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitStatuslessModelsRejectDefaultBeforeHTTP`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitErrorOnlyDefaultsAndFailureReplacement`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures`.
-- Deletion waits use status or 404 absence without issuing DELETE, with deadlines and native failure causes.
-  Tests: `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeletionUsesStatusOrAbsenceWithoutDELETE`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitDeadlineDefaultsAndOverrides`, `api/instanceha_wait_contracts_test.go:TestInstanceHAWaitRevalidatesVersionAndKeepsNativeAndDecodeFailures`.
-
-Python/Go differences:
-
-- Explicit Ref returns fresh typed models rather than mutating a cached Python Resource; WaitForDelete returns error instead of the original Resource pointer. Segment/Host names use exact lookup once, while Notification/VMove name lookup is unsupported.
-- Go uses notification_uuid/uuid route identities rather than database id, preserves fixed parent scope and never retargets polling from response IDs. Pinned inherited Python Resource identity behavior is documented separately.
-- Go requires nonempty status, positive intervals and exported typed string attributes. Nullable Python targets/attributes, interval None/zero, arbitrary Resource/custom attrs and falsy successful fetches have distinct semantics.
-- HTTP contexts carry deadlines and cancellation priority. Strict success-envelope decoding preserves ResponseError evidence and does not trigger an automatic resend; nested workflow progress is not synthesized as a top-level callback percentage.
-- Python wait helpers take a Resource and may return a cached target status without fetching; Go takes a fixed resource.Ref, always polls through the typed getter, and returns a fresh model (an error only for deletion). Defaults are five minutes and two seconds with context deadlines.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

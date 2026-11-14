@@ -1,49 +1,6 @@
 # Introspection
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `gophercloud:baremetalintrospection/v1/introspection.StartIntrospection`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartIntrospection`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-
-- Omitted, false and true manage_boot and escaped extension query values reach the POST URL.
-  Tests: `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions`.
-- Invalid options fail before HTTP; only 202 succeeds and HTTP status, body, headers, URL and cancellation remain observable.
-  Tests: `api/introspection_start_contracts_test.go:TestIntrospectionStartRejectsQueryAndCapabilityErrorsBeforeHTTP`, `api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause`, `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesCanceledContext`.
-
-Python/Go differences:
-
-- The SDK fixes the pinned native function that discards its serialized query; a private helper preserves that query and the original 202/error policy.
-
-### `python:baremetal_introspection/v1/start_introspection`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartAndGet`
-- `github.com/JSYoo5B/go-openstacksdk/baremetalintrospection/v1/introspection.API.StartIntrospection`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-
-- POST /introspection/{node}?manage_boot=... (omitted, false, true) then one GET of the status; a rejected start is not followed by a read and nothing is replayed.
-  Tests: `api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionStartAndGetPostsThenReadsOnceWithoutReplay`, `api/introspection_start_contracts_test.go:TestIntrospectionStartPreservesBootQueryAndEscapedExtensions`.
-- A failed status read after an accepted start is a *StartedError; empty identity and canceled contexts fail before HTTP; only 202 starts.
-  Tests: `api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionStartAndGetPostsThenReadsOnceWithoutReplay`, `api/py_cloud_ironic_introspection_test.go:TestPyCloudIronicIntrospectionStartAndGetRejectsEmptyIdentityAndCancellation`, `api/introspection_start_contracts_test.go:TestIntrospectionStartRequires202AndPreservesHTTPCause`.
-
-Python/Go differences:
-
-- Go returns typed models and wrapped native errors instead of Resource objects and openstack.exceptions; the inspector microversion is the client microversion. Python retries HTTP 409/503 on mutating calls; Go never replays a mutation. Python accepts any success status below 400; Go accepts the exact native code.
-- The node argument is a name or UUID string used in the URL as given (Python builds a Node from the value without a lookup). Python also sends the identity in the request body; Go sends no body, which the inspector ignores.
-- Python accepts a Node object; Go accepts only the identity string.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

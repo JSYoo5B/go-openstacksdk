@@ -1,37 +1,6 @@
 # Quotas
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `gophercloud:containerinfra/v1/quotas.Create`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.API.InProject`
-- `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.API.CurrentProject`
-- `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.ProjectQuotaScope.ForResource`
-- `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.ResourceQuotaScope.Create`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas.WithQuotaCreateOptions`
-- `github.com/JSYoo5B/go-openstacksdk/request.Field`
-
-- Explicit project IDs and resource names fix the compound quota target; exact project names resolve once through a separate Keystone client, and recorded v2/v3 auth fixes the current project without guessing from endpoints or response identity.
-  Tests: `api/magnum_quota_create_test.go:TestMagnumQuotaScopeUsesSeparateIdentityAndRecordedAuth`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotaNamesUseSeparateIdentityClient`, `connectiontest/connection_project_quotas_test.go:TestConnectionServiceQuotasIDAuthAndCancellation`.
-- POST /quotas sends flat project_id/resource/hard_limit JSON with an explicitly supplied hard limit, zero and exact platform integers. Typed pointer and extension options snapshot at construction and remain byte-accurate across reuse and reauth; protected identity/core fields and unsupported options fail before HTTP.
-  Tests: `api/magnum_quota_create_test.go:TestMagnumQuotaScopedCreatePreservesFixedIdentityExactJSONAndMetadata`, `api/magnum_quota_create_test.go:TestMagnumQuotaCreateOptionsSnapshotAndRetainIntegersAcrossReauth`, `api/magnum_quota_create_test.go:TestMagnumQuotaCreatePreflightAndCancellation`, `api/magnum_quota_create_test.go:TestMagnumQuotaNilScopesRemainSafeToInspectAndRejectCreate`.
-- Only201 succeeds; returned quota preserves native values, exact raw row ID, unknown/null fields, request identity separate from response identity and independent HTTP metadata. Accepted decode failures retain raw bytes/header/status without automatic resend; native HTTP/context causes and fixed-scope redirect boundaries remain observable.
-  Tests: `api/magnum_quota_create_test.go:TestMagnumQuotaScopedCreatePreservesFixedIdentityExactJSONAndMetadata`, `api/magnum_quota_create_test.go:TestMagnumQuotaCreateHTTPFailuresAndSuccessPolicy`, `api/magnum_quota_create_test.go:TestMagnumQuotaCreateDecodeFailuresRetainSuccessfulEvidence`, `api/magnum_quota_create_test.go:TestMagnumQuotaCreateRejectsScopeChangingRedirectAndPreservesCanceledCause`, `api/magnum_quota_create_test.go:TestMagnumQuotaGeneratedCreateRetainsNativeContract`.
-
-Python/Go differences:
-
-- Generated native API.Create remains unchanged. The high-level scope owns concrete option snapshots and the fixed project/resource pair, requires an explicit hard limit instead of choosing an administrative default, and returns extension-preserving QuotaResource with HTTP metadata.
-- RequestProjectID/RequestResource record the fixed input separately from server ProjectID/Resource. Numeric row IDs are re-read from raw JSON rather than rounded through the native float64 ID representation.
-- The pinned Python container-infrastructure proxy has no quota declaration. Additional scoped GET/PATCH/DELETE and paginated List/All REST methods are documented and tested separately, and are not invented native or Python catalog operations.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
