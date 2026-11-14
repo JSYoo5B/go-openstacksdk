@@ -4,46 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-    "time"
-
-    "github.com/gophercloud/gophercloud/v2"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func attachDefault(ctx context.Context, conn *sdk.Connection, serverID, volumeID string) (*blockstorage.AttachVolumeResult, error) {
-    return conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{
-        Server: resource.ID(serverID), Volume: resource.ID(volumeID),
-    })
-}
-
-func attachWithoutWaiting(ctx context.Context, conn *sdk.Connection, serverID, volumeID string) (*blockstorage.AttachVolumeResult, error) {
-    return conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{
-        Server: resource.ID(serverID), Volume: resource.ID(volumeID),
-    }, func(c *blockstorage.AttachVolumeOpts) error { c.Device = "/dev/vdb"; return nil },
-        blockstorage.WithAttachVolumeWait(false))
-}
-
-func attachWithDeadline(ctx context.Context, conn *sdk.Connection) (*blockstorage.AttachVolumeResult, error) {
-    return conn.AttachVolume(ctx, blockstorage.AttachVolumeRequest{
-        Server: resource.Name("worker"), Volume: resource.Name("data"),
-    }, blockstorage.WithAttachVolumeWaitOptions(
-        resource.WithTimeout(5*time.Minute), resource.WithPollInterval(time.Second),
-    ))
-}
-
-func attachWithClients(ctx context.Context, nova, cinder *gophercloud.ServiceClient, input blockstorage.AttachVolumeRequest) (*blockstorage.AttachVolumeResult, error) {
-    return blockstorage.AttachVolume(ctx, nova, cinder, input)
-}
-```
+See `example_attach_volume_test.go` in [example_attach_volume_test.go](example_attach_volume_test.go), compiled by `go test`.
 
 ```python
 server = conn.compute.get_server("server-id")

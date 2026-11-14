@@ -4,27 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-
-    v3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/backups"
-)
-
-func clearBackupMetadata(ctx context.Context, cinder *v3.Service, backupID string) (*backups.Backup, error) {
-    opts := backups.UpdateOpts{
-        Metadata: map[string]string{},
-    }
-    return cinder.Backups.Update(ctx, backupID, backups.UpdateOpts{},
-        backups.WithUpdateOptions(opts),
-    )
-}
-```
+See `example_backups_test.go` in [example_backups_test.go](example_backups_test.go), compiled by `go test`.
 
 ## References
 

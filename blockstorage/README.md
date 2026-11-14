@@ -12,19 +12,7 @@ for volume in conn.block_storage.volumes(status="available"):
     print(volume.id, volume.size)
 ```
 
-```go
-service, err := conn.BlockStorage(ctx)
-if err != nil { return err }
-volume, err := service.Volumes.Find(ctx, resource.Name("data"))
-if err != nil { return err }
-fmt.Println(volume.ID, volume.Size)
-
-for volume, err := range service.Volumes.List(ctx,
-    resource.WithStatus("available"), resource.WithPageSize(100)) {
-    if err != nil { return err }
-    fmt.Println(volume.ID, volume.Size)
-}
-```
+See `Example_blockstorageFragment1` in [example_blockstorage_fragment1_test.go](example_blockstorage_fragment1_test.go), compiled by `go test`.
 
 ```go
 ready, err := service.Volumes.Wait(ctx, resource.ID(volume.ID), "available",

@@ -25,72 +25,14 @@ implicitly fetches, merges client-side, or retries an accepted mutation.
 
 For example, bind a v3 Volume and explicitly pass a returned ETag when replacing:
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func replaceVolumeMetadata(ctx context.Context, client *gophercloud.ServiceClient, id string) error {
-    scope, err := volumes.New(client).MetadataIn(ctx, resource.ID(id))
-    if err != nil {
-        return err
-    }
-    current, err := scope.Get(ctx)
-    if err != nil {
-        return err
-    }
-    var options []volumes.MetadataOption
-    if etag := current.Header.Get("ETag"); etag != "" {
-        options = append(options, request.Header("If-Match", etag))
-    }
-    result, err := scope.Replace(ctx, map[string]string{"owner": "team-a"}, options...)
-    if err != nil {
-        return err
-    }
-    _ = result.Metadata
-    _ = result.Body // original response JSON, including envelope extensions
-    return nil
-}
-```
+See `example_metadata1_test.go` in [example_metadata1_test.go](example_metadata1_test.go), compiled by `go test`.
 
 Deletion preserves input order and duplicates. Each successful key DELETE has
 an actual HTTP 200 acknowledgement. The first error stops the sequence and
 returns earlier acknowledgements; this is not a transaction and missing keys
 are not ignored. The SDK does not manufacture metadata from acknowledgements.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v2/snapshots"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func deleteSnapshotMetadataKeys(ctx context.Context, client *gophercloud.ServiceClient, id string) error {
-    scope, err := snapshots.New(client).MetadataIn(ctx, resource.ID(id))
-    if err != nil {
-        return err
-    }
-    result, err := scope.DeleteKeys(ctx, []string{"temporary", "obsolete"})
-    if result != nil {
-        for _, deleted := range result.Deleted {
-            _ = deleted.Key // requested key with its actual response evidence
-            _ = deleted.StatusCode
-        }
-    }
-    return err // successful earlier deletes remain recorded on failure
-}
-```
+See `example_metadata2_test.go` in [example_metadata2_test.go](example_metadata2_test.go), compiled by `go test`.
 
 `Result` retains the actual `Metadata` string map, complete raw `Body`, copied
 `Header` and `StatusCode`. `DeleteResult` has `Cleared *Result` for clear-all PUT

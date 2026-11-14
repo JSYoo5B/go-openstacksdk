@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -52,85 +50,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "strings"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groups"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func printGroup(value *resource.RawResource) {
-    raw, err := json.MarshalIndent(value, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(raw))
-}
-
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-    version := flag.String("microversion", "3.38", "Cinder selected version")
-    action := flag.String("action", "list", "list/get/create/clone/update/delete")
-    id := flag.String("group", "", "group ID")
-    name := flag.String("name", "sample", "name for create/clone/update")
-    groupType := flag.String("group-type", "", "existing group-type name or ID")
-    volumeTypes := flag.String("volume-types", "", "comma-separated volume-type IDs")
-    sourceGroup := flag.String("source-group", "", "source group ID for clone")
-    sourceSnapshot := flag.String("source-snapshot", "", "source group-snapshot ID for clone")
-    flag.Parse()
-    ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud),
-        sdk.WithMicroversion(sdk.BlockStorage, *version))
-    if err != nil { log.Fatal(err) }
-    service, err := conn.BlockStorageV3(ctx)
-    if err != nil { log.Fatal(err) }
-    api := groups.New(service.RawClient())
-    var value *groups.GroupRecord
-    switch *action {
-    case "list":
-        for row, err := range api.ListRecords(ctx) {
-            if err != nil { log.Fatal(err) }
-            printGroup(row.Resource)
-        }
-        return
-    case "get":
-        value, err = api.GetRecord(ctx, *id, request.Custom(func(c *groups.RecordGetOpts) error { v := true; c.ListVolume = &v; return nil }))
-    case "create":
-        value, err = api.CreateRecord(ctx,
-            request.Field("group_type", *groupType),
-            request.Field("volume_types", strings.Split(*volumeTypes, ",")),
-            request.Field("name", *name))
-    case "clone":
-        var snapshot, source any
-        if *sourceSnapshot != "" { snapshot = *sourceSnapshot }
-        if *sourceGroup != "" { source = *sourceGroup }
-        value, err = api.CreateFromSourceRecord(ctx,
-            groups.WithRecordSourceGroupSnapshotID(snapshot),
-            groups.WithRecordSourceSourceGroupID(source),
-            groups.WithRecordSourceName(*name))
-    case "update":
-        value, err = api.UpdateRecord(ctx, *id, request.Field("name", *name))
-    case "delete":
-        err = api.DeleteRecord(ctx, *id, request.IgnoreMissing(false))
-        if err != nil { log.Fatal(err) }
-        return
-    default:
-        log.Fatal("unknown action")
-    }
-    if err != nil { log.Fatal(err) }
-    printGroup(value.Resource)
-}
-```
+See `Example_groups` in [example_groups_test.go](example_groups_test.go), compiled by `go test`.
 
 ## References
 

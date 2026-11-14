@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -37,49 +35,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/resourcefilters"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-    version := flag.String("microversion", "3.33", "selected Cinder version")
-    resourceName := flag.String("resource", "", "resource name; empty omits query")
-    single := flag.Bool("single-page", false, "stop after the first page")
-    expression := flag.String("expression", "", "optional JMESPath result")
-    flag.Parse()
-    ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud),
-        sdk.WithMicroversion(sdk.BlockStorage, *version))
-    if err != nil { log.Fatal(err) }
-    service, err := conn.BlockStorageV3(ctx)
-    if err != nil { log.Fatal(err) }
-    filters := resourcefilters.New(service.RawClient())
-    options := []resourcefilters.RecordListOption{
-        request.Custom(func(c *resourcefilters.RecordListOpts) error { c.Control = resource.ListControl{SinglePage: *single}; return nil }),
-        resourcefilters.WithRecordListJMESPath(*expression),
-    }
-    if *resourceName != "" {
-        options = append(options, resourcefilters.WithRecordListResource(*resourceName))
-    }
-    result, err := filters.ListResult(ctx, options...)
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(result.Value))
-}
-```
+See `Example_resourceFilters` in [example_resource_filters_test.go](example_resource_filters_test.go), compiled by `go test`.
 
 ## References
 

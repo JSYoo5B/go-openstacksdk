@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import openstack
@@ -27,67 +25,7 @@ else:
     print(conn.block_storage.delete_group_snapshot(args.id, ignore_missing=False))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/groupsnapshots"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func show(value *groupsnapshots.GroupSnapshotRecord) {
-    if value == nil { return }
-    if value.Resource != nil {
-        fmt.Printf("id=%s name=%s status=%s\n", value.Resource.Body["id"], value.Resource.Body["name"], value.Resource.Body["status"])
-    }
-    fmt.Printf("actual_http=%d discovery=%d actual_body=%q\n", value.StatusCode, len(value.Discovery), value.Envelope)
-}
-
-func main() {
-    action := flag.String("action", "get", "get, list, create, or delete")
-    id := flag.String("id", "group-snapshot-id", "existing group snapshot ID")
-    group := flag.String("group", "group-id", "existing source group ID")
-    flag.Parse()
-    ctx, cancel := context.WithTimeout(context.Background(), time.Minute)
-    defer cancel()
-    conn, err := openstack.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    cinder, err := conn.BlockStorageV3(ctx)
-    if err != nil { log.Fatal(err) }
-    api := groupsnapshots.New(cinder.RawClient())
-    switch *action {
-    case "get":
-        value, err := api.GetRecord(ctx, *id)
-        show(value)
-        if err != nil { log.Fatal(err) }
-    case "list":
-        for value, err := range api.ListRecords(ctx,
-            request.Custom(func(c *groupsnapshots.RecordListOpts) error { v := false; c.Details = &v; return nil }),
-            request.Query("status", "available"),
-            request.Limit(10)) {
-            if err != nil { log.Fatal(err) }
-            show(value)
-        }
-    case "create":
-        value, err := api.CreateRecord(ctx, map[string]any{"group_id": *group, "name": "sdk-example"})
-        show(value)
-        if err != nil { log.Fatal(err) }
-    case "delete":
-        receipt, err := api.DeleteRecord(ctx, *id, request.IgnoreMissing(false))
-        if receipt != nil { fmt.Printf("actual_http=%d ignored404=%t actual_body=%q\n", receipt.StatusCode, receipt.IgnoredMissing, receipt.Envelope) }
-        if err != nil { log.Fatal(err) }
-    default:
-        log.Fatal("unknown action")
-    }
-}
-```
+See `Example_groupSnapshots` in [example_group_snapshots_test.go](example_group_snapshots_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import openstack
 
@@ -16,35 +14,7 @@ quota = conn.block_storage.get_quota_set(
 print(quota.volumes, quota.usage, quota.reservation)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "log"
-
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func main() {
-    ctx := context.Background()
-    conn, err := openstack.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    scope, err := conn.BlockStorageProjectQuotas(ctx, resource.ID("project-id"))
-    if err != nil { log.Fatal(err) }
-    quota, err := scope.GetRecord(ctx,
-        quotasets.WithQuotaUsage(true),
-        request.Query("fields", []string{"volumes", "gigabytes"}),
-    )
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(quota.Resource.Body["volumes"]))
-    fmt.Println(string(quota.Resource.Body["usage"]), string(quota.Resource.Body["reservation"]))
-    fmt.Println(quota.ProjectID, quota.StatusCode)
-}
-```
+See `Example_query` in [example_query_test.go](example_query_test.go), compiled by `go test`.
 
 ## References
 

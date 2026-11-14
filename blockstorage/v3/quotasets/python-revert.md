@@ -15,36 +15,7 @@ conn.block_storage.revert_quota_set(
 )
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "os"
-
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-    "github.com/gophercloud/gophercloud/v2"
-)
-
-func main() {
-    provider := &gophercloud.ProviderClient{}
-    provider.SetToken(os.Getenv("OS_TOKEN"))
-    client := &gophercloud.ServiceClient{
-        ProviderClient: provider, Type: "volumev3",
-        Endpoint: os.Getenv("OS_VOLUME_ENDPOINT"),
-    }
-    scope, err := quotasets.New(client).InProject(context.Background(), resource.ID("project-id"))
-    if err != nil { panic(err) }
-    result, err := scope.RevertRecord(context.Background(),
-        request.Query("user_id", "user-id"),
-        request.Query("force", false),
-        request.Query("optional", nil))
-    if err != nil { panic(err) }
-    fmt.Println(result.ProjectID, result.StatusCode)
-}
-```
+See `Example_revert` in [example_revert_test.go](example_revert_test.go), compiled by `go test`.
 
 This Source path uses `urllib.parse.urlencode(params)` without `doseq`, rather
 than Requests' ordinary query expansion. Each value becomes one Python string:

@@ -4,24 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/snapshots"
-)
-
-func replaceSnapshotMetadata(ctx context.Context, client *gophercloud.ServiceClient, id string) (map[string]any, error) {
-    return snapshots.New(client).UpdateMetadata(ctx, id, snapshots.UpdateMetadataOpts{
-        Metadata: map[string]any{"owner": "team-a", "purpose": "backup"},
-    })
-}
-```
+See `example_snapshots_test.go` in [example_snapshots_test.go](example_snapshots_test.go), compiled by `go test`.
 
 ## References
 

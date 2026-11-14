@@ -18,37 +18,7 @@ cleanup = conn.block_storage.cleanup_service_workers(
 print(service, cleanup)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-    "os"
-
-    blockstorage "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/services"
-    "github.com/gophercloud/gophercloud/v2"
-)
-
-func main() {
-    provider := &gophercloud.ProviderClient{}
-    provider.SetToken(os.Getenv("OS_TOKEN"))
-    client := &gophercloud.ServiceClient{
-        ProviderClient: provider, Type: "volumev3",
-        Endpoint: os.Getenv("OS_VOLUME_ENDPOINT"), Microversion: "3.24",
-    }
-    sdk := blockstorage.New(client)
-    found, err := sdk.Services.FindRecord(context.Background(), "cinder-volume",
-        request.Query("host", "host@lvm"))
-    if err != nil { panic(err) }
-    fmt.Println(found)
-    result, err := sdk.Services.CleanupServiceWorkers(context.Background(),
-        services.WithCleanupWorkerFilter("is_up", false))
-    if err != nil { panic(err) }
-    fmt.Println(string(result.JSON))
-}
-```
+See `Example_findCleanup` in [example_find_cleanup_test.go](example_find_cleanup_test.go), compiled by `go test`.
 
 `CleanupServiceWorkers` sends all eight keys. Go binds omitted binary, host and
 cluster_name to JSON null; the pinned Python signature requires those three

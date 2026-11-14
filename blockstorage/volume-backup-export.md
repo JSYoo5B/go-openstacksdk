@@ -4,78 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-    "encoding/json"
-    "errors"
-    "fmt"
-    "time"
-
-    "github.com/gophercloud/gophercloud/v2"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func Adopt(provider *gophercloud.ProviderClient) (*sdk.Connection, error) {
-    return sdk.FromProvider(provider, sdk.WithRegion("RegionOne"))
-}
-
-func Inspect(result *blockstorage.ExportVolumeBackupResult, err error) {
-    if result != nil {
-        fmt.Println("requested backup ID:", result.BackupID)
-        if result.Exported != nil {
-            response := result.Exported
-            fmt.Println("export HTTP:", response.StatusCode, "bytes:", len(response.Body))
-            fmt.Println("content type:", response.Header.Get("Content-Type"))
-        }
-    }
-    if err == nil { return }
-    fmt.Println("export error:", err)
-    if errors.Is(err, context.Canceled) || errors.Is(err, context.DeadlineExceeded) {
-        fmt.Println("parent context interrupted export")
-    }
-    if errors.Is(err, resource.ErrInvalidOption) {
-        fmt.Println("invalid local input or changed request source")
-    }
-}
-
-func ConfiguredExport(parent context.Context, cloudName, backupID string) (*blockstorage.ExportVolumeBackupResult, error) {
-    ctx, cancel := context.WithTimeout(parent, 30*time.Second)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(cloudName))
-    if err != nil { return nil, err }
-    result, err := conn.ExportVolumeBackup(ctx,
-        blockstorage.ExportVolumeBackupRequest{BackupID: backupID})
-    Inspect(result, err)
-    return result, err
-}
-
-func DirectExport(ctx context.Context, cinder *gophercloud.ServiceClient, backupID string) (*blockstorage.ExportVolumeBackupResult, error) {
-    result, err := blockstorage.ExportVolumeBackup(ctx, cinder,
-        blockstorage.ExportVolumeBackupRequest{BackupID: backupID})
-    Inspect(result, err)
-    return result, err
-}
-
-// Optional application policy: call after a successful export only when
-// the application expects JSON. An opaque export need not contain JSON.
-func ApplicationJSON(result *blockstorage.ExportVolumeBackupResult) (json.RawMessage, error) {
-    if result == nil || result.Exported == nil {
-        return nil, fmt.Errorf("no admitted export response")
-    }
-    var value json.RawMessage
-    if err := json.Unmarshal(result.Exported.Body, &value); err != nil {
-        return nil, err
-    }
-    return value, nil
-}
-```
+See `example_volume_backup_export_test.go` in [example_volume_backup_export_test.go](example_volume_backup_export_test.go), compiled by `go test`.
 
 ```python
 import openstack

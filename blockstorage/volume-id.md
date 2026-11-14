@@ -4,68 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-    "encoding/json"
-    "fmt"
-
-    "github.com/gophercloud/gophercloud/v2"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func ReadVolumeID(ctx context.Context, conn *sdk.Connection, nameOrID string) error {
-    result, err := conn.GetVolumeID(ctx,
-        blockstorage.GetVolumeIDRequest{NameOrID: nameOrID})
-    if err != nil {
-        if result != nil {
-            fmt.Println("admitted fallback pages:", len(result.Pages))
-            if result.Observed != nil {
-                fmt.Println("admitted member status:", result.Observed.StatusCode)
-            }
-        }
-        return err
-    }
-    if result.ID == nil {
-        fmt.Println("volume absent")
-        return nil
-    }
-    fmt.Println("ID JSON:", string(result.ID))
-    fmt.Println("normalized volume:", string(result.Value))
-    copy := result.Volume.Clone()
-    fmt.Println("original ID field:", string(copy.Body["id"]))
-    return nil
-}
-
-func ReadVolumeIDWithLocation(ctx context.Context, conn *sdk.Connection, nameOrID string) error {
-    project := "configured-project"
-    location := resource.CloudLocation{
-        Project: resource.CloudProject{
-            ID: json.RawMessage(`"scope-id"`), Name: &project,
-        },
-    }
-    result, err := conn.GetVolumeID(ctx,
-        blockstorage.GetVolumeIDRequest{NameOrID: nameOrID},
-        func(c *blockstorage.VolumeReadOpts) error { loc := location.Clone(); c.Location = &loc; return nil })
-    if err != nil { return err }
-    fmt.Println(string(result.ID))
-    return nil
-}
-
-func ReadVolumeIDDirect(ctx context.Context, cinder *gophercloud.ServiceClient, nameOrID string) error {
-    result, err := blockstorage.GetVolumeID(ctx, cinder,
-        blockstorage.GetVolumeIDRequest{NameOrID: nameOrID})
-    if err != nil { return err }
-    if result.ID != nil { fmt.Println(string(result.ID)) }
-    return nil
-}
-```
+See `example_volume_id_test.go` in [example_volume_id_test.go](example_volume_id_test.go), compiled by `go test`.
 
 ```python
 import openstack

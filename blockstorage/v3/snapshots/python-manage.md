@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -24,41 +22,4 @@ with openstack.connect() as conn:
         conn.block_storage.unmanage_snapshot(args.identity)
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-)
-
-func main() {
-    action := flag.String("action", "", "manage or unmanage")
-    identity := flag.String("identity", "", "volume ID for manage, snapshot ID for unmanage")
-    reference := flag.String("reference", `{"source-name":"backend-snapshot"}`, "backend reference JSON")
-    flag.Parse()
-    ctx := context.Background()
-    conn, err := sdk.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.BlockStorageV3(ctx)
-    if err != nil { log.Fatal(err) }
-    switch *action {
-    case "manage":
-        row, err := service.Snapshots.ManageRecord(ctx, *identity, json.RawMessage(*reference))
-        if err != nil { log.Fatal(err) }
-        data, err := json.MarshalIndent(row.Resource, "", "  ")
-        if err != nil { log.Fatal(err) }
-        fmt.Println(string(data))
-    case "unmanage":
-        receipt, err := service.Snapshots.UnmanageRecord(ctx, *identity)
-        if err != nil { log.Fatal(err) }
-        fmt.Println(receipt.StatusCode)
-    default:
-        log.Fatal("action must be manage or unmanage")
-    }
-}
-```
+See `Example_manage` in [example_manage_test.go](example_manage_test.go), compiled by `go test`.
