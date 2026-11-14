@@ -30,7 +30,7 @@ func TestGlanceImageReadFacadePreservesNativeAndRegistry(t *testing.T) {
 			t.Fatalf("image read facade changed %s: %v", path, err)
 		}
 	}
-	docs, err := os.ReadFile(filepath.Join(g.root, "image/v2/README.md"))
+	docs, err := imageDocs(g.root)
 	if err != nil {
 		t.Fatal(err)
 	}

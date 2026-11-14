@@ -50,7 +50,7 @@ func TestGlanceMetadefTagsRegistryAndConcreteScope(t *testing.T) {
 			t.Fatalf("missing or duplicate tag aggregate: %s", want)
 		}
 	}
-	docs, err := os.ReadFile(filepath.Join(g.root, "image/v2/README.md"))
+	docs, err := imageDocs(g.root)
 	if err != nil {
 		t.Fatal(err)
 	}

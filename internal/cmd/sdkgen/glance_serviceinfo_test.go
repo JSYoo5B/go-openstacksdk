@@ -42,7 +42,7 @@ func TestGlanceServiceInfoRegistryAndNativeCompatibility(t *testing.T) {
 	if strings.Count(string(registry), `"github.com/JSYoo5B/go-openstacksdk/image/v2/serviceinfo"`) != 1 || strings.Count(string(registry), "ServiceInfo ") != 1 || strings.Count(string(registry), "ServiceInfo:") != 1 {
 		t.Fatalf("missing or duplicate aggregate: %s", registry)
 	}
-	docs, err := os.ReadFile(filepath.Join(g.root, "image/v2/README.md"))
+	docs, err := imageDocs(g.root)
 	if err != nil {
 		t.Fatal(err)
 	}

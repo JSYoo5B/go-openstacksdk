@@ -33,7 +33,7 @@ func TestGlanceImageUploadPreservesNativeAndRegistry(t *testing.T) {
 	if _, err := os.Stat(filepath.Join(g.root, "image/v2/imagedata/resources_generated.go")); !os.IsNotExist(err) {
 		t.Fatalf("imagedata unexpectedly gained a generated resource binding: %v", err)
 	}
-	docs, err := os.ReadFile(filepath.Join(g.root, "image/v2/README.md"))
+	docs, err := imageDocs(g.root)
 	if err != nil {
 		t.Fatal(err)
 	}
