@@ -6,47 +6,7 @@ Use Gophercloud v2.15.0's objectstorage/v1 API through one authenticated service
 
 Service access: `conn.ObjectStorageV1(ctx)` (openstacksdk: `conn.object_store`).
 
-`Containers.ListRecords/AllRecords` provides Source raw lists and SDK-owned paging, fields, and response evidence. [Container lists](containers/listing-python.md) covers query defaults, headers, and caps.
-
-`Containers.CreateRecord/DeleteRecord` handles create attributes, metadata prefixes, descriptor validation before HTTP, and missing defaults. [Container mutations](containers/mutations-python.md) distinguishes Source generic statuses and seed values from actual HTTP evidence.
-
-Native `Objects.Create` substitutes an empty reader for nil Content and rejects typed nil before HTTP. `WithCreateBytes` copies input and prepares a fresh reader per call. [Empty objects and byte options](objects/create-defaults-python.md) compares native single PUT with upper-level upload behavior.
-
-`Accounts/Containers.SetMetadataAndRefresh` provides the Python metadata setter's default refresh. `DeleteMetadataKeys` sends POST even for nil/empty keys. `Objects.HeadMetadata/SetMetadataFromFresh/DeleteMetadataAndRefresh` separates fresh state, each mutation acknowledgement, and final HEAD. [Accounts](accounts/metadata-refresh-python.md), [containers](containers/metadata-refresh-python.md), and [objects](objects/metadata-python.md) compare prefixes, system aliases, JSON values, partial failures, and Python defaults.
-
-[Native Swift calls](native-calls.md) covers generated `Accounts`, `Containers`, and `Objects` paths, headers, statuses, marker paging, bulk-delete bodies, and temp-URL signing.
-
-[Native swauth](swauth/README.md) describes TempAuth/swauth authentication and Swift client construction, including mutation of the shared ProviderClient token.
-
-[Miscellaneous Python cloud helpers](../../docs/python-cloud-parity-misc.md) covers object-store and Connection-state helpers.
-
-`Objects.CreateDirectoryMarkerObject` prepares an empty object with Content-Type `application/directory`; function options supply metadata and extra headers. See [directory markers](objects/directory-marker.md) for Python cloud-helper comparisons.
-
-`Objects.CreateObject` accepts bytes, a file, or a Reader through concrete `CreateObjectInput`. Bytes use a single PUT; files/Readers use owned spooling, checksums, fresh capabilities, and HEAD before selecting skip or SLO/DLO. `IsObjectStale` provides separate HEAD/hash comparison. SegmentPrefix and each physical attempt, manifest, and cleanup response remain available. [Object creation](objects/create.md) explains function options, Python defaults, retries, and partial failures.
-
-`Objects.WaitForDelete` performs HEAD every two seconds by default, waiting up to 120 seconds for a clean 404. `WaitForStatus` compares an explicitly selected string attribute or response header with no default SDK timeout. Swift objects have no default status/progress fields, so callers must select one. Both waits preserve the last physical request/response evidence and differ from common Collection wait policies. See [object waits](objects/wait.md).
-
-`Objects.DeleteObject` accepts concrete `DeleteObjectOpts` and function options, performing HEAD by default before deleting the same object. A known SLO flag skips HEAD; true requests `multipart-manifest=delete`. Discovery and Deletion contain actual phase responses; default missing tolerance marks only clean 404 as IgnoredMissing. [Object deletion](objects/delete.md) covers ordinary DELETE202/204, SLO 200 bulk reports, partial failures, and uncertain cleanup completion.
-
-`Objects.GetObject` returns binary bytes, metadata, and raw headers from one GET. `Objects.DownloadObject` writes to a borrowed `io.Writer` and preserves actual byte counts; `Objects.StreamObject` returns a caller-owned `io.ReadCloser`. Shared concrete `ObjectReadOpts` and function options configure conditional headers, ranges, and queries, distinguishing 200/206/304. [Read/download/stream](objects/read.md) explains partial transfers, Close errors, and ownership.
-
-`Objects.GetMetadata` uses literal container/object names and HEAD200 to return metadata and raw responses. `Objects.SetMetadata` and `Objects.DeleteMetadata` perform `symlink=get` HEAD200, merge changes, then POST202. MetadataChangeResult separates discovery and mutation responses. [Object metadata](objects/README.md) explains system headers, link restrictions, and concurrent-change limits.
-
-`Containers.GetMetadata` accepts a literal name and concrete `GetMetadataOpts`, returning user metadata, nullable counters, and raw timestamps from HEAD204. `Containers.SetMetadata` and `Containers.DeleteMetadata` returns a single POST204 acknowledgement; refresh requires an explicit read. [Container metadata](containers/README.md) explains ResourceBase paths and system-header options.
-
-`Containers.CreateContainer` accepts concrete `CreateContainerOpts` and function options, sending metadata/system headers with PUT201/202. `Containers.DeleteContainer` expects DELETE204; default missing tolerance returns the actual 404 and IgnoredMissing. Transport errors and nonempty-container 409 remain errors. No additional HEAD or object deletion occurs. [Container creation/deletion](containers/README.md) explains strict missing options and raw responses.
-
-`Accounts.GetMetadata` uses concrete `GetMetadataOpts` and HEAD204 for account metadata, nullable counters, and raw responses. `Accounts.SetMetadata` and `Accounts.DeleteMetadata` returns POST204 acknowledgements with explicit refresh reads. [Account metadata](accounts/README.md) explains owned options and Python's automatic HEAD refresh.
-
-`Accounts.SetTempURLKey` and `Containers.SetTempURLKey` use concrete `SetTempURLKeyOpts` to select primary or secondary keys and send one POST204. `GetTempURLKey` uses concrete `GetTempURLKeyOpts` for fresh container-to-account HEAD204 discovery, selecting secondary before primary within each scope. Actual phase responses/errors are preserved; discovery errors stop fallback. [Temp URL keys](temp_url_key.md) explains function options, empty-key deletion, and native signing's primary-only lookup.
-
-`GenerateFormSignature` and `GenerateTempURL` sign with FormSignatureInput, concrete GenerateFormSignatureOpts/GenerateTempURLOpts, and function options. They support default SHA1, optional SHA256/SHA512, owned binary keys, and integer UTC expiry. Explicit keys require no HTTP. Automatic discovery preserves FormPost container-to-account and Temp URL account-only policies, retaining actual Discovery responses on failure. [Signing](signing.md) covers decoded literal paths, escaped URLs, prefixes, and IP ranges.
-
-`GetInfo` derives `/info` from the catalog endpoint, returning capabilities and extension raw JSON from actual HTTP 200 responses. `GetObjectSegmentSize` selects the default 1 GiB or explicit size within advertised bounds; only clean 404/412 uses the fallback maximum of 2684354561. See [capabilities](info.md) for concrete GetInfoOpts/ObjectSegmentSizeOpts, function options, and actual response/error evidence.
-
-Go `Containers.List` and `Objects.List` correspond to Python `conn.object_store.containers()` and `objects(container)`. They return typed fields rather than names alone: Container Name/Count/Bytes and Object Name/Bytes/ContentType/Hash/LastModified. Delimiter entries remain in Object.Subdir.
-
-`Containers.Resources` and `Objects.InContainer(ctx, parent)` provide common resource policies. HEAD reads preserve typed information, user metadata, and complete headers in SDK-owned ContainerResource/ObjectResource. See [Swift resources](objects/README.md).
+Package docs describe the service, accounts, containers and objects (`go doc ./objectstorage/v1/...`). Guides: [accounts](accounts/README.md), [containers](containers/README.md), [objects](objects/README.md), [object creation](objects/create.md), [directory markers](objects/directory-marker.md), [reads](objects/read.md), [deletion](objects/delete.md), [waits](objects/wait.md), [capabilities](info.md), [signing](signing.md), [temp URL keys](temp_url_key.md) and [swauth](swauth/README.md).
 
 ## Go usage
 

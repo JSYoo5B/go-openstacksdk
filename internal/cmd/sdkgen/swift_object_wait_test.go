@@ -35,7 +35,7 @@ func TestSwiftObjectWaitPreservesNativeAndSharedWaiters(t *testing.T) {
 			t.Fatalf("unexpected generated%s Collection:%v", name, err)
 		}
 	}
-	docs, err := os.ReadFile(filepath.Join(g.root, "objectstorage/v1/README.md"))
+	docs, err := objectStorageDocs(g.root)
 	if err != nil {
 		t.Fatal(err)
 	}
