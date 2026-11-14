@@ -34,32 +34,7 @@ quota = conn.shared_file_system.update_quota_set("project-id", shares=0)
 conn.shared_file_system.revert_quota_set("project-id")
 ```
 
-```go
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-    "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets"
-)
-
-func manageQuota(ctx context.Context, client *gophercloud.ServiceClient) error {
-    scope, err := quotasets.New(client).InProject(ctx, resource.ID("project-id"))
-    if err != nil {
-        return err
-    }
-    quota, err := scope.Get(ctx)
-    if err != nil {
-        return err
-    }
-    _ = quota.Shares // *int64; nil is omitted or null, distinguished by quota.Body
-    zero := int64(0)
-    _, err = scope.Update(ctx, quotasets.UpdateOpts{Shares: &zero},
-        request.Custom(func(c *request.Config[quotasets.UpdateOpts]) error { v := false; c.Options.Force = &v; return nil }))
-    return err
-}
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 An ID does not trigger Keystone HTTP. `resource.Name("tenant")` uses the separate
 Keystone v3 client supplied through `WithIdentityClient`. Exact names are resolved
@@ -74,40 +49,7 @@ IDs avoid lookup HTTP. Share-type scopes require API 2.39 before a name lookup
 or any quota operation; user detail requires API 2.25. The server enforces the
 microversions for individual newer quota fields.
 
-```go
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-    "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotasets"
-)
-
-func manageScopedQuota(ctx context.Context, client *gophercloud.ServiceClient) error {
-    parent, err := quotasets.New(client).InProject(ctx, resource.ID("project-id"))
-    if err != nil {
-        return err
-    }
-    user, err := parent.InUser(ctx, resource.ID("user-id"))
-    if err != nil {
-        return err
-    }
-    count := int64(10)
-    if _, err := user.Update(ctx, quotasets.UpdateOpts{Shares: &count}); err != nil {
-        return err
-    }
-    shareType, err := parent.InShareType(ctx, resource.Name("gold")) // API 2.39+
-    if err != nil {
-        return err
-    }
-    quota, err := shareType.Get(ctx)
-    if err != nil {
-        return err
-    }
-    _ = quota.ShareTypeID // resolved target, separate from quota.ID
-    return nil
-}
-```
+See `Example_scoped` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 Child scopes use composition with a private binding, so they cannot expose a
 project-wide reset through embedded methods. They expose `Get`, `Detail`,

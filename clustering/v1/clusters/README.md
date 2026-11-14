@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 cluster = conn.clustering.create_cluster(
     name="workers", profile_id="PROFILE_ID",
@@ -37,15 +35,7 @@ action = conn.clustering.delete_cluster("CLUSTER_ID", force_delete=True)
 action = conn.clustering.get_action(action.id)
 ```
 
-```go
-api := clusters.New(client)
-submission, err := api.Delete(ctx, resource.ID("CLUSTER_ID"), request.Custom(func(c *request.Config[clusters.DeleteOpts]) error { c.Options.Force = true; return nil }))
-if err != nil { return err }
-if submission == nil { return nil }
-action, err := actions.New(client).Get(ctx, submission.ActionID)
-if err != nil { return err }
-fmt.Println(action.ID, action.Status)
-```
+See `Example_forceDelete` in [example_delete_test.go](example_delete_test.go), compiled by `go test`.
 
 ```python
 action = conn.clustering.scale_out_cluster("CLUSTER_ID", count=1)

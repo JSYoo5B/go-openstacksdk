@@ -4,34 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-api := quotas.New(dnsClient)
-scope, err := api.InProject(ctx, resource.ID("project-id"),
-    quotas.WithAllProjects(true))
-if err != nil { return err }
-
-limits, err := scope.Get(ctx)
-if err != nil { return err }
-fmt.Println(limits.ProjectID, limits.Zones, limits.StatusCode)
-
-zero := 0
-updated, err := scope.Update(ctx, quotas.UpdateOpts{Zones: &zero})
-if err != nil { return err }
-fmt.Println(updated.Header.Get("X-Openstack-Request-Id"))
-
-reset, err := scope.Reset(ctx)
-if err != nil { return err }
-fmt.Println(reset.ProjectID, reset.StatusCode)
-```
-
-```go
-zones := 7
-snapshot := quotas.WithQuotaOptions(quotas.UpdateOpts{Zones: &zones})
-zones = 99
-_, err := scope.Update(ctx, quotas.UpdateOpts{}, snapshot) // zones=7
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

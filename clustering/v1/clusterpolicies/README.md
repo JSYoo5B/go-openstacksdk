@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 binding = conn.clustering.get_cluster_policy("POLICY_NAME_OR_ID", "CLUSTER_NAME_OR_ID")
 for binding in conn.clustering.cluster_policies("CLUSTER_NAME_OR_ID", is_enabled=False):
@@ -14,21 +12,7 @@ for binding in conn.clustering.cluster_policies("CLUSTER_NAME_OR_ID", is_enabled
 
 See `Example_clusterpoliciesFragment1` in [example_clusterpolicies_fragment1_test.go](example_clusterpolicies_fragment1_test.go), compiled by `go test`.
 
-```go
-bindings, err := scope.All(ctx,
-    request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { v := false; c.Options.Enabled = &v; return nil }),
-    request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { c.Options.PolicyName = "POLICY_NAME"; return nil }),
-    request.Custom(func(c *request.Config[clusterpolicies.ListOpts]) error { c.Options.PolicyType = "senlin.policy.scaling-1.0"; return nil }))
-if err != nil { return err }
-fmt.Println(len(bindings))
-```
-
-```go
-err = scope.WaitForDelete(ctx, resource.ID("POLICY_NAME_OR_ID"),
-    resource.WithTimeout(30*time.Second),
-    resource.WithPollInterval(time.Second))
-if err != nil { return err }
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 See `Example_clusterpoliciesFragment4` in [example_clusterpolicies_fragment4_test.go](example_clusterpolicies_fragment4_test.go), compiled by `go test`.
 

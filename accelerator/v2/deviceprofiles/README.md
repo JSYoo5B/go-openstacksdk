@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 profile = conn.accelerator.create_device_profile(
     name="fpga-profile",
@@ -14,24 +12,7 @@ profile = conn.accelerator.create_device_profile(
 conn.accelerator.delete_device_profile(profile.uuid, ignore_missing=False)
 ```
 
-```go
-func createAndDelete(ctx context.Context, client *gophercloud.ServiceClient) error {
-    profiles := deviceprofiles.New(client)
-    profile, err := profiles.Create(ctx, deviceprofiles.CreateOpts{
-        Name: "fpga-profile",
-        Groups: []deviceprofiles.Group{{
-            "resources:CUSTOM_FPGA": "1",
-            "trait:CUSTOM_ACCEL": "required",
-        }},
-    })
-    if err != nil { return err }
-    if err := profiles.Delete(ctx, resource.ID(profile.UUID), resource.WithMissingError()); err != nil {
-        return err
-    }
-    return profiles.WaitDeleted(ctx, resource.ID(profile.UUID),
-        resource.WithTimeout(2*time.Minute), resource.WithPollInterval(time.Second))
-}
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

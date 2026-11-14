@@ -55,18 +55,7 @@ Limits and exact behavior:
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-conn, err := sdk.Connect(ctx, sdk.WithCloud("dev"),
-    sdk.WithMicroversion("baremetal", "1.93"))
-if err != nil { return err }
-service, err := conn.BareMetal(ctx)
-if err != nil { return err }
-media, err := service.Nodes.GetVirtualMedia(ctx, nodeID)
-if err != nil { return err }
-fmt.Println(media.Image, media.Inserted, media.MediaTypes)
-```
+See `ExampleAPI_GetVirtualMedia` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

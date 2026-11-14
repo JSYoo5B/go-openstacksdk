@@ -144,11 +144,7 @@ view:
   fail with `resource.ErrUnsupported` before any request. Progress callbacks
   report zero.
 
-```go
-rules := defaultrules.New(client).Resources()
-rule, err := network.WaitForStatus(ctx, rules, resource.ID(ruleID), "IPv6",
-	resource.WithStatusAttribute("ether_type"))
-```
+See `Example_waitForDefaultRuleAttribute` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 ## Differences from Python
 

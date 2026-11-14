@@ -2,12 +2,7 @@
 
 `Service.SearchCOEClusters`, `GetCOECluster`, `SearchClusterTemplates` and `GetClusterTemplate` are the Go counterparts of the openstacksdk cloud helpers `search_coe_clusters`, `get_coe_cluster`, `search_cluster_templates` and `get_cluster_template`.
 
-```go
-found, err := service.SearchCOEClusters(ctx, "prod-*",
-    v1.WithSearchFilters(json.RawMessage(`{"status":"CREATE_COMPLETE"}`)))
-cluster, err := service.GetCOECluster(ctx, "prod-a")      // nil, nil when nothing matches
-template, err := service.GetClusterTemplate(ctx, "k8s")   // GET by ID, then exact ID/name match
-```
+See `Example_search` in [example_search_test.go](example_search_test.go), compiled by `go test`.
 
 ## Contract
 

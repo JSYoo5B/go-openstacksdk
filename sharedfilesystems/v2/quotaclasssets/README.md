@@ -14,24 +14,7 @@ quota = conn.shared_file_system.get_quota_class_set("default")
 quota = conn.shared_file_system.update_quota_class_set("default", shares=0)
 ```
 
-```go
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/sharedfilesystems/v2/quotaclasssets"
-)
-
-func updateQuotaClass(ctx context.Context, client *gophercloud.ServiceClient) error {
-    scope, err := quotaclasssets.New(client).InClass(ctx, "default")
-    if err != nil {
-        return err
-    }
-    zero := int64(0)
-    _, err = scope.Update(ctx, quotaclasssets.UpdateOpts{Shares: &zero})
-    return err
-}
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 `InClass` performs no HTTP or Keystone lookup. A class name must be one unescaped
 URL path segment. A UUID-shaped class name remains a class name. The catalog

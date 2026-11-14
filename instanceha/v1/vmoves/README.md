@@ -3,21 +3,7 @@
 Python `conn.instance_ha.vmoves(notification)` and
 `get_vmove(vmove, notification)` map to a fixed Notification scope.
 
-```go
-client.Microversion = "1.3" // before constructing/using the API
-scope, err := vmoves.New(client).InNotification(ctx,
-    resource.ID(notification.UUID))
-if err != nil { return err }
-state, kind := "ongoing", "evacuation"
-moves, err := scope.All(ctx, vmoves.WithListOptions(vmoves.ListOpts{
-    Status: &state, Type: &kind,
-}))
-if err != nil { return err }
-for _, move := range moves {
-    move, err = scope.Get(ctx, move.UUID)
-    if err != nil { return err }
-}
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 VMove is read-only: list/get plus shared status/deletion monitoring, with no
 create, update, delete or name lookup capability. Both parent and VMove route

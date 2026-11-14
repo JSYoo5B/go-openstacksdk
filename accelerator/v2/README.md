@@ -2,17 +2,7 @@
 
 The SDK owns Cyborg models and transport because pinned Gophercloud does not provide this service. `Connection.Accelerator(ctx)` and `AcceleratorV2(ctx)` share authentication/HTTP configuration and lazy caching. Endpoints normalize `/v2` once, whether initially present or absent. Select Cyborg microversions with `WithMicroversion`, `WithMicroversionRange`, or `WithLatestMicroversion`.
 
-```go
-accel, err := conn.Accelerator(ctx)
-if err != nil { return err }
-for device, err := range accel.Devices.List(ctx, resource.WithQuery("hostname", "compute-1")) {
-    if err != nil { return err }
-    fmt.Println(device.UUID, device.Type, device.Status)
-}
-deployable, err := accel.Deployables.Find(ctx, resource.Name("compute-1_FPGA"))
-if err != nil { return err }
-fmt.Println(deployable.UUID)
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 | Python openstacksdk | Go SDK |
 |---|---|

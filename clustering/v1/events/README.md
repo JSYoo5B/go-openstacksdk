@@ -4,28 +4,12 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 event = conn.clustering.get_event(event_id)
 events = conn.clustering.events(obj_id=node_id, limit=20)
 ```
 
-```go
-api := events.New(client)
-event, err := api.Get(ctx, eventID)
-if err != nil {
-    return err
-}
-fmt.Println(event.ObjectID, event.GeneratedAt, event.Level)
-
-records, err := api.All(ctx, events.WithListOptions(events.ListOpts{
-    Limit:       20,
-    ObjectIDs:   []string{nodeID, otherNodeID},
-    ObjectTypes: []string{"NODE", "CLUSTER"},
-    Sort:        "timestamp:desc",
-}))
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 See `Example_eventsFragment2` in [example_events_fragment2_test.go](example_events_fragment2_test.go), compiled by `go test`.
 

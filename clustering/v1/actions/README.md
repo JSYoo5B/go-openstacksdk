@@ -4,30 +4,12 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 action = conn.clustering.get_action(action_id)
 actions = conn.clustering.actions(target_id=node_id, limit=20)
 ```
 
-```go
-api := actions.New(client)
-action, err := api.Get(ctx, actionID)
-if err != nil {
-    return err
-}
-fmt.Println(action.ID, action.Status)
-
-for action, err := range api.List(ctx,
-    actions.WithListOptions(actions.ListOpts{TargetID: nodeID, Limit: 20}),
-) {
-    if err != nil {
-        return err
-    }
-    fmt.Println(action.ID, action.Status)
-}
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ```python
 action = conn.clustering.update_action("ACTION_ID", status="CANCELLED")

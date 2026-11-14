@@ -13,21 +13,9 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 See `Example_databasesFragment1` in [example_databases_fragment1_test.go](example_databases_fragment1_test.go), compiled by `go test`.
 
-```go
-if err := scope.CreateBatch(ctx, databases.BatchCreateOpts{
-    {Name: "app"},
-    {Name: "logs", CharSet: "utf8mb4"},
-}); err != nil { return err }
-```
-
-```go
-if err := scope.Delete(ctx, resource.ID("app")); err != nil { return err }
-if err := scope.WaitDeleted(ctx, resource.ID("app")); err != nil { return err }
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 See `example_databases1_test.go` in [example_databases1_test.go](example_databases1_test.go), compiled by `go test`.
 

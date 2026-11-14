@@ -18,11 +18,4 @@ Other Python differences:
 conn.load_balancer.update_quota("project-id", load_balancers=10, health_monitors=-1)
 ```
 
-```go
-func updateLikePython(ctx context.Context, scope *quotas.ProjectQuotaScope) error {
-    ten, unlimited := 10, -1
-    _, err := scope.Update(ctx, quotas.UpdateOpts{Loadbalancer: &ten, Healthmonitor: &unlimited},
-        quotas.WithLegacyQuotaKeys(true)) // {"quota":{"load_balancer":10,"health_monitor":-1}}
-    return err
-}
-```
+See `ExampleWithLegacyQuotaKeys` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.

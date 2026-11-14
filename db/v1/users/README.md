@@ -13,28 +13,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-scope, err := service.Users.InInstance(ctx, resource.Name("db-server"))
-if err != nil { return err }
-user, err := scope.Find(ctx, resource.Name("reader"))
-if err != nil { return err }
-fmt.Println(user.Name, user.Host)
-
-if err := scope.Create(ctx, users.CreateOpts{
-    Name: "writer",
-    Password: password,
-    Databases: databases.BatchCreateOpts{{Name: "app"}},
-}); err != nil { return err }
-```
-
-```go
-if err := scope.CreateBatch(ctx, users.BatchCreateOpts{
-    {Name: "reader", Password: password, Host: "%"},
-    {Name: "reader", Password: password, Host: "192.0.2.10"},
-}); err != nil { return err }
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 See `Example_usersFragment3` in [example_users_fragment3_test.go](example_users_fragment3_test.go), compiled by `go test`.
 

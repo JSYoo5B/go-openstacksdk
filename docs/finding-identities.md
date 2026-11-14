@@ -4,20 +4,13 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 See `example_finding_identities1_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 See `example_finding_identities2_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 See `example_finding_identities3_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-```go
-flavor, err := compute.Flavors.FindIdentity(ctx, flavorID,
-    resource.WithIdentityFindFallback(resource.FindFallbackNever),
-    resource.WithIdentityFindIgnoreMissing(false),
-    resource.WithIdentityFindExtraSpecs(true))
-```
+See `Example_findFlavorStrictly` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 See `example_finding_identities4_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 

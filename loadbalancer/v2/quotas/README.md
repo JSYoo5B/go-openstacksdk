@@ -4,40 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-func manageQuotas(ctx context.Context, client *gophercloud.ServiceClient) error {
-    api := quotas.New(client)
-    scope, err := api.InProject(ctx, resource.ID("project-id"))
-    if err != nil { return err }
-
-    limits, err := scope.Get(ctx)
-    if err != nil { return err }
-    fmt.Println(limits.ProjectID, limits.Loadbalancer, limits.Listener)
-
-    defaults, err := api.Defaults(ctx)
-    if err != nil { return err }
-    fmt.Println(defaults.Loadbalancer, defaults.Listener)
-
-    zero, unlimited := 0, -1
-    updated, err := scope.Update(ctx, quotas.UpdateOpts{
-        Listener: &zero, Loadbalancer: &unlimited,
-    }, quotas.WithDefaultLimit(quotas.LimitMembers))
-    if err != nil { return err }
-    fmt.Println(updated.Header.Get("X-Openstack-Request-Id"))
-
-    for quota, err := range api.ListProjects(ctx, quotas.WithProjectListOptions(
-        quotas.ProjectListOpts{Limit: 100},
-    )) {
-        if err != nil { return err }
-        fmt.Println(quota.ProjectID, quota.Pool)
-    }
-
-    _, err = scope.Reset(ctx)
-    return err
-}
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

@@ -3,6 +3,9 @@ package openstack_test
 import (
 	"context"
 	"fmt"
+	networkcloud "github.com/JSYoo5B/go-openstacksdk/network"
+	"github.com/JSYoo5B/go-openstacksdk/network/v2/extensions/security/defaultrules"
+	"log"
 	"net/url"
 	"time"
 
@@ -331,4 +334,97 @@ func waitForVolumeServiceWaits2(ctx context.Context, client *gophercloud.Service
 func waitForVolumeDeletionServiceWaits2(ctx context.Context, client *gophercloud.ServiceClient, id string) error {
 	return volumes.New(client).WaitForDelete(ctx, resource.ID(id),
 		resource.WithUnlimitedWait())
+}
+
+func Example_findFlavorStrictly() {
+	ctx := context.Background()
+	conn, err := sdk.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	compute, err := conn.ComputeV2(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	flavor, err := compute.Flavors.FindIdentity(ctx, "flavor-id",
+		resource.WithIdentityFindFallback(resource.FindFallbackNever),
+		resource.WithIdentityFindIgnoreMissing(false),
+		resource.WithIdentityFindExtraSpecs(true))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(flavor)
+}
+
+func Example_microversionPolicy() {
+	ctx := context.Background()
+	conn, err := sdk.Connect(ctx,
+		sdk.WithLatestMicroversion(sdk.Compute),
+		sdk.WithMicroversion(sdk.Compute, "2.52"),
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(conn != nil)
+}
+
+func Example_waitForDefaultRuleAttribute() {
+	ctx := context.Background()
+	conn, err := sdk.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	service, err := conn.NetworkV2(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	rules := defaultrules.New(service.RawClient()).Resources()
+	rule, err := networkcloud.WaitForStatus(ctx, rules, resource.ID("rule-id"), "IPv6", resource.WithStatusAttribute("ether_type"))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(rule)
+}
+
+func Example_listWithEarlyStop() {
+	ctx := context.Background()
+	conn, err := sdk.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	service, err := conn.ComputeV2(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	seen := 0
+	for server, err := range service.Servers.Resources.List(ctx, resource.WithPageSize(100)) {
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(server.ID)
+		if seen++; seen == 10 {
+			break
+		}
+	}
+}
+
+func Example_waitOnAttribute() {
+	ctx := context.Background()
+	conn, err := sdk.Connect(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	service, err := conn.BareMetalV1(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+	node, err := service.Nodes.Resources.Wait(ctx, resource.ID("node-uuid"), "power on",
+		resource.WithStatusAttribute("power_state"),
+		resource.WithFailureStates("error"),
+		resource.WithUnlimitedWait(),
+		resource.WithProgressCallback(func(progress int) error { fmt.Println(progress); return nil }))
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(node)
 }

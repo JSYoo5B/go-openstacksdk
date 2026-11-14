@@ -4,16 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 See `Example_profiletypesFragment1` in [example_profiletypes_fragment1_test.go](example_profiletypes_fragment1_test.go), compiled by `go test`.
 
-```go
-values, err := api.All(ctx,
-    profiletypes.WithListOptions(profiletypes.ListOpts{Limit: 20}),
-    request.Query("vendor_filter", "enabled"),
-)
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 See `Example_profiletypesFragment3` in [example_profiletypes_fragment3_test.go](example_profiletypes_fragment3_test.go), compiled by `go test`.
 

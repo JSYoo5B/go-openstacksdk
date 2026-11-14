@@ -10,8 +10,6 @@ The pinned native `List` appends the raw share ID after `?share_id=`, so an ID s
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 See `Example_shareaccessrules1` in [example_shareaccessrules1_test.go](example_shareaccessrules1_test.go), compiled by `go test`.
 
 See `example_shareaccessrules2_test.go` in [example_shareaccessrules2_test.go](example_shareaccessrules2_test.go), compiled by `go test`.
@@ -24,13 +22,7 @@ still counts raw rows before filtering, as Python's `max_items` does:
 rules = conn.shared_file_system.access_rules("share-id", access_level="rw", state="active")
 ```
 
-```go
-func ActiveWritableRules(ctx context.Context, scope *shareaccessrules.AccessRuleScope) ([]*shareaccessrules.AccessRule, error) {
-    return scope.All(ctx,
-        shareaccessrules.WithListBodyFilter("access_level", "rw"),
-        shareaccessrules.WithListBodyFilter("state", "active"))
-}
-```
+See `ExampleWithListBodyFilter` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 Deployments that only serve Manila 2.44 or earlier can list rules through the
 legacy share action. The client's numeric microversion selects
@@ -38,17 +30,7 @@ legacy share action. The client's numeric microversion selects
 newer fails with `resource.ErrUnsupported` before HTTP, so use `InShare` there.
 Legacy rows carry no `share_id`; each rule keeps `ParentShareID`.
 
-```go
-func LegacyRules(ctx context.Context, client *gophercloud.ServiceClient, shareID string) error {
-    client.Microversion = "2.40" // configure before sharing the client
-    result, err := shareaccessrules.New(client).ListAccessAction(ctx, shareID)
-    if err != nil { return err }
-    for _, rule := range result.Rules {
-        fmt.Println(result.Action, rule.ID, rule.AccessTo, rule.State)
-    }
-    return nil
-}
-```
+See `ExampleAPI_ListAccessAction` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

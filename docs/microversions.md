@@ -27,12 +27,7 @@ order, including when that exact version lies outside an otherwise configured
 range. The range still must be syntactically valid. Repeated options of the same
 kind use the last value.
 
-```go
-conn, err := sdk.Connect(ctx,
-    sdk.WithLatestMicroversion(sdk.Compute),
-    sdk.WithMicroversion(sdk.Compute, "2.52"),
-)
-```
+See `Example_microversionPolicy` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 The exact pin preserves the previous SDK contract: the cloud checks whether that
 version is usable when an API request is made. `MicroversionSelection` reports the

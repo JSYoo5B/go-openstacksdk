@@ -4,53 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-func createClusterQuota(ctx context.Context, client *gophercloud.ServiceClient) error {
-    api := quotas.New(client)
-    project, err := api.InProject(ctx, resource.ID("project-id"))
-    if err != nil { return err }
-    scope, err := project.ForResource(quotas.Cluster)
-    if err != nil { return err }
-
-    quota, err := scope.Create(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 0; c.Options.HardLimit = &v; return nil }),
-        request.Field("vendor", map[string]string{"tier": "small"}))
-    if err != nil { return err }
-    fmt.Println(quota.RequestProjectID, quota.RequestResource,
-        quota.ID, quota.HardLimit, quota.Header.Get("X-Openstack-Request-Id"))
-    current, err := scope.Get(ctx)
-    if err != nil { return err }
-    fmt.Println(current.HardLimit)
-
-    updated, err := scope.Update(ctx, request.Custom(func(c *request.Config[quotas.QuotaCreateOpts]) error { v := 2; c.Options.HardLimit = &v; return nil }))
-    if err != nil { return err }
-    fmt.Println(updated.StatusCode)
-
-    _, err = scope.Delete(ctx)
-    return err
-}
-```
-
-```go
-import (
-    "context"
-    "fmt"
-    "github.com/JSYoo5B/go-openstacksdk/containerinfra/v1/quotas"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func listQuotas(ctx context.Context, api *quotas.API) error {
-    for quota, err := range api.List(ctx,
-        quotas.WithListOptions(quotas.ListOpts{Limit: 100}),
-        request.Custom(func(c *request.Config[quotas.ListOpts]) error { v := true; c.Options.AllTenants = &v; return nil }),
-    ) {
-        if err != nil { return err }
-        fmt.Println(quota.ID, quota.ProjectID, quota.Resource, quota.HardLimit)
-    }
-    return nil
-}
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

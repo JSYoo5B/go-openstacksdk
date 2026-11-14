@@ -12,23 +12,9 @@ resource.Name("web-01")
 resource.ID(server.ID)
 ```
 
-```go
-for server, err := range service.Servers.List(ctx, resource.WithPageSize(100)) {
-    if err != nil { return err }
-    fmt.Println(server.ID)
-    if shouldStop { break }
-}
-```
+See `Example_listWithEarlyStop` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-```go
-node, err := service.Nodes.Resources.Wait(ctx, resource.ID("node-uuid"), "power on",
-    resource.WithStatusAttribute("power_state"),
-    resource.WithFailureStates("error"),
-    resource.WithUnlimitedWait(),
-    resource.WithProgressCallback(func(progress int) error { fmt.Println(progress); return nil }))
-if err != nil { return err }
-_ = node
-```
+See `Example_waitOnAttribute` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 See `example_resource1_test.go` in [example_resource1_test.go](example_resource1_test.go), compiled by `go test`.
 

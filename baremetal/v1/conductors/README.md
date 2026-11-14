@@ -13,17 +13,7 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-conn, err := sdk.Connect(ctx, sdk.WithMicroversion(sdk.BareMetal, "1.49"))
-if err != nil { return err }
-service, err := conn.BareMetalV1(ctx)
-if err != nil { return err }
-conductor, err := service.Conductors.Find(ctx, resource.ID("conductor-01"))
-if err != nil { return err }
-fmt.Println(conductor.Hostname, conductor.Alive, conductor.Drivers)
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

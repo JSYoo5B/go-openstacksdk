@@ -4,12 +4,6 @@ SDK-owned API for `/runbooks` and runbook traits (microversions 1.92 and 1.112).
 contracts shared with the other Ironic collections (exact statuses, no replay,
 patch-based update, listing, find, microversions).
 
-```go
-service, _ := conn.BareMetalV1(ctx)
-api := service.RunbooksAPI()
-created, err := api.Create(ctx, runbooks.CreateOpts{Name: "CUSTOM_X", Steps: steps})
-for value, err := range api.List(ctx, request.Custom(func(c *request.Config[runbooks.ListOpts]) error { c.Options.Detail = true; return nil })) { _, _ = value, err }
-deleted, err := api.Delete(ctx, created.UUID)
-```
+See `Example` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 Operations: Create, Get, List, Update, Patch, Delete, AddTrait, RemoveTrait, SetTraits.
