@@ -3,6 +3,7 @@ package main
 import (
 	"go/parser"
 	"go/token"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -58,9 +59,15 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 		}
 	}
 	docs := read("keymanager/v1/README.md")
-	for _, part := range []string{"SecretStores.List/All", "GetGlobalDefault", "GetPreferred", "Quotas.Get", "Quotas.InProject", "secretstores/api.go", "quotas/api.go", "secretconsumers/api.go", "secretconsumers/README.md", "secretacls/api.go", "PUT Set/Update", "absent attributes cause no HTTP", "SecretConsumers.InSecret", "no consumer ID/Resources/Find/Wait", "advertised offset next", "replaces configuration with PUT204", "resets overrides with DELETE204", "seeded Resource", "no Resources/CRUD/Find/Wait", "authenticated-project effective quota", "service.Secrets.Resources.List(ctx)", "Containers.Fetch(ctx", "Orders.Fetch(ctx", "metadata-fetch.md", "Containers.Remove", "Orders.Remove", "Secrets.Remove", "metadata-delete.md", "WithListFilter", "WithListFilters", "Containers.CreateRecord", "Orders.CreateRecord", "Secrets.CreateRecord", "WithCreateRecordAttribute", "metadata-create.md"} {
+	for _, part := range []string{"GetGlobalDefault", "GetPreferred", "secretstores/api.go", "quotas/api.go", "secretconsumers/api.go", "secretacls/api.go", "PUT Set/Update", "absent attributes cause no HTTP", "no consumer ID/Resources/Find/Wait", "no Resources/CRUD/Find/Wait", "authenticated-project effective quota", "service.Secrets.Resources.List(ctx)", "go doc ./keymanager/v1/..."} {
 		if !strings.Contains(docs, part) {
 			t.Fatalf("missing documented actual capability %q: %s", part, docs)
+		}
+	}
+	packageDocs := keyManagerPackageDocs(t)
+	for _, part := range []string{"List and All, GetGlobalDefault and GetPreferred", "WithListFilter and WithListFilters", "InProject fixes a project ID", "replaces configuration with PUT204", "resets overrides with DELETE204", "seeded Resource", "InSecret fixes the parent secret", "advertised offset next links", "Secrets.Fetch, Containers.Fetch and Orders.Fetch", "Secrets.CreateRecord, Containers.CreateRecord and Orders.CreateRecord", "WithCreateRecordAttribute", "Secrets.Remove, Containers.Remove and Orders.Remove"} {
+		if !strings.Contains(packageDocs, part) {
+			t.Fatalf("missing package doc capability %q: %s", part, packageDocs)
 		}
 	}
 	for _, invented := range []string{"SecretStores.Resources", "Quotas.Resources", "SecretConsumers.Resources", "SecretStores.Find(", "Quotas.Find(", "SecretConsumers.Find("} {
@@ -68,4 +75,26 @@ func TestKeyManagerSDKOwnedRegistryAndActualCapabilities(t *testing.T) {
 			t.Fatalf("documentation invented an unsupported abstraction %q", invented)
 		}
 	}
+}
+
+func keyManagerPackageDocs(t *testing.T) string {
+	t.Helper()
+	var text []string
+	err := filepath.WalkDir(filepath.Join("..", "..", "..", "keymanager", "v1"), func(path string, entry fs.DirEntry, err error) error {
+		if err != nil || entry.IsDir() || !strings.HasSuffix(path, ".go") || strings.HasSuffix(path, "_test.go") || strings.HasSuffix(path, "_generated.go") {
+			return err
+		}
+		file, err := parser.ParseFile(token.NewFileSet(), path, nil, parser.PackageClauseOnly|parser.ParseComments)
+		if err != nil {
+			return err
+		}
+		if file.Doc != nil {
+			text = append(text, file.Doc.Text())
+		}
+		return nil
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	return strings.Join(strings.Fields(strings.Join(text, " ")), " ")
 }

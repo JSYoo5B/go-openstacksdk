@@ -1,5 +1,8 @@
 // Package secretstores reads Barbican's available, global-default and preferred
-// secret-store backends. It never follows a response's secret_store_ref URL.
+// secret-store backends: List and All, GetGlobalDefault and GetPreferred, with
+// no CRUD, fallback or waits. WithListFilter and WithListFilters classify nine
+// server queries and five local attributes. It never follows a response's
+// secret_store_ref URL.
 package secretstores
 
 import (

@@ -1,4 +1,8 @@
 // Package quotas reads effective Barbican quotas and manages project overrides.
+// Get reads the authenticated project's quota; InProject fixes a project ID for
+// Get, Update, which replaces configuration with PUT204, and Delete, which
+// resets overrides with DELETE204. Neither write fetches again, and the empty
+// acknowledgement stays distinct from the seeded Resource Python returns.
 package quotas
 
 import (

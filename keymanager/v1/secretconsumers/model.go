@@ -1,5 +1,8 @@
 // Package secretconsumers manages associations between one Barbican secret
-// and its consumers. Response references are evidence, never request targets.
+// and its consumers. InSecret fixes the parent secret; Create and Delete return
+// the actual secret response, and List follows advertised offset next links.
+// Associations have no consumer ID. Response references are evidence, never
+// request targets.
 package secretconsumers
 
 import (
