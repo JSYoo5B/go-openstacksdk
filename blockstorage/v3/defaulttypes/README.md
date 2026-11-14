@@ -4,22 +4,13 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 conn.block_storage.set_default_type(project_id, volume_type_id)
 default = conn.block_storage.show_default_type(project_id)
 conn.block_storage.unset_default_type(project_id)
 ```
 
-```go
-api := defaulttypes.New(volumeClient)
-if _, err := api.Set(ctx, projectID, volumeTypeID); err != nil { return err }
-dt, err := api.Get(ctx, projectID)
-if err != nil { return err }
-fmt.Println(*dt.VolumeTypeID)
-err = api.Unset(ctx, projectID)
-```
+See `ExampleAPI_Set` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

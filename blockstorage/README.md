@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 volume = conn.block_storage.find_volume("data", ignore_missing=False)
 for volume in conn.block_storage.volumes(status="available"):
@@ -14,16 +12,7 @@ for volume in conn.block_storage.volumes(status="available"):
 
 See `Example_blockstorageFragment1` in [example_blockstorage_fragment1_test.go](example_blockstorage_fragment1_test.go), compiled by `go test`.
 
-```go
-ready, err := service.Volumes.Wait(ctx, resource.ID(volume.ID), "available",
-    resource.WithTimeout(5*time.Minute))
-if err != nil { return err }
-fmt.Println(ready.Status)
-
-if err := service.Volumes.Delete(ctx, resource.ID(volume.ID)); err != nil {
-    return err
-}
-```
+See `Example_waitAndDelete` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

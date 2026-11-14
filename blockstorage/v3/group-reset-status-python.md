@@ -4,17 +4,12 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 conn.block_storage.reset_group_status(group_id, "available")
 conn.block_storage.reset_group_snapshot_status(snapshot_id, "error")
 ```
 
-```go
-if _, err := groups.New(volumeClient).ResetStatusRecord(ctx, groupID, "available"); err != nil { return err }
-if _, err := groupsnapshots.New(volumeClient).ResetStatusRecord(ctx, snapshotID, "error"); err != nil { return err }
-```
+See `Example_resetGroupStatus` in [example_group_reset_test.go](example_group_reset_test.go), compiled by `go test`.
 
 ## References
 

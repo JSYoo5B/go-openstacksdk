@@ -4,19 +4,12 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 cluster = conn.block_storage.get_cluster("cluster1@lvm")
 conn.block_storage.disable_cluster(cluster, reason="maintenance")
 ```
 
-```go
-api := clusters.New(volumeClient)
-cluster, err := api.Get(ctx, "cluster1@lvm")
-if err != nil { return err }
-_, err = api.Disable(ctx, cluster.Target(), request.Custom(func(c *clusters.ActionOpts) error { c.Reason = "maintenance"; return nil }))
-```
+See `ExampleAPI_Disable` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

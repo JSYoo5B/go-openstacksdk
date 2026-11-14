@@ -4,24 +4,13 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 gt = conn.block_storage.create_group_type(name="gold", is_public=True)
 conn.block_storage.create_group_type_group_specs(gt, {"consistent_group_snapshot_enabled": "<is> True"})
 conn.block_storage.delete_group_type(gt)
 ```
 
-```go
-api := grouptypes.New(volumeClient)
-gt, err := api.Create(ctx,
-    request.Field("name", "gold"),
-    request.Field("is_public", true))
-if err != nil { return err }
-_, err = api.CreateGroupSpecs(ctx, gt.ID, map[string]any{"consistent_group_snapshot_enabled": "<is> True"})
-if err != nil { return err }
-err = api.Delete(ctx, gt.ID)
-```
+See `ExampleAPI_CreateGroupSpecs` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

@@ -16,34 +16,7 @@ current = conn.block_storage.get_limits()
 project = conn.block_storage.get_limits("project-id")
 ```
 
-```go
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/limits"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func readLimits(ctx context.Context, client *gophercloud.ServiceClient) error {
-    api := limits.New(client)
-    current, err := api.Fetch(ctx)
-    if err != nil {
-        return err
-    }
-    _ = current.ProjectID // empty: the server chooses its implicit current project
-    scope, err := api.InProject(ctx, resource.ID("project-id")) // Cinder 3.39+
-    if err != nil {
-        return err
-    }
-    result, err := scope.Get(ctx)
-    if err != nil {
-        return err
-    }
-    _ = result.Absolute.MaxTotalVolumes // nil distinguishes absent/null from zero
-    return nil
-}
-```
+See `ExampleAPI_InProject` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 Cinder added the admin-only `project_id` filter in API 3.39. An omitted version
 uses 3.0 behavior: unfiltered `Fetch` works, while `InProject`, `CurrentProject`

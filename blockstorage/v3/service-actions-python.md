@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 svc = next(conn.block_storage.services(binary="cinder-volume"))
 conn.block_storage.disable_service(svc, reason="maintenance")
@@ -13,17 +11,7 @@ for level in conn.block_storage.get_service_log_levels(binary="cinder-api"):
     print(level.host, level.levels)
 ```
 
-```go
-api := services.New(volumeClient)
-for svc, err := range api.List(ctx, services.WithListOptions(services.ListOpts{Binary: "cinder-volume"})) {
-    if err != nil { return err }
-    if _, err := api.Disable(ctx, services.TargetOf(svc), request.Custom(func(c *services.ActionOpts) error { c.Reason = "maintenance"; return nil })); err != nil { return err }
-    break
-}
-levels, err := api.GetLogLevels(ctx, request.Custom(func(c *services.LogOpts) error { v := "cinder-api"; c.Binary = &v; return nil }))
-if err != nil { return err }
-for _, level := range levels.Levels { fmt.Println(level.Host, level.Levels) }
-```
+See `ExampleAPI_GetLogLevels` in [example_guide_test.go](services/example_guide_test.go), compiled by `go test`.
 
 ## References
 

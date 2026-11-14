@@ -4,50 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `ExampleAPI_InProject` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
-```go
-api := quotasets.New(volumeClient)
-scope, err := api.InProject(ctx, resource.ID("project-id"))
-if err != nil { return err }
-
-limits, err := scope.Get(ctx)
-if err != nil { return err }
-fmt.Println(scope.ProjectID(), limits.Volumes, limits.Header.Get("X-Openstack-Request-Id"))
-
-defaults, err := scope.Defaults(ctx)
-if err != nil { return err }
-fmt.Println(defaults.Volumes)
-
-usage, err := scope.Usage(ctx)
-if err != nil { return err }
-fmt.Println(usage.Volumes.Limit, usage.Volumes.InUse, usage.Volumes.Reserved)
-
-zero, unlimited := 0, -1
-updated, err := scope.Update(ctx, quotasets.UpdateOpts{
-    Volumes: &unlimited,
-    Snapshots: &zero,
-}, quotasets.WithVolumeTypeQuota(quotasets.VolumeTypeVolumes, "SSD", 12))
-if err != nil { return err }
-fmt.Println(updated.Volumes, string(updated.Body["volumes_SSD"]))
-
-reset, err := scope.Reset(ctx)
-if err != nil { return err }
-fmt.Println(reset.Header.Get("X-Openstack-Request-Id"))
-```
-
-```go
-limit := 5
-nested := map[string]any{"tier": "original"}
-snapshot := quotasets.WithQuotaOptions(quotasets.UpdateOpts{
-    Volumes: &limit,
-    Extra: map[string]any{"vendor_quota": nested},
-})
-limit = 99
-nested["tier"] = "changed"
-_, err := scope.Update(ctx, quotasets.UpdateOpts{}, snapshot) // volumes=5, original
-if err != nil { return err }
-```
+See `ExampleWithQuotaOptions` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 
