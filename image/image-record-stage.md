@@ -137,4 +137,3 @@ func printStage(result *image.ImageRecordStageResult, operationErr error) error 
 - [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1778-L1837)
 - [Image Data](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/image_data.py#L330-L360)
 - [Image](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L80-L93)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)

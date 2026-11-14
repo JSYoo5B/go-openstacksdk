@@ -36,7 +36,6 @@ func mergeVolumeMetadata(ctx context.Context, client *gophercloud.ServiceClient,
 - [v2 guide](../../v2/volumes/README.md)
 - [HTTP contract tests](../../../api/cinder_metadata_scopes_test.go)
 - [Connection tests](../../../connectiontest/connection_metadata_test.go)
-- [release-pinned server contract](../../../docs/cinder-metadata-server-contracts.md)
 - [Service Waits](../../../docs/service-waits.md)
 - [the package and Connection examples](../../volume-actions.md)
 - [the Connection and package flag examples](../../volume-flags.md)

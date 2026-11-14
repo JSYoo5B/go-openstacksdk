@@ -114,4 +114,3 @@ func run(ctx context.Context, cloud, namespace string, maxRows, minLength int) e
 - [List Records Test](v2/metadefproperties/list_records_test.go)
 - [Connection Image Metadef Property List Records Test](../connectiontest/connection_image_metadef_property_list_records_test.go)
 - [SDK Support Ledger](../docs/sdk-support-ledger.md)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)

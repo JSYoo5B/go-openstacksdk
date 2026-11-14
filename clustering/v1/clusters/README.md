@@ -226,7 +226,6 @@ func RenameTrackedCluster(ctx context.Context, conn *sdk.Connection) (*clusters.
 
 ## References
 
-- [16.0.0 source audit](../../../docs/senlin-server-contracts.md)
 - [Finding](../finding/README.md)
 - [Actions](../actions/README.md)
 - [Clustering](https://docs.openstack.org/api-ref/clustering/#clusters)

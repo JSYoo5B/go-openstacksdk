@@ -123,7 +123,6 @@ func printAction(result *image.ImageRecordActionResult, operationErr error) erro
 - [DeactivateImage/ReactivateImage](mutations.md)
 - [Image](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L301-L328)
 - [Image Actions](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/image_actions.py#L47-L102)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [Install](../docs/install.md)
 - [Image Records](image-records.md)
 - [ Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L1117-L1137)

@@ -7668,7 +7668,7 @@
       "documentation": [
         "clustering/v1/clusters/README.md",
         "clustering/v1/README.md",
-        "docs/senlin-server-contracts.md"
+        "README.md"
       ]
     },
     {
@@ -9732,7 +9732,7 @@
       ],
       "documentation": [
         "clustering/v1/clusterpolicies/README.md",
-        "docs/senlin-server-contracts.md"
+        "README.md"
       ]
     },
     {
@@ -9868,7 +9868,7 @@
       ],
       "documentation": [
         "clustering/v1/clusterpolicies/README.md",
-        "docs/senlin-server-contracts.md",
+        "README.md",
         "clustering/v1/listing/README.md",
         "clustering/v1/python-parity.md"
       ]
@@ -9920,7 +9920,7 @@
       ],
       "documentation": [
         "clustering/v1/clusterattributes/README.md",
-        "docs/senlin-server-contracts.md",
+        "README.md",
         "clustering/v1/python-parity.md"
       ]
     },
@@ -9955,7 +9955,7 @@
       ],
       "documentation": [
         "clustering/v1/clusters/metadata/README.md",
-        "docs/senlin-server-contracts.md"
+        "README.md"
       ]
     },
     {
@@ -9989,7 +9989,7 @@
       ],
       "documentation": [
         "clustering/v1/clusters/metadata/README.md",
-        "docs/senlin-server-contracts.md"
+        "README.md"
       ]
     },
     {
@@ -10046,7 +10046,7 @@
       ],
       "documentation": [
         "clustering/v1/clusters/metadata/README.md",
-        "docs/senlin-server-contracts.md",
+        "README.md",
         "clustering/v1/clusters/python-metadata.md"
       ]
     },
@@ -10094,7 +10094,7 @@
       ],
       "documentation": [
         "clustering/v1/clusters/metadata/README.md",
-        "docs/senlin-server-contracts.md",
+        "README.md",
         "clustering/v1/clusters/python-metadata.md"
       ]
     },
@@ -12795,7 +12795,7 @@
         "image/README.md",
         "image/v2/README.md",
         "image/image-records.md",
-        "docs/glance-policy-priorities.md",
+        "README.md",
         "docs/implementation-plan.md"
       ],
       "differences": [
@@ -17848,7 +17848,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -17958,7 +17958,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -18068,7 +18068,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -18177,7 +18177,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -18286,7 +18286,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -18396,7 +18396,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -18508,7 +18508,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -18620,7 +18620,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v2/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md"
+        "README.md"
       ],
       "differences": [
         "Go uses explicit resource.Ref and a fixed scope returning owned actual HTTP evidence; Python accepts a string ID or existing Resource and returns/mutates that seeded Resource. Explicit Name lookup is a Go convenience and retains the existing native resolver boundary.",
@@ -18757,7 +18757,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -18898,7 +18898,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -19036,7 +19036,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -19174,7 +19174,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -19311,7 +19311,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -19450,7 +19450,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -19590,7 +19590,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/snapshots/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -19731,7 +19731,7 @@
       "documentation": [
         "blockstorage/metadata/README.md",
         "blockstorage/v3/volumes/README.md",
-        "docs/cinder-metadata-server-contracts.md",
+        "README.md",
         "blockstorage/v3/metadata-python.md"
       ],
       "differences": [
@@ -20688,7 +20688,7 @@
         "image/v2/images/README.md",
         "image/image-record-waits.md",
         "docs/implementation-plan.md",
-        "docs/glance-policy-priorities.md",
+        "README.md",
         "image/v2/README.md"
       ],
       "differences": [
@@ -20875,7 +20875,7 @@
         "image/v2/images/README.md",
         "image/image-record-waits.md",
         "docs/implementation-plan.md",
-        "docs/glance-policy-priorities.md",
+        "README.md",
         "image/v2/README.md"
       ],
       "differences": [
@@ -21287,7 +21287,6 @@
         "image/image-record-import.md",
         "image/README.md",
         "README.md",
-        "docs/glance-policy-priorities.md",
         "docs/install.md"
       ],
       "differences": [
@@ -22029,7 +22028,6 @@
         "image/v2/README.md",
         "image/image-record-create.md",
         "README.md",
-        "docs/glance-policy-priorities.md",
         "docs/install.md"
       ],
       "differences": [
@@ -22396,7 +22394,6 @@
         "image/v2/README.md",
         "image/image-record-download.md",
         "README.md",
-        "docs/glance-policy-priorities.md",
         "docs/install.md"
       ],
       "differences": [
@@ -23064,7 +23061,7 @@
         "image/README.md",
         "image/v2/README.md",
         "image/image-record-tags.md",
-        "docs/glance-policy-priorities.md"
+        "README.md"
       ],
       "differences": [
         "The original nine contracts and old AddTag/RemoveTag APIs describe the retained strict204 Ref/ACK profile. New AddImageRecordTag/RemoveImageRecordTag provides the named immutable ImageRecord profile and actual200..399 local-list behavior; legacy profile differences are not limitations of the new profile.",
@@ -23244,7 +23241,7 @@
         "image/README.md",
         "image/v2/README.md",
         "image/image-record-tags.md",
-        "docs/glance-policy-priorities.md"
+        "README.md"
       ],
       "differences": [
         "The original nine contracts and old AddTag/RemoveTag APIs describe the retained strict204 Ref/ACK profile. New AddImageRecordTag/RemoveImageRecordTag provides the named immutable ImageRecord profile and actual200..399 local-list behavior; legacy profile differences are not limitations of the new profile.",
@@ -29365,7 +29362,7 @@
         "image/v2/metadefresourcetypes/README.md",
         "image/metadef-resource-type-association-mutations.md",
         "image/metadef-resource-types-records.md",
-        "docs/glance-policy-priorities.md"
+        "README.md"
       ],
       "differences": [
         "Owned CreateRecord provides fixed immutable declared Resource/Wire/receipt views and an eight-field Resource including namespace_name; Source returns a mutable association whose default to_dict has seven fields excluding URI. General Resource cache/commit/session/dirty reuse parity is outside this named create contract.",
@@ -29480,7 +29477,7 @@
         "image/v2/metadefresourcetypes/README.md",
         "image/metadef-resource-type-association-mutations.md",
         "image/metadef-resource-types-records.md",
-        "docs/glance-policy-priorities.md"
+        "README.md"
       ],
       "differences": [
         "Source association delete passes the supplied Resource into Proxy._get_resource, which can reuse and mutate its namespace URI; unlike property deletion it does not first normalize the child to ID. Go privately snapshots only identity before options, never mutates input, and keeps a safe nonempty UTF8<=80rune fixed literal parent/child without Resource/Ref/name lookup.",
@@ -30196,7 +30193,7 @@
       "documentation": [
         "image/images.md",
         "image/image-records.md",
-        "docs/glance-policy-priorities.md",
+        "README.md",
         "docs/implementation-plan.md"
       ],
       "differences": [
@@ -30372,7 +30369,7 @@
       "documentation": [
         "image/images.md",
         "image/image-records.md",
-        "docs/glance-policy-priorities.md",
+        "README.md",
         "docs/implementation-plan.md"
       ],
       "differences": [
@@ -31080,7 +31077,6 @@
         "image/image-record-upload.md",
         "README.md",
         "image/README.md",
-        "docs/glance-policy-priorities.md",
         "docs/install.md"
       ],
       "differences": [
@@ -113021,7 +113017,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns a list of Container resources; Go yields ContainerRecord values lazily through an iterator, so a Python list is the collected iterator.",
@@ -113086,7 +113082,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-container-search-python.md"
       ],
       "differences": [
@@ -113115,7 +113111,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns a Container resource or None; Go returns *ContainerResource with typed Details, Metadata keyed by the original header suffix and the cloned response Header, or nil.",
@@ -113188,7 +113184,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-containers-python.md"
       ],
       "differences": [
@@ -113216,7 +113212,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns a bool; Go returns *ContainerResponse whose IgnoredMissing field is the negated Python result.",
@@ -113244,7 +113240,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns None; Go returns the POST acknowledgement with Refreshed nil because refresh is disabled.",
@@ -113315,7 +113311,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-containers-python.md"
       ],
       "differences": [
@@ -113388,7 +113384,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-containers-python.md"
       ],
       "differences": [
@@ -113416,7 +113412,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "The helper only delegates to Proxy.get_info; the get_info differences apply.",
@@ -113441,7 +113437,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "The helper only delegates to Proxy.get_object_segment_size; Python returns the float 2684354561.0 on fallback where Go returns the integer 2684354561.",
@@ -113465,7 +113461,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "The helper only delegates to Proxy.is_object_stale; Go returns a nullable Stale with HEAD evidence instead of a bool.",
@@ -113493,7 +113489,7 @@
         "The cloud helper delegates to the same CreateObject as python:object_store/v1/create_object and shares its recorded differences."
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ]
     },
     {
@@ -113512,7 +113508,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python merges the metadata dict and keyword headers itself; the Go caller passes one map[string]any holding both.",
@@ -113592,7 +113588,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/v1/objects/python-record-list.md"
       ],
       "differences": [
@@ -113663,7 +113659,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-object-search-python.md"
       ],
       "differences": [
@@ -113690,7 +113686,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns False for every SDKException, including 409 and 5xx; Go returns those failures as errors and reports only a clean 404 through IgnoredMissing.",
@@ -113732,7 +113728,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-autocreated-image-objects-python.md"
       ],
       "differences": [
@@ -113758,7 +113754,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns the metadata dict; Go returns GetMetadataResult whose Metadata.Values holds the same keys, together with typed system headers and the response evidence.",
@@ -113815,7 +113811,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/v1/objects/python-raw-get.md"
       ],
       "differences": [
@@ -113906,7 +113902,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-object-stream-python.md"
       ],
       "differences": [
@@ -114022,7 +114018,7 @@
         "Text is decoded only from UTF-8, a byte-order mark or a supported declared charset (UTF-16/UTF-32 with a BOM or explicit endianness, ISO-8859-1); undeclared non-UTF-8 bytes and other codecs return ErrUnsupported with the original bytes instead of Requests' statistical detection or the full CPython codec registry; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md",
+        "README.md",
         "objectstorage/cloud-object-get-python.md"
       ]
     },
@@ -114042,7 +114038,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns a Munch; Go returns resource.CloudLocation with nullable pointer and raw JSON fields.",
@@ -114068,7 +114064,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns a Munch with id, name, domain_id and domain_name; Go exposes the same four fields as CurrentLocation().Project.",
@@ -114098,7 +114094,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns a string or None; Go returns CurrentLocation().Project.ID as raw JSON or nil.",
@@ -114122,7 +114118,7 @@
         }
       ],
       "documentation": [
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ],
       "differences": [
         "Python returns the configured cloud name string; Go returns CurrentLocation().Cloud as a nullable pointer.",
@@ -114614,7 +114610,7 @@
       "documentation": [
         "projectcleanup/README.md",
         "docs/connection-r2-misc.md",
-        "docs/python-cloud-parity-misc.md"
+        "README.md"
       ]
     },
     {

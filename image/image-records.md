@@ -110,7 +110,6 @@ func run(ctx context.Context, cloud, imageID, nameOrID string) error {
 - [Image](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/image.py#L429-L437)
 - [Image](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/image.py#L494-L531)
 - [Resource.find](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2524-L2582)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [Image Record Get Test](image_record_get_test.go)
 - [Image Record Lists Test](image_record_lists_test.go)
 - [Image Record Find Test](image_record_find_test.go)

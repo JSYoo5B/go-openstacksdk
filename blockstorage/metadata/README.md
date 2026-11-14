@@ -156,5 +156,5 @@ header/ETag errors, fixed routes, live auth and native API isolation.
 Volume/Snapshot client, and [generator tests](../../internal/cmd/sdkgen/cinder_metadata_scopes_test.go)
 check that scope discovery supplements exactly the four existing collections.
 
-The [fixed server contract](../../docs/cinder-metadata-server-contracts.md)
+The fixed server contract
 records the release-pinned route, ETag and Backup limitations.

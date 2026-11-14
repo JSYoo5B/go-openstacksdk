@@ -31,4 +31,3 @@ func clearBackupMetadata(ctx context.Context, cinder *v3.Service, backupID strin
 - [Volume Backup Export Record](../../volume-backup-export-record.md)
 - [Volume Backup Actions](../../volume-backup-actions.md)
 - [Volume Backup Import](../../volume-backup-import.md)
-- [Cinder Metadata Server Contracts](../../../docs/cinder-metadata-server-contracts.md)

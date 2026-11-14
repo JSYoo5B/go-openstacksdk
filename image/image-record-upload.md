@@ -141,6 +141,5 @@ func printUpload(result *image.ImageRecordUploadResult, operationErr error) erro
 - [Install](../docs/install.md)
 - [Upload Image](upload-image.md)
 - [Create Import](create-import.md)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [Implementation Plan](../docs/implementation-plan.md)
 - [SDK Support Ledger](../docs/sdk-support-ledger.md)

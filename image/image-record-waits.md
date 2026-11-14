@@ -124,7 +124,6 @@ func run(ctx context.Context, cloud, imageID, target string, waitDelete bool) er
 - [Install](../docs/install.md)
 - [Image Records](image-records.md)
 - [Service Waits](../docs/service-waits.md)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [Image Record Wait Test](image_record_wait_test.go)
 - [Connection Image Record Waits Test](../connectiontest/connection_image_record_waits_test.go)
 - [SDK Support Ledger](../docs/sdk-support-ledger.md)

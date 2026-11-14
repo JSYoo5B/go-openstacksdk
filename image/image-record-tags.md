@@ -102,7 +102,6 @@ func run(ctx context.Context, cloud, imageID, tag string) error {
 - [urljoin](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/utils.py#L43-L50)
 - [Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/proxy.py#L563-L602)
 - [Resource](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L785-L839)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [Image Record Tag Test](image_record_tag_test.go)
 - [Connection Image Record Tags Test](../connectiontest/connection_image_record_tags_test.go)
 - [SDK Support Ledger](../docs/sdk-support-ledger.md)

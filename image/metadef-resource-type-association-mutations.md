@@ -140,7 +140,6 @@ func run(ctx context.Context, cloud, namespace, resourceType, action, prefix, ta
 
 - [Metadef Resource Types Records](metadef-resource-types-records.md)
 - [Metadefresourcetypes](v2/metadefresourcetypes/README.md)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [ Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/_proxy.py#L1711-L1761)
 - [association class](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_resource_type.py#L34-L61)
 - [Proxy](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/proxy.py#L563-L609)

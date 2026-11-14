@@ -139,4 +139,3 @@ func run(ctx context.Context, cloud, namespace, id, action, title, description s
 - [commit no-op](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L1881-L2017)
 - [descriptor get/set](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/fields.py#L208-L291)
 - [SDK Support Ledger](../docs/sdk-support-ledger.md)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)

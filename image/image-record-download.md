@@ -213,7 +213,6 @@ result, err := service.DownloadImageRecord(ctx, image.ImageRecordDownloadRequest
 
 - [Image Records](image-records.md)
 - [Install](../docs/install.md)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [Licensing](../docs/licensing.md)
 - [`DownloadTo`](download.md)
 - [Implementation Plan](../docs/implementation-plan.md)

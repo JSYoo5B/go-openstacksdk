@@ -23,6 +23,5 @@ if err := api.Delete(ctx, imageID, projectID); err != nil { return err }
 
 - [Members](../../members.md)
 - [Member Records](../../member-records.md)
-- [Glance Policy Priorities](../../../docs/glance-policy-priorities.md)
 - [Requests](https://github.com/gophercloud/gophercloud/blob/v2.15.0/openstack/image/v2/members/requests.go#L28-L86)
 - [Delete](../images/delete.md)

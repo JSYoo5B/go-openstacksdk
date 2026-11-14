@@ -33,5 +33,4 @@ func replaceSnapshotMetadata(ctx context.Context, client *gophercloud.ServiceCli
 - [shared guide](../../metadata/README.md)
 - [Scoped HTTP tests](../../../api/cinder_metadata_scopes_test.go)
 - [Connection tests](../../../connectiontest/connection_metadata_test.go)
-- [release-pinned server contract](../../../docs/cinder-metadata-server-contracts.md)
 - [Service Waits](../../../docs/service-waits.md)

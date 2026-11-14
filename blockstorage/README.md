@@ -55,7 +55,6 @@ if err := service.Volumes.Delete(ctx, resource.ID(volume.ID)); err != nil {
 - [Metadata](metadata/README.md)
 - [v3 Volume](v3/volumes/README.md)
 - [Snapshot](v3/snapshots/README.md)
-- [Cinder Metadata Server Contracts](../docs/cinder-metadata-server-contracts.md)
 - [Service Waits](../docs/service-waits.md)
 - [Delete Volume](delete-volume.md)
 - [Volume Attachment Device](volume-attachment-device.md)

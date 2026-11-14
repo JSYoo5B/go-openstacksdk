@@ -129,5 +129,4 @@ func run(ctx context.Context, cloud, namespace, namespaceFilter, owner,
 - [namespace class](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/image/v2/metadef_namespace.py)
 - [inherited list](https://github.com/openstack/openstacksdk/blob/ef55d7d1666099f50bf1e1c40b59d7e7b72a51fe/openstack/resource.py#L2155-L2436)
 - [jmespath.py1.0.1 interpreter](https://github.com/jmespath/jmespath.py/blob/1.0.1/jmespath/visitor.py)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
 - [SDK Support Ledger](../docs/sdk-support-ledger.md)

@@ -157,4 +157,3 @@ func printImport(result *image.ImageRecordImportResult, operationErr error) erro
 - [Images](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/api/v2/images.py#L317-L390)
 - [Image](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L80-L93)
 - [Image](https://github.com/openstack/glance/blob/57f7dd9e76ef24e1e9013eceaa703bd442469a24/glance/policies/image.py#L330-L343)
-- [Glance Policy Priorities](../docs/glance-policy-priorities.md)
