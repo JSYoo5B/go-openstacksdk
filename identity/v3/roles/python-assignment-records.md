@@ -4,14 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-api := roles.New(identityClient)
-values, err := api.AllAssignmentRecords(ctx,
-    request.Query("user_id", userID),
-    request.Query("scope", map[string]any{"OS-INHERIT:inherited_to": "projects"}))
-```
+See `ExampleAPI_AllAssignmentRecords` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

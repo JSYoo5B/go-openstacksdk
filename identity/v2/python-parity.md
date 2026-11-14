@@ -4,17 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 See `Example_parityFragment1` in [example_parity_fragment1_test.go](example_parity_fragment1_test.go), compiled by `go test`.
 
-```go
-api := tenants.New(client)
-tenant, err := api.Find(ctx, resource.ID(nameOrID), resource.WithIgnoreMissing())
-if err == nil && tenant == nil {
-	tenant, err = api.Find(ctx, resource.Name(nameOrID), resource.WithIgnoreMissing())
-}
-```
+See `Example_findTenant` in [example_tenants_test.go](example_tenants_test.go), compiled by `go test`.
 
 ## References
 

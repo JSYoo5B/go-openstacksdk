@@ -4,35 +4,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `Example_createProject` in [example_cloud_parity_test.go](v3/example_cloud_parity_test.go), compiled by `go test`.
 
-```go
-// Python: conn.create_project("demo", domain_id="default")
-p, err := svc.Projects.Create(ctx, projects.CreateOpts{
-	Name: "demo", DomainID: "default", Enabled: &enabled,
-	Extra: map[string]any{"description": nil},
-})
-```
+See `Example_deleteService` in [example_cloud_parity_test.go](v3/example_cloud_parity_test.go), compiled by `go test`.
 
-```go
-// Python: conn.delete_service("nova")
-found, err := svc.Services.Find(ctx, resource.ID("nova"), resource.WithIgnoreMissing())
-if err == nil && found == nil {
-	found, err = svc.Services.Find(ctx, resource.Name("nova"), resource.WithIgnoreMissing())
-}
-if err == nil && found != nil {
-	err = svc.Services.Remove(ctx, resource.ID(found.ID))
-}
-```
-
-```go
-// Python: conn.delete_user("alice", domain_id="default")
-user, err := svc.Users.FindIdentity(ctx, "alice",
-	resource.WithIdentityFindQuery("domain_id", "default"))
-if err == nil && user != nil {
-	err = svc.Users.Remove(ctx, resource.ID(user.ID))
-}
-```
+See `Example_deleteUser` in [example_cloud_parity_test.go](v3/example_cloud_parity_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import json
 import openstack
@@ -26,21 +24,7 @@ if __name__ == "__main__":
 
 See `Example_records1` in [example_records1_test.go](example_records1_test.go), compiled by `go test`.
 
-```go
-result, err := identity.Limits.ProxyListRecords(ctx,
-    limits.WithRecordListJMESPath("[*].id"),
-)
-if err != nil { log.Fatal(err) }
-fmt.Println(string(result.JSON))
-
-result, err = identity.Limits.ProxyListRecords(ctx)
-if err != nil { log.Fatal(err) }
-generator := result.Value.(*limits.RecordListGenerator)
-for row, err := range generator.Records {
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(row.Resource.Body["id"]))
-}
-```
+See `ExampleAPI_ProxyListRecords` in [example_guide_test.go](example_guide_test.go), compiled by `go test`.
 
 ## References
 

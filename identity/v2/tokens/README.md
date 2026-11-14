@@ -13,15 +13,4 @@ Consult the [support ledger](../../../docs/sdk-support-ledger.md) and [operation
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-auth, err := service.Tokens.Get(ctx, tokenID)
-if err != nil { return err }
-fmt.Println(auth.Token.ID, auth.Token.ExpiresAt, auth.User.Name)
-for _, entry := range auth.Catalog.Entries {
-    fmt.Println(entry.Type, entry.Endpoints)
-}
-requestID := auth.Header.Get("X-Openstack-Request-Id")
-_ = requestID
-```
+See `ExampleAPI_Get` in [example_test.go](example_test.go), compiled by `go test`.

@@ -4,16 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 See `Example_parityCatalogFragment1` in [example_parity_catalog_fragment1_test.go](example_parity_catalog_fragment1_test.go), compiled by `go test`.
 
-```go
-disabled := false
-ep, err := endpoints.New(client).Create(ctx,
-	endpoints.CreateOpts{Availability: gophercloud.AvailabilityPublic, URL: "https://nova", ServiceID: "svc-1", Enabled: &disabled},
-	request.Field("region_id", "RegionOne"))
-```
+See `Example_createEndpoint` in [example_cloud_parity_test.go](example_cloud_parity_test.go), compiled by `go test`.
 
 See `Example_parityCatalogFragment3` in [example_parity_catalog_fragment3_test.go](example_parity_catalog_fragment3_test.go), compiled by `go test`.
 
