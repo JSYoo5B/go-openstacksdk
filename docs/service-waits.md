@@ -2,6 +2,25 @@
 
 Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
+## Shared rules
+
+**Common waits.** `Collection.Wait` polls until the status equals the target, compared case-insensitively, and `Collection.WaitDeleted` polls until a 404 or a `deleted` status. Both default to a five-minute timeout and a two-second interval. A resource that disappears during `Wait` ends it with `resource.FailedStateError` for status `missing`.
+
+**Options.** Every wait takes `resource.WaitOption` values:
+
+- `WithTimeout` and `WithUnlimitedWait` set the time budget;
+- `WithPollInterval` sets a fixed interval, and `WithWaitStrategy` picks a fixed, linear or exponential schedule with optional jitter (a Go-only extension; Python waits use a fixed interval);
+- `WithFailureStates` replaces the failure statuses, and `WithStatusAttribute` selects another string field as the status;
+- `WithProgressCallback` runs a `func(int) error` after each nonterminal poll, and a returned error stops the wait; `WithProgress` sends the same value on a caller-owned channel, blocking until it is received or the context ends, never closing it and sending nothing after the wait returns. With both set, the callback runs first and an error suppresses that step's send.
+
+Later options override earlier ones.
+
+**Service waits.** Service packages add Python-style helpers with their own defaults: state waits such as `WaitForState` fail on the exact `ERROR` or `error` status and have no SDK timeout, deletion waits such as `WaitForDelete` stop after 120 seconds, and both poll every two seconds. Compute `WaitForServer` waits for `ACTIVE` for up to 120 seconds; Cinder `WaitForAvailable` waits for `available`. Caller options apply after these defaults.
+
+**Operation waits.** Operations that wait as one of their steps, such as creating a volume or an image, take their wait settings as `With<Op>Wait(...resource.WaitOption)` or a `Wait`/`WaitOptions` field. `resource.ResolveWait` applies the operation's own defaults, and a control the operation does not honor (failure states, status attribute or progress) fails with `resource.ErrInvalidOption` before any request.
+
+**Cancellation.** A done context ends the current pause and the wait immediately. Cancelling a wait never rolls back the remote operation, and a wait never infers completion from an accepted request.
+
 ## Usage examples
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
