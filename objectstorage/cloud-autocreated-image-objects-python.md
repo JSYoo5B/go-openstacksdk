@@ -39,49 +39,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "flag"
-    "fmt"
-    "os"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/objectstorage"
-)
-
-func run(ctx context.Context, cloud, container, prefix string, tasks bool) error {
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(cloud))
-    if err != nil { return err }
-    swift, err := conn.ObjectStorage(ctx)
-    if err != nil { return err }
-    result, err := swift.Cloud.DeleteAutocreatedImageObjects(ctx,
-        func(c *objectstorage.AutocreatedImageObjectsOpts) error { c.ImageAPIUseTasks = tasks; return nil },
-        func(c *objectstorage.AutocreatedImageObjectsOpts) error { v := container; c.Container = &v; return nil },
-        func(c *objectstorage.AutocreatedImageObjectsOpts) error { v := prefix; c.SegmentPrefix = &v; return nil })
-    if err != nil { return err }
-    fmt.Printf("deleted=%t observed=%d\n", result.Deleted, len(result.Observations))
-    return nil
-}
-
-func main() {
-    cloud := flag.String("cloud", "devstack", "clouds.yaml cloud")
-    container := flag.String("container", "images", "Swift container")
-    prefix := flag.String("prefix", "", "server object prefix")
-    tasks := flag.Bool("tasks", false, "enable image task upload cleanup")
-    timeout := flag.Duration("timeout", time.Minute, "whole workflow timeout")
-    flag.Parse()
-    ctx, cancel := context.WithTimeout(context.Background(), *timeout)
-    defer cancel()
-    if err := run(ctx, *cloud, *container, *prefix, *tasks); err != nil {
-        fmt.Fprintln(os.Stderr, err)
-        os.Exit(1)
-    }
-}
-```
+See `Example_cloudAutocreatedImageObjects` in [example_cloud_autocreated_image_objects_test.go](example_cloud_autocreated_image_objects_test.go), compiled by `go test`.
 
 Existing clients can call `objectstorage.New(client)` directly. `WithAutocreatedImageObjectsOpts` copies pointer inputs when created and applied. Replacement options restore nil/default fields; a nil prefix omits the query and an explicit empty prefix is preserved. Options default to the pinned connection setting's false value; this helper deliberately does not read hidden Python configuration or automatically enable tasks.
 

@@ -4,28 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-api := objects.New(swiftClient)
-change, err := api.SetMetadataFromFresh(ctx, "assets", "folder/file ?.txt",
-    map[string]any{"owner": "ops", "empty": "", "is_content_type_detected": true},
-    objects.WithMetadataHeaders(map[string]string{"X-Trans-Id-Extra": "metadata"}),
-)
-if err != nil {
-    return err
-}
-_ = change.Acknowledgement
-
-removed, err := api.DeleteMetadataAndRefresh(ctx, "assets", "folder/file ?.txt", []string{"owner"})
-if err != nil {
-    return err
-}
-if !removed.NoOp {
-    observed := removed.Refreshed.Metadata.Values
-    _ = observed
-}
-```
+See `ExampleAPI_SetMetadataFromFresh` in [example_scope_test.go](example_scope_test.go), compiled by `go test`.
 
 ## References
 

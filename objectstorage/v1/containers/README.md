@@ -4,37 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package examples
-
-import (
-	"context"
-	"fmt"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func ListContainers(ctx context.Context, conn *sdk.Connection) error {
-	service, err := conn.ObjectStorage(ctx)
-	if err != nil {
-		return err
-	}
-	for container, err := range service.Containers.Resources.List(ctx,
-		resource.WithPageSize(100),
-		resource.WithMaxItems(20),
-		resource.WithPaginated(false),
-	) {
-		if err != nil {
-			return err
-		}
-		fmt.Println(container.Name, container.Count, container.Bytes)
-	}
-	return nil
-}
-```
+See `example_containers1_test.go` in [example_containers1_test.go](example_containers1_test.go), compiled by `go test`.
 
 ```python
 container = conn.object_store.get_container_metadata("books")
@@ -45,57 +15,7 @@ refreshed = conn.object_store.set_container_metadata(
 conn.object_store.delete_container_metadata(refreshed, ["note"])
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-
-    "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func changeContainerMetadata(ctx context.Context, api *containers.API, name string) error {
-    getOptions := []containers.GetMetadataOption{
-        containers.WithGetMetadataOpts(containers.GetMetadataOpts{
-            Headers: map[string]string{"X-Request-Label": "initial"},
-        }),
-        containers.WithGetMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
-        request.Header("X-Request-Label", "container-metadata"),
-        request.Custom(func(c *containers.GetMetadataOpts) error { v := false; c.Newest = &v; return nil }),
-    }
-    before, err := api.GetMetadata(ctx, name, getOptions...)
-    if before != nil { fmt.Println(before.StatusCode) }
-    if err != nil { return err }
-    if before.Metadata.ObjectCount != nil { fmt.Println(*before.Metadata.ObjectCount) }
-
-    mutationOptions := []containers.MetadataOption{
-        containers.WithMetadataOpts(containers.MetadataOpts{
-            Headers: map[string]string{"X-Request-Label": "initial"},
-        }),
-        containers.WithMetadataHeaders(map[string]string{"X-Trace-Label": "metadata"}),
-        request.Header("X-Request-Label", "metadata-mutation"),
-    }
-    acknowledgement, err := api.SetMetadata(ctx, name, map[string]string{
-        "book": "Moby Dick", "note": "literal %2F 雪",
-    }, mutationOptions...)
-    if acknowledgement != nil { fmt.Println(acknowledgement.StatusCode) }
-    if err != nil { return err }
-
-    refreshOptions := append([]containers.GetMetadataOption(nil), getOptions...)
-    refreshOptions = append(refreshOptions, request.Custom(func(c *containers.GetMetadataOpts) error { c.Newest = nil; return nil }))
-    refreshed, err := api.GetMetadata(ctx, name, refreshOptions...)
-    if err != nil { return err }
-    fmt.Println(refreshed.Metadata.Values["book"])
-
-    removed, err := api.DeleteMetadata(ctx, name, []string{"note"}, mutationOptions...)
-    if removed != nil { fmt.Println(removed.StatusCode) }
-    return err
-}
-
-func main() {}
-```
+See `Example_containers2` in [example_containers2_test.go](example_containers2_test.go), compiled by `go test`.
 
 ```python
 created = conn.object_store.create_container(
@@ -105,54 +25,7 @@ conn.object_store.delete_container(created, ignore_missing=False)
 conn.object_store.delete_container("books-lifecycle")
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-
-    "github.com/JSYoo5B/go-openstacksdk/objectstorage/v1/containers"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func containerLifecycle(ctx context.Context, api *containers.API, name string) error {
-    createOptions := []containers.CreateContainerOption{
-        containers.WithCreateContainerOpts(containers.CreateContainerOpts{
-            Headers: map[string]string{"X-Request-Label": "initial"},
-            Metadata: map[string]string{"owner": "initial"},
-        }),
-        containers.WithCreateContainerHeaders(map[string]string{"X-Trace-Label": "container-create"}),
-        request.Header("X-Request-Label", "create"),
-        containers.WithCreateContainerMetadata(map[string]string{
-            "owner": "ops", "note": "literal %2F 雪",
-        }),
-    }
-    created, err := api.CreateContainer(ctx, name, createOptions...)
-    if created != nil { fmt.Println(created.StatusCode) }
-    if err != nil { return err }
-
-    deleteOptions := []containers.DeleteContainerOption{
-        containers.WithDeleteContainerOpts(containers.DeleteContainerOpts{
-            Headers: map[string]string{"X-Request-Label": "initial"},
-        }),
-        containers.WithDeleteContainerHeaders(map[string]string{"X-Trace-Label": "container-delete"}),
-        request.Header("X-Request-Label", "delete"),
-        request.IgnoreMissing(false),
-    }
-    deleted, err := api.DeleteContainer(ctx, name, deleteOptions...)
-    if deleted != nil { fmt.Println(deleted.StatusCode, deleted.IgnoredMissing) }
-    if err != nil { return err }
-
-    quietOptions := append([]containers.DeleteContainerOption(nil), deleteOptions...)
-    quietOptions = append(quietOptions, request.IgnoreMissing(true))
-    missing, err := api.DeleteContainer(ctx, name, quietOptions...)
-    if missing != nil { fmt.Println(missing.StatusCode, missing.IgnoredMissing) }
-    return err
-}
-
-func main() {}
-```
+See `Example_containers3` in [example_containers3_test.go](example_containers3_test.go), compiled by `go test`.
 
 ## References
 
