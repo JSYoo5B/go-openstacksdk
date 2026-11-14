@@ -373,7 +373,7 @@ func TestImageRecordWaitZeroIntervalsTimeoutAndParentBudget(t *testing.T) {
 			calls++
 			return taskCoreJSON(req, 200, `{"status":"pending"}`), nil
 		})
-		got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitTimeout(5*time.Millisecond), WithImageRecordWaitPollInterval(0), WithImageRecordWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
+		got, err := New(client).WaitForImageRecordStatus(context.Background(), imageRecordWaitSeed(json.RawMessage(`"pending"`)), "active", WithImageRecordWaitTimeout(50*time.Millisecond), WithImageRecordWaitPollInterval(0), WithImageRecordWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 		if got == nil || !errors.Is(err, context.DeadlineExceeded) || calls != 1 || callbacks != 1 || got.StatusCode != 200 {
 			t.Fatal(got, err, calls, callbacks)
 		}

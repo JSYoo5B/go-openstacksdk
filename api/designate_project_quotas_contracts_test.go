@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"testing"
 	"time"
@@ -293,6 +294,7 @@ func TestDesignateQuotaContextOwnsTransportAndBodyRead(t *testing.T) {
 			var calls atomic.Int32
 			release := make(chan struct{})
 			t.Cleanup(func() { close(release) })
+			expired := newArrivalDeadline()
 			cloud.Mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 				calls.Add(1)
 				_, _ = io.Copy(io.Discard, r.Body)
@@ -300,21 +302,32 @@ func TestDesignateQuotaContextOwnsTransportAndBodyRead(t *testing.T) {
 					w.Header().Set("X-Openstack-Request-Id", "partial")
 					_, _ = io.WriteString(w, `{"zones":`)
 					w.(http.Flusher).Flush()
+				} else {
+					expired.expire()
 				}
 				select {
 				case <-r.Context().Done():
 				case <-release:
 				}
 			})
+			base := cloud.Provider.HTTPClient.Transport
+			if base == nil {
+				base = http.DefaultTransport
+			}
+			cloud.SetTransport(roundTripFunc(func(r *http.Request) (*http.Response, error) {
+				resp, err := base.RoundTrip(r)
+				if err == nil {
+					expired.expire()
+				}
+				return resp, err
+			}))
 			scope := newDesignateQuotaScope(t, cloud)
 			canceled, stop := context.WithCancel(context.Background())
 			stop()
 			if err := callDesignateQuota(scope, operation, canceled); !errors.Is(err, context.Canceled) || calls.Load() != 0 {
 				t.Fatal(err, calls.Load())
 			}
-			deadline, cancel := context.WithTimeout(context.Background(), 40*time.Millisecond)
-			defer cancel()
-			err := callDesignateQuota(scope, operation, deadline)
+			err := callDesignateQuota(scope, operation, expired)
 			if !errors.Is(err, context.DeadlineExceeded) || calls.Load() != 1 {
 				t.Fatal(err, calls.Load())
 			}
@@ -327,3 +340,32 @@ func TestDesignateQuotaContextOwnsTransportAndBodyRead(t *testing.T) {
 		})
 	}
 }
+
+type arrivalDeadline struct {
+	context.Context
+	done chan struct{}
+	once sync.Once
+}
+
+func newArrivalDeadline() *arrivalDeadline {
+	return &arrivalDeadline{Context: context.Background(), done: make(chan struct{})}
+}
+
+func (c *arrivalDeadline) expire() { c.once.Do(func() { close(c.done) }) }
+
+func (c *arrivalDeadline) Deadline() (time.Time, bool) { return time.Now().Add(time.Hour), true }
+
+func (c *arrivalDeadline) Done() <-chan struct{} { return c.done }
+
+func (c *arrivalDeadline) Err() error {
+	select {
+	case <-c.done:
+		return context.DeadlineExceeded
+	default:
+		return nil
+	}
+}
+
+type roundTripFunc func(*http.Request) (*http.Response, error)
+
+func (f roundTripFunc) RoundTrip(r *http.Request) (*http.Response, error) { return f(r) }

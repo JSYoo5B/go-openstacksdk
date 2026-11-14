@@ -21,7 +21,11 @@ func TestWaitForServerRawFailuresKeepLastMatchingModelAndCauses(t *testing.T) {
 			ctx, cancel := context.WithCancelCause(context.Background())
 			defer cancel(nil)
 			cause := errors.New("readiness canceled")
-			opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPEnabled(false)), compute.WithServerReadyWaitOptions(resource.WithTimeout(20*time.Millisecond), resource.WithFailureStates(), resource.WithProgressCallback(func(int) error {
+			readyTimeout := 5 * time.Second
+			if scenario == "nil timeout" {
+				readyTimeout = 20 * time.Millisecond
+			}
+			opts := append(serverReadyOptions(), compute.WithServerReadyAutomaticIPOptions(compute.WithAutomaticIPEnabled(false)), compute.WithServerReadyWaitOptions(resource.WithTimeout(readyTimeout), resource.WithFailureStates(), resource.WithProgressCallback(func(int) error {
 				if scenario == "progress source" {
 					f.service.API = nil
 				}

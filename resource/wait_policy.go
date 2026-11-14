@@ -89,6 +89,9 @@ func (o waitOptions) pause(ctx context.Context, d time.Duration) error {
 	case <-ctx.Done():
 		return ctx.Err()
 	case <-timer.C:
+		if deadline, ok := ctx.Deadline(); ok && !time.Now().Before(deadline) {
+			return context.DeadlineExceeded
+		}
 		return ctx.Err()
 	}
 }

@@ -517,7 +517,7 @@ func TestFloatingIPUnattachedAcceptedFailuresAndOneOperationBudget(t *testing.T)
 				options = append(options, compute.WithFloatingIPDeleteTimeout(2*time.Minute))
 			}
 			if mode == "expire" {
-				options = append(options, compute.WithFloatingIPDeleteTimeout(25*time.Millisecond))
+				options = append(options, compute.WithFloatingIPDeleteTimeout(time.Second))
 			}
 			if mode == "unlimited" {
 				options = append(options, compute.WithFloatingIPDeleteTimeout(time.Minute), compute.WithUnlimitedFloatingIPDeleteTimeout())
