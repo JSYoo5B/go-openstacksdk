@@ -33,8 +33,11 @@ type WaitDefaults struct {
 // options. Timeout is zero when Unlimited is set. FailureStatesSet reports an
 // explicit WithFailureStates; FailureStates is then non-nil, and an empty list
 // disables failure detection. FailureStates is nil when it was not set.
-// StatusAttribute is empty unless the caller selected one. The slice is owned
-// by the settings.
+// StatusAttribute is empty unless the caller selected one. TimeoutSet reports
+// that the options chose the timeout (WithTimeout or WithUnlimitedWait) and
+// StrategySet that they chose the pacing (WithPollInterval or
+// WithWaitStrategy); otherwise those fields hold the defaults. The slice is
+// owned by the settings.
 type WaitSettings struct {
 	Timeout          time.Duration
 	Unlimited        bool
@@ -44,6 +47,8 @@ type WaitSettings struct {
 	StatusAttribute  string
 	ProgressCallback func(int) error
 	Progress         chan<- int
+	TimeoutSet       bool
+	StrategySet      bool
 }
 
 // ResolveWait applies opts in order over defaults; for each control the later
@@ -96,6 +101,8 @@ func ResolveWait(defaults WaitDefaults, opts ...WaitOption) (WaitSettings, error
 		StatusAttribute:  o.statusAttribute,
 		ProgressCallback: o.progressCallback,
 		Progress:         o.progress,
+		TimeoutSet:       o.timeoutSet,
+		StrategySet:      o.strategySet,
 	}, nil
 }
 
@@ -122,6 +129,8 @@ func WithWaitSettings(s WaitSettings) WaitOption {
 			statusAttribute:  s.StatusAttribute,
 			progressCallback: s.ProgressCallback,
 			progress:         s.Progress,
+			timeoutSet:       s.TimeoutSet,
+			strategySet:      s.StrategySet,
 		}
 		return nil
 	}

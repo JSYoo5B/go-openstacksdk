@@ -113,3 +113,33 @@ func TestWaitProgressCallbackErrorStopsWaitWithoutSend(t *testing.T) {
 		}
 	}
 }
+
+func TestResolveWaitReportsWhichControlsWereSet(t *testing.T) {
+	defaults := resource.WaitDefaults{Timeout: time.Minute, Strategy: resource.FixedWait(time.Second), Supports: resource.WaitSupportFailureStates}
+	cases := []struct {
+		name              string
+		opts              []resource.WaitOption
+		timeout, strategy bool
+	}{
+		{"defaults", nil, false, false},
+		{"failure states only", []resource.WaitOption{resource.WithFailureStates("ERROR")}, false, false},
+		{"timeout", []resource.WaitOption{resource.WithTimeout(time.Hour)}, true, false},
+		{"unlimited", []resource.WaitOption{resource.WithUnlimitedWait()}, true, false},
+		{"interval", []resource.WaitOption{resource.WithPollInterval(time.Millisecond)}, false, true},
+		{"strategy", []resource.WaitOption{resource.WithWaitStrategy(resource.ExponentialWait(time.Second, 2, time.Minute))}, false, true},
+		{"both", []resource.WaitOption{resource.WithTimeout(time.Hour), resource.WithPollInterval(time.Millisecond)}, true, true},
+	}
+	for _, tc := range cases {
+		settings, err := resource.ResolveWait(defaults, tc.opts...)
+		if err != nil {
+			t.Fatalf("%s: %v", tc.name, err)
+		}
+		if settings.TimeoutSet != tc.timeout || settings.StrategySet != tc.strategy {
+			t.Fatalf("%s: TimeoutSet=%v StrategySet=%v, want %v %v", tc.name, settings.TimeoutSet, settings.StrategySet, tc.timeout, tc.strategy)
+		}
+		replayed, err := resource.ResolveWait(defaults, resource.WithWaitSettings(settings))
+		if err != nil || replayed.TimeoutSet != tc.timeout || replayed.StrategySet != tc.strategy {
+			t.Fatalf("%s: replay = %+v, %v", tc.name, replayed, err)
+		}
+	}
+}

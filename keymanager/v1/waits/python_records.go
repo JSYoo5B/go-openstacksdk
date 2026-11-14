@@ -183,19 +183,15 @@ func WithWait(opts ...resource.WaitOption) Option {
 	})
 }
 
-// waitControls reports whether opts set the timeout and the pacing, by
-// resolving them over two distinct defaults. Invalid options report false
-// here and fail when the wait resolves them.
+// waitControls reports whether opts set the timeout and the pacing. Invalid
+// options report false here and fail when the wait resolves them.
 func waitControls(opts []resource.WaitOption) (timeout, pacing bool) {
 	all := resource.WaitSupportFailureStates | resource.WaitSupportStatusAttribute | resource.WaitSupportProgress
-	a, errA := resource.ResolveWait(resource.WaitDefaults{Timeout: time.Hour, Strategy: resource.FixedWait(time.Hour), Supports: all}, opts...)
-	b, errB := resource.ResolveWait(resource.WaitDefaults{Timeout: 2 * time.Hour, Strategy: resource.FixedWait(2 * time.Hour), Supports: all}, opts...)
-	if errA != nil || errB != nil {
+	settings, err := resource.ResolveWait(resource.WaitDefaults{Timeout: time.Hour, Strategy: resource.FixedWait(time.Hour), Supports: all}, opts...)
+	if err != nil {
 		return false, false
 	}
-	timeout = a.Timeout != time.Hour || b.Timeout != 2*time.Hour
-	pacing = a.Strategy.Delay(1) != time.Hour || b.Strategy.Delay(1) != 2*time.Hour
-	return timeout, pacing
+	return settings.TimeoutSet, settings.StrategySet
 }
 
 // WithInterval sets a Python-source fixed interval: zero follows Source's

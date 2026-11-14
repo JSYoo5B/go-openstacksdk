@@ -125,6 +125,8 @@ type waitOptions struct {
 	statusAttribute   string
 	progressCallback  func(int) error
 	progress          chan<- int
+	timeoutSet        bool
+	strategySet       bool
 }
 type WaitOption func(*waitOptions) error
 
@@ -133,7 +135,7 @@ func WithTimeout(timeout time.Duration) WaitOption {
 		if timeout <= 0 {
 			return invalid("timeout must be positive")
 		}
-		o.timeout = timeout
+		o.timeout, o.timeoutSet = timeout, true
 		return nil
 	}
 }
@@ -141,7 +143,7 @@ func WithTimeout(timeout time.Duration) WaitOption {
 // WithUnlimitedWait removes the SDK timeout. The parent context still controls
 // cancellation and deadlines. A later WithTimeout reinstates a bounded wait.
 func WithUnlimitedWait() WaitOption {
-	return func(o *waitOptions) error { o.timeout = 0; return nil }
+	return func(o *waitOptions) error { o.timeout, o.timeoutSet = 0, true; return nil }
 }
 
 // WithFailureStates replaces the service's failure predicate with exact,
@@ -216,6 +218,7 @@ func WithPollInterval(interval time.Duration) WaitOption {
 		}
 		o.interval = interval
 		o.strategy = WaitStrategy{}
+		o.strategySet = true
 		return nil
 	}
 }
@@ -229,7 +232,7 @@ func WithWaitStrategy(strategy WaitStrategy) WaitOption {
 		if err := strategy.Validate(); err != nil {
 			return err
 		}
-		o.strategy = strategy
+		o.strategy, o.strategySet = strategy, true
 		return nil
 	}
 }
