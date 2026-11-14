@@ -1,3 +1,6 @@
+// Command create-server creates a server from image, flavor and optional
+// network names, waits for it to become active and prints the result. When the
+// wait fails it still reports the server that was created.
 package main
 
 import (

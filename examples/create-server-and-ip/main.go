@@ -1,3 +1,6 @@
+// Command create-server-and-ip creates a server and attaches a floating IP
+// allocated from the -external-network network, reporting what was created
+// when a later step fails.
 package main
 
 import (
