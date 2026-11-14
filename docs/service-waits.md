@@ -23,53 +23,13 @@ Later options override earlier ones.
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-package example
-
-import (
-    "context"
-    "time"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/compute/v2/servers"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func waitForServer(ctx context.Context, client *gophercloud.ServiceClient, id string) (*servers.Server, error) {
-    return servers.New(client).WaitForServer(ctx, resource.ID(id),
-        resource.WithTimeout(time.Minute))
-}
-```
+See `example_service_waits1_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 ```python
 server = conn.compute.wait_for_server(server, wait=60)
 ```
 
-```go
-package example
-
-import (
-    "context"
-    "time"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func waitForVolume(ctx context.Context, client *gophercloud.ServiceClient, id string) (*volumes.Volume, error) {
-    bounded, cancel := context.WithTimeout(ctx, 10*time.Minute)
-    defer cancel()
-    return volumes.New(client).WaitForAvailable(bounded, resource.ID(id))
-}
-
-func waitForVolumeDeletion(ctx context.Context, client *gophercloud.ServiceClient, id string) error {
-    return volumes.New(client).WaitForDelete(ctx, resource.ID(id),
-        resource.WithUnlimitedWait())
-}
-```
+See `example_service_waits2_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 ```python
 volume = conn.block_storage.wait_for_status(volume)  # available, wait=None

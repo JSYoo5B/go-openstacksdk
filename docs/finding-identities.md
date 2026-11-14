@@ -6,84 +6,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
 
-```go
-package example
+See `example_finding_identities1_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-import (
-    "context"
+See `example_finding_identities2_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-    computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
-    storagev3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
-    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindApplicationResources(ctx context.Context, compute *computev2.Service,
-    storage *storagev3.Service, network *networkv2.Service) error {
-    strict := resource.WithIdentityFindIgnoreMissing(false)
-    server, err := compute.Servers.FindIdentity(ctx, "web-01", strict)
-    if err != nil { return err }
-    volume, err := storage.Volumes.FindIdentity(ctx, "data-01", strict)
-    if err != nil { return err }
-    port, err := network.Ports.FindIdentity(ctx, "web-port", strict)
-    if err != nil { return err }
-    _, _, _ = server, volume, port
-    return nil
-}
-```
-
-```go
-package example
-
-import (
-    "context"
-
-    dnsv2 "github.com/JSYoo5B/go-openstacksdk/dns/v2"
-    lbv2 "github.com/JSYoo5B/go-openstacksdk/loadbalancer/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindScopedResources(ctx context.Context, dns *dnsv2.Service,
-    loadbalancer *lbv2.Service) error {
-    records, err := dns.RecordSets.InZone(ctx, resource.Name("example.org."))
-    if err != nil { return err }
-    record, err := records.FindIdentity(ctx, "www.example.org.",
-        resource.WithIdentityFindIgnoreMissing(false))
-    if err != nil { return err }
-    members, err := loadbalancer.Pools.Members(ctx, resource.ID("pool-id"))
-    if err != nil { return err }
-    member, err := members.FindIdentity(ctx, "backend-01",
-        resource.WithIdentityFindIgnoreMissing(false))
-    if err != nil { return err }
-    _, _ = record, member
-    return nil
-}
-```
-
-```go
-package example
-
-import (
-    "context"
-
-    computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
-    blockstoragev3 "github.com/JSYoo5B/go-openstacksdk/blockstorage/v3"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindAcrossProjects(ctx context.Context, compute *computev2.Service,
-    storage *blockstoragev3.Service) error {
-    summary := resource.WithIdentityFindDetails(false)
-    allProjects := resource.WithIdentityFindAllProjects(true)
-    strict := resource.WithIdentityFindIgnoreMissing(false)
-    server, err := compute.Servers.FindIdentity(ctx, "web-01", summary, allProjects, strict)
-    if err != nil { return err }
-    volume, err := storage.Volumes.FindIdentity(ctx, "data-01", summary, allProjects, strict)
-    if err != nil { return err }
-    _, _ = server, volume
-    return nil
-}
-```
+See `example_finding_identities3_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 ```go
 flavor, err := compute.Flavors.FindIdentity(ctx, flavorID,
@@ -92,153 +19,17 @@ flavor, err := compute.Flavors.FindIdentity(ctx, flavorID,
     resource.WithIdentityFindExtraSpecs(true))
 ```
 
-```go
-package example
+See `example_finding_identities4_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-import (
-    "context"
+See `example_finding_identities5_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-    computev2 "github.com/JSYoo5B/go-openstacksdk/compute/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
+See `example_finding_identities6_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-func FindFlavor(ctx context.Context, compute *computev2.Service) error {
-    flavor, err := compute.Flavors.FindIdentity(ctx, "small",
-        resource.WithIdentityFindExtraSpecs(true),
-        resource.WithIdentityFindIgnoreMissing(false),
-        resource.WithIdentityFindQuery("minRam", "256"))
-    if err != nil { return err }
-    _, _ = flavor.ID, flavor.ExtraSpecs
-    return nil
-}
-```
+See `example_finding_identities7_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-```go
-package example
+See `example_finding_identities8_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
-import (
-    "context"
-
-    imagev2 "github.com/JSYoo5B/go-openstacksdk/image/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindImage(ctx context.Context, images *imagev2.Service) error {
-    image, err := images.Images.FindIdentity(ctx, "ubuntu",
-        resource.WithIdentityFindIgnoreMissing(false))
-    if err != nil { return err }
-    _, _ = image.ID, image.Hidden
-    return nil
-}
-```
-
-```go
-package example
-
-import (
-    "context"
-
-    identityv3 "github.com/JSYoo5B/go-openstacksdk/identity/v3"
-    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindTenantResources(ctx context.Context, identity *identityv3.Service,
-    network *networkv2.Service) error {
-    strict := resource.WithIdentityFindIgnoreMissing(false)
-    domain, err := identity.Domains.FindIdentity(ctx, "Default", strict)
-    if err != nil { return err }
-    domainQuery := resource.WithIdentityFindQuery("domain_id", domain.ID)
-    project, err := identity.Projects.FindIdentity(ctx, "app", strict, domainQuery)
-    if err != nil { return err }
-    user, err := identity.Users.FindIdentity(ctx, "app-user", strict, domainQuery)
-    if err != nil { return err }
-    group, err := identity.Groups.FindIdentity(ctx, "app-group", strict, domainQuery)
-    if err != nil { return err }
-    role, err := identity.Roles.FindIdentity(ctx, "reader", strict, domainQuery)
-    if err != nil { return err }
-    net, err := network.Networks.FindIdentity(ctx, "web-net", strict)
-    if err != nil { return err }
-    subnet, err := network.Subnets.FindIdentity(ctx, "web-subnet", strict,
-        resource.WithIdentityFindQuery("network_id", net.ID))
-    if err != nil { return err }
-    _, _, _, _, _ = project, user, group, role, subnet
-    return nil
-}
-```
-
-```go
-package example
-
-import (
-    "context"
-    "net/url"
-
-    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindNetworkExtensions(ctx context.Context, network *networkv2.Service,
-    projectID string) error {
-    filter := resource.WithIdentityFindOptions(resource.IdentityFindOpts{
-        Query: url.Values{"project_id": {projectID}, "fields": {"id", "name"}},
-    })
-    strict := resource.WithIdentityFindIgnoreMissing(false)
-    router, err := network.Routers.FindIdentity(ctx, "app-router", filter, strict)
-    if err != nil { return err }
-    group, err := network.SecurityGroups.FindIdentity(ctx, "app-sg", filter, strict)
-    if err != nil { return err }
-    _, _ = router, group
-    return nil
-}
-```
-
-```go
-package example
-
-import (
-    "context"
-
-    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindSubnetPoolAndTrunk(ctx context.Context, network *networkv2.Service,
-    projectID string) error {
-    filter := resource.WithIdentityFindQuery("project_id", projectID)
-    strict := resource.WithIdentityFindIgnoreMissing(false)
-    pool, err := network.SubnetPools.FindIdentity(ctx, "app-pool", filter, strict)
-    if err != nil { return err }
-    trunk, err := network.Trunks.FindIdentity(ctx, "app-trunk", filter, strict)
-    if err != nil { return err }
-    _, _ = pool.Prefixes, trunk.Subports
-    return nil
-}
-```
-
-```go
-package example
-
-import (
-    "context"
-
-    networkv2 "github.com/JSYoo5B/go-openstacksdk/network/v2"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func FindQoSAndAddresses(ctx context.Context, network *networkv2.Service,
-    projectID string) error {
-    strict := resource.WithIdentityFindIgnoreMissing(false)
-    policy, err := network.QoSPolicies.FindIdentity(ctx, "app-qos",
-        resource.WithIdentityFindQuery("shared", "true"), strict)
-    if err != nil { return err }
-    group, err := network.SecurityAddressGroups.FindIdentity(ctx, "app-addresses",
-        resource.WithIdentityFindQuery("project_id", projectID), strict)
-    if err != nil { return err }
-    _, _ = policy.Rules, group.Addresses
-    return nil
-}
-```
+See `example_finding_identities9_test.go` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 ## References
 

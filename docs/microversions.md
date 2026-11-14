@@ -5,33 +5,7 @@ highest version shared with your application. This is an opt-in connection
 policy. A connection with no microversion option keeps the existing behavior:
 no discovery request and no microversion header.
 
-```go
-package main
-
-import (
-    "context"
-    "fmt"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-)
-
-func main() {
-    ctx := context.Background()
-    conn, err := sdk.Connect(ctx,
-        sdk.WithMicroversionRange(sdk.Compute, "2.52", "2.90"),
-        sdk.WithLatestMicroversion(sdk.BlockStorage),
-    )
-    if err != nil { panic(err) }
-
-    compute, err := conn.ComputeV2(ctx)
-    if err != nil { panic(err) }
-    selection, err := conn.Microversion(ctx, sdk.Compute)
-    if err != nil { panic(err) }
-    fmt.Println(selection.RequestedMinimum, selection.RequestedMaximum)
-    fmt.Println(selection.SupportedMinimum, selection.SupportedMaximum)
-    fmt.Println(selection.Selected, compute.RawClient().Microversion)
-}
-```
+See `Example_microversions1` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 `WithMicroversionRange(service, minimum, maximum)` has inclusive bounds. Empty
 minimum uses the cloud's minimum. Empty maximum or `"latest"` uses the cloud's

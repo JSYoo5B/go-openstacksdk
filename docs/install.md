@@ -15,22 +15,6 @@ The [quick start](../README.md) demonstrates authentication and a read. [Create-
 
 The following program references public APIs without authenticating or executing HTTP requests. It demonstrates root, service, leaf, concrete-option, and generic-option imports.
 
-```go
-package main
-
-import (
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/compute"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func main() {
-    _ = sdk.Connect
-    _ = compute.CreateServerRequest{}
-    _ = resource.ID("example-id")
-    _ = request.Present(false)
-}
-```
+See `Example_install` in [example_docs_test.go](../example_docs_test.go), compiled by `go test`.
 
 Build an external module with `GOWORK=off go build ./...`. Module download/build success proves importability for that version; it does not establish authenticated cloud interoperability.
