@@ -13,22 +13,27 @@ import (
 
 func TestFloatingIPCreateOptionsDefaultsBulkAndIgnoredSelectors(t *testing.T) {
 	p, err := compute.PrepareFloatingIPCreateOptions(context.Background())
-	if err != nil || p.Wait || p.WaitTimeout != time.Minute || p.WaitOptions != nil || p.Timeout != 0 || p.Source != nil {
+	if err != nil || p.Wait || p.WaitOptions != nil || p.Timeout != 0 || p.Source != nil {
 		t.Fatal(p, err)
 	}
-	p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateWaitTimeout(-time.Second), func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID("ignored/path"); return nil }, func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = "literal IPv6 or arbitrary"; return nil })
-	if err != nil || p.WaitTimeout != -time.Second || p.Server.String() != "ignored/path" {
+	p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateWaitOptions(resource.WithTimeout(time.Second)), func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID("ignored/path"); return nil }, func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = "literal IPv6 or arbitrary"; return nil })
+	if err != nil || len(p.WaitOptions) != 1 || p.Server.String() != "ignored/path" {
 		t.Fatal(p, err)
+	}
+	for _, invalid := range []resource.WaitOption{resource.WithTimeout(0), resource.WithTimeout(-time.Second), resource.WithPollInterval(0), resource.WithPollInterval(-time.Second)} {
+		if _, err := compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateWaitOptions(invalid)); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(err)
+		}
 	}
 	p, err = compute.PrepareFloatingIPCreateOptions(context.Background(), compute.WithFloatingIPCreateTimeout(time.Minute), compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{}), compute.WithFloatingIPCreateWait(true))
-	if err != nil || !p.Wait || p.WaitTimeout != 0 || p.Timeout != 0 {
+	if err != nil || !p.Wait || p.WaitOptions != nil || p.Timeout != 0 {
 		t.Fatal(p, err)
 	}
 }
 func TestFloatingIPCreateOptionsOwnSnapshotsAndApplyOnce(t *testing.T) {
 	source := compute.FloatingIPNeutron
 	location := resource.CloudLocation{Project: resource.CloudProject{ID: json.RawMessage(`"owner"`)}}
-	option := compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{Source: &source, Location: &location, WaitTimeout: time.Minute})
+	option := compute.WithFloatingIPCreateOptions(compute.FloatingIPCreateOpts{Source: &source, Location: &location})
 	source = compute.FloatingIPNova
 	location.Project.ID[1] = 'X'
 	calls := 0

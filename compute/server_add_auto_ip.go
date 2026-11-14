@@ -381,7 +381,7 @@ func (o addAutoIPOptions) createWaitBudget() FloatingIPCreateOption {
 	if o.unlimited {
 		return WithFloatingIPCreateWaitOptions(resource.WithUnlimitedWait())
 	}
-	return WithFloatingIPCreateWaitTimeout(o.timeout)
+	return WithFloatingIPCreateWaitOptions(resource.WithTimeout(o.timeout))
 }
 
 // remainingAfter is the budget left after a step that started at start; it is

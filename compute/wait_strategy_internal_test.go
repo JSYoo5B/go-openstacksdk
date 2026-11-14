@@ -104,10 +104,13 @@ func TestFloatingIPCreateWaitResolvesSourceDefaults(t *testing.T) {
 			t.Fatal(wait, err)
 		}
 	}
-	check(FloatingIPCreateOpts{WaitTimeout: time.Minute}, time.Minute, false, 5*time.Second)
-	check(FloatingIPCreateOpts{WaitTimeout: 2 * time.Second}, 2*time.Second, false, 2*time.Second)
-	check(FloatingIPCreateOpts{WaitTimeout: -time.Second}, -time.Second, false, 5*time.Second)
-	check(FloatingIPCreateOpts{WaitTimeout: time.Minute, WaitOptions: []resource.WaitOption{resource.WithTimeout(3 * time.Second)}}, 3*time.Second, false, 3*time.Second)
-	check(FloatingIPCreateOpts{WaitTimeout: time.Minute, WaitOptions: []resource.WaitOption{resource.WithUnlimitedWait()}}, 0, true, 5*time.Second)
-	check(FloatingIPCreateOpts{WaitTimeout: time.Second, WaitOptions: []resource.WaitOption{resource.WithPollInterval(ms), resource.WithTimeout(time.Minute)}}, time.Minute, false, ms)
+	check(FloatingIPCreateOpts{}, time.Minute, false, 5*time.Second)
+	check(FloatingIPCreateOpts{WaitOptions: []resource.WaitOption{resource.WithTimeout(2 * time.Second)}}, 2*time.Second, false, 2*time.Second)
+	check(FloatingIPCreateOpts{WaitOptions: []resource.WaitOption{resource.WithUnlimitedWait()}}, 0, true, 5*time.Second)
+	check(FloatingIPCreateOpts{WaitOptions: []resource.WaitOption{resource.WithPollInterval(ms), resource.WithTimeout(time.Minute)}}, time.Minute, false, ms)
+	for _, invalid := range []resource.WaitOption{resource.WithTimeout(0), resource.WithTimeout(-time.Second), resource.WithPollInterval(0), resource.WithPollInterval(-time.Second)} {
+		if _, err := (FloatingIPCreateOpts{WaitOptions: []resource.WaitOption{invalid}}).resolveWait(); !errors.Is(err, resource.ErrInvalidOption) {
+			t.Fatal(err)
+		}
+	}
 }

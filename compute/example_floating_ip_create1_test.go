@@ -45,7 +45,7 @@ func runFloatingIpCreate1() error {
 		func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = *fixed; return nil },
 		func(c *compute.FloatingIPCreateOpts) error { c.NATDestination = *nat; return nil },
 		compute.WithFloatingIPCreateWait(*wait),
-		compute.WithFloatingIPCreateWaitTimeout(*waitTimeout),
+		compute.WithFloatingIPCreateWaitOptions(resource.WithTimeout(*waitTimeout)),
 	}
 	if *serverID != "" {
 		opts = append(opts, func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID(*serverID); return nil })

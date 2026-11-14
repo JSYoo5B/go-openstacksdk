@@ -34,7 +34,7 @@ func TestFloatingIPCreateWaitStrategyPacesNeutronPolls(t *testing.T) {
 	}
 	ms := time.Millisecond
 	result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true),
-		compute.WithFloatingIPCreateWaitTimeout(5*time.Second), compute.WithFloatingIPCreateWaitOptions(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
+		compute.WithFloatingIPCreateWaitOptions(resource.WithTimeout(5*time.Second)), compute.WithFloatingIPCreateWaitOptions(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 	if err != nil || !result.Waited || len(polls) != 4 {
 		t.Fatal(result, err, len(polls))
 	}

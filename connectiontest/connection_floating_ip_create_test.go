@@ -119,7 +119,7 @@ func TestFloatingIPCreateUnattachedIgnoresWaitAndFixedNAT(t *testing.T) {
 		}
 		return 202, `{"floatingip":{"floating_ip_address":null}}`
 	}
-	result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = "ignored"; return nil }, func(c *compute.FloatingIPCreateOpts) error { c.NATDestination = "ignored"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(-time.Second))
+	result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = "ignored"; return nil }, func(c *compute.FloatingIPCreateOpts) error { c.NATDestination = "ignored"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitOptions(resource.WithTimeout(time.Second)))
 	if err != nil || !result.Allocated || result.Waited || result.Cleanup != nil || len(result.Observations) != 0 || len(state.events) != 2 || string(result.FloatingIP.Resource.Body["id"]) != "null" || len(result.FloatingIP.Wire.Body["id"]) != 0 {
 		t.Fatal(result, err, state)
 	}
@@ -155,7 +155,7 @@ func TestFloatingIPCreateNovaFreshCompatibilityAndPoolPresence(t *testing.T) {
 					t.Error(r.URL)
 					return 500, `{}`
 				}
-				result, err := conn.CreateFloatingIP(context.Background(), input, func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID("ignored/path"); return nil }, func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = "invalid"; return nil }, func(c *compute.FloatingIPCreateOpts) error { c.NATDestination = "ignored"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(-1))
+				result, err := conn.CreateFloatingIP(context.Background(), input, func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID("ignored/path"); return nil }, func(c *compute.FloatingIPCreateOpts) error { c.FixedAddress = "invalid"; return nil }, func(c *compute.FloatingIPCreateOpts) error { c.NATDestination = "ignored"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitOptions(resource.WithTimeout(time.Second)))
 				if err != nil || !result.Allocated || result.Backend != compute.FloatingIPNova || result.Waited || result.Cleanup != nil || result.Compatibility == nil || result.Compatibility.Observed.StatusCode != 201 || string(result.FloatingIP.Resource.Body["status"]) != `"ACTIVE"` || string(result.FloatingIP.Wire.Body["status"]) != `"ERROR"` || string(result.FloatingIP.Wire.Body["vendor"]) != "9007199254740993" {
 					t.Fatal(result, err, state)
 				}
@@ -290,7 +290,7 @@ func TestFloatingIPCreateWaitPublicGetSkipsErrorAndChecksFinalPort(t *testing.T)
 				}
 				return 200, fmt.Sprintf(`{"floatingips":[{"id":"new","status":"\u0041CTIVE","port_id":%q}]}`, port)
 			}
-			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(time.Second), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(time.Millisecond)))
+			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitOptions(resource.WithTimeout(time.Second)), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			if !result.Allocated || result.Cleanup != nil || result.Backend != compute.FloatingIPNeutron {
 				t.Fatal(result, err)
 			}
@@ -306,7 +306,14 @@ func TestFloatingIPCreateWaitPublicGetSkipsErrorAndChecksFinalPort(t *testing.T)
 }
 
 func TestFloatingIPCreateSDKWaitTimeoutCleansWithLiveParent(t *testing.T) {
-	for _, mode := range []string{"immediate", "negative", "real", "cleanup denied"} {
+	for _, invalid := range []resource.WaitOption{resource.WithTimeout(0), resource.WithTimeout(-time.Second), resource.WithPollInterval(0)} {
+		_, conn, state := floatingCreateFixture(t, compute.FloatingIPNeutron)
+		state.reply = func(r *http.Request) (int, string) { t.Error("reached HTTP", r.URL); return 500, `{}` }
+		if _, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitOptions(invalid)); !errors.Is(err, resource.ErrInvalidOption) || len(state.events) != 0 {
+			t.Fatal(err, state.events)
+		}
+	}
+	for _, mode := range []string{"real", "cleanup denied"} {
 		t.Run(mode, func(t *testing.T) {
 			_, conn, state := floatingCreateFixture(t, compute.FloatingIPNeutron)
 			deletes := 0
@@ -329,14 +336,8 @@ func TestFloatingIPCreateSDKWaitTimeoutCleansWithLiveParent(t *testing.T) {
 				}
 				return 200, `{"floatingips":[{"id":"new","status":"ERROR","port_id":"port"}]}`
 			}
-			duration := time.Duration(0)
-			if mode == "negative" {
-				duration = -time.Second
-			}
-			if mode == "real" {
-				duration = 20 * time.Millisecond
-			}
-			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitTimeout(duration), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(time.Millisecond)))
+			duration := 20 * time.Millisecond
+			result, err := conn.CreateFloatingIP(context.Background(), floatingCreateInput("net"), func(c *compute.FloatingIPCreateOpts) error { c.PortID = "port"; return nil }, compute.WithFloatingIPCreateWait(true), compute.WithFloatingIPCreateWaitOptions(resource.WithTimeout(duration)), compute.WithFloatingIPCreateWaitOptions(resource.WithPollInterval(time.Millisecond)))
 			var timeout *compute.FloatingIPCreateTimeoutError
 			if !errors.As(err, &timeout) || !errors.Is(err, context.DeadlineExceeded) || !result.Allocated || result.Waited || result.Cleanup == nil || deletes != 1 || timeout.ID != "new" {
 				t.Fatal(result, err, state)

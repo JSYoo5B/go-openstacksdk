@@ -47929,7 +47929,6 @@
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateOptions",
         "github.com/JSYoo5B/go-openstacksdk/request.Custom",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWait",
-        "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitTimeout",
         "github.com/JSYoo5B/go-openstacksdk/compute.WithFloatingIPCreateWaitOptions",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithPollInterval",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithWaitStrategy",
@@ -47938,7 +47937,7 @@
       ],
       "contracts": [
         {
-          "behavior": "Concrete preparation defaults to Wait=false, a60-second post-allocation WaitTimeout, automatic wait interval and no SDK whole-operation cap. Last-option precedence permits a zero-valued bulk replacement to clear budgets; negative wait timeout is retained for a consumed immediate timeout rather than globally rejecting ignored destination values.",
+          "behavior": "Concrete preparation defaults to Wait=false, a 60-second post-allocation wait, automatic wait interval and no SDK whole-operation cap. Last-option precedence permits a zero-valued bulk replacement to clear budgets; a zero or negative resource.WithTimeout or resource.WithPollInterval in WithFloatingIPCreateWaitOptions fails with resource.ErrInvalidOption before HTTP.",
           "tests": [
             "compute/floating_ip_create_options_test.go:TestFloatingIPCreateOptionsDefaultsBulkAndIgnoredSelectors"
           ]
@@ -47970,7 +47969,7 @@
           ]
         },
         {
-          "behavior": "Without Server or explicit port, FixedAddress/NATDestination and Wait=true with a negative wait timeout are ignored. This accepted unattached allocation sends no poll or cleanup; a missing response ID is logical null while Wire preserves actual absence.",
+          "behavior": "Without Server or explicit port, FixedAddress/NATDestination and Wait=true are ignored. This accepted unattached allocation sends no poll or cleanup; a missing response ID is logical null while Wire preserves actual absence.",
           "tests": [
             "connectiontest/connection_floating_ip_create_test.go:TestFloatingIPCreateUnattachedIgnoresWaitAndFixedNAT"
           ]
@@ -48027,7 +48026,7 @@
           ]
         },
         {
-          "behavior": "A consumed zero/negative or real20-ms SDK wait timeout returns FloatingIPCreateTimeoutError with the allocated ID and DeadlineExceeded. Cleanup runs one default-policy DELETE and public absence verification on the still-live original context rather than the expired wait child. Successful absence and cleanup403 are separate results; original lookup/POST and cleanup DELETE have no SDK wait-child deadline.",
+          "behavior": "A zero or negative wait timeout or interval fails with resource.ErrInvalidOption before HTTP. A consumed real 20-ms SDK wait timeout returns FloatingIPCreateTimeoutError with the allocated ID and DeadlineExceeded. Cleanup runs one default-policy DELETE and public absence verification on the still-live original context rather than the expired wait child. Successful absence and cleanup403 are separate results; original lookup/POST and cleanup DELETE have no SDK wait-child deadline.",
           "tests": [
             "connectiontest/connection_floating_ip_create_test.go:TestFloatingIPCreateSDKWaitTimeoutCleansWithLiveParent"
           ]
@@ -48084,7 +48083,8 @@
         "Automatic destination selection keeps source-style created_at lexical reverse order and the first valid IPv4 while explicit fixed selection is literal and can be IPv6. Typed parsing and stable string order replace arbitrary Python malformed or mixed created_at/object comparison corners. Ordinary canonical HTTP/model behavior is mapped without reproducing every dynamic Resource descriptor/runtime case.",
         "Owned allocation/compatibility transport accepts final HTTP200 through399, preserving actual status/body/header and guarded native retries. Source literal status<400 also includes informational1xx; normal net/http informational handling and redirect/session combinations are deliberate transport boundaries, not claims of exact Python session behavior. Standard query/lookup reads retain their documented typed status/envelope/paging rules.",
         "Go exposes explicit per-call source/location/strict/direct-get options and existing immutable Connection configuration. Generic Python has_service negotiation, arbitrary mutable session/profile overrides and inherited Resource/cache/discovery facilities remain separate SDK goal scope, rather than an unimplemented declared Create argument.",
-        "Python waits use a fixed poll interval. compute.WithFloatingIPCreateWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins."
+        "Python waits use a fixed poll interval. compute.WithFloatingIPCreateWaitOptions accepts resource.WithWaitStrategy (fixed, linear or exponential pauses with optional jitter) as a Go-only extension; without it the wait keeps its fixed interval, and the later of resource.WithPollInterval and resource.WithWaitStrategy wins.",
+        "Python accepts a zero or negative create wait timeout, which expires a consumed Neutron wait immediately; Go rejects a zero or negative resource.WithTimeout or resource.WithPollInterval in WithFloatingIPCreateWaitOptions with resource.ErrInvalidOption before HTTP, even when the wait would be ignored."
       ],
       "remaining": []
     },

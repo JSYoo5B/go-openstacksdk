@@ -15,22 +15,21 @@ import (
 // chooses Neutron's default network but is a literal empty Nova pool.
 type CreateFloatingIPRequest struct{ Network *string }
 
-// Wait defaults to false. WaitTimeout defaults to 60 seconds after allocation;
-// zero/negative timeout immediately expires a consumed Neutron wait. An absent
-// port or Nova backend ignores server/fixed/NAT/wait. Timeout is an optional
-// whole-operation cap, independent of the source's post-allocation wait budget.
-// WaitOptions tune the ACTIVE wait with the shared resource wait options:
-// resource.WithTimeout or resource.WithUnlimitedWait replaces WaitTimeout, and
-// resource.WithPollInterval or resource.WithWaitStrategy replaces the default
-// min(5 seconds, wait timeout) fixed interval (5 seconds when unlimited). The
-// wait has a fixed completion condition and reports no progress, so failure
-// states, a status attribute and progress fail with resource.ErrInvalidOption
-// before HTTP, like any invalid wait option.
+// Wait defaults to false. An absent port or Nova backend ignores
+// server/fixed/NAT/wait. Timeout is an optional whole-operation cap,
+// independent of the post-allocation wait budget. WaitOptions tune the ACTIVE
+// wait with the shared resource wait options: resource.WithTimeout (default 60
+// seconds after allocation) or resource.WithUnlimitedWait, and
+// resource.WithPollInterval or resource.WithWaitStrategy, which replace the
+// default min(5 seconds, wait timeout) fixed interval (5 seconds when
+// unlimited). The wait has a fixed completion condition and reports no
+// progress, so a zero or negative timeout or poll interval, failure states, a
+// status attribute and progress fail with resource.ErrInvalidOption before
+// HTTP, like any invalid wait option.
 type FloatingIPCreateOpts struct {
 	Server                               resource.Ref
 	PortID, FixedAddress, NATDestination string
 	Wait                                 bool
-	WaitTimeout                          time.Duration
 	WaitOptions                          []resource.WaitOption
 	Source                               *FloatingIPSource
 	Location                             *resource.CloudLocation
@@ -45,9 +44,6 @@ func WithFloatingIPCreateOptions(value FloatingIPCreateOpts) FloatingIPCreateOpt
 }
 func WithFloatingIPCreateWait(value bool) FloatingIPCreateOption {
 	return func(o *FloatingIPCreateOpts) error { o.Wait = value; return nil }
-}
-func WithFloatingIPCreateWaitTimeout(value time.Duration) FloatingIPCreateOption {
-	return func(o *FloatingIPCreateOpts) error { o.WaitTimeout = value; return nil }
 }
 
 // WithFloatingIPCreateWaitOptions appends shared wait options for the ACTIVE
@@ -73,7 +69,7 @@ func PrepareFloatingIPCreateOptions(ctx context.Context, options ...FloatingIPCr
 	return prepareFloatingIPCreateOptions(options, func() error { return cloudread.Context(ctx) })
 }
 func prepareFloatingIPCreateOptions(options []FloatingIPCreateOption, guard func() error) (FloatingIPCreateOpts, error) {
-	value := FloatingIPCreateOpts{WaitTimeout: time.Minute}
+	value := FloatingIPCreateOpts{}
 	for _, option := range slices.Clone(options) {
 		if err := guard(); err != nil {
 			return FloatingIPCreateOpts{}, err
@@ -120,7 +116,7 @@ type floatingIPCreateWait struct {
 	Strategy  resource.WaitStrategy
 }
 
-// resolveWait returns the effective ACTIVE wait: WaitTimeout unless the wait
+// resolveWait returns the effective ACTIVE wait: 60 seconds unless the wait
 // options choose a timeout, and min(5 seconds, timeout) unless they choose
 // pacing.
 func (value FloatingIPCreateOpts) resolveWait() (floatingIPCreateWait, error) {
@@ -128,7 +124,7 @@ func (value FloatingIPCreateOpts) resolveWait() (floatingIPCreateWait, error) {
 	if err != nil {
 		return floatingIPCreateWait{}, err
 	}
-	wait := floatingIPCreateWait{Timeout: value.WaitTimeout, Strategy: settings.Strategy}
+	wait := floatingIPCreateWait{Timeout: time.Minute, Strategy: settings.Strategy}
 	if settings.TimeoutSet {
 		wait.Timeout, wait.Unlimited = settings.Timeout, settings.Unlimited
 	}
@@ -136,10 +132,6 @@ func (value FloatingIPCreateOpts) resolveWait() (floatingIPCreateWait, error) {
 		interval := 5 * time.Second
 		if !wait.Unlimited && wait.Timeout < interval {
 			interval = wait.Timeout
-		}
-		if interval <= 0 {
-			// The wait expires before its first pause; any valid pacing works.
-			interval = 5 * time.Second
 		}
 		wait.Strategy = resource.FixedWait(interval)
 	}
