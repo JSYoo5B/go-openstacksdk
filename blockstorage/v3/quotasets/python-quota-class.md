@@ -1,58 +1,6 @@
 # Python Quota Class
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:block_storage/v3/get_quota_class_set`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.GetQuotaClassRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassGetOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Custom`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-
-- GET default/custom class names project the seven declared quota integer fields with missing/null distinction and preserve actual unknown Wire/body/header/status separately. Selected version remains owned and no version discovery is added.
-  Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassGetSevenDescriptorsAndActualWire`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassGetMissingNullAndCopiedProof`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassOwnedOptionsAndNoVersionDiscovery`.
-- Owned options/callback/source/context guards preserve selected routing and do not allow malformed parent or bound controls. Physical read/Close/cancel errors retain actual404 evidence without replay or logical missing suppression.
-  Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassOwnedOptionsAndNoVersionDiscovery`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassPreflightIDsAndBoundConstructorControls`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassCallbacksSourceAndCancellationStayTerminal`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassPhysicalFaultKeeps404AndAllCauses`.
-
-Python/Go differences:
-
-- Go takes a scalar string class name in a fixed /os-quota-class-sets/{className} route rather than mutable Python Resource input. Only omitted GET name defaults to default; explicit empty names are rejected and other names are sent for server validation. Safe escaped routing, finite UTF-8 JSON and independent declared Resource/Wire/Envelope/header/status snapshots replace arbitrary runtime objects and URI formatter overrides.
-- Raw update attributes are not coerced on the wire; only the declared returned Resource view applies Source integer/default/null behavior, including bool remaining bool and non-digit strings becoming0. Unknown Body attributes are dropped from the view while actual Wire retains unknown response JSON. Descriptor projection errors are reported without claiming a successful wire operation or Python runtime object identity.
-- New scalar-name update seeds id but never commits dirty id; duplicate attrs id is rejected, and no recognized changes produces no HTTP/Discovery or fabricated receipt. Existing mutable Resource equality/recommit, optional response cache and generic adapter/session/runtime SDK-R1/C1/S1 remain whole-SDK goals. Header/version options are explicit Go conveniences and caller custom transport cache bypass is not claimed.
-- Cinder QuotaClassSet has no class maximum; the API retains selected version without adding discovery. Nova class ceiling2.56 is not applied to Cinder, and no automatic Connection location is synthesized.
-
-### `python:block_storage/v3/update_quota_class_set`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.API.UpdateQuotaClassRecord`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/quotasets.WithQuotaClassUpdateAttribute`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-
-- PUT transmits raw dirty quota_class_set attrs and explicit null, overlays actual response on class id seed and casts only the returned declared view. No attrs or unknown-only fields yields no HTTP, while duplicate id/constructor controls fail before requests.
-  Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassUpdateRawDirtyAttrsAndSeedProjection`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassUpdateNoopUnknownAndExplicitNull`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassPreflightIDsAndBoundConstructorControls`.
-- Owned options/callback/source/context guards preserve selected routing and do not allow malformed parent or bound controls. Physical read/Close/cancel errors retain actual404 evidence without replay or logical missing suppression.
-  Tests: `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassOwnedOptionsAndNoVersionDiscovery`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassPreflightIDsAndBoundConstructorControls`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassCallbacksSourceAndCancellationStayTerminal`, `blockstorage/v3/quotasets/python_quota_class_test.go:TestPythonCinderQuotaClassPhysicalFaultKeeps404AndAllCauses`.
-
-Python/Go differences:
-
-- Go takes a scalar string class name in a fixed /os-quota-class-sets/{className} route rather than mutable Python Resource input. Only omitted GET name defaults to default; explicit empty names are rejected and other names are sent for server validation. Safe escaped routing, finite UTF-8 JSON and independent declared Resource/Wire/Envelope/header/status snapshots replace arbitrary runtime objects and URI formatter overrides.
-- Raw update attributes are not coerced on the wire; only the declared returned Resource view applies Source integer/default/null behavior, including bool remaining bool and non-digit strings becoming0. Unknown Body attributes are dropped from the view while actual Wire retains unknown response JSON. Descriptor projection errors are reported without claiming a successful wire operation or Python runtime object identity.
-- New scalar-name update seeds id but never commits dirty id; duplicate attrs id is rejected, and no recognized changes produces no HTTP/Discovery or fabricated receipt. Existing mutable Resource equality/recommit, optional response cache and generic adapter/session/runtime SDK-R1/C1/S1 remain whole-SDK goals. Header/version options are explicit Go conveniences and caller custom transport cache bypass is not claimed.
-- Cinder QuotaClassSet has no class maximum; the API retains selected version without adding discovery. Nova class ceiling2.56 is not applied to Cinder, and no automatic Connection location is synthesized.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

@@ -10,12 +10,6 @@ Selected stateful resources provide `WaitForState(ctx, ref, target, options...)`
 
 `Volumes.MetadataIn(ctx, ref)` and `Snapshots.MetadataIn(ctx, ref)` resolve an ID or name once and expose the same Get, Merge, Replace, and DeleteKeys operations. Merge uses POST merge; Replace uses PUT full replacement. Nil/empty maps still send an explicit metadata object. Nil DeleteKeys deletes all keys, an empty slice makes no requests, and other slices delete in input order and return results before failure. Results contain actual metadata, raw bodies, headers, and success codes without a Resource cache. [Shared metadata](../metadata/README.md), [Volumes](volumes/README.md), and [Snapshots](snapshots/README.md) describe Python mappings, ETags, options, and partial success. Backup metadata child routes are outside this contract.
 
-[Native v2 calls](native-calls.md) documents only input, listing, and decoding differences between generated methods in the deprecated v2 package and native v3 calls.
-
-[Cinder v2 Python Proxy mappings](python-parity-volumes.md) covers volume, snapshot, and consistency group snapshot methods and unresolved behavior.
-
-[Cinder v2 resource mappings](python-parity-resources.md) covers backups, transfers, quotas, services, and other non-volume/snapshot resources, including unmapped methods.
-
 ## Go usage
 
 ```go

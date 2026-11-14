@@ -58108,7 +58108,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes call only; Python volume Resource parity and the SDK-owned volume workflows are tracked separately.",
@@ -58133,7 +58133,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes call only; Python volume Resource parity and the SDK-owned volume workflows are tracked separately.",
@@ -58160,7 +58160,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes call only; Python volume Resource parity and the SDK-owned volume workflows are tracked separately.",
@@ -58187,7 +58187,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes call only; Python volume Resource parity and the SDK-owned volume workflows are tracked separately.",
@@ -58214,7 +58214,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes call only; Python volume Resource parity and the SDK-owned volume workflows are tracked separately.",
@@ -58238,7 +58238,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes call only; Python volume Resource parity and the SDK-owned volume workflows are tracked separately.",
@@ -58266,7 +58266,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58292,7 +58292,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58320,7 +58320,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58346,7 +58346,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58372,7 +58372,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58400,7 +58400,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58428,7 +58428,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58456,7 +58456,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58484,7 +58484,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58512,7 +58512,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58540,7 +58540,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58568,7 +58568,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58596,7 +58596,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes action call only; Python volume Resource actions and the SDK-owned attach, resize, image and flag workflows are tracked separately.",
@@ -58623,7 +58623,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -58648,7 +58648,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -58675,7 +58675,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -58702,7 +58702,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -58729,7 +58729,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -58754,7 +58754,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -58778,7 +58778,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -58806,7 +58806,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-attachments.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
@@ -58831,7 +58831,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-attachments.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
@@ -58858,7 +58858,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-attachments.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
@@ -58885,7 +58885,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-attachments.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
@@ -58910,7 +58910,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-attachments.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
@@ -58935,7 +58935,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-attachments.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
@@ -58959,7 +58959,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-attachments.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/attachments call only; the SDK-owned Cinder attachment workflow and Python Resource parity are tracked separately.",
@@ -58986,7 +58986,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -59011,7 +59011,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -59038,7 +59038,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -59065,7 +59065,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -59094,7 +59094,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups Update call; Python backup Resource parity is tracked separately.",
@@ -59121,7 +59121,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -59146,7 +59146,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -59173,7 +59173,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/transfers call only; Python Resource parity is tracked separately.",
@@ -59200,7 +59200,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/transfers call only; Python Resource parity is tracked separately.",
@@ -59225,7 +59225,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/transfers call only; Python Resource parity is tracked separately.",
@@ -59252,7 +59252,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/transfers call only; Python Resource parity is tracked separately.",
@@ -59277,7 +59277,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/transfers call only; Python Resource parity is tracked separately.",
@@ -59303,7 +59303,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/availabilityzones call only; Python availability zone Resource parity is tracked separately.",
@@ -59328,7 +59328,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/apiversions call only; Python Resource parity is tracked separately.",
@@ -59353,7 +59353,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volume-types.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes read call only; Python volume type Resource parity and admin type management are tracked separately.",
@@ -59380,7 +59380,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volume-types.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes read call only; Python volume type Resource parity and admin type management are tracked separately.",
@@ -59405,7 +59405,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volume-types.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes read call only; Python volume type Resource parity and admin type management are tracked separately.",
@@ -59430,7 +59430,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volume-types.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes read call only; Python volume type Resource parity and admin type management are tracked separately.",
@@ -59458,8 +59458,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59484,8 +59484,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59512,8 +59512,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59540,8 +59540,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59568,8 +59568,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59593,8 +59593,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59622,8 +59622,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59649,8 +59649,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59678,8 +59678,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59705,8 +59705,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59732,8 +59732,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59761,8 +59761,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59790,8 +59790,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59819,8 +59819,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59848,8 +59848,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59877,8 +59877,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59906,8 +59906,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59935,8 +59935,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59964,8 +59964,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes call only; Python volume Resource parity and SDK-owned volume workflows are tracked separately.",
@@ -59992,8 +59992,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -60018,8 +60018,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -60046,8 +60046,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -60072,8 +60072,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -60097,8 +60097,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/snapshots call only; Python snapshot Resource parity, metadata scopes and the SDK-owned waits are tracked separately.",
@@ -60126,8 +60126,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -60152,8 +60152,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -60180,8 +60180,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -60208,8 +60208,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -60236,8 +60236,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -60262,8 +60262,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups call only; Python backup Resource parity and the SDK-owned export, import, restore and status workflows are tracked separately.",
@@ -60289,7 +60289,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Cinder added backup update in the v3 API at microversion 3.9, so the v2 route is not usable and the native body lacks the backup envelope."
@@ -60317,8 +60317,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
@@ -60345,8 +60345,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
@@ -60371,8 +60371,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
@@ -60399,8 +60399,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
@@ -60425,8 +60425,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/transfers call only; Python Resource parity is tracked separately.",
@@ -60452,8 +60452,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-transfers.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/availabilityzones call only; Python availability zone Resource parity is tracked separately.",
@@ -61976,7 +61976,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62002,7 +62002,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62026,7 +62026,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62050,8 +62050,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62077,8 +62077,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/native-calls.md",
-        "blockstorage/v3/native-volumes.md"
+        "blockstorage/v2/README.md",
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/volumes admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62102,7 +62102,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62128,7 +62128,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62154,7 +62154,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-snapshots.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/snapshots admin action only; the default Cinder policy limits it to administrators, and SDK-owned reset-status workflows are tracked separately.",
@@ -62179,7 +62179,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62206,7 +62206,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62233,7 +62233,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62258,7 +62258,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62283,8 +62283,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md",
-        "blockstorage/v2/native-calls.md"
+        "blockstorage/v3/README.md",
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62311,8 +62311,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md",
-        "blockstorage/v2/native-calls.md"
+        "blockstorage/v3/README.md",
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62339,8 +62339,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md",
-        "blockstorage/v2/native-calls.md"
+        "blockstorage/v3/README.md",
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62365,8 +62365,8 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-backups.md",
-        "blockstorage/v2/native-calls.md"
+        "blockstorage/v3/README.md",
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/backups admin call only; the default Cinder policy limits it to administrators, and the SDK-owned ExportRecord, ImportBackup and reset workflows are tracked separately.",
@@ -62393,7 +62393,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62418,7 +62418,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62445,7 +62445,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62472,7 +62472,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62499,7 +62499,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62526,7 +62526,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62553,7 +62553,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62580,7 +62580,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62605,7 +62605,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -62630,7 +62630,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-qos.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/qos admin call only; the default Cinder policy limits QoS spec management to administrators, and Python QoS Resource parity is tracked separately.",
@@ -65906,7 +65906,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -65933,7 +65933,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -65958,7 +65958,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -65985,7 +65985,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66011,7 +66011,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66036,7 +66036,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66063,7 +66063,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66090,7 +66090,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66115,7 +66115,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66142,7 +66142,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66167,7 +66167,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66192,7 +66192,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66219,7 +66219,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66244,7 +66244,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/volumetypes call only; Python volume type Resource parity, encryption and project access resources are tracked separately.",
@@ -66271,7 +66271,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/manageablevolumes call only; Python volume manage parity and microversion 3.8 selection are tracked separately.",
@@ -66298,7 +66298,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/schedulerstats call only; Python storage pool Resource parity are tracked separately.",
@@ -66325,7 +66325,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/services call only; Python block storage service Resource parity and service enable/disable actions are tracked separately.",
@@ -66352,7 +66352,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/schedulerstats call only; Python storage pool Resource parity are tracked separately.",
@@ -66379,7 +66379,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v3/services call only; Python block storage service Resource parity and service enable/disable actions are tracked separately.",
@@ -66404,7 +66404,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
@@ -66429,7 +66429,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
@@ -66454,7 +66454,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
@@ -66481,7 +66481,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
@@ -66506,7 +66506,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/quotasets call only; Python quota set parity and the SDK-owned v3 project quota scope are tracked separately.",
@@ -66531,7 +66531,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/native-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native blockstorage/v2/limits call only; Python limits parity and the SDK-owned v3 limits fetch are tracked separately.",
@@ -72461,7 +72461,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -72487,7 +72487,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python attribute names (image_id, source_volume_id, is_multiattach, scheduler_hints) become CreateOpts fields or request.Field wire keys and WithCreateHintOpts in Go.",
@@ -72514,7 +72514,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
@@ -72553,7 +72553,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -72604,7 +72604,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/volume-summary-python.md"
       ],
       "differences": [
@@ -72651,7 +72651,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/connector-python.md"
       ],
       "differences": [
@@ -72696,7 +72696,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/connector-python.md"
       ],
       "differences": [
@@ -72722,7 +72722,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -72846,7 +72846,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python all_projects=True sends all_tenants=True; typed Go AllTenants sends all_tenants=true, so request.Query(\"all_tenants\", \"True\") is needed for the identical string.",
@@ -72873,7 +72873,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python is_forced=False is sent as \"force\": false; Go omits a false Force and the server default is the same.",
@@ -72899,7 +72899,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
@@ -72928,7 +72928,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -72954,7 +72954,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Snapshot._action always sends microversion 3.65; Go sends the client microversion, so a client copy with Microversion 3.65 is needed for the same header.",
@@ -72978,7 +72978,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python emits a RemovedInSDK50Warning before delegating; Go has no alias.",
@@ -73002,7 +73002,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Snapshot._action always sends microversion 3.65; Go sends the client microversion."
@@ -73028,7 +73028,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "ListDetailOpts has no typed name, status or volume_id filters; request.Query adds them.",
@@ -73055,7 +73055,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -73171,7 +73171,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Go omits false Force and Incremental values that Python would send explicitly; the server defaults are the same.",
@@ -73197,7 +73197,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
@@ -73226,7 +73226,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -73252,7 +73252,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python emits a RemovedInSDK50Warning and returns None; Go returns a ResetBackupStatusResult with the applied response and Completed flag."
@@ -73288,7 +73288,7 @@
         "Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support."
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/backup-metadata-python.md"
       ]
     },
@@ -73321,7 +73321,7 @@
         "Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support."
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/backup-metadata-python.md"
       ]
     },
@@ -73353,7 +73353,7 @@
         "Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support."
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/backup-metadata-python.md"
       ]
     },
@@ -73385,7 +73385,7 @@
         "Stock Cinder 27.0.0 registers no /backups/{id}/metadata child routes; the SDK-owned PythonMetadata profile reproduces the pinned Python request shape, error behavior and physical 404, and deployment support of those routes is not verified and not counted as stock Cinder support."
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/backup-metadata-python.md"
       ]
     },
@@ -73480,7 +73480,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python reads the mode attribute from a mode key while Go reads attach_mode.",
@@ -73575,7 +73575,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "UpdateOpts.Connector has no omitempty, so an update without connector sends \"connector\": null where Python omits the key.",
@@ -73600,7 +73600,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python sends {\"os-complete\": \"<attachment id>\"}; Go sends {\"os-complete\": null}. The target comes from the URL in both.",
@@ -73629,7 +73629,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -73737,7 +73737,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/transfers-python.md"
       ],
       "differences": [
@@ -73885,7 +73885,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/transfers-python.md"
       ],
       "differences": [
@@ -73937,7 +73937,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/transfers-python.md"
       ],
       "differences": [
@@ -73966,7 +73966,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -74046,7 +74046,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python types() sends no is_public, which Cinder treats as true; Go always sends is_public and defaults to None (public and private), so ListOpts{IsPublic: VisibilityPublic} is needed for Python's default result.",
@@ -74073,7 +74073,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -74098,7 +74098,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
@@ -74128,7 +74128,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -74152,7 +74152,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "With no attributes Python sends nothing and returns Type(extra_specs={}); Go CreateExtraSpecs posts an empty map.",
@@ -74177,7 +74177,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python loops internally over keys; the Go caller loops and stops at the first error like Python.",
@@ -74201,7 +74201,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python returns the raw volume_type_access list of dicts; Go yields VolumeTypeAccess values with only VolumeTypeID and ProjectID."
@@ -74224,7 +74224,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Project object or ID; Go takes the project ID string.",
@@ -74248,7 +74248,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Project object or ID; Go takes the project ID string.",
@@ -74272,7 +74272,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -74393,7 +74393,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -74418,7 +74418,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python spec keys are passed as extra keyword attributes; Go takes them in CreateOpts.Specs or request.Field.",
@@ -74443,7 +74443,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -74525,7 +74525,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python filters returned rows locally for Body attributes outside the query mapping; Go sends only query parameters and leaves local filtering to the caller.",
@@ -74551,7 +74551,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
@@ -74588,7 +74588,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md",
+        "blockstorage/v3/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -74613,7 +74613,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Go rejects an empty volume type ID before sending.",
@@ -74637,7 +74637,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Go rejects an empty volume type ID before sending.",
@@ -74661,7 +74661,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Go accepts only 202."
@@ -74685,7 +74685,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Without WithDeleteKeysOptions Go sends {\"keys\": null}.",
@@ -74709,7 +74709,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Go reads only the first page while Python would follow pagination links.",
@@ -74733,7 +74733,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Go ZoneState decodes only available; Python keeps the whole zoneState dict.",
@@ -91249,7 +91249,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python sends only binary, host, limit and marker as server query, filters other Service Body attributes locally and drops unknown keys; Go sends every ListOpts/request.Query value to the server and leaves local filtering to the caller.",
@@ -91277,7 +91277,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python always sends detail=True from Pools.base_path; the Go default omits detail and returns name-only pools unless request.Query(\"detail\", \"True\") or ListOpts.Detail (lowercase true) is given.",
@@ -91305,7 +91305,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "The Cinder service struct has no extensions field; Go callers build common/extensions.New from Service.RawClient().",
@@ -91338,7 +91338,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md"
+        "blockstorage/v3/README.md"
       ],
       "differences": [
         "Python always sends name, description, volume_type, availability_zone and metadata (null when unset) and bootable=false; Go omits empty values, which Cinder reads as the same defaults, and cannot send an explicit null for these typed keys.",
@@ -91869,7 +91869,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/python-summary.md"
       ],
       "differences": [
@@ -92453,7 +92453,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/quotasets/python-quota-class.md"
       ],
       "differences": [
@@ -92495,7 +92495,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/quotasets/python-quota-class.md"
       ],
       "differences": [
@@ -92585,7 +92585,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v3/python-parity-admin.md",
+        "blockstorage/v3/README.md",
         "blockstorage/v3/resource-filters-python.md"
       ],
       "differences": [
@@ -94622,7 +94622,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
@@ -94648,7 +94648,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python commit sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
@@ -94686,7 +94686,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python always sends cascade=False or cascade=True; Remove sends no query and DeleteOpts{Cascade: true} sends lowercase cascade=true, so the exact Python query needs request.Query.",
@@ -94714,7 +94714,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "The v2 Python Volume keeps scheduler_hints as a Body attribute inside the envelope; WithCreateHintOpts puts it outside, so request.Field must be used.",
@@ -94742,7 +94742,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python all_projects=True becomes all_tenants=True; typed ListOpts.AllTenants sends all_tenants=true, so the exact string needs request.Query.",
@@ -94772,7 +94772,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
@@ -94798,7 +94798,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
@@ -94823,7 +94823,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python applies migration_policy=never by default; Go omits migration_policy unless the caller sets MigrationPolicyNever.",
@@ -94850,7 +94850,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Go accepts only HTTP 200 for this action.",
@@ -94876,7 +94876,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python **metadata always yields a dict; a nil Go map is sent as metadata:null, so callers pass an empty map for no keys.",
@@ -94903,7 +94903,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python prefers instance over host_name and raises ValueError when both are missing; Go sends whatever AttachOpts holds, so the caller sets exactly one.",
@@ -94930,7 +94930,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
@@ -94957,7 +94957,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python v2 Volume._action does not call raise_from_response, so HTTP error responses return None silently; Go accepts only the fixed native success status and returns other responses as errors.",
@@ -94984,7 +94984,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python always sends force, disk_format and container_format, including false and null; Go omits empty values and relies on the server defaults.",
@@ -95012,7 +95012,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python fills an empty disk_format from the cloud image_format setting (default qcow2) and container_format with bare; the v2 Go call does not read cloud settings, so the caller passes both values.",
@@ -95030,7 +95030,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95044,7 +95044,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95058,7 +95058,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95072,7 +95072,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95086,7 +95086,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95109,7 +95109,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "The v2 Snapshot model has no force field that the Python Snapshot exposes as is_forced.",
@@ -95135,7 +95135,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python is_forced=False is sent as \"force\": false; Go omits a false Force and the server default is the same.",
@@ -95163,7 +95163,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
@@ -95190,7 +95190,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
@@ -95219,7 +95219,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud v2 typed model, so response fields outside that model are dropped.",
@@ -95236,7 +95236,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95250,7 +95250,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95264,7 +95264,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95278,7 +95278,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95292,7 +95292,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95306,7 +95306,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95320,7 +95320,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95334,7 +95334,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95348,7 +95348,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95362,7 +95362,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -95376,7 +95376,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-volumes.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -101853,7 +101853,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "ListDetailOpts has no typed name, status, volume_id, project_id, sort_key or sort_dir filters; request.Query adds them.",
@@ -101880,7 +101880,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -101904,7 +101904,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python matches the list by ID or name; Go Find(resource.Name) matches the name only."
@@ -101930,7 +101930,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Go CreateOpts omits false and empty values that Python would send when passed explicitly; request.Field can send them.",
@@ -101965,7 +101965,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -101989,7 +101989,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "The pinned Backup.import_record overwrites the url argument with the backups/export_record path and posts there; Go Import repairs the route to backups/import_record and sends the caller locator.",
@@ -102014,7 +102014,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python returns the whole response JSON dict with backup_url as a string; Go returns BackupRecord with BackupURL decoded from base64 into bytes and fails if it is not valid base64."
@@ -102037,7 +102037,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python emits a RemovedInSDK50Warning before delegating to export_backup; Go has no deprecated alias.",
@@ -102061,7 +102061,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python raises SDKException before HTTP when neither volume nor name is given; Go sends an empty restore object.",
@@ -102085,7 +102085,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Go accepts only 202.",
@@ -102109,7 +102109,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python emits a RemovedInSDK50Warning before delegating to reset_backup_status; Go has no deprecated alias.",
@@ -102134,7 +102134,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped.",
@@ -102159,7 +102159,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python accepts a Resource object or ID and returns a mutable Resource; Go takes an ID string and returns a Gophercloud typed model, so response fields outside that model are dropped."
@@ -102182,7 +102182,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102205,7 +102205,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102228,7 +102228,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python sends auth_key null when it is None; Go requires a nonempty AuthKey.",
@@ -102255,7 +102255,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error."
@@ -102278,7 +102278,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "The v2 Limits resource has no project URI or query mapping, so Python get_limits(project) also sends plain GET limits; Go takes no project argument.",
@@ -102303,7 +102303,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102326,7 +102326,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "The pinned v2 proxy ignores the project for the URL and fetches os-quota-sets/defaults; Go reproduces it with Get(ctx, \"defaults\"), while quotasets.API.GetDefaults sends os-quota-sets/{project}/defaults.",
@@ -102352,7 +102352,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python sends no request when no attribute is dirty; Go Update always sends PUT, even with an empty envelope.",
@@ -102377,7 +102377,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102391,7 +102391,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102405,7 +102405,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102430,7 +102430,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python keeps the whole capabilities dict; Go Capabilities decodes a fixed field set, turns infinite capacities into +Inf and other nonnumeric capacities into 0.",
@@ -102445,7 +102445,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102469,7 +102469,7 @@
         }
       ],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [
         "Python exposes zone as availability_zone, binary also as name and frozen as is_frozen; Go keeps the wire names in Service fields.",
@@ -102484,7 +102484,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102498,7 +102498,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102512,7 +102512,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102526,7 +102526,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102540,7 +102540,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102554,7 +102554,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102568,7 +102568,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102582,7 +102582,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102596,7 +102596,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102610,7 +102610,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102624,7 +102624,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102638,7 +102638,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102652,7 +102652,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102666,7 +102666,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102680,7 +102680,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102694,7 +102694,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102708,7 +102708,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102722,7 +102722,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102736,7 +102736,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102750,7 +102750,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102764,7 +102764,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102778,7 +102778,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102792,7 +102792,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102806,7 +102806,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102820,7 +102820,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102834,7 +102834,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102848,7 +102848,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102862,7 +102862,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102876,7 +102876,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102890,7 +102890,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102904,7 +102904,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102918,7 +102918,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102932,7 +102932,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102946,7 +102946,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102960,7 +102960,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102974,7 +102974,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -102988,7 +102988,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -103002,7 +103002,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -103016,7 +103016,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "blockstorage/v2/python-parity-resources.md"
+        "blockstorage/v2/README.md"
       ],
       "differences": [],
       "remaining": [

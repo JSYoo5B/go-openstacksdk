@@ -1,56 +1,6 @@
 # Connector Python
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:block_storage/v3/init_volume_attachment`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.InitializeWithConnector`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-
-- The owned direct-ID action sends the exact Source envelope and arbitrary nested connector JSON, including wwnns arrays/nqn/extensions and nil/null/false/zero/empty values. Source is captured before custom MarshalJSON and JSON is snapshotted before options, so callbacks cannot change transmitted caller data; headers are concrete guarded inputs and native typed connector APIs remain unchanged.
-  Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNestedInputAndOptionSnapshots`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNullEmptyAndRawConnectionInfo`.
-- Action200..399 follows Source _action. Initialization requires the JSON response connection_info field and retains its raw object/null/scalar/array without Source cast coercion; termination accepts opaque success bytes. Actual discovery/action body/header/status are separate receipts, never Resource state or invented connector input.
-  Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorResponseShapeAndSourceStatuses`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNegotiationPreservesActualDiscovery`.
-- The shared Cinder negotiation honors a selected version without GET, otherwise selects server bounds and Source Volume3.71 ceiling with actual discovery receipts. Guards preserve accepted/rejected physical read/Close/cancel/source errors, sticky route changes, ordinary native retries and original HTTP causes while rejecting mutated retry JSON/version. Source and typed options remain library-owned.
-  Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorCapturesSourceBeforeMarshalAndOptions`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorPhysicalFaultsKeepReceiptsAndCauses`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNativeRetryOwnsBodyAndVersion`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNegotiationPreservesActualDiscovery`.
-
-Python/Go differences:
-
-- Go accepts a literal validated ID and a map[string]any JSON connector instead of mutable Python Resource; arbitrary connector contents remain untyped. Unsupported Go JSON values fail before HTTP.
-- Go returns explicit action/discovery receipts; Python initialize returns its unchecked connection_info JSON value and terminate returns None. Neither proves local attachment completion.
-- The SDK reuses finite Cinder discovery when no client version is selected, capped at Source Volume3.71; explicitly selected versions retain existing session/client policy. JSON/route/version ownership and physical handling causes are guarded Go behavior.
-
-### `python:block_storage/v3/terminate_volume_attachment`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/blockstorage/v3/volumes.API.TerminateWithConnector`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/request.Headers`
-
-- The owned direct-ID action sends the exact Source envelope and arbitrary nested connector JSON, including wwnns arrays/nqn/extensions and nil/null/false/zero/empty values. Source is captured before custom MarshalJSON and JSON is snapshotted before options, so callbacks cannot change transmitted caller data; headers are concrete guarded inputs and native typed connector APIs remain unchanged.
-  Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNestedInputAndOptionSnapshots`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNullEmptyAndRawConnectionInfo`.
-- Action200..399 follows Source _action. Initialization requires the JSON response connection_info field and retains its raw object/null/scalar/array without Source cast coercion; termination accepts opaque success bytes. Actual discovery/action body/header/status are separate receipts, never Resource state or invented connector input.
-  Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorResponseShapeAndSourceStatuses`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNegotiationPreservesActualDiscovery`.
-- The shared Cinder negotiation honors a selected version without GET, otherwise selects server bounds and Source Volume3.71 ceiling with actual discovery receipts. Guards preserve accepted/rejected physical read/Close/cancel/source errors, sticky route changes, ordinary native retries and original HTTP causes while rejecting mutated retry JSON/version. Source and typed options remain library-owned.
-  Tests: `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorCapturesSourceBeforeMarshalAndOptions`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorPhysicalFaultsKeepReceiptsAndCauses`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNativeRetryOwnsBodyAndVersion`, `blockstorage/v3/volumes/python_connector_test.go:TestPythonVolumeConnectorNegotiationPreservesActualDiscovery`.
-
-Python/Go differences:
-
-- Go accepts a literal validated ID and a map[string]any JSON connector instead of mutable Python Resource; arbitrary connector contents remain untyped. Unsupported Go JSON values fail before HTTP.
-- Go returns explicit action/discovery receipts; Python initialize returns its unchecked connection_info JSON value and terminate returns None. Neither proves local attachment completion.
-- The SDK reuses finite Cinder discovery when no client version is selected, capped at Source Volume3.71; explicitly selected versions retain existing session/client policy. JSON/route/version ownership and physical handling causes are guarded Go behavior.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
