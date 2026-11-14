@@ -4,29 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-api := limits.New(computeClient)
-current, err := api.Fetch(ctx, limits.WithGetReserved(true))
-if err != nil { return err }
-fmt.Println(current.Absolute.MaxTotalCores, current.StatusCode)
-
-scope, err := api.InProject(ctx, resource.ID("project-id"))
-if err != nil { return err }
-value, err := scope.Get(ctx, limits.WithGetReserved(false))
-if err != nil { return err }
-fmt.Println(value.ProjectID, value.Absolute.TotalCoresUsed)
-```
-
-```go
-for _, group := range value.Rate {
-    for _, rule := range group.Limits {
-        fmt.Println(group.URI, rule.Verb, rule.Remaining,
-            string(rule.NextAvailable))
-    }
-}
-```
+See `ExampleAPI_InProject` in [example_test.go](example_test.go), compiled by `go test`.
 
 ## References
 

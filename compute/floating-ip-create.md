@@ -4,16 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-networkName := "public"
-result, err := conn.CreateFloatingIP(ctx,
-	compute.CreateFloatingIPRequest{Network: &networkName},
-	func(c *compute.FloatingIPCreateOpts) error { c.Server = resource.ID(serverID); return nil },
-	compute.WithFloatingIPCreateWait(true),
-)
-```
+See `ExampleCreateFloatingIPRequest` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 
 See `Example_floatingIpCreate1` in [example_floating_ip_create1_test.go](example_floating_ip_create1_test.go), compiled by `go test`.
 

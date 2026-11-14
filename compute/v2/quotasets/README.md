@@ -4,55 +4,9 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `ExampleAPI_InProject` in [example_test.go](example_test.go), compiled by `go test`.
 
-```go
-api := quotasets.New(computeClient)
-scope, err := api.InProject(ctx, resource.ID("project-id"))
-if err != nil { return err }
-limits, err := scope.Get(ctx)
-if err != nil { return err }
-fmt.Println(scope.ProjectID(), limits.Cores, limits.Header.Get("X-Openstack-Request-Id"))
-
-usage, err := scope.Detail(ctx)
-if err != nil { return err }
-fmt.Println(usage.Cores.Limit, usage.Cores.InUse, usage.Cores.Reserved)
-
-zero, unlimited := 0, -1
-updated, err := scope.Update(ctx, quotasets.UpdateOpts{
-    Cores: &unlimited,
-    Instances: &zero,
-}, quotasets.WithUpdateForce(false))
-if err != nil { return err }
-fmt.Println(updated.Cores, updated.Instances)
-
-reset, err := scope.Reset(ctx)
-if err != nil { return err }
-fmt.Println(reset.Header.Get("X-Openstack-Request-Id"))
-```
-
-```go
-userScope, err := scope.InUser(ctx, resource.ID("user-id"))
-if err != nil { return err }
-userLimits, err := userScope.Get(ctx)
-if err != nil { return err }
-fmt.Println(userLimits.ProjectID, userLimits.UserID, userLimits.Cores)
-
-zero := 0
-_, err = userScope.Update(ctx, quotasets.UpdateOpts{Cores: &zero},
-    quotasets.WithUpdateForce(false))
-if err != nil { return err }
-_, err = userScope.Reset(ctx)
-if err != nil { return err }
-```
-
-```go
-cores := 7
-snapshot := quotasets.WithQuotaOptions(quotasets.UpdateOpts{Cores: &cores})
-cores = 99
-_, err := scope.Update(ctx, quotasets.UpdateOpts{}, snapshot) // cores=7
-if err != nil { return err }
-```
+See `ExampleWithQuotaOptions` in [example_test.go](example_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 server = conn.compute.find_server("web-01", ignore_missing=False)
 for server in conn.compute.servers(status="ACTIVE"):
@@ -14,20 +12,7 @@ for server in conn.compute.servers(status="ACTIVE"):
 
 See `Example_computeFragment1` in [example_compute_fragment1_test.go](example_compute_fragment1_test.go), compiled by `go test`.
 
-```go
-server, err := service.Servers.Create(ctx, compute.CreateServerRequest{
-    Name: "web-01",
-    Image: resource.Name("ubuntu"),
-    Flavor: resource.Name("small"),
-}, compute.WithNetworks(resource.Name("private")),
-   compute.WithKeyName("my-key"),
-   compute.WithConfigDrive(false),
-   compute.WithWait(resource.WithTimeout(5*time.Minute)))
-if err != nil {
-    if server != nil { fmt.Println("created:", server.ID) }
-    return err
-}
-```
+See `ExampleServers_Create` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 
 ```python
 server = conn.create_server(
@@ -41,18 +26,7 @@ server = conn.create_server(
 )
 ```
 
-```go
-server, err := service.Servers.Create(ctx, compute.CreateServerRequest{
-    Name: "volume-server",
-    Flavor: resource.Name("small"),
-}, compute.WithBootVolume(resource.Name("root-volume")),
-   compute.WithNetworks(resource.Name("private")),
-   compute.WithWait(resource.WithTimeout(5*time.Minute)))
-if err != nil {
-    if server != nil { fmt.Println("created:", server.ID) }
-    return err
-}
-```
+See `ExampleWithBootVolume` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 
 ```python
 server = conn.create_server(
@@ -67,18 +41,7 @@ server = conn.create_server(
 )
 ```
 
-```go
-server, err := service.Servers.Create(ctx, compute.CreateServerRequest{
-    Name: "new-volume-server",
-    Image: resource.Name("ubuntu"),
-    Flavor: resource.Name("small"),
-}, compute.WithBootVolumeSize(50),
-   compute.WithWait(resource.WithTimeout(5*time.Minute)))
-if err != nil {
-    if server != nil { fmt.Println("created:", server.ID) }
-    return err
-}
-```
+See `ExampleWithBootVolumeSize` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 
 ```python
 server = conn.create_server(
@@ -93,17 +56,7 @@ server = conn.create_server(
 )
 ```
 
-```go
-server, err := service.Servers.Create(ctx, compute.CreateServerRequest{
-    Name: "grouped",
-    Image: resource.Name("ubuntu"),
-    Flavor: resource.Name("small"),
-}, compute.WithServerGroup(resource.Name("anti-affinity")),
-   compute.WithSchedulerHints(map[string]any{"different_host": []string{"other-id"}}),
-   compute.WithDataVolumes(resource.Name("data")),
-   compute.WithUserData([]byte("#cloud-config\n")),
-   compute.WithMetadata(map[string]string{"role": "web"}))
-```
+See `ExampleWithServerGroup` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 
 Create property rules:
 
@@ -162,16 +115,7 @@ Readiness errors and cleanup:
   DELETE, records the result in `Deletion`, and waits for 404 when the
   workflow waits. A failed DELETE is joined to the error and never retried.
 
-```go
-ready, err := service.Servers.Wait(ctx, resource.ID(server.ID), "ACTIVE",
-    resource.WithTimeout(5*time.Minute), resource.WithPollInterval(time.Second))
-if err != nil { return err }
-fmt.Println(ready.Status)
-
-if err := service.Servers.Delete(ctx, resource.ID(server.ID)); err != nil {
-    return err
-}
-```
+See `ExampleServers_Wait` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 
 ## References
 

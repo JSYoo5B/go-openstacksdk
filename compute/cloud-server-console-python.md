@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -37,8 +35,4 @@ python main.py --cloud devstack --server-json '{"id":"s1"}' --length-json 0
 go run main.go --cloud devstack --server-json '{"id":"s1"}' --length-json 0
 ```
 
-```go
-service, err := conn.Compute(ctx)
-if err != nil { return err }
-result, err := service.GetServerConsole(ctx, "vm", compute.WithServerConsoleLength(50))
-```
+See `ExampleService_GetServerConsole` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.

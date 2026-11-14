@@ -4,15 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-result, err := conn.DeleteFloatingIP(ctx,
-	compute.DeleteFloatingIPRequest{ID: ipID},
-	func(c *compute.FloatingIPDeleteOpts) error { c.Retries = 1; return nil },
-	compute.WithFloatingIPDeleteTimeout(time.Minute),
-)
-```
+See `ExampleDeleteFloatingIPRequest` in [example_servers_test.go](example_servers_test.go), compiled by `go test`.
 
 See `Example_floatingIpDelete1` in [example_floating_ip_delete1_test.go](example_floating_ip_delete1_test.go), compiled by `go test`.
 
