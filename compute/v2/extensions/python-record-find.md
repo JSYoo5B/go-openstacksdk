@@ -1,32 +1,6 @@
 # Python Record Find
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:compute/v2/find_extension`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions.API.Get`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/extensions.API.FindRecord`
-
-- Get sends GET extensions/{alias} and returns the 404 for a name without listing extensions.
-  Tests: `compute/v2/extensions/python_parity_test.go:TestPythonExtensionListAndGetHaveNoFindFallback`.
-- Concrete Source-owned compute-role projection, library-owned callback snapshots and selected/versionless policy retain original client and actual response evidence. Source-aware lookup/list parsing shares guarded REST, descriptor MRO, Python-loaded equality and paging rather than new transport wrappers.
-  Tests: `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindMemberOwnsSourceMROWithoutDiscovery`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindCleanFallbackAliasNameMissingAndAmbiguity`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindStrictMissingKeepsExistingNativeAPIs`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindOwnedKwargsAndGetOnlyVersion`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindLaterPageAndSourcePrimaryPresence`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindOptionSourceGuardAndCancellation`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindPhysicalRejectionsNeverFallbackOrRunHooks`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindCleanAuthenticationRenewalKeepsMember`.
-- GET-first literal extensions path suppresses only clean400403404; complete fallback pages match exact alias-derived id or name, detect duplicate and default missingnil/strictErrNotFound. Compute Extension unknownBody=false includes namespace, links=list_type=dict, updated alias and untyped fields; maxNone yields no default discovery and explicit override is GET-only. Physical401 pointer native public receipt and all causes survive without fallback/retry/auth/backoff.
-  Tests: `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindMemberOwnsSourceMROWithoutDiscovery`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindCleanFallbackAliasNameMissingAndAmbiguity`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindStrictMissingKeepsExistingNativeAPIs`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindOwnedKwargsAndGetOnlyVersion`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindLaterPageAndSourcePrimaryPresence`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindOptionSourceGuardAndCancellation`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindPhysicalRejectionsNeverFallbackOrRunHooks`, `compute/v2/extensions/python_record_find_contracts_test.go:TestComputeExtensionFindCleanAuthenticationRenewalKeepsMember`.
-
-Python/Go differences:
-
-- Go concrete Source records separate Resource default/projection from complete actual Wire/page/header/status; SDK-owned location is null and optional HTTP cache/Connection/dirty-state remain generic SDK-R1/C1. Actual cloud permissions/acceptance are not established by HTTP fixtures.
-- Direct Source find_extension signature declares only identity/ignore_missing; Go raw Query/Header/Microversion/ListBasePath options are explicit convenience corresponding to generic Resource.find, not implicit extra kwargs on the Python named method.
-- Official Nova31.0.0 extension list/show policy is project-scope RULE_ANY, not admin-only; deployment policies can differ. Role-specific version headers, safe literal IDs, source/context guards and owned callback maps improve Go safety.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

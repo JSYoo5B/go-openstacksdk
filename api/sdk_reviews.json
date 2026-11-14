@@ -2422,7 +2422,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/quotasets/python-reset-query.md",
+        "compute/v2/README.md",
         "compute/v2/quotasets/README.md"
       ],
       "differences": [
@@ -43057,7 +43057,7 @@
         "compute/README.md",
         "compute/server-default-network.md",
         "network/network-roles.md",
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "The SDK owns concrete NIC inputs and an Optional tag field; request.Present/Null distinguish omitted, empty and null without a caller builder. The owned network body overlay avoids native empty-string tag omission.",
@@ -50485,7 +50485,7 @@
       "documentation": [
         "compute/availability-zones.md",
         "compute/README.md",
-        "compute/v2/availabilityzones/python-detail-records.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python selects the branch with availability_zones(details=False|True); Go exposes ListRecords for details=False and ListDetailRecords for details=True.",
@@ -52629,7 +52629,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md",
+        "compute/v2/README.md",
         "compute/v2/servers/README.md"
       ],
       "differences": [
@@ -52656,7 +52656,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md",
+        "compute/v2/README.md",
         "compute/v2/servers/README.md"
       ],
       "differences": [
@@ -52683,7 +52683,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md",
+        "compute/v2/README.md",
         "compute/v2/servers/README.md"
       ],
       "differences": [
@@ -52710,7 +52710,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md",
+        "compute/v2/README.md",
         "compute/v2/servers/README.md"
       ],
       "differences": [
@@ -52736,7 +52736,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md",
+        "compute/v2/README.md",
         "compute/v2/servers/README.md"
       ],
       "differences": [
@@ -52762,7 +52762,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
@@ -52787,7 +52787,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
@@ -52814,7 +52814,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
@@ -52841,7 +52841,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
@@ -52868,7 +52868,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
@@ -52893,7 +52893,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server metadata call only; Python compute server metadata parity is tracked separately.",
@@ -52918,7 +52918,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -52946,7 +52946,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -52974,7 +52974,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53002,7 +53002,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53027,7 +53027,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53052,7 +53052,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53081,7 +53081,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53109,7 +53109,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53134,7 +53134,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53159,7 +53159,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53184,7 +53184,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53209,7 +53209,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53234,7 +53234,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53259,7 +53259,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53284,7 +53284,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53309,7 +53309,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53334,7 +53334,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53359,7 +53359,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53384,7 +53384,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53412,7 +53412,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server user action call only; Python compute server action parity and admin actions are tracked separately.",
@@ -53436,7 +53436,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
@@ -53460,7 +53460,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
@@ -53486,7 +53486,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
@@ -53510,7 +53510,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/native.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native server address, console output and status wait calls only; Python wait_for_server failure states and timeouts are tracked separately.",
@@ -62657,7 +62657,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62684,7 +62684,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62709,7 +62709,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62736,7 +62736,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62763,7 +62763,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62788,7 +62788,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62815,7 +62815,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62841,7 +62841,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62866,7 +62866,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/flavors call only; Python compute flavor admin parity and Cloud flavor helpers are tracked separately.",
@@ -62894,7 +62894,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
@@ -62919,7 +62919,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
@@ -62944,7 +62944,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
@@ -62972,7 +62972,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
@@ -62997,7 +62997,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
@@ -63022,7 +63022,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
@@ -63047,7 +63047,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-flavors-servers.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/servers call only; Python compute server admin action parity and Cloud server helpers are tracked separately.",
@@ -65387,7 +65387,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
@@ -65412,7 +65412,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
@@ -65439,7 +65439,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
@@ -65464,7 +65464,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
@@ -65489,7 +65489,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/hypervisors call only; Python Hypervisor resource models and cloud hypervisor helpers are tracked separately.",
@@ -65514,7 +65514,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65541,7 +65541,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65566,7 +65566,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65593,7 +65593,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65618,7 +65618,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65644,7 +65644,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65670,7 +65670,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65696,7 +65696,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/aggregates call only; Python Aggregate resource models, cloud aggregate helpers and image/traits actions are tracked separately.",
@@ -65723,7 +65723,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/services call only; Python Service resource models and the enable/disable/force-down helpers are tracked separately.",
@@ -65750,7 +65750,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/services call only; Python Service resource models and the enable/disable/force-down helpers are tracked separately.",
@@ -65775,7 +65775,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/services call only; Python Service resource models and the enable/disable/force-down helpers are tracked separately.",
@@ -65802,7 +65802,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/migrations call only; Python Migration resource models and server migration helpers are tracked separately.",
@@ -65826,7 +65826,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/diagnostics call only; Python ServerDiagnostics resource models are tracked separately.",
@@ -65852,7 +65852,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/availabilityzones call only; Python AvailabilityZone detail resource models and cloud zone helpers are tracked separately.",
@@ -65879,7 +65879,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/native-admin-infra.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native compute/v2/usage call only; Python Usage resource models and cloud usage helpers are tracked separately.",
@@ -74757,7 +74757,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID; Go takes the server ID string.",
@@ -74783,7 +74783,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "UpdateOpts carries name, access IPs and hostname; other attributes such as description go through request.Field.",
@@ -74812,7 +74812,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -74838,7 +74838,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server and an Image resource or IDs; Go takes the server ID and RebuildOpts.ImageRef.",
@@ -74866,7 +74866,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -74891,7 +74891,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python takes reboot_type as a plain string; Go takes RebootOpts{Type: servers.RebootMethod(...)}, which is required before HTTP.",
@@ -74917,7 +74917,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Flavor resource or ID; Go takes the flavor ID in ResizeOpts.FlavorRef.",
@@ -74943,7 +74943,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Go ConfirmResize also accepts 204 from the action.",
@@ -74969,7 +74969,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -74994,7 +74994,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75019,7 +75019,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75044,7 +75044,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75069,7 +75069,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75094,7 +75094,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75119,7 +75119,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75144,7 +75144,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75169,7 +75169,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75194,7 +75194,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75219,7 +75219,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Server resource or ID and returns None; Go takes the server ID string and returns only an error.",
@@ -75244,7 +75244,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts an Image resource or ID for image; Go takes the image ID in RescueOpts.RescueImageRef.",
@@ -75286,7 +75286,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python pins microversion 2.45 for createImage when the server supports it; Go sends the client microversion and picks the body or Location header from the response version header.",
@@ -75593,7 +75593,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns the Server with metadata set to the passed keys only; Go returns the server's full merged metadata from the response.",
@@ -75619,7 +75619,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "The Go caller loops DeleteMetadatum over the keys; Python deduplicates them in set order.",
@@ -75645,7 +75645,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python yields one ServerIP per address carrying network_label; Go ListAddresses yields one label map and ListAddressesByNetwork yields Address rows without the label.",
@@ -75678,7 +75678,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python discovers a microversion of at least 2.26; Go requires the configured client microversion to be 2.26 or newer.",
@@ -75706,7 +75706,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python raises on 404; Go ignores 404 by default, so the Python behavior needs tags.WithMissingError().",
@@ -75734,7 +75734,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python raises on 404; Go ignores 404 by default, so the Python behavior needs tags.WithMissingError().",
@@ -75758,7 +75758,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns the Server with security_groups set to the raw response dicts; Go yields typed secgroups.SecurityGroup values.",
@@ -75782,7 +75782,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a SecurityGroup resource and sends its name, or its ID when the name is unset; Go takes that string directly.",
@@ -75808,7 +75808,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a SecurityGroup resource and sends its name, or its ID when the name is unset; Go takes that string directly.",
@@ -76043,7 +76043,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python rewrites policies to policy at microversion 2.64 or later and policy to policies below it, and rejects rules below 2.64; the Go caller chooses Policy and Rules or Policies for the configured microversion.",
@@ -76068,7 +76068,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a ServerGroup resource or ID; Go takes the ID string and returns the Gophercloud ServerGroup model.",
@@ -76094,7 +76094,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -76120,7 +76120,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Typed ListOpts.AllProjects sends all_projects=true; request.Query(\"all_projects\", \"True\") reproduces Python's spelling.",
@@ -76203,7 +76203,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "tag is not a CreateOpts field and goes through request.Field.",
@@ -76229,7 +76229,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python can take the server from the ServerInterface resource's server_id; Go takes both IDs explicitly.",
@@ -76254,7 +76254,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts limit and marker query parameters that Nova's interface list does not use; Go List takes no query.",
@@ -76282,7 +76282,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python can take the server from the ServerInterface resource's server_id; Go needs InServer(ctx, resource.ID(serverID)) first.",
@@ -76307,7 +76307,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python's legacy volume_id and volumeId keyword arguments map to CreateOpts.VolumeID.",
@@ -76333,7 +76333,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts Server and Volume resources or IDs; Go takes both ID strings.",
@@ -76361,7 +76361,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "With plain ID strings Python first calls find_server(server) to detect swapped arguments, adding GET servers/{id} (and a list fallback when it is missing) and swapping the arguments if no server is found; Go sends only the DELETE.",
@@ -76496,7 +76496,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python's ignore_missing argument is not applied by _get, so both sides raise or return an error on 404.",
@@ -76546,7 +76546,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76596,7 +76596,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76635,7 +76635,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76677,7 +76677,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76713,7 +76713,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76750,7 +76750,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76795,7 +76795,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76831,7 +76831,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity.md",
+        "compute/v2/README.md",
         "compute/v2/nova-images-python.md"
       ],
       "differences": [
@@ -76860,7 +76860,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python can send limit and marker query keys, which Nova's aggregate list ignores; the Go aggregate list accepts no wire query.",
@@ -76885,7 +76885,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
@@ -76910,7 +76910,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python sends only passed attributes and may send availability_zone null; Go omits an empty AvailabilityZone, which Nova treats the same as null on create.",
@@ -76938,7 +76938,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -76963,7 +76963,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
@@ -76988,7 +76988,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
@@ -77013,7 +77013,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts an Aggregate or an ID string; Go generated calls take the integer aggregate ID.",
@@ -77050,8 +77050,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/aggregates/python-update-record.md",
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts an Aggregate or an ID string; Go takes the integer aggregate ID.",
@@ -77171,7 +77170,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python sends only passed attributes; Go always sends name, ram, vcpus and disk, which Nova requires anyway.",
@@ -77200,7 +77199,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python ignore_missing=True maps to Remove(ctx, resource.ID(id)) and ignore_missing=False to resource.WithMissingError(); the plain generated Delete returns the 404 error.",
@@ -77236,7 +77235,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/flavors/python-update-record.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python accepts a Flavor or an ID string; Go takes the flavor ID string and rejects a blank one before HTTP.",
@@ -77262,7 +77261,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns None and sends an empty Accept header; Go returns the response flavor_access rows with the default Accept header.",
@@ -77286,7 +77285,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns None and sends an empty Accept header; Go returns the response flavor_access rows with the default Accept header.",
@@ -77310,7 +77309,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns the raw flavor_access dicts as a list; Go yields typed FlavorAccess rows one by one.",
@@ -77334,7 +77333,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns a Flavor holding the response extra_specs; Go returns the map.",
@@ -77359,7 +77358,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns the value under the key; Go returns the response map.",
@@ -77392,7 +77391,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -77416,7 +77415,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python sends no microversion for this request unless the session has a default; Go always sends the Connection client microversion."
@@ -77466,7 +77465,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/extensions/python-record-find.md"
       ],
       "differences": [
@@ -77492,7 +77491,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "hypervisors.Hypervisor has no uptime field, which Nova returns in the show response from 2.88.",
@@ -77516,7 +77515,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python raises SDKException without a request when the server supports 2.88; Go sends the request and returns Nova's 404.",
@@ -77565,7 +77564,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/hypervisors/python-records.md"
       ],
       "differences": [
@@ -77608,7 +77607,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/hypervisors/python-records.md"
       ],
       "differences": [
@@ -77635,7 +77634,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python filters non-query Body attributes such as status locally; Go Services.List has no local filter, so the caller filters the rows.",
@@ -77679,8 +77678,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/services/python-service-actions.md",
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python decides the 2.53 branch with supports_microversion against the server range and default microversion and sends min(Service _max_microversion 2.69, server maximum); Go decides and sends with the one microversion configured or negotiated on the Connection client.",
@@ -77725,8 +77723,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/services/python-service-actions.md",
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python decides the 2.53 branch with supports_microversion against the server range and default microversion and sends min(Service _max_microversion 2.69, server maximum); Go decides and sends with the one microversion configured or negotiated on the Connection client.",
@@ -77758,7 +77755,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/services/python-update-record.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python decides the 2.53 and 2.11 branches with supports_microversion against the server range and default microversion and sends min(Service _max_microversion 2.69, server maximum); Go decides and sends with the one microversion configured or negotiated on the Connection client.",
@@ -77796,7 +77793,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/services/python-update-record.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python sends min(Service _max_microversion 2.69, server maximum) discovered per request and checks 2.53 against the server range and default microversion; Go sends and checks the one microversion configured or negotiated on the Connection client.",
@@ -77838,7 +77835,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/services/python-find-record.md"
       ],
       "differences": [
@@ -77871,7 +77868,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "resource/README.md"
       ],
       "differences": [
@@ -77897,7 +77894,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Go reads one page and does not follow migrations_links; the caller continues with Marker.",
@@ -77937,7 +77934,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/servers/python-server-migrations.md"
       ],
       "differences": [
@@ -77975,7 +77972,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/servers/python-server-migrations.md"
       ],
       "differences": [
@@ -78012,7 +78009,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/servers/python-server-migrations.md"
       ],
       "differences": [
@@ -78050,7 +78047,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/servers/python-server-migrations.md"
       ],
       "differences": [
@@ -78076,7 +78073,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python takes a string; Go takes servers.ServerState, so the caller converts the string.",
@@ -78111,7 +78108,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/python-migration-actions.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the client.",
@@ -78146,7 +78143,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/python-migration-actions.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python sends min(Server _max_microversion 2.100, server maximum) discovered per request; Go sends the one microversion configured or negotiated on the client.",
@@ -78189,7 +78186,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/servers/python-migration-actions.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python chooses the 2.30, 2.25 or legacy body from the supported server microversion (or the session default); Go chooses it from the selected client microversion, treating latest as 2.30 or later, and like Python sends 2.30 or 2.25 as the request microversion for those bodies.",
@@ -78223,7 +78220,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/servers/python-server-migrations.md"
       ],
       "differences": [
@@ -78249,7 +78246,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python returns a ServerDiagnostics resource; Go returns map[string]any with float64 numbers.",
@@ -78274,7 +78271,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python sends start.isoformat() including any offset; Go sends the wall-clock time without the offset, so callers pass UTC values.",
@@ -78300,7 +78297,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ],
       "differences": [
         "Python fetches one response; Go SingleTenant is a stream that follows tenant_usage_links unless the caller stops after the first value.",
@@ -78386,7 +78383,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/quotasets/python-quota-class.md"
       ],
       "differences": [
@@ -78426,7 +78423,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/quotasets/python-quota-class.md"
       ],
       "differences": [
@@ -78477,7 +78474,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/share-attachments-python.md",
         "compute/v2/shareattachments/README.md"
       ],
@@ -78529,7 +78526,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/share-attachments-python.md",
         "compute/v2/shareattachments/README.md"
       ],
@@ -78585,7 +78582,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/share-attachments-python.md",
         "compute/v2/shareattachments/README.md"
       ],
@@ -78639,7 +78636,7 @@
         }
       ],
       "documentation": [
-        "compute/v2/python-parity-admin.md",
+        "compute/v2/README.md",
         "compute/v2/share-attachments-python.md",
         "compute/v2/shareattachments/README.md"
       ],
@@ -105619,7 +105616,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns None; Go returns the flavor_access rows from the response.",
@@ -105644,7 +105641,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns None; Go returns the remaining flavor_access rows from the response.",
@@ -105669,7 +105666,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns a list of raw dicts; Go yields typed FlavorAccess values through an iterator, so unknown row keys are dropped.",
@@ -105693,7 +105690,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns None; Go returns the merged extra_specs map from the response.",
@@ -105719,7 +105716,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python loops over keys inside the helper; Go calls DeleteExtraSpec once per key and wraps each call in resource.IgnoreMissing.",
@@ -105743,7 +105740,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python sends \"id\": null for flavorid='auto' and \"description\": null when no description is given; Go omits both keys, which Nova treats the same.",
@@ -105771,7 +105768,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns True or False; Go returns the found Flavor or nil from FindIdentity and an error from Remove.",
@@ -105796,7 +105793,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns the name string or None; Go returns the Flavor, whose Name field the caller reads, or nil.",
@@ -105887,7 +105884,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-flavor-ram-python.md"
       ],
       "differences": [
@@ -105915,7 +105912,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python sends \"availability_zone\": null when no zone is given; Go omits the key, which Nova treats the same.",
@@ -105943,7 +105940,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns a lazy generator of Aggregate Resources; Go All returns a slice and List returns an iterator.",
@@ -105990,7 +105987,7 @@
         "Rows whose members do not decode into the typed Aggregate (for example a non-boolean deleted or a non-list hosts value, which Nova does not send) fail the search, whereas Python converts them; the view itself applies the Python conversions."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -106063,7 +106060,7 @@
       ],
       "documentation": [
         "docs/python-cloud-project-helpers.md",
-        "compute/v2/aggregates/python-update-record.md"
+        "compute/v2/README.md"
       ]
     },
     {
@@ -106098,7 +106095,7 @@
       ],
       "documentation": [
         "docs/python-cloud-project-helpers.md",
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ]
     },
     {
@@ -106253,7 +106250,7 @@
       ],
       "documentation": [
         "compute/v2/hypervisors/python-records.md",
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ]
     },
     {
@@ -106273,7 +106270,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python rewrites policies to policy at 2.64 or later and policy to policies below it; Go sends the fields the caller sets, so the caller picks Policy or Policies for the client microversion.",
@@ -106297,7 +106294,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns a list of ServerGroup Resources; Go yields typed ServerGroup values through an iterator.",
@@ -106402,7 +106399,7 @@
         "JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-group-reads-python.md",
         "README.md"
       ]
@@ -106511,7 +106508,7 @@
         "JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-group-reads-python.md",
         "README.md"
       ]
@@ -106533,7 +106530,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns True or False; Go returns the found ServerGroupRecord or nil from FindRecord and an error from Delete.",
@@ -106557,7 +106554,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
@@ -106583,7 +106580,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
@@ -106609,7 +106606,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
@@ -106635,7 +106632,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python returns [] without HTTP when the secgroup_source config is unset or not nova/neutron; Go has no such config gate.",
@@ -106666,7 +106663,7 @@
         }
       ],
       "documentation": [
-        "compute/python-cloud-parity.md"
+        "compute/README.md"
       ],
       "differences": [
         "Python get_server(name_or_id, bare=True) is find_server with details=True and all_projects=False; Go servers.API.FindRecord has the same defaults and returns a ServerFindRecord whose Resource.Body holds the declared Server fields as JSON instead of a mutable Server Resource.",
@@ -106718,7 +106715,7 @@
         "JMESPath string filters, deprecated by the pinned Python SDK with RemovedInSDK60Warning, evaluate rows as plain JSON objects, so expressions that depend on the Resource class, Resource equality with a literal object, or CPython float arithmetic and serialization can differ; dictionary filters behave the same; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -106754,7 +106751,7 @@
         "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -106804,7 +106801,7 @@
         "Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items)."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -106857,7 +106854,7 @@
         "Rows come from the python:compute/v2/servers listing and inherit its recorded differences (immutable snapshots, integer-only limit and max_items)."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -106898,7 +106895,7 @@
         "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -106944,7 +106941,7 @@
         "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -107008,7 +107005,7 @@
         "The floating-IP gate uses the Connection's floating_ip_source (ServerAddressPolicy or clouds.yaml); per-call floating-IP query options do not change it. Floating lookup and delete semantics are those of GetFloatingIP and DeleteFloatingIP."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -107123,7 +107120,7 @@
         "Only standard finite JSON numbers are accepted: NaN, Infinity and overflowing literals such as 1e400 return ErrUnsupported with the original response, where Python's json loads them as floats, and a latest microversion must be written as \"latest\"; see Deliberate runtime differences in docs/sdk-support-ledger.md."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-console-python.md",
         "README.md"
       ]
@@ -107170,7 +107167,7 @@
         "The server and groups are resolved with Servers.FindRecord (find_server with details, as get_server(bare=True) does) and GetSecurityGroupRecord; their record representation differences are documented on those operations."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -107215,7 +107212,7 @@
         "The server and groups are resolved with Servers.FindRecord (find_server with details, as get_server(bare=True) does) and GetSecurityGroupRecord; their record representation differences are documented on those operations."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -107251,7 +107248,7 @@
       ],
       "documentation": [
         "docs/python-cloud-project-helpers.md",
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ]
     },
     {
@@ -107285,7 +107282,7 @@
       ],
       "documentation": [
         "docs/python-cloud-project-helpers.md",
-        "compute/v2/python-parity-admin.md"
+        "compute/v2/README.md"
       ]
     },
     {
@@ -107334,7 +107331,7 @@
         "The default expansion reuses ExpandServerInterfaces; its own get_server_public_ip review stays unresolved only for the separate cloud Create/Get/Wait lifecycle, while the expansion this operation returns is covered by the HTTP fixtures listed here. The typed native server drops a nonempty string image, which Go treats like Nova's boot-from-volume empty string; non-string flavor or image ids are rejected instead of being passed to the Python lookups."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },
@@ -107368,7 +107365,7 @@
         "Python's Resource-typed flavor and image always contain a name key, so a missing name yields flavor-None/image-None groups; Go adds those groups only when a name was set (dict semantics of meta.py). Python reads az from a key the Server Resource mapping does not carry, so neither side emits availability-zone groups. These are the shared SDK-R1 boundary of docs/sdk-support-ledger.md."
       ],
       "documentation": [
-        "compute/python-cloud-parity.md",
+        "compute/README.md",
         "compute/cloud-server-composed-python.md"
       ]
     },

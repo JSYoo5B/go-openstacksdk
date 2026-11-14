@@ -1,41 +1,6 @@
 # Python Records
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:compute/v2/server_actions`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.InServer`
-- `github.com/JSYoo5B/go-openstacksdk/resource.Collection.List`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithMaxItems`
-- `github.com/JSYoo5B/go-openstacksdk/resource.WithPaginated`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.ProxyListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.ActionScope.ListRecords`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.ActionScope.ProxyListRecords`
-
-- The fixed-server action history retains requestID, server identity, summary/event extensions and raw response evidence while controlling linked-page consumption.
-  Tests: `api/native_scope_list_controls_test.go:TestNativeScopeListControlsFiveBindingsRawCapBeforeNameAndHostFilters`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsSinglePageSkipsForeignAndCyclicContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsCrossPageQueryFixedParentAndIteratorReuse`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsZeroDefaultsFollowNativeContinuation`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsKeepWholePageDecodeErrors`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsParentCancellationAndConsumerBreak`, `api/native_scope_list_controls_test.go:TestNativeScopeListControlsPreflightNegativeAndTroveQueryPolicy`.
-- Concrete Source-owned compute-role projection, library-owned callback snapshots and selected/versionless policy retain original client and actual response evidence. Source-aware lookup/list parsing shares guarded REST, descriptor MRO, Python-loaded equality and paging rather than new transport wrappers.
-  Tests: `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsSourceMROEventsProjectionAndActualWire`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsEventsNullScalarAndOrderedAliases`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsQueryAliasesLocalFiltersRawCapAndParentScope`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsDiscoveryIsLazyAndCeilingOwnsEveryPage`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsOpaqueJMESUsesActualGeneratorWithZeroHTTP`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsCancelAfterYieldDoesNotReadNextPage`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsOptionsCannotReplaceParentAndKeepNilMapOwnership`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsPhysicalFailuresPreserveActualPageAndStopHooks`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsClean401And503RetriesKeepScopeQueryAndVersion`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsEventResourceIdentityDoesNotEqualPlainJSONDictionary`.
-- Server URI is explicit and independent of passive instance_uuid/request_id; Source nine Body fields and nested list_type Resource event defaults/hostId aliases are preserved. Missing/null/scalar/nonobject distinctions, Source Resource-vs-plainJSONdict array equality and raw row cap/local filters are audited. Deferred max2.84 discovery/selected-literal version owns every page; opaque Proxy JMESPath uses generator identity and performs zero HTTP until consumption.
-  Tests: `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsSourceMROEventsProjectionAndActualWire`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsEventsNullScalarAndOrderedAliases`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsQueryAliasesLocalFiltersRawCapAndParentScope`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsDiscoveryIsLazyAndCeilingOwnsEveryPage`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsOpaqueJMESUsesActualGeneratorWithZeroHTTP`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsCancelAfterYieldDoesNotReadNextPage`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsOptionsCannotReplaceParentAndKeepNilMapOwnership`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsPhysicalFailuresPreserveActualPageAndStopHooks`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsClean401And503RetriesKeepScopeQueryAndVersion`, `compute/v2/instanceactions/python_records_contracts_test.go:TestActionRecordsEventResourceIdentityDoesNotEqualPlainJSONDictionary`.
-
-Python/Go differences:
-
-- Go exposes these local controls through the common Collection or fixed-parent scope; existing native typed List option signatures remain unchanged. Zero means unlimited and negative values fail lazily before HTTP.
-- The native path does not infer a wire limit from max_items and stops exactly at the raw row cap. Native whole-page extraction or IsEmpty may still reject unused trailing rows; continuation retains the native pager and SDK cycle policy.
-- Go concrete Source records separate Resource default/projection from complete actual Wire/page/header/status; SDK-owned location is null and optional HTTP cache/Connection/dirty-state remain generic SDK-R1/C1. Actual cloud permissions/acceptance are not established by HTTP fixtures.
-- JSON filters cannot construct Python Resource operands; original object event items are Source Resource objects and do not equal plain JSON dicts, while nonobject items become plain{} and retain loaded equality. Typed Source Python object lifecycle remains SDK-R1.
-- Opaque generator Value and serializable JSON are separate Go result carriers, never eager collected list masquerading as Source Proxy._list. Go scoped ListRecords and InServer parent resolver are additional conveniences; fixed route/cursor/source/auth guard strengthens Source arbitrary session/origin behavior.
-- Official Nova31.0.0 list policy is project reader-or-admin against instance project. Base list summary does not contain events; admin traceback/host/details visibility is detail controller policy and SDK performs no detail/admin fetch. Changes-since/limit/marker begin2.58, changes-before2.66; server remains the version/schema authority.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

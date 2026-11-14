@@ -1,44 +1,6 @@
 # Instanceactions
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `gophercloud:compute/v2/instanceactions.List`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.List`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.WithListOptions`
-- `github.com/JSYoo5B/go-openstacksdk/request.Query`
-
-- List GETs servers/{id}/os-instance-actions with limit, marker, RFC3339 changes-since/before keeping the caller offset and extension query as one single page ignoring links, decodes zone-less start_time, yields nothing for an empty array, surfaces io.EOF for a bodyless 204 and returns native pager status errors without operation context.
-  Tests: `compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsRoutesQueryAndDecode`, `compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsStatusesAndDecodeErrors`.
-
-Python/Go differences:
-
-- This declaration maps the Gophercloud native compute/v2/instanceactions call only; Python resource models and cloud helpers are tracked separately.
-- The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged.
-
-### `gophercloud:compute/v2/instanceactions.Get`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/instanceactions.API.Get`
-
-- Get GETs servers/{id}/os-instance-actions/{requestID}, decodes zone-less start/updated/event times (null to zero or nil) and events, rejects zoned timestamps as a decode error and accepts only 200.
-  Tests: `compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsRoutesQueryAndDecode`, `compute/v2/instanceactions/native_contracts_test.go:TestNativeInstanceActionsStatusesAndDecodeErrors`.
-
-Python/Go differences:
-
-- This declaration maps the Gophercloud native compute/v2/instanceactions call only; Python resource models and cloud helpers are tracked separately.
-- The SDK adds only request.Wrap operation context (not on list streams); native URL construction, OkCodes, paging and decoding are unchanged.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

@@ -1,39 +1,6 @@
 # Flavor Extra Specs
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:compute/v2/fetch_flavor_extra_specs`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.API.FetchExtraSpecs`
-- `github.com/JSYoo5B/go-openstacksdk/compute/v2/flavors.WithFlavorExtraSpecsOptions`
-- `github.com/JSYoo5B/go-openstacksdk/request.Microversion`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-
-- FetchExtraSpecs always performs one logical bodyless GET at the captured prefixed flavors/{id}/os-extra_specs route, with no flavor lookup or inline extra_specs shortcut. ID-only input seeds the requested ID; existing native or raw flavor fields are copied before options, keep their original fields, and only the Resource extra_specs value is replaced. Native Swap survives its json-excluded native field and native is_public/ephemeral wire aliases become source view names. An explicit route ID does not rewrite a supplied passive Resource ID; absent route ID uses the existing truthy string id/name/original_name identity.
-  Tests: `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs`.
-- A missing response extra_specs becomes an empty object. Record.ExtraSpecs and independently owned actual whole-root Wire preserve present object, null, array, scalar, string, false and large precise JSON values. Resource.extra_specs reproduces Flavor's dict descriptor: objects and null remain, while nonnull nonobjects project to an empty object. Other actual response fields do not replace the existing flavor. Resource retains owned input metadata while record/Wire headers and status plus Envelope preserve the fresh physical response; input, Resource, Wire and raw result bytes do not alias.
-  Tests: `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs`.
-- A selected microversion is retained without an inline-specs or 2.61 gate. With no selection, finite shared Nova discovery selects the advertised maximum capped at 2.61 or a versionless request for unavailable bounds; an explicit empty override bypasses discovery and issues a versionless private GET. Source token and headers remain live/owned, options apply once and mutable typed pointers/header inputs are snapshotted before later option mutations, while the original service client's version and route remain unchanged.
-  Tests: `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsAlwaysGETRawValuesAndOwnedExistingInputs`.
-- Owned reads admit final200..399 but require a nonnull UTF-8 JSON object root; malformed/empty accepted JSON and parsed nonobject roots preserve the accepted receipt rather than being tolerated. HTTP403 retains original native status, expected codes, method, fixed URL and response body/header. Accepted read/Close nested404 and post-fetch source failures remain terminal ResponseErrors with the actual receipt and original cause, never a missing result, follow-up request or accepted-response replay. Invalid concrete input, nil options, callback cancellation, source drift, outer guard and spoofed auth header stop HTTP.
-  Tests: `api/compute_flavor_extra_specs_fetch_test.go:TestComputeFlavorFetchExtraSpecsPreflightAndAcceptedTerminalReceipts`.
-
-Python/Go differences:
-
-- Python accepts a string or connected Flavor and mutates/returns the same resource. Go accepts a concrete ID/native Flavor/raw Resource carrier, returns an independently owned updated input view plus a raw specs value and physical receipt, and never mutates the supplied input. Raw existing fields and metadata are preserved rather than recreating every Flavor descriptor default or injecting computed Connection location.
-- Explicit ID with an existing input is an additional route-only Go selection. With no explicit ID, only a validated safe UTF-8 string id/name/original_name can become the executable path; Python's arbitrary dynamic truthy identity and custom base_path/session controls are not exposed. Passive original IDs remain in the input view, even when a different validated string selects the request route.
-- The Resource extra_specs object/null/empty projection matches the pinned type=dict descriptor; the additive ExtraSpecs field deliberately exposes the original nonobject value that the Python property converts to {}. Actual Wire and Envelope never contain invented defaults or input fields. ID-only Resource is a finite id plus extra_specs view, not a fully connected default-hydrated Python Flavor.
-- Nil operation microversion uses a captured selected version or the existing finite guarded Nova discovery capped at Flavor2.61. Explicit empty is an additional versionless Go override. Full Keystoneauth discovery ordering/cache/session facilities retain independent SDK scope; discovery physical/source/JSON failures are explicit Go errors rather than blanket source DiscoveryFailure swallowing.
-- Final200..399 and strict UTF-8 object parsing are the mapped Go transport boundary. Python accepts status<400 through its session and response.json text decoder; informational/session redirect/charset combinations are not asserted as identical. Physical read/Close/source/context faults retain typed receipt evidence. Native ListExtraSpecs remains a separate strict200 string-map API.
-- This review maps the directly named unconditional fetch operation only. find_flavor/get_flavor/flavors optional inline enrichment, create/update/delete individual extra-specs, mutable Resource lifecycle, computed location and other service declarations keep independent tracking; none is incidentally promoted by this read.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
