@@ -6,12 +6,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
 
-```go
-// Python: conn.identity.delete_region("RegionOne")
-err := regions.New(client).Remove(ctx, resource.ID("RegionOne"))
-// Python: conn.identity.delete_region("RegionOne", ignore_missing=False)
-err = regions.New(client).Remove(ctx, resource.ID("RegionOne"), resource.WithMissingError())
-```
+See `Example_parityCatalogFragment1` in [example_parity_catalog_fragment1_test.go](example_parity_catalog_fragment1_test.go), compiled by `go test`.
 
 ```go
 disabled := false
@@ -20,12 +15,7 @@ ep, err := endpoints.New(client).Create(ctx,
 	request.Field("region_id", "RegionOne"))
 ```
 
-```go
-rows, err := limits.New(client).BatchCreate(ctx, limits.BatchCreateOpts{
-	{ServiceID: "svc-1", ProjectID: "p", ResourceName: "cores", ResourceLimit: 10},
-})
-limit := rows[0]
-```
+See `Example_parityCatalogFragment3` in [example_parity_catalog_fragment3_test.go](example_parity_catalog_fragment3_test.go), compiled by `go test`.
 
 ## References
 

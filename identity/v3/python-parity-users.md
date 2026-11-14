@@ -4,31 +4,11 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
+See `Example_parityUsersFragment1` in [example_parity_users_fragment1_test.go](example_parity_users_fragment1_test.go), compiled by `go test`.
 
-```go
-enabled := false
-project, err := projects.New(client).Create(ctx, projects.CreateOpts{Name: "demo", DomainID: "default", Enabled: &enabled})
-empty := []string{}
-project, err = projects.New(client).Update(ctx, "p-1",
-    projects.UpdateOpts{Tags: &empty, Extra: map[string]any{"description": nil}},
-    request.Field("id", "p-1"))
-```
+See `Example_parityUsersFragment2` in [example_parity_users_fragment2_test.go](example_parity_users_fragment2_test.go), compiled by `go test`.
 
-```go
-err := users.New(client).Remove(ctx, resource.ID("u-1"))
-err = users.New(client).Remove(ctx, resource.ID("u-1"), resource.WithMissingError()) // ignore_missing=False
-```
-
-```go
-api := roles.New(client)
-// Python assign_project_role_to_user("p-1", "u-1", "r-1")
-err := api.Assign(ctx, "r-1", roles.AssignOpts{ProjectID: "p-1", UserID: "u-1"})
-// Python validate_group_has_system_role("g-1", "r-1", "all")
-hasRole := api.Validate(ctx, "r-1", roles.ValidateOpts{System: true, GroupID: "g-1"}) == nil
-// Python assign_domain_role_to_group("d-1", "g-1", "r-1", inherited=True)
-err = osinherit.New(client).Assign(ctx, "r-1", osinherit.AssignOpts{DomainID: "d-1", GroupID: "g-1"})
-```
+See `Example_parityUsersFragment3` in [example_parity_users_fragment3_test.go](example_parity_users_fragment3_test.go), compiled by `go test`.
 
 ## References
 

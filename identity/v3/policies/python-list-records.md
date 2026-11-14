@@ -26,36 +26,7 @@ if __name__ == "__main__":
 
 Set `OS_IDENTITY_ENDPOINT` to the Keystone v3 service endpoint and `OS_TOKEN` to an authorized token.
 
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "os"
-
-    identity "github.com/JSYoo5B/go-openstacksdk/identity/v3"
-    "github.com/JSYoo5B/go-openstacksdk/identity/v3/policies"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/gophercloud/gophercloud/v2"
-)
-
-func main() {
-    endpoint := os.Getenv("OS_IDENTITY_ENDPOINT")
-    if endpoint == "" { log.Fatal("OS_IDENTITY_ENDPOINT is required") }
-    provider := &gophercloud.ProviderClient{TokenID: os.Getenv("OS_TOKEN")}
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: "identity"}
-    service := identity.New(client)
-    for row, err := range service.Policies.ListRecords(context.Background(),
-        request.Limit(100),
-        policies.WithRecordListFilter("project_id", "project-id"),
-        policies.WithRecordListFilter("type", "application/json"),
-    ) {
-        if err != nil { log.Fatal(err) }
-        log.Printf("id=%s blob=%s", row.Resource.Body["id"], row.Resource.Body["blob"])
-    }
-}
-```
+See `Example_listRecords` in [example_list_records_test.go](example_list_records_test.go), compiled by `go test`.
 
 ## Options and Go boundaries
 

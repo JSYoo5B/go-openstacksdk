@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import json
 import openstack
@@ -27,54 +25,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "fmt"
-    "log"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/identity"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func printJSON(value any) {
-    encoded, err := json.MarshalIndent(value, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(encoded))
-}
-
-func main() {
-    ctx := context.Background()
-    conn, err := sdk.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.IdentityV3(ctx)
-    if err != nil { log.Fatal(err) }
-
-    for role, err := range service.Roles.ListRecords(ctx,
-        request.Query("description", "operations"),
-        request.Limit(2), request.MaxItems(2)) {
-        if err != nil { log.Fatal(err) }
-        printJSON(role.Resource)
-    }
-    cloud := identity.NewRoleReadCloud(service.Roles)
-    listed, err := cloud.ListRoles(ctx,
-        request.Query("description", "operations"))
-    if err != nil { log.Fatal(err) }
-    printJSON(listed.JSON)
-    selected, err := cloud.SearchRoles(ctx, "read*",
-        identity.WithRoleSearchFilters(json.RawMessage(`{"options":{"immutable":false}}`)))
-    if err != nil { log.Fatal(err) }
-    printJSON(selected.Value)
-    count, err := cloud.SearchRoles(ctx, "",
-        identity.WithRoleSearchFilters(json.RawMessage(`"length(@)"`)))
-    if err != nil { log.Fatal(err) }
-    printJSON(count.Value)
-}
-```
+See `Example_records` in [example_records_test.go](example_records_test.go), compiled by `go test`.
 
 ## References
 

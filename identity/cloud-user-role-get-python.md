@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import json
 import os
@@ -33,73 +31,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-	"context"
-	"encoding/json"
-	"fmt"
-	"log"
-	"os"
-
-	sdk "github.com/JSYoo5B/go-openstacksdk"
-	"github.com/JSYoo5B/go-openstacksdk/identity"
-)
-
-func printValue(value any) {
-	encoded, err := json.MarshalIndent(value, "", "  ")
-	if err != nil {
-		log.Fatal(err)
-	}
-	fmt.Printf("%s\n", encoded)
-}
-func main() {
-	ctx := context.Background()
-	conn, err := sdk.Connect(ctx)
-	if err != nil {
-		log.Fatal(err)
-	}
-	user, role := os.Getenv("IDENTITY_USER_REF"), os.Getenv("IDENTITY_ROLE_REF")
-	if user == "" || role == "" {
-		log.Fatal("set IDENTITY_USER_REF and IDENTITY_ROLE_REF to readable IDs or names")
-	}
-	userOpts := []identity.UserGetOption{}
-	roleOpts := []identity.RoleGetOption{}
-	if domain, ok := os.LookupEnv("IDENTITY_DOMAIN_ID"); ok {
-		userOpts = append(userOpts, identity.WithUserGetDomainID(domain))
-		roleOpts = append(roleOpts, identity.WithRoleGetDomainID(domain))
-	}
-	directUser, err := conn.GetUserRecord(ctx, user, userOpts...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	printValue(directUser.Value)
-	filteredUser, err := conn.GetUserRecord(ctx, user, append(userOpts,
-		identity.WithUserGetFilters(json.RawMessage(`{}`)))...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	printValue(filteredUser.Value)
-	pinnedUser, err := conn.GetUserRecord(ctx, user, append(userOpts,
-		identity.WithUserGetExpression("`[null]`"))...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	printValue(pinnedUser.Value)
-	directRole, err := conn.GetRoleRecord(ctx, role, roleOpts...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	printValue(directRole.Value)
-	filteredRole, err := conn.GetRoleRecord(ctx, role, append(roleOpts,
-		identity.WithRoleGetExpression("`[null]`"))...)
-	if err != nil {
-		log.Fatal(err)
-	}
-	printValue(filteredRole.Value)
-}
-```
+See `Example_cloudUserRoleGet` in [example_cloud_user_role_get_test.go](example_cloud_user_role_get_test.go), compiled by `go test`.
 
 ## References
 

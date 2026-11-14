@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -31,56 +29,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/identity"
-)
-
-func printJSON(value any) {
-    data, err := json.MarshalIndent(value, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Printf("%s\n", data)
-}
-
-func main() {
-    id := flag.String("domain-id", "", "required domain UUID")
-    name := flag.String("domain-name", "", "optional domain name")
-    flag.Parse()
-    if *id == "" { log.Fatal("-domain-id is required") }
-    ctx := context.Background()
-    conn, err := openstack.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.IdentityV3(ctx)
-    if err != nil { log.Fatal(err) }
-    row, err := service.Domains.GetRecord(ctx, *id)
-    if err != nil { log.Fatal(err) }
-    printJSON(row.Resource.Body)
-
-    cloud := identity.NewDomainReadCloud(service.Domains)
-    result, err := cloud.GetDomain(ctx,
-        request.Custom(func(c *identity.DomainGetOpts) error { v := *id; c.DomainID = &v; return nil }),
-        identity.WithDomainGetFilters(json.RawMessage(`{invalid-but-ignored`)),
-    )
-    if err != nil { log.Fatal(err) }
-    printJSON(result.Record.Resource.Body)
-    fmt.Println("deprecated filters ignored:", result.DeprecatedFilters)
-    if *name != "" {
-        found, err := cloud.GetDomain(ctx, request.Custom(func(c *identity.DomainGetOpts) error { v := *name; c.NameOrID = &v; return nil }))
-        if err != nil { log.Fatal(err) }
-        if found.Record != nil { printJSON(found.Record.Resource.Body) }
-    }
-}
-```
+See `Example_cloudDomainGet` in [example_cloud_domain_get_test.go](example_cloud_domain_get_test.go), compiled by `go test`.
 
 ## References
 

@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -25,42 +23,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/identity/v3/users"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func main() {
-    groupID := flag.String("group-id", "", "required group UUID")
-    flag.Parse()
-    if *groupID == "" { log.Fatal("-group-id is required") }
-    ctx := context.Background()
-    conn, err := openstack.Connect(ctx)
-    if err != nil { log.Fatal(err) }
-    service, err := conn.IdentityV3(ctx)
-    if err != nil { log.Fatal(err) }
-    for row, err := range service.Users.ListUsersInGroupRecords(ctx, *groupID,
-        users.WithGroupRecordListQuery("email", "member@example.com"),
-        request.Limit(100),
-        request.MaxItems(100),
-    ) {
-        if err != nil { log.Fatal(err) }
-        data, err := json.MarshalIndent(row.Resource.Body, "", "  ")
-        if err != nil { log.Fatal(err) }
-        fmt.Printf("%s\n", data)
-    }
-}
-```
+See `Example_groupRecords` in [example_group_records_test.go](example_group_records_test.go), compiled by `go test`.
 
 ## References
 

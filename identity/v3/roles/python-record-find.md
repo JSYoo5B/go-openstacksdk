@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -24,44 +22,7 @@ with openstack.connect(cloud=args.cloud) as conn:
     print(json.dumps(role.to_dict(), indent=2))
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "time"
-
-    sdk "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-)
-
-func main() {
-    cloud := flag.String("cloud", "dev", "clouds.yaml cloud")
-    identity := flag.String("identity", "", "Role exact name or ID")
-    domain := flag.String("domain", "", "explicit domain ID")
-    flag.Parse()
-    if *identity == "" || *domain == "" { log.Fatal("identity and domain are required") }
-    ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-    defer cancel()
-    conn, err := sdk.Connect(ctx, sdk.WithCloud(*cloud))
-    if err != nil { log.Fatal(err) }
-    service, err := conn.IdentityV3(ctx)
-    if err != nil { log.Fatal(err) }
-    row, err := service.Roles.FindRecord(ctx, *identity,
-        request.IgnoreMissing(false),
-        request.Query("domain_id", *domain),
-        request.Query("skip_cache", true),
-        request.Query("error_message", "Role lookup failed"))
-    if err != nil { log.Fatal(err) }
-    data, err := json.MarshalIndent(row.Resource, "", "  ")
-    if err != nil { log.Fatal(err) }
-    fmt.Println(string(data))
-}
-```
+See `Example_recordFind` in [example_record_find_test.go](example_record_find_test.go), compiled by `go test`.
 
 ## References
 

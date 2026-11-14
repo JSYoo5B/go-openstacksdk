@@ -6,11 +6,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
 
-```go
-enabled := true
-tenant, err := tenants.New(client).Create(ctx, tenants.CreateOpts{Name: "demo", Description: "d", Enabled: &enabled})
-tenant, err = tenants.New(client).Update(ctx, "t-1", tenants.UpdateOpts{Name: "renamed"}, request.Field("id", "t-1"))
-```
+See `Example_parityFragment1` in [example_parity_fragment1_test.go](example_parity_fragment1_test.go), compiled by `go test`.
 
 ```go
 api := tenants.New(client)
