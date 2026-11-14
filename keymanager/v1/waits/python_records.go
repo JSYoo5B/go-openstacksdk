@@ -8,7 +8,6 @@ import (
 	"maps"
 	"net/http"
 	"strings"
-	"time"
 
 	"github.com/JSYoo5B/go-openstacksdk/internal/calls"
 	"github.com/JSYoo5B/go-openstacksdk/internal/keymanagerread"
@@ -104,24 +103,16 @@ func ForSecret(r *secrets.FoundSecretRecord) Target {
 	return fromRecord("secrets", r.RequestID, &Record{Resource: r.Resource, Wire: r.Wire, Envelope: r.Envelope, Header: r.Header, StatusCode: r.StatusCode, Payload: r.Payload})
 }
 
-// Options distinguishes omission from zero. Wait holds the shared wait
-// options (see WithWait). Interval and Timeout carry Python-source numeric
-// values that the shared options reject: a nil Interval keeps the Wait
-// pacing (two seconds by default), explicit zero follows Source's short
-// 100ms pause and a negative value is invalid; a nil Timeout keeps the Wait
-// timeout (unlimited status wait or 120-second deletion wait by default),
-// while an explicit zero or negative value exhausts before the first
-// observation. A set Interval or Timeout wins over the Wait options for its
-// control.
+// Options holds the wait settings. Wait holds the shared wait options (see
+// WithWait).
 type Options struct {
-	Interval, Timeout *time.Duration
-	Wait              []resource.WaitOption
-	Headers           map[string]string
-	Microversion      *string
+	Wait         []resource.WaitOption
+	Headers      map[string]string
+	Microversion *string
 }
 
 // Option is one option of WaitForStatus and WaitForDelete: WithOptions,
-// WithWait, WithInterval, WithTimeout, request.Custom over *Options,
+// WithWait, request.Custom over *Options,
 // request.Header (adds one header to every read) or request.Microversion.
 // Other shared calls fail with resource.ErrInvalidOption before HTTP.
 type Option = request.GetCall
@@ -134,14 +125,6 @@ func optionSpec() calls.Spec[Options] {
 }
 
 func ownOptions(o Options) Options {
-	if o.Interval != nil {
-		v := *o.Interval
-		o.Interval = &v
-	}
-	if o.Timeout != nil {
-		v := *o.Timeout
-		o.Timeout = &v
-	}
 	if o.Microversion != nil {
 		v := *o.Microversion
 		o.Microversion = &v
@@ -166,47 +149,16 @@ func WithOptions(o Options) Option {
 // records after each nonterminal response; the callback runs first and its
 // error stops the wait with nothing sent for that step). WaitForDelete
 // rejects failure states and a status attribute with
-// resource.ErrUnsupported. A timeout or pacing control here replaces an
-// earlier WithTimeout or WithInterval.
+// resource.ErrUnsupported. A zero or negative timeout or poll interval fails
+// with resource.ErrInvalidOption before HTTP.
 func WithWait(opts ...resource.WaitOption) Option {
 	snapshot := append([]resource.WaitOption(nil), opts...)
-	timeout, pacing := waitControls(snapshot)
 	return request.Custom(func(c *Options) error {
 		c.Wait = append(append([]resource.WaitOption(nil), c.Wait...), snapshot...)
-		if timeout {
-			c.Timeout = nil
-		}
-		if pacing {
-			c.Interval = nil
-		}
 		return nil
 	})
 }
 
-// waitControls reports whether opts set the timeout and the pacing. Invalid
-// options report false here and fail when the wait resolves them.
-func waitControls(opts []resource.WaitOption) (timeout, pacing bool) {
-	all := resource.WaitSupportFailureStates | resource.WaitSupportStatusAttribute | resource.WaitSupportProgress
-	settings, err := resource.ResolveWait(resource.WaitDefaults{Timeout: time.Hour, Strategy: resource.FixedWait(time.Hour), Supports: all}, opts...)
-	if err != nil {
-		return false, false
-	}
-	return settings.TimeoutSet, settings.StrategySet
-}
-
-// WithInterval sets a Python-source fixed interval: zero follows Source's
-// short 100ms pause (capped by a shorter timeout) and a negative value is
-// invalid. It replaces earlier pacing from WithWait.
-func WithInterval(v time.Duration) Option {
-	return request.Custom(func(c *Options) error { c.Interval = &v; return nil })
-}
-
-// WithTimeout sets a Python-source timeout: zero or negative exhausts before
-// the first observation. It replaces an earlier timeout or unlimited wait
-// from WithWait.
-func WithTimeout(v time.Duration) Option {
-	return request.Custom(func(c *Options) error { c.Timeout = &v; return nil })
-}
 func invalid(v string) error { return fmt.Errorf("%w: %s", resource.ErrInvalidOption, v) }
 
 // Finite Body aliases merge synchronized seed attributes with each incoming

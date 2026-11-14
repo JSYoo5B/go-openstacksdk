@@ -72008,9 +72008,7 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForOrder",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWait",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/request.Header",
         "github.com/JSYoo5B/go-openstacksdk/request.Microversion",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.SecretStore",
@@ -72043,10 +72041,11 @@
           ]
         },
         {
-          "behavior": "Shared Collection.Wait/WaitDeleted and prepared WaitPolicy supply native context/timer/progress mechanics. Source defaults are status-unbounded/delete120/interval2, explicit timeout zero/negative exhausts before polling, zero interval shortens the pause. Compound callback/cancel/source errors retain the last accepted receipt.",
+          "behavior": "Shared Collection.Wait/WaitDeleted and prepared WaitPolicy supply native context/timer/progress mechanics. Source defaults are status-unbounded/delete120/interval2; a zero or negative timeout or interval fails with resource.ErrInvalidOption before HTTP. Compound callback/cancel/source errors retain the last accepted receipt.",
           "tests": [
-            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitDefaultTimeoutsAndZeroIntervalPolicy",
-            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal"
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitDefaultTimeouts",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitOptionOwnershipAndPreflight"
           ]
         },
         {
@@ -72203,12 +72202,11 @@
       ],
       "differences": [
         "Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.",
-        "resource.WithPollInterval and resource.WithTimeout through waits.WithWait require positive durations; the Python-parity waits.WithInterval(0) uses Source100ms/min-positive-timeout coercion and waits.WithTimeout(0) exhausts before the first observation.",
         "Timeouts and failures are Python ResourceTimeout and ResourceFailure; Go returns context deadline errors and resource.FailedStateError.",
         "Finite SDK-owned concrete Target constructors with immutable routes and independent record snapshots replace Python arbitrary Resource subclasses, same-object mutation and dynamic getattr. All known pinned fetchable concrete targets now include admin ProjectQuota; arbitrary class/subtyping remains SDK-R1 as a deliberate finite Go API boundary.",
         "Source normalized nullable/empty/string states use PythonLower and private exact comparison tokens, not broad Unicode EqualFold. Go failures accept strings only, callbacks are typed func(int)error, declared attributes must be nullable strings.",
-        "The SDK validates source/headers and applied option callbacks before cached-state success; Source returns its cached object before consulting session or many invalid timer/failure settings. Negative interval is a pre-HTTP Go guard rather than Python sleep-time ValueError after an observation.",
-        "Status timeout defaults to unlimited, deletion timeout120s, interval2s. Nil Timeout is omission; explicit Unlimited removes the deletion SDK limit. Explicit zero/negative timeout fails before first GET unless a cached status already matches. Zero interval uses Source 100ms/min-positive-timeout pause.",
+        "The SDK validates source/headers and applied option callbacks before cached-state success; Source returns its cached object before consulting session or many invalid timer/failure settings. A negative interval is a pre-HTTP Go guard rather than Python sleep-time ValueError after an observation.",
+        "Status timeout defaults to unlimited, deletion timeout120s, interval2s. resource.WithUnlimitedWait removes the deletion SDK limit. Python accepts a zero or negative timeout (exhausting before the first GET) and a zero interval (a 100ms pause); Go rejects a zero or negative resource.WithTimeout or resource.WithPollInterval with resource.ErrInvalidOption before cached-state success or HTTP.",
         "Fixed original route, selected microversion or absence and reserved headers survive native attempts. Python mutable response id can change subsequent fetch routing; Go preserves RequestID and leaves response id/HREF passive. Live auth token and ordinary native retry headers remain native.",
         "Source custom Secret.fetch does not raise HTTP errors itself; Go admits100..399 and rejects400..599 strictly with full physical causes, so payload404 cannot establish metadata absence. Accepted UTF-8 text is decoded strictly, opaque bytes remain Payload plus JSON base64 Resource values.",
         "Container/Order generic malformed/empty JSON preserves synchronized attributes as Source ValueError handling does; valid JSON null/nonobject fails. Secret malformed JSON fails. Go requires valid UTF-8 metadata and eagerly projects finite declared casts/aliases using the existing shared projector.",
@@ -72249,9 +72247,7 @@
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForOrder",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.ForSecret",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithOptions",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithInterval",
         "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithWait",
-        "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits.WithTimeout",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithUnlimitedWait",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgressCallback",
         "github.com/JSYoo5B/go-openstacksdk/resource.WithProgress",
@@ -72281,10 +72277,11 @@
           ]
         },
         {
-          "behavior": "Shared Collection.Wait/WaitDeleted and prepared WaitPolicy supply native context/timer/progress mechanics. Source defaults are status-unbounded/delete120/interval2, explicit timeout zero/negative exhausts before polling, zero interval shortens the pause. Compound callback/cancel/source errors retain the last accepted receipt.",
+          "behavior": "Shared Collection.Wait/WaitDeleted and prepared WaitPolicy supply native context/timer/progress mechanics. Source defaults are status-unbounded/delete120/interval2; a zero or negative timeout or interval fails with resource.ErrInvalidOption before HTTP. Compound callback/cancel/source errors retain the last accepted receipt.",
           "tests": [
-            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitDefaultTimeoutsAndZeroIntervalPolicy",
-            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal"
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitDefaultTimeouts",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitCallbackFailureCancellationAndSourceAreTerminal",
+            "keymanager/v1/waits/python_wait_contracts_test.go:TestPythonKeymanagerWaitOptionOwnershipAndPreflight"
           ]
         },
         {
@@ -72420,8 +72417,8 @@
         "Legacy generated collection waits retain their historical five-minute policy. The concrete waits.API lane defaults status to unlimited/ERROR and deletion120s with interval2s, matching the pinned helper defaults.",
         "Finite SDK-owned concrete Target constructors with immutable routes and independent record snapshots replace Python arbitrary Resource subclasses, same-object mutation and dynamic getattr. All known pinned fetchable concrete targets now include admin ProjectQuota; arbitrary class/subtyping remains SDK-R1 as a deliberate finite Go API boundary.",
         "Source normalized nullable/empty/string states use PythonLower and private exact comparison tokens, not broad Unicode EqualFold. Go failures accept strings only, callbacks are typed func(int)error, declared attributes must be nullable strings.",
-        "The SDK validates source/headers and applied option callbacks before cached-state success; Source returns its cached object before consulting session or many invalid timer/failure settings. Negative interval is a pre-HTTP Go guard rather than Python sleep-time ValueError after an observation.",
-        "Status timeout defaults to unlimited, deletion timeout120s, interval2s. Nil Timeout is omission; explicit Unlimited removes the deletion SDK limit. Explicit zero/negative timeout fails before first GET unless a cached status already matches. Zero interval uses Source 100ms/min-positive-timeout pause.",
+        "The SDK validates source/headers and applied option callbacks before cached-state success; Source returns its cached object before consulting session or many invalid timer/failure settings. A negative interval is a pre-HTTP Go guard rather than Python sleep-time ValueError after an observation.",
+        "Status timeout defaults to unlimited, deletion timeout120s, interval2s. resource.WithUnlimitedWait removes the deletion SDK limit. Python accepts a zero or negative timeout (exhausting before the first GET) and a zero interval (a 100ms pause); Go rejects a zero or negative resource.WithTimeout or resource.WithPollInterval with resource.ErrInvalidOption before cached-state success or HTTP.",
         "Fixed original route, selected microversion or absence and reserved headers survive native attempts. Python mutable response id can change subsequent fetch routing; Go preserves RequestID and leaves response id/HREF passive. Live auth token and ordinary native retry headers remain native.",
         "Source custom Secret.fetch does not raise HTTP errors itself; Go admits100..399 and rejects400..599 strictly with full physical causes, so payload404 cannot establish metadata absence. Accepted UTF-8 text is decoded strictly, opaque bytes remain Payload plus JSON base64 Resource values.",
         "Container/Order generic malformed/empty JSON preserves synchronized attributes as Source ValueError handling does; valid JSON null/nonobject fails. Secret malformed JSON fails. Go requires valid UTF-8 metadata and eagerly projects finite declared casts/aliases using the existing shared projector.",

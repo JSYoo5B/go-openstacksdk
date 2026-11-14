@@ -71,7 +71,7 @@ func TestPythonKeymanagerSecretStoreWaitNativeCachedSnapshotKeepsExplicitIdentit
 	seed.Header.Set("X-Original", "changed")
 	seed.ID = "foreign"
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { t.Fatal("cached state fetched"); return nil })
-	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithTimeout(0), waits.WithInterval(-time.Second))
+	value, err := api.WaitForStatus(context.Background(), target, str("active"))
 	if err != nil || value == nil || len(*calls) != 0 || value.RequestID != "literal/selector" || value.StatusCode != 203 || value.Header.Get("X-Original") != "owned" || value.Envelope != nil {
 		t.Fatal(err, value, *calls)
 	}
@@ -104,7 +104,7 @@ func TestPythonKeymanagerSecretStoreWaitOrderedAliasesAndSynchronizedMerge(t *te
 	})
 	seed := nativeSecretStore(t, `{"status":"BUILD","name":"retained","secret_store_ref":"https://passive.invalid/seed","created":"old","global_default":true}`)
 	var progress []int
-	value, err := api.WaitForStatus(context.Background(), waits.ForSecretStore("fixed/id", seed), str("active"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
+	value, err := api.WaitForStatus(context.Background(), waits.ForSecretStore("fixed/id", seed), str("active"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
 	if err != nil || len(*calls) != 3 || !reflect.DeepEqual(progress, []int{0, 0}) || value.StatusCode != 202 || string(value.Envelope) != bodies[2] {
 		t.Fatal(err, value, *calls, progress)
 	}
@@ -210,7 +210,7 @@ func TestPythonKeymanagerSecretStoreWaitPreflightFailureAndCallbackPolicies(t *t
 			t.Fatal(err, value, *calls)
 		}
 	}
-	for _, option := range []waits.Option{waits.WithWait(resource.WithStatusAttribute("progress")), waits.WithTimeout(0), waits.WithInterval(-time.Second)} {
+	for _, option := range []waits.Option{waits.WithWait(resource.WithStatusAttribute("progress"))} {
 		value, err := api.WaitForStatus(context.Background(), waits.SecretStore("one"), str("active"), option)
 		if value != nil || err == nil || len(*calls) != 0 {
 			t.Fatal(err, value, *calls)

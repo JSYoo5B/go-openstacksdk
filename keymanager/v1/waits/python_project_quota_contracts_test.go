@@ -39,7 +39,7 @@ func TestPythonProjectQuotaWaitCachedRecordOwnsSnapshotsAndNoStatus(t *testing.T
 	original.Resource.Body["name"][1] = 'X'
 	original.Envelope[0] = '!'
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { t.Fatal("cached GET"); return nil })
-	got, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithTimeout(0), waits.WithInterval(-time.Second))
+	got, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithWait(resource.WithStatusAttribute("name")))
 	if err != nil || got.RequestID != "fixed" || got.StatusCode != 202 || got.Header.Get("X-Proof") != "cached" {
 		t.Fatal(got, err)
 	}
@@ -62,7 +62,7 @@ func TestPythonProjectQuotaWaitMergeIgnoresMalformedJSONAndPreservesNull(t *test
 		return wire(202, bodies[n-1])
 	})
 	count := 0
-	got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), str("ready"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(progress int) error {
+	got, err := api.WaitForStatus(context.Background(), waits.ProjectQuota("fixed"), str("ready"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgressCallback(func(progress int) error {
 		if progress != 0 {
 			t.Fatal(progress)
 		}
@@ -86,7 +86,7 @@ func TestPythonProjectQuotaWaitDeleteOnlyCleanGET404(t *testing.T) {
 		return wire(404, `{"missing":true}`)
 	})
 	callbacks := 0
-	got, err := api.WaitForDelete(context.Background(), waits.ProjectQuota("fixed"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
+	got, err := api.WaitForDelete(context.Background(), waits.ProjectQuota("fixed"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgressCallback(func(int) error { callbacks++; return nil })))
 	if err != nil || len(*calls) != 2 || callbacks != 1 || got.StatusCode != 404 || got.RequestID != "fixed" {
 		t.Fatal(got, err, callbacks, *calls)
 	}
@@ -111,7 +111,7 @@ func TestPythonProjectQuotaWaitShapeNumericAndPhysicalFailures(t *testing.T) {
 				r.Body = projectQuotaClose{Reader: r.Body, cause: cause}
 				return r
 			})
-			_, err := api.WaitForDelete(context.Background(), waits.ProjectQuota("fixed"), waits.WithInterval(time.Nanosecond))
+			_, err := api.WaitForDelete(context.Background(), waits.ProjectQuota("fixed"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)))
 			if !errors.Is(err, cause) || len(*calls) != 1 {
 				t.Fatal(err, *calls)
 			}

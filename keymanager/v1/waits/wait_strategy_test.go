@@ -44,7 +44,7 @@ func TestKeymanagerWaitStrategy(t *testing.T) {
 	})
 	ms := time.Millisecond
 	// The strategy given after an interval wins.
-	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(time.Hour), waits.WithWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
+	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Hour)), waits.WithWait(resource.WithWaitStrategy(resource.ExponentialWait(2*ms, 2, 0))))
 	if err != nil || value == nil || len(*calls) != 4 {
 		t.Fatal(value, err, *calls)
 	}

@@ -147,33 +147,9 @@ func (a *API) wait(ctx context.Context, target Target, status *string, deleting 
 			return target.seed.Clone(), nil
 		}
 	}
-	strategy := settings.Strategy
-	if config.Interval != nil {
-		strategy = resource.FixedWait(*config.Interval)
-	}
-	timeout := settings.Timeout
-	if config.Timeout != nil {
-		timeout = *config.Timeout
-	}
-	// Source timeout zero/negative exhausts before the first observation.
-	if config.Timeout != nil && timeout <= 0 {
-		return nil, wrap(context.DeadlineExceeded)
-	}
-	if config.Interval != nil && *config.Interval < 0 {
-		return nil, wrap(invalid("negative polling interval"))
-	}
-	if config.Interval != nil && *config.Interval == 0 {
-		interval := 100 * time.Millisecond
-		if timeout > 0 && timeout < interval {
-			interval = timeout
-		}
-		strategy = resource.FixedWait(interval)
-	}
-	waitOptions := []resource.WaitOption{resource.WithWaitStrategy(strategy)}
-	if timeout == 0 {
-		waitOptions = append(waitOptions, resource.WithUnlimitedWait())
-	} else {
-		waitOptions = append(waitOptions, resource.WithTimeout(timeout))
+	waitOptions := []resource.WaitOption{resource.WithWaitStrategy(settings.Strategy), resource.WithTimeout(settings.Timeout)}
+	if settings.Unlimited {
+		waitOptions[1] = resource.WithUnlimitedWait()
 	}
 	failures := []string{"ERROR"}
 	if settings.FailureStatesSet {

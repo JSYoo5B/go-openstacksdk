@@ -22,7 +22,7 @@ func TestPythonKeymanagerWaitProgressChannelSendsZeroAndRejectsNil(t *testing.T)
 	})
 	var got []int
 	observer := testcloud.NewProgress(t, func(v int) { got = append(got, v) })
-	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgress(observer.C)))
+	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgress(observer.C)))
 	observer.Done()
 	if err != nil || value == nil || len(*calls) != 3 || !reflect.DeepEqual(got, []int{0, 0}) {
 		t.Fatal(value, err, *calls, got)
@@ -46,9 +46,9 @@ func TestPythonKeymanagerWaitProgressChannelBlockedSendStopsOnCancellation(t *te
 		var value *waits.Record
 		var err error
 		if deleting {
-			value, err = api.WaitForDelete(ctx, waits.Container("c"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgress(blocked)))
+			value, err = api.WaitForDelete(ctx, waits.Container("c"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgress(blocked)))
 		} else {
-			value, err = api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgress(blocked)))
+			value, err = api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgress(blocked)))
 		}
 		select {
 		case v := <-blocked:
@@ -77,7 +77,7 @@ func TestPythonKeymanagerWaitProgressChannelReceiverCancellation(t *testing.T) {
 		got = append(got, value)
 		gate.AwaitThen(t, func() { cancel(cause) })
 	})
-	value, err := api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithInterval(time.Millisecond), waits.WithWait(resource.WithProgress(observer.C)))
+	value, err := api.WaitForStatus(ctx, waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Millisecond)), waits.WithWait(resource.WithProgress(observer.C)))
 	observer.Done()
 	// The gated read failed without a response, so the wait returns no
 	// record and no accepted-response proof for it.
@@ -97,7 +97,7 @@ func TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend(t *testing.T)
 	// A buffered channel shows what was already sent when each callback runs.
 	sent := make(chan int, 4)
 	var queuedAtCallback []int
-	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgress(sent)),
+	value, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgress(sent)),
 		waits.WithWait(resource.WithProgressCallback(func(int) error { queuedAtCallback = append(queuedAtCallback, len(sent)); return nil })))
 	if err != nil || value == nil || len(*calls) != 3 || !reflect.DeepEqual(queuedAtCallback, []int{0, 1}) || len(sent) != 2 {
 		t.Fatal(value, err, *calls, queuedAtCallback, len(sent))
@@ -106,7 +106,7 @@ func TestPythonKeymanagerWaitProgressCallbackRunsBeforeChannelSend(t *testing.T)
 	stop := errors.New("callback stop")
 	api, _, calls = fixture(t, func(*http.Request, int) *http.Response { return wire(200, `{"status":"BUILD"}`) })
 	sent = make(chan int, 4)
-	value, err = api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgress(sent)),
+	value, err = api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgress(sent)),
 		waits.WithWait(resource.WithProgressCallback(func(int) error { return stop })))
 	if value == nil || !errors.Is(err, stop) || len(*calls) != 1 || len(sent) != 0 {
 		t.Fatal(value, err, *calls, len(sent))

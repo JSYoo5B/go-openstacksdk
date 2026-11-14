@@ -54,7 +54,7 @@ func TestPythonKeymanagerQuotaWaitCachedSnapshotAndNullableDefaults(t *testing.T
 	native.Body["secrets"][1] = 'x'
 	native.Header.Set("X-Original", "changed")
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { t.Fatal("cached HTTP"); return nil })
-	value, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithWait(resource.WithStatusAttribute("secrets")), waits.WithTimeout(0), waits.WithInterval(-time.Second))
+	value, err := api.WaitForStatus(context.Background(), target, str("ready"), waits.WithWait(resource.WithStatusAttribute("secrets")))
 	if err != nil || value == nil || len(*calls) != 0 || value.Envelope != nil || value.StatusCode != 203 || value.Header.Get("X-Original") != "owned" {
 		t.Fatal(err, value, *calls)
 	}
@@ -87,7 +87,7 @@ func TestPythonKeymanagerQuotaWaitMergesFlatFallbackAndNullPresence(t *testing.T
 	})
 	target := quotaTarget(t, `{"name":"BUILD","secrets":999,"orders":100,"containers":900719925474099312345,"id":"foreign"}`)
 	progress := 0
-	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(v int) error {
+	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgressCallback(func(v int) error {
 		if v != 0 {
 			t.Fatal(v)
 		}

@@ -40,17 +40,11 @@ func TestKeymanagerWaitDefaultDeadlines(t *testing.T) {
 
 func TestKeymanagerWaitLaterOptionWinsAcrossSourceAndSharedControls(t *testing.T) {
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { return wire(200, `{"status":"ACTIVE"}`) })
-	if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithTimeout(time.Second)), waits.WithTimeout(0)); !errors.Is(err, context.DeadlineExceeded) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
-	}
-	if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithTimeout(0), waits.WithWait(resource.WithUnlimitedWait())); err != nil || len(*calls) != 1 {
+	if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithTimeout(time.Nanosecond)), waits.WithWait(resource.WithUnlimitedWait())); err != nil || len(*calls) != 1 {
 		t.Fatal(err, *calls)
 	}
 	*calls = nil
-	if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Millisecond)), waits.WithInterval(-time.Second)); !errors.Is(err, resource.ErrInvalidOption) || len(*calls) != 0 {
-		t.Fatal(err, *calls)
-	}
-	if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithInterval(-time.Second), waits.WithWait(resource.WithPollInterval(time.Millisecond))); err != nil || len(*calls) != 1 {
+	if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), waits.WithWait(resource.WithPollInterval(time.Hour)), waits.WithWait(resource.WithPollInterval(time.Millisecond))); err != nil || len(*calls) != 1 {
 		t.Fatal(err, *calls)
 	}
 	*calls = nil
@@ -73,9 +67,12 @@ func TestKeymanagerWaitRejectsUnsupportedAndInvalidSharedControlsBeforeHTTP(t *t
 		}
 	}
 	for name, option := range map[string]waits.Option{
-		"nil":          waits.WithWait(nil),
-		"zero timeout": waits.WithWait(resource.WithTimeout(0)),
-		"nil callback": waits.WithWait(resource.WithProgressCallback(nil)),
+		"nil":               waits.WithWait(nil),
+		"zero timeout":      waits.WithWait(resource.WithTimeout(0)),
+		"negative timeout":  waits.WithWait(resource.WithTimeout(-time.Second)),
+		"zero interval":     waits.WithWait(resource.WithPollInterval(0)),
+		"negative interval": waits.WithWait(resource.WithPollInterval(-time.Second)),
+		"nil callback":      waits.WithWait(resource.WithProgressCallback(nil)),
 	} {
 		if _, err := api.WaitForStatus(context.Background(), waits.Container("c"), str("active"), option); !errors.Is(err, resource.ErrInvalidOption) {
 			t.Errorf("%s: %v", name, err)

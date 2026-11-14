@@ -43,14 +43,14 @@ func Example_aclQuotaWaits() {
 		log.Fatal("unknown kind")
 	}
 	options := []waits.Option{
-		waits.WithInterval(*interval),
+		waits.WithWait(resource.WithPollInterval(*interval)),
 		waits.WithWait(resource.WithProgressCallback(func(progress int) error {
 			fmt.Println("progress", progress)
 			return nil
 		})),
 	}
 	if *timeout != 0 {
-		options = append(options, waits.WithTimeout(*timeout))
+		options = append(options, waits.WithWait(resource.WithTimeout(*timeout)))
 	}
 	var result *waits.Record
 	switch *operation {

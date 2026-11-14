@@ -38,7 +38,7 @@ func Example_projectQuota() {
 	}
 	log.Printf("id=%s status=%d", current.Resource.Body["id"], current.StatusCode)
 	if os.Getenv("WAIT_ABSENCE") == "1" {
-		if _, err := service.Waits.WaitForDelete(ctx, target, waits.WithTimeout(120*time.Second)); err != nil {
+		if _, err := service.Waits.WaitForDelete(ctx, target, waits.WithWait(resource.WithTimeout(120*time.Second))); err != nil {
 			log.Fatal(err)
 		}
 	}

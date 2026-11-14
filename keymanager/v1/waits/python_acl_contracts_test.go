@@ -61,7 +61,7 @@ func TestPythonKeymanagerACLWaitSnapshotsCachedNativeAndURIWithoutFakeEnvelope(t
 	seed.Body["read"][0] = 'x'
 	seed.Header.Set("X-Original", "changed")
 	api, _, calls := fixture(t, func(*http.Request, int) *http.Response { t.Fatal("cached HTTP"); return nil })
-	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithWait(resource.WithStatusAttribute("acl_ref")), waits.WithTimeout(0), waits.WithInterval(-time.Second))
+	value, err := api.WaitForStatus(context.Background(), target, str("active"), waits.WithWait(resource.WithStatusAttribute("acl_ref")))
 	if err != nil || value == nil || len(*calls) != 0 || value.RequestID != "fixed/id" || value.Envelope != nil || value.StatusCode != 203 || value.Header.Get("X-Original") != "owned" {
 		t.Fatal(err, value, *calls)
 	}
@@ -76,7 +76,7 @@ func TestPythonKeymanagerACLWaitSnapshotsCachedNativeAndURIWithoutFakeEnvelope(t
 	}
 	field(t, value, "acl_ref", `"ACTIVE"`)
 	// URI is declared for getattr, while to_dict omits URI fields.
-	value, err = api.WaitForStatus(context.Background(), waits.SecretACL("fixed/id"), str("fixed/id"), waits.WithWait(resource.WithStatusAttribute("secret_id")), waits.WithTimeout(0))
+	value, err = api.WaitForStatus(context.Background(), waits.SecretACL("fixed/id"), str("fixed/id"), waits.WithWait(resource.WithStatusAttribute("secret_id")))
 	if err != nil || value.StatusCode != 0 || value.Wire != nil || value.Envelope != nil || value.Resource.Body["secret_id"] != nil || len(*calls) != 0 {
 		t.Fatal(err, value, *calls)
 	}
@@ -98,7 +98,7 @@ func TestPythonKeymanagerACLWaitRawPresenceMergeAndReadDictCoercion(t *testing.T
 	})
 	seed := aclState(t, "one", `{"name":"BUILD","acl_ref":"old","read":{"old":true}}`)
 	var progress []int
-	value, err := api.WaitForStatus(context.Background(), waits.ForSecretACL(seed), str("active"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
+	value, err := api.WaitForStatus(context.Background(), waits.ForSecretACL(seed), str("active"), waits.WithWait(resource.WithStatusAttribute("name")), waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
 	if err != nil || len(*calls) != 3 || !reflect.DeepEqual(progress, []int{0, 0}) || value.StatusCode != 202 || string(value.Envelope) != bodies[2] {
 		t.Fatal(err, value, *calls, progress)
 	}
@@ -197,7 +197,7 @@ func TestPythonKeymanagerACLQuotaDeleteSkipsUndeclaredStatusAndRetainsOriginalAt
 			target = quotaTarget(t, `{"name":"original","secrets":900719925474099312345}`)
 		}
 		var progress []int
-		value, err := api.WaitForDelete(context.Background(), target, waits.WithInterval(time.Nanosecond), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
+		value, err := api.WaitForDelete(context.Background(), target, waits.WithWait(resource.WithPollInterval(time.Nanosecond)), waits.WithWait(resource.WithProgressCallback(func(v int) error { progress = append(progress, v); return nil })))
 		if err != nil || value == nil || value.StatusCode != 404 || string(value.Envelope) != `{"missing":true}` || len(*calls) != 2 || !reflect.DeepEqual(progress, []int{0}) {
 			t.Fatal(err, value, *calls, progress)
 		}
