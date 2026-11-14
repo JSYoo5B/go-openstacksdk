@@ -15,21 +15,7 @@ options, nullable/full-reference matching, duplicate detection, and pagination.
 
 `CreateRecord(ctx, options...)` returns the input-seeded Resource view and the actual POST response separately, without a metadata or payload GET. [Creation comparison](../metadata-create.md) explains the same attribute options used for Containers, Orders, and Secrets.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func fetchSecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
-    return secrets.New(client).Fetch(ctx, resource.ID("secret-id"))
-}
-```
+See `example_secrets1_test.go` in [example_secrets1_test.go](example_secrets1_test.go), compiled by `go test`.
 
 The first request is `GET /secrets/{id}` with `Accept: application/json`.
 If the exact response key `content_types` is absent, no payload request follows.
@@ -44,27 +30,7 @@ attribute: it wins over the response's default, including malformed
 type for that call. `FetchOpts.Payload = false` is an additional Go option that
 skips selection and the payload request after reading metadata.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func fetchBinarySecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
-    value, err := secrets.New(client).Fetch(ctx, resource.ID("secret-id"),
-        request.Custom(func(c *request.Config[secrets.FetchOpts]) error { v := "application/octet-stream"; c.Options.ContentType = &v; return nil }),
-        request.Header("X-Trace", "caller-trace"))
-    // value may contain the successful metadata response even when err
-    // describes a later selection, payload HTTP/read, or UTF-8 failure.
-    return value, err
-}
-```
+See `example_secrets2_test.go` in [example_secrets2_test.go](example_secrets2_test.go), compiled by `go test`.
 
 The second request uses the original fixed `GET /secrets/{id}/payload` URI.
 Neither a returned `id` or `secret_ref`, nor a changed `ResourceBase` after the

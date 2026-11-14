@@ -4,8 +4,6 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
 ```python
 import argparse
 import json
@@ -32,47 +30,7 @@ if __name__ == "__main__":
     main()
 ```
 
-```go
-package main
-
-import (
-    "context"
-    "encoding/json"
-    "flag"
-    "fmt"
-    "log"
-    "os"
-
-    openstack "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits"
-)
-
-func main() {
-    cloud := flag.String("cloud", os.Getenv("OS_CLOUD"), "clouds.yaml cloud")
-    id := flag.String("id", "", "literal SecretStore identity")
-    status := flag.String("status", "ACTIVE", "desired state")
-    deleting := flag.Bool("delete", false, "poll GET for absence/deleted")
-    flag.Parse()
-    if err := run(*cloud, *id, *status, *deleting); err != nil { log.Fatal(err) }
-}
-
-func run(cloud, id, status string, deleting bool) error {
-    ctx := context.Background()
-    conn, err := openstack.Connect(ctx, openstack.WithCloud(cloud))
-    if err != nil { return err }
-    service, err := conn.KeyManagerV1(ctx)
-    if err != nil { return err }
-    api := waits.New(service.RawClient())
-    target := waits.SecretStore(id)
-    var value *waits.Record
-    if deleting { value, err = api.WaitForDelete(ctx, target) } else { value, err = api.WaitForStatus(ctx, target, &status) }
-    if err != nil { return err }
-    encoded, err := json.MarshalIndent(value.Resource.Body, "", "  ")
-    if err != nil { return err }
-    fmt.Println(string(encoded))
-    return nil
-}
-```
+See `Example_secretStoreWaits` in [example_secret_store_waits_test.go](example_secret_store_waits_test.go), compiled by `go test`.
 
 ## References
 

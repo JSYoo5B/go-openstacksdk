@@ -6,26 +6,7 @@ filters through `resource.WithFilter` and `WithFilters`. They return native
 unknown fields to the returned model, fetching associated secrets, or following
 response references.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listAESOrders(ctx context.Context, client *gophercloud.ServiceClient) ([]*orders.Order, error) {
-    return orders.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "type": "key",
-            "meta": map[string]any{"algorithm": "aes", "bit_length": 256},
-        }),
-        resource.WithMaxItems(20))
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 The corresponding pinned OpenStackSDK call is:
 
@@ -124,24 +105,7 @@ as rejecting nonnumeric authority ports. Complete parser parity is not
 claimed. Neither formatted IDs nor passive raw identities change the explicit
 ID routes used by Find, Remove, Wait, or WaitDeleted.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/orders"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listNamedOrderRows(ctx context.Context, client *gophercloud.ServiceClient) ([]*orders.Order, error) {
-    return orders.New(client).Resources.All(ctx,
-        resource.WithFilter("name", "top-level-order-name"),
-        resource.WithBodyFilter("status", "ACTIVE"),
-        resource.WithPaginated(false))
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 The corresponding Python row attributes and first-page control are:
 

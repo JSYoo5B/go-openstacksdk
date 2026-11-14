@@ -10,32 +10,7 @@ This SDK-owned package implements the three declared Barbican SecretConsumer pro
 
 The primary [Secret consumers API reference](https://docs.openstack.org/barbican/latest/api/reference/secret_consumers.html) documents all three success codes as **200**. A pinned Python unit test mocks DELETE204 while checking only `_raw_delete`; it does not establish a server204 contract. Go rejects unexpected201/204 rather than treating them as the documented root response.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func Associate(ctx context.Context, client *gophercloud.ServiceClient, secretID string) error {
-    scope, err := secretconsumers.New(client).InSecret(ctx, resource.ID(secretID))
-    if err != nil {
-        return err
-    }
-    response, err := scope.Create(ctx, secretconsumers.ConsumerOpts{
-        Service: "image", ResourceType: "image", ResourceID: "image-id",
-    })
-    if err != nil {
-        return err
-    }
-    _ = response.SecretRef // HTTP evidence; never automatically followed.
-    return nil
-}
-```
+See `example_secretconsumers1_test.go` in [example_secretconsumers1_test.go](example_secretconsumers1_test.go), compiled by `go test`.
 
 `InSecret(resource.ID(...))` fixes a safe single unescaped path segment without HTTP. `InSecret(resource.Name(...))` performs an exact name lookup through the existing [Secrets collection](../secrets/api_generated.go), checks ambiguity and captures its returned identifier once. This explicit Name convenience is a Go extension: the Python consumer methods call `Resource._get_id`, treating a string as an ID without a name search. Go does not accept a mutable Python Secret Resource overload. `SecretID()` and `RawClient()` expose the selected parent and shared configured client; response fields cannot retarget the scope.
 
@@ -49,29 +24,7 @@ All typed model fields use exact canonical wire keys. Case-variant extensions re
 
 ## Listing
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secretconsumers"
-    "github.com/JSYoo5B/go-openstacksdk/request"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func Associations(ctx context.Context, client *gophercloud.ServiceClient, secretID string) ([]*secretconsumers.Consumer, error) {
-    scope, err := secretconsumers.New(client).InSecret(ctx, resource.ID(secretID))
-    if err != nil {
-        return nil, err
-    }
-    return scope.All(ctx,
-        secretconsumers.WithListOptions(secretconsumers.ListOpts{Limit: 10, Offset: 0}),
-        request.MaxItems(25),
-    )
-}
-```
+See `example_secretconsumers2_test.go` in [example_secretconsumers2_test.go](example_secretconsumers2_test.go), compiled by `go test`.
 
 `Limit` and `Offset` request server paging. Zero omits the field and preserves server defaults of limit10/offset0; Go does not guess or enforce the server's maximum limit100. `request.Query` supplies explicit wire extensions, repeated values (a `[]string` value), and explicit empty values. Positive concrete limit/offset plus the same raw key is rejected even if the values agree. The server must validate extension queries; Go does not claim that arbitrary wire fields are supported by Barbican.
 

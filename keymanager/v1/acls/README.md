@@ -5,14 +5,7 @@
 unchanged. Each secret and container has an ACL at `secrets/{id}/acl` or
 `containers/{id}/acl`; IDs are joined into the path without escaping.
 
-```go
-api := acls.New(client)
-users := []string{userID}
-access := false
-ref, err := api.SetSecretACL(ctx, secretID, acls.SetOpts{{Type: "read", Users: &users, ProjectAccess: &access}})
-if err != nil { return err }
-fmt.Println(*ref)
-```
+See `ExampleAPI_SetSecretACL` in [example_test.go](example_test.go), compiled by `go test`.
 
 | Method (secret / container) | Request | Result |
 |---|---|---|

@@ -6,24 +6,7 @@ the original JSON list row locally. Results remain native `secrets.Secret`
 models. Raw filtering does not add missing fields or response metadata to that
 native model, and it does not retrieve secret payloads.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listPlainSecrets(ctx context.Context, client *gophercloud.ServiceClient) ([]*secrets.Secret, error) {
-    return secrets.New(client).Resources.All(ctx,
-        resource.WithFilter("algorithm", "aes"),
-        resource.WithFilter("content_types", map[string]any{"default": "text/plain"}),
-        resource.WithMaxItems(20))
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 The algorithm filter sends `alg=aes`. The content-types filter performs a local
 recursive object-subset comparison. `MaxItems` counts raw rows before local
@@ -116,29 +99,7 @@ name/status predicates. Go's URL parser rejects some inputs accepted by
 Python's `urlsplit`, such as a nonnumeric authority port; this is an explicit
 parser boundary, not full URL-parser parity.
 
-```go
-package example
-
-import (
-    "context"
-    "encoding/json"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listExactSecretRows(ctx context.Context, client *gophercloud.ServiceClient) ([]*secrets.Secret, error) {
-    return secrets.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "mode": []any{"cbc", "gcm"},
-            "bit_length": json.Number("256"),
-            "created_at": "2026-10-02T03:04:05",
-        }),
-        resource.WithBodyFilter("status", "ACTIVE"),
-        resource.WithPaginated(false))
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 Options snapshot JSON inputs at construction and application, including nested
 maps/slices, and can be reused concurrently after configuring the client.

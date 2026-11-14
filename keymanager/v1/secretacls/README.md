@@ -18,16 +18,7 @@ conn.key_manager.set_secret_acl(secret_id, read={"users": [user_id], "project-ac
 conn.key_manager.delete_secret_acl(secret_id)
 ```
 
-```go
-scope, err := service.SecretACLs.InSecret(ctx, resource.ID(secretID))
-if err != nil { return err }
-acl, err := scope.Get(ctx)
-if err != nil { return err }
-fmt.Println(string(acl.Read))
-_, err = scope.Set(ctx, secretacls.ACLInput{Read: json.RawMessage(`{"users":["` + userID + `"],"project-access":false}`)})
-if err != nil { return err }
-_, err = scope.Delete(ctx)
-```
+See `Example` in [example_test.go](example_test.go), compiled by `go test`.
 
 The Python string argument is an ID; `InSecret` also accepts a `resource.Name`
 and resolves it once through the Secrets collection as a Go convenience.

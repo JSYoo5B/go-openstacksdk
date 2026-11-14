@@ -4,20 +4,7 @@
 owned `FetchedSecret`. Existing explicit `resource.ID`/`resource.Name` APIs keep
 their native contracts.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
-)
-
-func findSecret(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
-    return secrets.New(client).FindIdentity(ctx, "secret-id-or-name")
-}
-```
+See `example_finding1_test.go` in [example_finding1_test.go](../example_finding1_test.go), compiled by `go test`.
 
 A safe unescaped single-segment identity first uses
 [`Fetch`](../README.md): metadata `GET /secrets/{identity}`, then a conditional
@@ -62,23 +49,7 @@ strings, and page headers/status are retained using the Fetch model's canonical
 decoder. A null or scalar list row and incompatible declared typed fields fail
 with the actual accepted page body, headers, and status.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func findSecretStrict(ctx context.Context, client *gophercloud.ServiceClient) (*secrets.FetchedSecret, error) {
-    return secrets.New(client).FindIdentity(ctx, "secret-id-or-name",
-        resource.WithIdentityFindIgnoreMissing(false),
-        resource.WithIdentityFindFallback(resource.FindFallbackNotFoundOnly))
-}
-```
+See `example_finding2_test.go` in [example_finding2_test.go](../example_finding2_test.go), compiled by `go test`.
 
 | Policy | Behavior |
 | --- | --- |

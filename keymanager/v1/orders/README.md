@@ -5,15 +5,7 @@
 unchanged. An order asks Barbican to generate a secret asynchronously; the
 created order is a reference to poll, not the secret itself.
 
-```go
-api := orders.New(client)
-order, err := api.Create(ctx, orders.CreateOpts{
-    Type: orders.KeyOrder,
-    Meta: orders.MetaOpts{Algorithm: "aes", BitLength: 256, Mode: "cbc"},
-})
-if err != nil { return err }
-fmt.Println(order.OrderRef)
-```
+See `ExampleAPI_Create` in [example_test.go](example_test.go), compiled by `go test`.
 
 | Method | Request | Accepted statuses | Result |
 |---|---|---|---|

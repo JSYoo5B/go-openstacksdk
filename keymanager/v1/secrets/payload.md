@@ -5,28 +5,7 @@ returns `[]byte, error`. It reads the complete native response and closes its
 body before returning. The bytes preserve binary data, NUL, and invalid UTF-8;
 `text/plain` does not cause text decoding.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/JSYoo5B/go-openstacksdk"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/secrets"
-)
-
-func secretPayload(ctx context.Context, conn *openstack.Connection, secretID string) ([]byte, error) {
-    service, err := conn.KeyManagerV1(ctx)
-    if err != nil {
-        return nil, err
-    }
-    return service.Secrets.GetPayload(ctx, secretID,
-        secrets.WithGetPayloadOptions(secrets.GetPayloadOpts{
-            PayloadContentType: "application/octet-stream",
-        }),
-        request.Header("X-Trace", "payload"))
-}
-```
+See `example_payload_test.go` in [example_payload_test.go](example_payload_test.go), compiled by `go test`.
 
 With no options, the request sends `Accept: text/plain`.
 `WithGetPayloadOptions` selects the native concrete `GetPayloadOpts`; its

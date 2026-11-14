@@ -4,21 +4,7 @@ Python openstacksdk mappings, contracts and differences for these operations are
 
 ## Usage examples
 
-Examples use the surrounding guide's service object and context unless they declare a complete program. Python examples describe the pinned comparison API.
-
-```go
-err := secrets.New(client).Update(ctx, "s1", secrets.UpdateOpts{ContentType: "text/plain", Payload: "new"})
-```
-
-```go
-order, err := orders.New(client).WaitFor(ctx, resource.ID("o1"), "ACTIVE",
-	resource.WithUnlimitedWait(),          // Python wait=None
-	resource.WithFailureStates("ERROR"),  // Python failures=None
-)
-err = orders.New(client).WaitForDeletion(ctx, resource.ID("o1"),
-	resource.WithTimeout(120*time.Second),
-)
-```
+See `Example_pythonParity` in [example_python_parity_test.go](example_python_parity_test.go), compiled by `go test`.
 
 ## References
 

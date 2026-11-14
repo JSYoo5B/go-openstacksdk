@@ -6,19 +6,7 @@ unchanged. A container groups secret references; consumers record which
 services use it. IDs are joined into the path without escaping, so a slash or
 query delimiter changes the native path.
 
-```go
-api := containers.New(client)
-created, err := api.Create(ctx, containers.CreateOpts{
-    Type: containers.GenericContainer, Name: "web-tls",
-    SecretRefs: []containers.SecretRef{{Name: "cert", SecretRef: certRef}},
-})
-if err != nil { return err }
-for value, err := range api.List(ctx, containers.WithListOptions(containers.ListOpts{Name: "web-tls"})) {
-    if err != nil { return err }
-    fmt.Println(value.ContainerRef, value.Status)
-}
-fmt.Println(created.ContainerRef)
-```
+See `ExampleAPI_Create` in [example_test.go](example_test.go), compiled by `go test`.
 
 | Method | Request | Accepted statuses | Result |
 |---|---|---|---|

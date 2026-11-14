@@ -5,26 +5,7 @@ filters through `resource.WithFilter` and `WithFilters`. Results remain native
 `containers.Container` models. Filtering original JSON does not add unknown
 response fields to those models, fetch containers again, or follow references.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listCertificateContainers(ctx context.Context, client *gophercloud.ServiceClient) ([]*containers.Container, error) {
-    return containers.New(client).Resources.All(ctx,
-        resource.WithFilters(map[string]any{
-            "name": "certificate-container",
-            "type": "certificate",
-        }),
-        resource.WithMaxItems(20))
-}
-```
+See `example_listing1_test.go` in [example_listing1_test.go](../example_listing1_test.go), compiled by `go test`.
 
 The corresponding pinned OpenStackSDK call is:
 
@@ -115,29 +96,7 @@ local name/status predicates. Go's URL parser rejects some inputs accepted by
 Python `urlsplit`, such as nonnumeric authority ports; full parser parity is
 not claimed.
 
-```go
-package example
-
-import (
-    "context"
-
-    "github.com/gophercloud/gophercloud/v2"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/containers"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-)
-
-func listExactContainerReferences(ctx context.Context, client *gophercloud.ServiceClient) ([]*containers.Container, error) {
-    return containers.New(client).Resources.All(ctx,
-        resource.WithFilter("secret_refs", []any{
-            map[string]any{
-                "name": "certificate",
-                "secret_ref": "https://barbican.example/v1/secrets/secret-id",
-            },
-        }),
-        resource.WithBodyFilter("status", "ACTIVE"),
-        resource.WithPaginated(false))
-}
-```
+See `example_listing2_test.go` in [example_listing2_test.go](../example_listing2_test.go), compiled by `go test`.
 
 The corresponding Python attributes and first-page control are:
 

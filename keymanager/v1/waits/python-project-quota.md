@@ -32,42 +32,6 @@ if __name__ == "__main__":
 
 Set `OS_KEY_MANAGER_ENDPOINT` and `OS_TOKEN`. The optional `WAIT_ABSENCE=1` demonstrates absence observation rather than issuing a configuration DELETE.
 
-```go
-package main
-
-import (
-    "context"
-    "log"
-    "os"
-    "time"
-
-    keymanager "github.com/JSYoo5B/go-openstacksdk/keymanager/v1"
-    "github.com/JSYoo5B/go-openstacksdk/keymanager/v1/waits"
-    "github.com/JSYoo5B/go-openstacksdk/resource"
-    "github.com/gophercloud/gophercloud/v2"
-)
-
-func main() {
-    endpoint := os.Getenv("OS_KEY_MANAGER_ENDPOINT")
-    if endpoint == "" { log.Fatal("OS_KEY_MANAGER_ENDPOINT is required") }
-    provider := &gophercloud.ProviderClient{TokenID: os.Getenv("OS_TOKEN")}
-    client := &gophercloud.ServiceClient{ProviderClient: provider, Endpoint: gophercloud.NormalizeURL(endpoint), Type: "key-manager"}
-    service := keymanager.New(client)
-    ctx := context.Background()
-    projectID := "project-id"
-    scope, err := service.Quotas.InProject(ctx, resource.ID(projectID))
-    if err != nil { log.Fatal(err) }
-    record, err := scope.GetRecord(ctx)
-    if err != nil { log.Fatal(err) }
-    target := waits.ForProjectQuota(record)
-    current, err := service.Waits.WaitForStatus(ctx, target, &projectID,
-        waits.WithWait(resource.WithStatusAttribute("id"), resource.WithTimeout(120*time.Second)))
-    if err != nil { log.Fatal(err) }
-    log.Printf("id=%s status=%d", current.Resource.Body["id"], current.StatusCode)
-    if os.Getenv("WAIT_ABSENCE") == "1" {
-        if _, err := service.Waits.WaitForDelete(ctx, target, waits.WithTimeout(120*time.Second)); err != nil { log.Fatal(err) }
-    }
-}
-```
+See `Example_projectQuota` in [example_project_quota_test.go](example_project_quota_test.go), compiled by `go test`.
 
 These finite constructors now cover the known ProjectQuota gap alongside Container, Order, Secret, SecretStore, SecretACL and effective Quota. SecretConsumer has allow_fetch=False in pinned Source. This does not implement arbitrary Python Resource/runtime subclasses, mutable identity, session/location/cache, untyped callbacks or every dynamic getattr behavior. Immutable routes, typed callback errors, selected nullable strings, finite UTF-8 JSON and owned-null location remain explicit Go differences under SDK-R1/C1/S1. Local HTTP tests do not establish live cloud or release parity.
