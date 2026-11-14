@@ -1,31 +1,6 @@
 # Get
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `gophercloud:image/v2/images.Get`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.Get`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.RawClient`
-
-- Generated API.Get retains the exact RawClient and sends one GET to native ServiceURL(ResourceBase or Endpoint, images, raw id) with a nil body, default Accept, service MoreHeaders, microversion and live token. Empty IDs, slashes and query delimiters are forwarded without validation or escaping.
-  Tests: `image/v2/images/get_contracts_test.go:TestNativeImageGetRoutesHeadersAndNativeProjection`.
-- A 200 response uses the pinned Extract header merge and Image.UnmarshalJSON: import methods and store IDs are trimmed and comma split without empty fields, numeric size becomes int64 and null size zero, undeclared keys except self/size/header keys become Properties with the body properties string retained, and times decode to time.Time.
-  Tests: `image/v2/images/get_contracts_test.go:TestNativeImageGetRoutesHeadersAndNativeProjection`.
-- Only 200 is accepted; other statuses keep the native ErrUnexpectedResponseCode with Expected [200] as the direct cause of a Get/images OperationError without an owned receipt. Decode errors keep native partial Extract results, and caller cancellation stays inspectable.
-  Tests: `image/v2/images/get_contracts_test.go:TestNativeImageGetStrictStatusAndDecodeErrors`.
-
-Python/Go differences:
-
-- This declaration maps Gophercloud native Get only; it is not Python get_image parity, owned GetImageRecord descriptor/location projection or Cloud get_image_by_id behavior.
-- The SDK adds only request.Wrap operation context; native URL construction, status policy, retries, reauthentication and partial Extract results are unchanged.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

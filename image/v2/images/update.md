@@ -1,41 +1,6 @@
 # Update
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `gophercloud:image/v2/images.Update`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.API.Update`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/images.WithUpdateOptions`
-
-- Generated API accepts concrete UpdateOpts and the SDK owns the upstream builder and Extract invocation. All nine native concrete Patch types retain order and raw zero/false/empty values. Property add/replace includes string value; remove omits it, and property Names retain native unescaped JSON Pointer paths.
-  Tests: `image/v2/images/update_contracts_test.go:TestNativeImageUpdateConcretePatchesAndOrder`.
-- Nil/allocated-empty UpdateOpts both issue PATCH JSON[], nil tags is null and allocated-empty tags is[]. WithUpdateOptions replaces the whole base set, including nil replacement. Custom inherited Patch map extension remains available; the SDK does not claim it removed the element interface.
-  Tests: `image/v2/images/update_contracts_test.go:TestNativeImageUpdateConcretePatchesAndOrder`, `image/v2/images/update_contracts_test.go:TestNativeImageUpdateEmptyReplacementAndInheritedPatchInterface`.
-- Nil/error option and nonempty generic body/query/header/argument extensions fail before HTTP with OperationError context and original cause. Custom inherited Patch JSON marshaling error also fails before transport with its original cause; concrete UpdateOpts does not expose arbitrary external UpdateOptsBuilder.
-  Tests: `image/v2/images/update_contracts_test.go:TestNativeImageUpdateRejectsRequestExtensionsAndMarshalFailuresBeforeHTTP`.
-- Native Update uses service ResourceBase, PATCH and v2.1 JSON-patch content type with default OkCodes200 only. Native microversion/source headers/live auth/context, rejected-response RetryFunc and accepted JSON-decoder retry remain upstream policies. Default rejected201/203/204/404/503 preserve actual status/expected/method/URL/body/header in native error.
-  Tests: `image/v2/images/update_contracts_test.go:TestNativeImageUpdateConcretePatchesAndOrder`, `image/v2/images/update_contracts_test.go:TestNativeImageUpdateStrictHTTPContextAndRetryPolicy`.
-- Extract preserves native Image field/timestamp/unknown Properties handling, float64-based size and unknown number decoding, last import-method/store-ID header values and original response identity. It does not inject declared raw view, Envelope/status or an owned acknowledgement into the native result.
-  Tests: `image/v2/images/update_contracts_test.go:TestNativeImageUpdateExtractsRichImageUnknownPropertiesAndLastHeaders`.
-- Valid empty object returns native Image, valid JSONnull may return nil,nil. Body decode failures and invalid known types preserve upstream error plus possible partial Image; OperationError keeps causes inspectable without fabricating owned ResponseError or replacing partial fields.
-  Tests: `image/v2/images/update_contracts_test.go:TestNativeImageUpdateExtractorErrorsKeepNativePartialResults`.
-
-Python/Go differences:
-
-- This mapping closes the pinned Gophercloud Update declaration with library-owned outer builder/options/result handling. It does not close Python update_image: native explicit patches always send HTTP, preserve caller order and default strict200 instead of mutable Resource dirty/no-op/sorted-diff/descriptor behavior.
-- The SDK accepts concrete UpdateOpts instead of arbitrary external UpdateOptsBuilder. Its inherited Patch element interface remains optional for arbitrary maps; concrete nine Patch types cover the pinned built-in requests. Nil Patch elements retain native unsafe behavior; input slice/map/custom object snapshots and arbitrary callback safety are not added by this facade.
-- Native IDs go through ServiceURL, property Names are interpolated without JSON Pointer escaping, schema/enum/range/readonly/policy/permission checks remain server-owned, and configured native client/hooks can change retry/header/response policies. Owned literal/route/body/source guards and ACK contracts are separate APIs.
-- Native Image extraction retains its typed/null/date/float64/unknown-key behavior and possible partial pointer plus error or nil,nil. Accepted body Close/decoder/retry policy and response evidence are not promoted to the owned raw ImageRecord guarantees.
-- The current/original raw body snapshot foundation preserves sparse presence before descriptor projection for future owned commit. It is not a mutable Resource dirty/header/cache/session state machine, and Python update_image remains unresolved with SDK-R1/C1/S1 work outstanding.
-- Ordinary project-owned modify_image is a core-user candidate under the pinned server default; public visibility, owner and location operations can require additional admin policy. Local HTTP tests/builds establish client contracts, not deployed permissions/storage or actual cloud outcomes.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 

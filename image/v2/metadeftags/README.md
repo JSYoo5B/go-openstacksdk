@@ -1,117 +1,6 @@
 # Metadeftags
 
-This guide describes the public Go APIs and their contracts against the pinned Gophercloud and Python openstacksdk sources. Support decisions apply to each operation below.
-
-See the [support ledger](../../../docs/sdk-support-ledger.md) for status definitions and shared limitations.
-
-## Operation contracts
-
-### `python:image/v2/add_tag_to_metadef_namespace`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Create`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithCreateHeaders`
-
-- InNamespace is zeroHTTP and captures required literal namespace plus original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent and route child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected, colons/Unicode/spaces preserved and escaped once. No parent lookup/Ref/find/search/returned identity routing. Before callbacks and after accepted handling source/context stay fixed, per-request ordinary headers are newly copied and authentication remains live from original provider.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreCompletePreflight`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource`.
-- Create Tag requires whole validUTF8 nonnullJSONobject with exact-case optional nullable Name and literal CreatedAt/UpdatedAt strings; canonical wrong nonnull types fail atomically. Unknown fields and large JSON precision stay independently owned in Body; no ID/parent/self/schema/links/date seed or parser. Returned Name is passive and cannot retarget later calls.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreCanonicalPresenceAndAtomicDecoder`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsCanonicalModelsAndRawOwnership`.
-- Directly related Create/Delete/DeleteAll header-only concrete families use FullOpts whole replacement, lastwins and independent header/helper/config snapshots before and after callbacks. Options slice copied and callback once per request; nil/error callback and invalid/conflicting owned headers fail before HTTP. Seven total SDK families are proved separately; no unrelated Set/List option behavior is assigned to these Python rows.
-  Tests: `image/v2/metadeftags/options_test.go:TestMetadefTagsOptionsValidationAndDefaults`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource`.
-- Original Create201 and Delete/DeleteAll204 are strict. Accepted bytes/Header/status and read/Close/contextErr/customCause/source handling causes are preserved in ResponseError, close once/no replay. Actual204 opaque Acknowledgement carries requested Namespace and literal child Name pointer, nil Name for bulk, and remains available with handling errors. Native rejected response ownership remains native.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- Shared REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect. Exact method/origin/path/query/serialized body and owned response fields are guarded; expanded native OkCodes cannot change original accepted status. Read/Close/ctx.Err/customCause and native ErrOriginal/ErrReauth remain evidence; no accepted-body replay or private404 retry bypass. Existing advanced native RetryFunc.MoreHeaders mutation stays allowed; option/source ordinary header restrictions do not promise provider-header hook rejection.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- One bodyless individual POST201 at fixed namespace/tags/name, matching Namespace.add_tag override rather than common PUT/imageTag. No JSON name body, discovery/fetch/cache merge/rollback. Input literal route80 bound is explicitGo behavior; server individual schema/SQL supplementaryUnicode/protection/duplicate checks stay server-owned. Python returns None through proxy while its Namespace method appends input to mutable cache and returns same Resource without decoding actual201 body.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreCompletePreflight`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource`, `internal/cmd/sdkgen/glance_metadef_tags_test.go:TestGlanceMetadefTagsRegistryAndConcreteScope`.
-- Create sends a bodyless POST metadefs/namespaces/{namespace}/tags/{tag}, the request Python add_tag sends.
-  Tests: `image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads`.
-
-Python/Go differences:
-
-- Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.
-- Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.
-- Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity.
-- Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.
-- Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.
-- Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.
-- Python updates the cached tags list on its namespace Resource and returns None; Go returns the created tag or the 204 acknowledgement.
-
-### `python:image/v2/remove_tag_from_metadef_namespace`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.Delete`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteHeaders`
-
-- InNamespace is zeroHTTP and captures required literal namespace plus original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent and route child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected, colons/Unicode/spaces preserved and escaped once. No parent lookup/Ref/find/search/returned identity routing. Before callbacks and after accepted handling source/context stay fixed, per-request ordinary headers are newly copied and authentication remains live from original provider.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreCompletePreflight`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource`.
-- Directly related Create/Delete/DeleteAll header-only concrete families use FullOpts whole replacement, lastwins and independent header/helper/config snapshots before and after callbacks. Options slice copied and callback once per request; nil/error callback and invalid/conflicting owned headers fail before HTTP. Seven total SDK families are proved separately; no unrelated Set/List option behavior is assigned to these Python rows.
-  Tests: `image/v2/metadeftags/options_test.go:TestMetadefTagsOptionsValidationAndDefaults`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource`.
-- Original Create201 and Delete/DeleteAll204 are strict. Accepted bytes/Header/status and read/Close/contextErr/customCause/source handling causes are preserved in ResponseError, close once/no replay. Actual204 opaque Acknowledgement carries requested Namespace and literal child Name pointer, nil Name for bulk, and remains available with handling errors. Native rejected response ownership remains native.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- Shared REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect. Exact method/origin/path/query/serialized body and owned response fields are guarded; expanded native OkCodes cannot change original accepted status. Read/Close/ctx.Err/customCause and native ErrOriginal/ErrReauth remain evidence; no accepted-body replay or private404 retry bypass. Existing advanced native RetryFunc.MoreHeaders mutation stays allowed; option/source ordinary header restrictions do not promise provider-header hook rejection.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- One strict individual DELETE204 at required fixed child path. No IgnoreMissing helper/default, swallowed404 or private404 ownership; native rejected404/retry behavior retained. Parent/tag forbidden can be concealed404, so absence cannot be inferred. Python inherited remove_tag also raises HTTP404 and only catches local cache-list.remove ValueError; it mutates cache and proxy returnsNone. No parentGET/check/RMW/unprotect/wait/cleanup.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreCompletePreflight`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- Delete sends DELETE metadefs/namespaces/{namespace}/tags/{tag} and keeps 404 as an error, as Python remove_tag does.
-  Tests: `image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`.
-
-Python/Go differences:
-
-- Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.
-- Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.
-- Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity.
-- Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.
-- Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.
-- Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.
-- Python updates the cached tags list on its namespace Resource and returns None; Go returns the created tag or the 204 acknowledgement.
-
-### `python:image/v2/remove_tags_from_metadef_namespace`
-
-Status: `go_mapping`.
-
-Go API:
-
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.API.InNamespace`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.NamespaceScope.DeleteAll`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllOpts`
-- `github.com/JSYoo5B/go-openstacksdk/request.Header`
-- `github.com/JSYoo5B/go-openstacksdk/image/v2/metadeftags.WithDeleteAllHeaders`
-
-- InNamespace is zeroHTTP and captures required literal namespace plus original API/client/provider/type/endpoint/base/microversion for scope lifetime. Parent and route child are nonempty validUTF8<=80runes with route-breaking/control/dot syntax rejected, colons/Unicode/spaces preserved and escaped once. No parent lookup/Ref/find/search/returned identity routing. Before callbacks and after accepted handling source/context stay fixed, per-request ordinary headers are newly copied and authentication remains live from original provider.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreCompletePreflight`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource`.
-- Directly related Create/Delete/DeleteAll header-only concrete families use FullOpts whole replacement, lastwins and independent header/helper/config snapshots before and after callbacks. Options slice copied and callback once per request; nil/error callback and invalid/conflicting owned headers fail before HTTP. Seven total SDK families are proved separately; no unrelated Set/List option behavior is assigned to these Python rows.
-  Tests: `image/v2/metadeftags/options_test.go:TestMetadefTagsOptionsValidationAndDefaults`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsOwnedPreparationAndSource`.
-- Original Create201 and Delete/DeleteAll204 are strict. Accepted bytes/Header/status and read/Close/contextErr/customCause/source handling causes are preserved in ResponseError, close once/no replay. Actual204 opaque Acknowledgement carries requested Namespace and literal child Name pointer, nil Name for bulk, and remains available with handling errors. Native rejected response ownership remains native.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- Shared REST/fixedrequest preserves configured native prebody retry/reauth/backoff and identical-target redirect. Exact method/origin/path/query/serialized body and owned response fields are guarded; expanded native OkCodes cannot change original accepted status. Read/Close/ctx.Err/customCause and native ErrOriginal/ErrReauth remain evidence; no accepted-body replay or private404 retry bypass. Existing advanced native RetryFunc.MoreHeaders mutation stays allowed; option/source ordinary header restrictions do not promise provider-header hook rejection.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreLifetimeSourceAndNativeRetryBoundaries`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- One strict collection DELETE204 with no IgnoreMissing and nil childName in actual opaque ACK. Native404/policy/close/context causes remain errors. Server checks namespaceDelete and tagsDelete policy/protection; no automaticunprotect/enumerate/count/transaction/wait or cleanup. Python remove_all_tags clears mutable localcache after HTTPstatus<400 and proxy returnsNone; Go exposes actual ACK/evidence.
-  Tests: `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreFixedScopeAndRoutes`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreCompletePreflight`, `image/v2/metadeftags/core_test.go:TestMetadefTagsCoreAcceptedBodiesAndStrictMissingPolicy`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads`, `image/v2/metadeftags/contracts_test.go:TestMetadefTagsResponseOwnershipAndNativeHooks`.
-- DeleteAll sends one DELETE metadefs/namespaces/{namespace}/tags, the request Python remove_all_tags sends.
-  Tests: `image/v2/metadeftags/contracts_test.go:TestMetadefTagsFixedScopedRoutesAndPayloads`.
-
-Python/Go differences:
-
-- Pinned Python has only three namespace-tag write proxies, generic NamespaceResource reuse/bare-id construction, mutable cache and adapter/session/microversion behavior; Go fixed scoped identity/raw DTO/original-status gate is a bounded difference.
-- Python response exception handling accepts status<400 and add/remove/all mutate cached tags rather than decode canonicalTag/opaqueACK. Go validates UTF8/canonical types and exact201/204 while preserving accepted raw evidence.
-- Server schema80, SQL supplementaryUnicode/length/collation/duplicate/transaction/protection/policy and authenticatedcloud effects remain unexecuted; local Go fixtures are not Python execution or fullcloud parity.
-- Go returns typed result values with copied raw response evidence instead of a mutable Python Resource, so there is no Resource descriptor coercion, dirty-attribute tracking or seeded-object merge.
-- Python raises openstack.exceptions classes; Go returns wrapped Gophercloud or SDK errors, with resource.NotFoundError or the native 404 cause where documented.
-- Go validates literal route names and accepts only the documented 201/200/204 statuses; Python accepts any status below 400.
-- Python updates the cached tags list on its namespace Resource and returns None; Go returns the created tag or the 204 acknowledgement.
+Python openstacksdk mappings, contracts and differences for these operations are recorded in the review ledger, `api/sdk_reviews.json`.
 
 ## Usage examples
 
@@ -197,13 +86,11 @@ func manageNamespaceTags(ctx context.Context, service *image.Service, namespace,
 ```python
 from openstack.image.v2.metadef_namespace import MetadefNamespace
 
-
 def proxy_namespace_tags(conn, namespace, tag, clear_namespace=False):
     conn.image.add_tag_to_metadef_namespace(namespace, tag)
     conn.image.remove_tag_from_metadef_namespace(namespace, tag)
     if clear_namespace:
         conn.image.remove_tags_from_metadef_namespace(namespace)
-
 
 def resource_namespace_tags(conn, namespace, names):
     resource = MetadefNamespace.new(id=namespace)

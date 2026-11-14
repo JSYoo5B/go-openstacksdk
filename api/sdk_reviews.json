@@ -20688,7 +20688,8 @@
         "image/v2/images/README.md",
         "image/image-record-waits.md",
         "docs/implementation-plan.md",
-        "docs/glance-policy-priorities.md"
+        "docs/glance-policy-priorities.md",
+        "image/v2/README.md"
       ],
       "differences": [
         "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
@@ -20874,7 +20875,8 @@
         "image/v2/images/README.md",
         "image/image-record-waits.md",
         "docs/implementation-plan.md",
-        "docs/glance-policy-priorities.md"
+        "docs/glance-policy-priorities.md",
+        "image/v2/README.md"
       ],
       "differences": [
         "Go accepts explicit resource.Ref and an SDK typed collection and returns a native-model pointer for state waits; Python accepts an existing Resource and may return it immediately from its cached target state without HTTP. Explicit ID performs a fresh lookup and Name retains the existing native resolver before fixing its ID.",
@@ -50548,7 +50550,8 @@
         "image/v2/images/update.md",
         "image/v2/images/README.md",
         "image/update.md",
-        "image/image-records.md"
+        "image/image-records.md",
+        "image/v2/README.md"
       ],
       "differences": [
         "This mapping closes the pinned Gophercloud Update declaration with library-owned outer builder/options/result handling. It does not close Python update_image: native explicit patches always send HTTP, preserve caller order and default strict200 instead of mutable Resource dirty/no-op/sorted-diff/descriptor behavior.",
@@ -51262,7 +51265,8 @@
       ],
       "documentation": [
         "image/v2/images/get.md",
-        "image/v2/images/README.md"
+        "image/v2/images/README.md",
+        "image/v2/README.md"
       ],
       "differences": [
         "This declaration maps Gophercloud native Get only; it is not Python get_image parity, owned GetImageRecord descriptor/location projection or Cloud get_image_by_id behavior.",
@@ -51295,7 +51299,8 @@
       ],
       "documentation": [
         "image/v2/images/list.md",
-        "image/v2/images/README.md"
+        "image/v2/images/README.md",
+        "image/v2/README.md"
       ],
       "differences": [
         "This declaration maps Gophercloud native List only; it is not Python images() descriptor/local-filter/location parity or Cloud list_images behavior.",
@@ -51329,7 +51334,8 @@
       ],
       "documentation": [
         "image/v2/images/create.md",
-        "image/v2/images/README.md"
+        "image/v2/images/README.md",
+        "image/v2/README.md"
       ],
       "differences": [
         "This declaration maps Gophercloud native metadata Create only; it is not Python create_image parity, which CreateImageRecord and CreateCloudImageRecord cover.",
@@ -66552,7 +66558,7 @@
         }
       ],
       "documentation": [
-        "image/v2/native-tasks.md"
+        "image/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native image/v2/tasks call only; Python task Resource parity and the SDK-owned task waits are tracked separately.",
@@ -66577,7 +66583,7 @@
         }
       ],
       "documentation": [
-        "image/v2/native-tasks.md"
+        "image/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native image/v2/tasks call only; Python task Resource parity and the SDK-owned task waits are tracked separately.",
@@ -66604,7 +66610,7 @@
         }
       ],
       "documentation": [
-        "image/v2/native-tasks.md"
+        "image/v2/README.md"
       ],
       "differences": [
         "This declaration maps the Gophercloud native image/v2/tasks call only; Python task Resource parity and the SDK-owned task waits are tracked separately.",
@@ -71626,7 +71632,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71640,7 +71646,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71654,7 +71660,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71668,7 +71674,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71682,7 +71688,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71696,7 +71702,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71710,7 +71716,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71724,7 +71730,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71738,7 +71744,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71752,7 +71758,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
@@ -71766,7 +71772,7 @@
       "go_api": [],
       "contracts": [],
       "documentation": [
-        "image/python-v1-parity.md"
+        "image/README.md"
       ],
       "differences": [],
       "remaining": [
